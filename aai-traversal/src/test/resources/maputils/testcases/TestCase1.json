@@ -1,0 +1,32 @@
+{
+  "input": {
+    "myImage": {
+      "imageId": "test-imageId-1",
+      "imageName": "test-image-name",
+      "imageList": [
+        {
+          "imageListName": "testListName",
+          "imageListId": "testListId",
+          "imageListNumber": 200,
+          "imageListBoolean": true,
+          "imageListNull": null
+        }
+      ]
+    }
+  },
+  "output": {
+    "my-image": {
+      "image-id": "test-imageId-1",
+      "image-name": "test-image-name",
+      "image-list": [
+        {
+          "image-list-name": "testListName",
+          "image-list-id": "testListId",
+          "image-list-number": 200,
+          "image-list-boolean": true,
+          "image-list-null": null
+        }
+      ]
+    }
+  }
+}

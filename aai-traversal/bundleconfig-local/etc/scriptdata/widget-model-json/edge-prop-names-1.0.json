@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "7a08cad4-8759-46a5-8245-095d1ba57ac6",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "f0442326-8201-4d0e-857c-74b4ddcbfc9f",
+			"model-version" : "1.0",
+			"model-name" : "edge-prop-names"
+		} ]
+	}
+}

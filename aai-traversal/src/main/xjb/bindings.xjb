@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jaxb:bindings
+    version="2.1"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <jaxb:bindings scd="x-schema::a" xmlns:a="http://org.openecomp.aai.inventory/v7">
+        <jaxb:schemaBindings>
+            <jaxb:package name="org.openecomp.aai.domain.yang.v7"/>
+        </jaxb:schemaBindings>      
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::a" xmlns:a="http://org.openecomp.aai.inventory/v8">
+        <jaxb:schemaBindings>
+            <jaxb:package name="org.openecomp.aai.domain.yang.v8"/>
+        </jaxb:schemaBindings>      
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::a" xmlns:a="http://org.openecomp.aai.inventory/v9">
+        <jaxb:schemaBindings>
+            <jaxb:package name="org.openecomp.aai.domain.yang"/>
+        </jaxb:schemaBindings>      
+    </jaxb:bindings>
+</jaxb:bindings>

@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "98fbb471-1f86-428e-bd8a-c8a25de6fa23",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "4cb44ae8-e3ab-452a-9f95-bcc8a44c55ea",
+			"model-version" : "1.0",
+			"model-name" : "dvs-switch"
+		} ]
+	}
+}

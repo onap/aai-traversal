@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "862b25a1-262a-4961-bdaa-cdc55d69785a",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "e9f1fa7d-c839-418a-9601-03dc0d2ad687",
+			"model-version" : "1.0",
+			"model-name" : "pnf"
+		} ]
+	}
+}

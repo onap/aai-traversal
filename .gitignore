@@ -1,0 +1,9 @@
+.settings
+.project
+target/
+**/logs/
+bundleconfig-local/etc/auth/aai-client-cert.p12
+bundleconfig-local/etc/logback.xml
+/.pydevproject
+/bin/
+/.classpath

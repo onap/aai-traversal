@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "2076e726-3577-477a-a300-7fa65cd4df11",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "753e813a-ba9e-4a1d-ab34-b2f6dc6eec0c",
+			"model-version" : "1.0",
+			"model-name" : "model-element"
+		} ]
+	}
+}

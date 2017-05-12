@@ -1,0 +1,126 @@
+{
+   "named-query-uuid" : "5aaae840-ca96-4e5f-9308-58883564a80f",
+   "named-query-name" : "get-service-instance-summary",
+   "named-query-version" : "1.0",
+   "description" : "Named Query - Get Service Instance Summary",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "property-collect-list" : [ "service-instance-id", "service-instance-name", "operational-status" ],
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "do-not-output" : "true",
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "property-collect-list" : [ "cloud-region-id" ],
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "425b2158-e51d-4509-9945-dad4556474a3"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "3d560d81-57d0-438b-a2a1-5334dba0651a"
+                     } ]
+                  } ]
+               }
+            }, {
+               "property-collect-list" : [ "service-type" ],
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "property-collect-list" : [ "global-customer-id", "subscriber-name" ],
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "c1d4305f-cdbd-4bbe-9069-a2f4978fd89e"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "2e1a602a-acd8-4f78-94ff-618b802a303b"
+                     } ]
+                  } ]
+               }
+            }, {
+               "do-not-output" : "true",
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "do-not-output" : "true",
+                     "named-query-elements" : {
+                        "named-query-element" : [ {
+                           "do-not-output" : "true",
+                           "named-query-elements" : {
+                              "named-query-element" : [ {
+                                 "property-collect-list" : [ "cloud-region-id" ],
+                                 "relationship-list" : {
+                                    "relationship" : [ {
+                                       "related-to" : "model",
+                                       "relationship-data" : [ {
+                                          "relationship-key" : "model.model-invariant-id",
+                                          "relationship-value" : "425b2158-e51d-4509-9945-dad4556474a3"
+                                       } ]
+                                    } ]
+                                 }
+                              } ]
+                           },
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "97c26c99-6870-44c1-8a07-1d900d3f4ce6"
+                                 } ]
+                              } ]
+                           }
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "ff69d4e0-a8e8-4108-bdb0-dd63217e63c7"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "acc6edd8-a8d4-4b93-afaa-0994068be14c"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-invariant-id",
+                  "relationship-value" : "82194af1-3c2c-485a-8f44-420e22a9eaa4"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

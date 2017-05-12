@@ -1,0 +1,40 @@
+{
+  "input": {
+    "myImage": {
+      "imageId": "test-imageId-1",
+      "imageName": "test-image-name",
+      "imageList": [
+        {
+          "imageListName": "testListName",
+          "imageListId": "testListId",
+          "imageArray": [
+            [
+              {
+                "imageNestedArrayElement": "value"
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "output": {
+    "my-image": {
+      "image-id": "test-imageId-1",
+      "image-name": "test-image-name",
+      "image-list": [
+        {
+          "image-list-name": "testListName",
+          "image-list-id": "testListId",
+          "image-array": [
+            [
+              {
+                "image-nested-array-element": "value"
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}

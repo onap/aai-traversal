@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "2851cf01-9c40-4064-87d4-6184a6fcff35",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "f4fb34f3-fd6e-4a8f-a3fb-4ab61a343b79",
+			"model-version" : "1.0",
+			"model-name" : "oam-network"
+		} ]
+	}
+}

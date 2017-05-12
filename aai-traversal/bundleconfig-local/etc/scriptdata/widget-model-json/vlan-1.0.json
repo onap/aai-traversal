@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "d2b1eaf1-ae59-4116-9ee4-aa0179faa4f8",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "257d88a5-a269-4c35-944f-aca04fbdb791",
+			"model-version" : "1.0",
+			"model-name" : "vlan"
+		} ]
+	}
+}

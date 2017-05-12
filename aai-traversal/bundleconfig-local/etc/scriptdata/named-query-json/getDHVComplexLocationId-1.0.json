@@ -1,0 +1,32 @@
+{
+   "named-query-uuid" : "59490c32-eaae-488d-8442-f301b1ed43a9",
+   "named-query-name" : "dhv-complex-by-location-id",
+   "named-query-version" : "1.0",
+   "description" : "Named Query - DHV Complex By LocationId",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "6d932c8f-463b-4e76-83fb-87acfbaa2e2d"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-invariant-id",
+                  "relationship-value" : "af91c2f7-35fc-43cf-a13d-443f385b2353"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

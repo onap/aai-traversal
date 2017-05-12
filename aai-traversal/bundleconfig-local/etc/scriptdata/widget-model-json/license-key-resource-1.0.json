@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "9022ebfe-b54f-4911-a6b2-8c3f5ec189b7",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "24b25f8c-b8bd-4c62-9421-87c12667aac9",
+			"model-version" : "1.0",
+			"model-name" : "license-key-resource"
+		} ]
+	}
+}

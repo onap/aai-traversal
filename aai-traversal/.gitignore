@@ -1,0 +1,10 @@
+.settings
+target/
+**/logs/
+bundleconfig-local/etc/auth/aai-client-cert.p12
+bundleconfig-local/etc/oxm
+src/main/aai_schema
+bundleconfig-local/etc/logback.xml
+/.pydevproject
+/test_csvWriter.csv
+/bin/

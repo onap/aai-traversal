@@ -1,0 +1,4 @@
+<route xmlns="http://camel.apache.org/schema/spring" trace="true"> 
+	<from uri="att-dme2-servlet:///aai?matchOnUriPrefix=true" />
+	<to uri="cxfbean:jaxrsServices?providers=#jsonProvider&amp;bus=#cxfBus" />
+</route>

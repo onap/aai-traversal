@@ -1,0 +1,20 @@
+<configuration debug="false">
+	<property name="defaultPattern" value="%d{MM/dd-HH:mm:ss.SSS}|%logger|%X{RequestId}|%X{ServiceInstanceId}|%thread|%X{ServiceName}|%X{InstanceUUID}|%.-5level|%X{AlertSeverity}|%X{ServerIPAddress}|%X{ServerFQDN}|%X{RemoteHost}|%X{Timer}|%msg%n" />
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${defaultPattern}</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.reflections" level="WARN"/>
+	<logger name="org.apache.zookeeper" level="WARN"/>
+	<logger name="org.apache.hadoop" level="WARN"/>
+	<logger name="com.thinkaurelius" level="WARN"/>
+	<logger name="ch.qos.logback.classic" level="WARN" />
+	<logger name="ch.qos.logback.core" level="WARN" />
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT"/>
+	</root>
+</configuration>

@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "e78a7eaa-f65d-4919-9c2b-5b258c8c4d7e",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "c246f6e2-e3a1-4697-94c0-5672a7fbbf04",
+			"model-version" : "1.0",
+			"model-name" : "tagged-inventory-item-list"
+		} ]
+	}
+}

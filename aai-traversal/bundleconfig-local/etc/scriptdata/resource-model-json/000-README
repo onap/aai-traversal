@@ -1,0 +1,10 @@
+Add resource models here in the order you want them to be added to the graph.
+
+Recommended that they are spaced by 10's.
+
+So, if you are adding a resource model it should be:
+
+100-ipe-resource-model-1.0.json
+110-vBgf-resource-model-1.0.json
+
+This will allow others to insert models between existing models.

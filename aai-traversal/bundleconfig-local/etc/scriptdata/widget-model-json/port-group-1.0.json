@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "8ce940fb-55d7-4230-9e7f-a56cc2741f77",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "03e8bb6b-b48a-46ae-b5d4-e5af577e6844",
+			"model-version" : "1.0",
+			"model-name" : "port-group"
+		} ]
+	}
+}

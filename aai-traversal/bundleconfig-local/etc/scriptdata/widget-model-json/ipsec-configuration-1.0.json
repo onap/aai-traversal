@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "aca4c310-cb45-42bd-9f88-73e40ba7b962",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "d949fd10-36bf-408a-ac7a-cad5004d2e0d",
+			"model-version" : "1.0",
+			"model-name" : "ipsec-configuration"
+		} ]
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "1c2ded4f-8b01-4193-829c-966847dfec3e",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "3ccbcbc7-d19e-44d5-a52f-7e18aa8d69fa",
+			"model-version" : "1.0",
+			"model-name" : "routing-instance"
+		} ]
+	}
+}
