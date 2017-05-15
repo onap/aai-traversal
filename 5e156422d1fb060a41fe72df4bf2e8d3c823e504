@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da141535_2676713f",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 903
+      },
+      "writtenOn": "2017-05-15T17:38:35Z",
+      "side": 1,
+      "message": "Can this be removed ?",
+      "range": {
+        "startLine": 30,
+        "startChar": 2,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "5e156422d1fb060a41fe72df4bf2e8d3c823e504",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
