@@ -75,28 +75,6 @@
 			<url>dav:${nexusproxy}${sitePath}</url>
 		</site>
 	</distributionManagement>
-
-	<!-- The standard build tasks for this project are inherited from the parent. 
-		Please do not override the build tasks. However tasks and/or profiles can 
-		be included here as well as additional dependencies for your service. Any 
-		runtime or compile scope dependencies will be copied to the INSTALLATION_PATH/extJars 
-		folder and will be made available on the AJSC classpath for your service. 
-		Please, NOTE: DME2 and CSM related dependencies are EXTERNALIZED within the 
-		CSI environment. Therefore, they are provided within this project as "provided" 
-		dependencies. In order for the AJSC to run properly, locally, the CSM and 
-		DME2 dependencies will be copied into the target/commonLibs folder and will 
-		be made available to the classpath of the AJSC through the use of the system 
-		property, "AJSC_EXTERNAL_LIB_FOLDERS". This system property needs to be set 
-		in the "runAjsc" maven profile within the pom.xml (and, is defaulted to do 
-		so). If you have a startup failure related to a missing dme2 class not found 
-		exception, please contact the AJSC team for assistance.--> 
-	<dependencies>
-		<dependency>
-			<groupId>csi-schemas-source</groupId>
-			<artifactId>cmn-CommonDataModel</artifactId>
-			<version>100.0.145</version>
-		</dependency>
-	</dependencies>
 	<profiles>
 		<profile>
 			<id>jenkins-properties</id>
