@@ -204,45 +204,6 @@
 	<logger name="ch.qos.logback.classic" level="INFO" />
 	<logger name="ch.qos.logback.core" level="INFO" />
 
-	<!-- logback jms appenders & loggers definition starts here -->
-
-	<if condition='property("JMS_BROKER").contains("WMQ")'>
-		<then>
-			<appender name="Audit-Record-Queue" class="ajsc.JMSQueueAppender">
-				<param name="InitialContextFactoryName" value="${JMS_WMQ_INITIAL_CONNECTION_FACTORY_NAME}" />
-				<param name="ProviderURL" value="${JMS_WMQ_PROVIDER_URL}" />
-				<param name="DestinationName" value="${JMS_WMQ_AUDIT_DESTINATION_NAME}" />
-				<param name="ConnectionFactoryName" value="${JMS_WMQ_CONNECTION_FACTORY_NAME}" />
-			</appender>
-			<appender name="Performance-Tracker-Queue" class="ajsc.JMSQueueAppender">
-				<param name="InitialContextFactoryName" value="${JMS_WMQ_INITIAL_CONNECTION_FACTORY_NAME}" />
-				<param name="ProviderURL" value="${JMS_WMQ_PROVIDER_URL}" />
-				<param name="DestinationName" value="${JMS_WMQ_PERF_DESTINATION_NAME}" />
-				<param name="ConnectionFactoryName" value="${JMS_WMQ_CONNECTION_FACTORY_NAME}" />
-			</appender>
-		</then>
-		<else> <!-- logback jms appenders definition starts here -->
-			<appender name="Audit-Record-Queue" class="ajsc.JMSQueueAppender">
-				<param name="InitialContextFactoryName"
-					value="com.tibco.tibjms.naming.TibjmsInitialContextFactory" />
-				<param name="ProviderURL" value="${JMS_TIBCO_PROVIDER_URL}" />
-				<param name="userName" value="${JMS_LOGGER_USER_NAME}" />
-				<param name="password" value="${JMS_LOGGER_PASSWORD}" />
-				<QueueBindingName>${JMS_LOGGER_AUDIT_QUEUE_BINDING}
-				</QueueBindingName>
-			</appender>
-			<appender name="Performance-Tracker-Queue" class="ajsc.JMSQueueAppender">
-				<param name="InitialContextFactoryName"
-					value="com.tibco.tibjms.naming.TibjmsInitialContextFactory" />
-				<param name="ProviderURL" value="${JMS_TIBCO_PROVIDER_URL}" />
-				<param name="userName" value="${JMS_LOGGER_USER_NAME}" />
-				<param name="password" value="${JMS_LOGGER_PASSWORD}" />
-				<QueueBindingName>${JMS_LOGGER_PERF_QUEUE_BINDING}
-				</QueueBindingName>
-			</appender>
-		</else>
-	</if>
-	
 	<appender name="ASYNC-audit" class="ch.qos.logback.classic.AsyncAppender">
 		<queueSize>1000</queueSize>
 		<discardingThreshold>0</discardingThreshold>

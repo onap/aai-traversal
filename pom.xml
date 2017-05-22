@@ -23,7 +23,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<module.ajsc.namespace.name>ActiveAndAvailableInventory-Traversal</module.ajsc.namespace.name>
 		<module.ajsc.namespace.version>v1</module.ajsc.namespace.version>
-		<ajscRuntimeVersion>5.0.0-RC16.0.5</ajscRuntimeVersion>
+		<ajscRuntimeVersion>2.1.0</ajscRuntimeVersion>
 		<aai-schema.version>1.1.0-SNAPSHOT</aai-schema.version>
 		<aai.project.version>${project.version}</aai.project.version>
 

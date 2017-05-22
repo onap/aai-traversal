@@ -2140,7 +2140,7 @@ public class ModelBasedProcessing{
 	  //     processing for how we join to that model and will not try to go any "deeper".
 	  List<String> linkagePtList = new ArrayList<>();
 	  Iterator <VertexProperty<Object>> vpI = thisLevelElemVtx.properties("linkage-points");
-	  //DEBUG -- AAI-8002 
+
 	  // I am not sure why, but since "linkage-points" is an xml-element-wrapper in the OXM definition, 
 	  // we get back the whole array of Strings in one String - but still use the "vtx.properties()" to
 	  // get it - but only look at the first thing returned by the iterator.
@@ -2505,7 +2505,7 @@ public class ModelBasedProcessing{
 			  
 			  List<String> linkagePtList = new ArrayList <String>();
 			  Iterator <VertexProperty<Object>> vpI = elVert.properties("linkage-points");
-			  //DEBUG -- AAI-8002 
+ 
 			  // I am not sure why, but since "linkage-points" is an xml-element-wrapper in the OXM definition, 
 			  // we get back the whole array of Strings in one String - but still use the "vtx.properties()" to
 			  // get it - but only look at the first thing returned by the iterator.
@@ -2624,7 +2624,7 @@ public class ModelBasedProcessing{
 	  //      but that after that, we connect to a p-interface followed by a pserver.
 	  // It might have been more clear to define it in the other direction, but for now, that is it. (16-07)
 	  String linkagePointStr = linkagePointStrVal;
-	  // --- DEBUG For AAI-8002 
+	 
 	  // We are getting these with more than linkage thing in one string.  
 	  //   Ie. "pserver|lag-interface|l-interface, pserver|p-interface|l-interface, vlan|l-interface"
 	  linkagePointStr = linkagePointStr.replace("[",  "");

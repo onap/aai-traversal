@@ -20,7 +20,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN if [ ! -z ${HTTP_PROXY} ]; then echo "Acquire::http::proxy  \"${HTTP_PROXY}\";" >> /etc/apt/apt.conf; fi && \
     if [ ! -z ${HTTP_PROXY} ]; then echo "Acquire::https::proxy \"${HTTP_PROXY}\";" >> /etc/apt/apt.conf; fi && \
     apt-get update && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common uuid-runtime && \
     apt-get install --reinstall ca-certificates && \
     sudo -E add-apt-repository ppa:openjdk-r/ppa && \
     apt-get update && \
