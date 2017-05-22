@@ -40,8 +40,8 @@ import org.openecomp.aai.logging.ErrorLogHelper;
 import org.openecomp.aai.util.AAIConstants;
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
-import com.att.nsa.mr.client.MRBatchingPublisher;
-import com.att.nsa.mr.client.MRClientFactory;
+//import com.att.nsa.mr.client.MRBatchingPublisher;
+//import com.att.nsa.mr.client.MRClientFactory;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -52,7 +52,7 @@ public class AAIDmaapEventJMSConsumer implements MessageListener {
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(AAIDmaapEventJMSConsumer.class);
 
 	private final static String COMPONENT = "aaiDmaapEvent";
-	private MRBatchingPublisher adp = null;
+	//private MRBatchingPublisher adp = null;
 
 	private Properties props;
 
@@ -64,100 +64,100 @@ public class AAIDmaapEventJMSConsumer implements MessageListener {
 	private Client client;
 
 	public AAIDmaapEventJMSConsumer() throws org.apache.commons.configuration.ConfigurationException {
-		super();
+		//super();
 
-		if (this.adp == null) {
-			try {
-				FileReader reader = new FileReader(new File(AAIConstants.AAI_EVENT_DMAAP_PROPS));
-				props = new Properties();
-				props.load(reader);
-				props.setProperty("DME2preferredRouterFilePath", AAIConstants.AAI_HOME_ETC_APP_PROPERTIES + "preferredRoute.txt");
-				if (props.getProperty("password") != null && props.getProperty("password").startsWith("OBF:")) {
-					props.setProperty("password", Password.deobfuscate(props.getProperty("password")));
-				}
-				this.adp = MRClientFactory.createBatchingPublisher(props);
+		//if (this.adp == null) {
+			//try {
+				//FileReader reader = new FileReader(new File(AAIConstants.AAI_EVENT_DMAAP_PROPS));
+				//props = new Properties();
+				//props.load(reader);
+				//props.setProperty("DME2preferredRouterFilePath", AAIConstants.AAI_HOME_ETC_APP_PROPERTIES + "preferredRoute.txt");
+				//if (props.getProperty("password") != null && props.getProperty("password").startsWith("OBF:")) {
+					//props.setProperty("password", Password.deobfuscate(props.getProperty("password")));
+				//}
+				//this.adp = MRClientFactory.createBatchingPublisher(props);
 
-				String host = props.getProperty("host");
-				String topic = props.getProperty("topic");
-				String protocol = props.getProperty("Protocol");
+				//String host = props.getProperty("host");
+				//String topic = props.getProperty("topic");
+				//String protocol = props.getProperty("Protocol");
 
-				username = props.getProperty("username");
-				password = props.getProperty("password");
-				contentType = props.getProperty("contenttype");
+				//username = props.getProperty("username");
+				//password = props.getProperty("password");
+				//contentType = props.getProperty("contenttype");
 
-				url = protocol + "://" + host + "/events/" + topic;
-				client = Client.create();
-				client.addFilter(new HTTPBasicAuthFilter(username, password));
+				//url = protocol + "://" + host + "/events/" + topic;
+				//client = Client.create();
+				//client.addFilter(new HTTPBasicAuthFilter(username, password));
 
-			} catch (IOException e) {
-				ErrorLogHelper.logError("AAI_4000", "Error updating dmaap config file for aai event.");
-			}
-		}
+			//} catch (IOException e) {
+				//ErrorLogHelper.logError("AAI_4000", "Error updating dmaap config file for aai event.");
+			//}
+		//}
 
 	}
 
 	@Override
 	public void onMessage(Message message) {
 
-		String jsmMessageTxt = "";
-		String aaiEvent = "";
-		String transId = "";
-		String fromAppId = "";
-		String fullId = "";
+		//String jsmMessageTxt = "";
+		//String aaiEvent = "";
+		//String transId = "";
+		//String fromAppId = "";
+		//String fullId = "";
 
-		if (message instanceof TextMessage) {
-			try {
-				jsmMessageTxt = ((TextMessage) message).getText();
-				JSONObject jo = new JSONObject(jsmMessageTxt);
+		//if (message instanceof TextMessage) {
+			//try {
+				//jsmMessageTxt = ((TextMessage) message).getText();
+				//JSONObject jo = new JSONObject(jsmMessageTxt);
 
-				if (jo.has("aaiEventPayload")) {
-					aaiEvent = jo.getJSONObject("aaiEventPayload").toString();
-				} else {
-					return;
-				}
-				if (jo.getString("transId") != null) {
-					MDC.put("requestId", jo.getString("transId"));
-				}
-				if (jo.getString("fromAppId") != null) {
-					MDC.put("partnerName", jo.getString("fromAppId"));
-				}
-				if (jo.getString("fullId") != null) {
-					fullId = jo.getString("fullId");
-				}
+				//if (jo.has("aaiEventPayload")) {
+					//aaiEvent = jo.getJSONObject("aaiEventPayload").toString();
+				//} else {
+					//return;
+				//}
+				//if (jo.getString("transId") != null) {
+					//MDC.put("requestId", jo.getString("transId"));
+				//}
+				//if (jo.getString("fromAppId") != null) {
+					//MDC.put("partnerName", jo.getString("fromAppId"));
+				//}
+				//if (jo.getString("fullId") != null) {
+					//fullId = jo.getString("fullId");
+				//}
 
-				LOGGER.info(fullId + "|" + transId + "|" + fromAppId + "|" + aaiEvent);
+				//LOGGER.info(fullId + "|" + transId + "|" + fromAppId + "|" + aaiEvent);
 
-				String environment = System.getProperty("lrmRO");
+				//String environment = System.getProperty("lrmRO");
 
-				if (environment == null) {
-					this.adp.send(aaiEvent);
-				} else {
-					if (environment.startsWith("dev") || environment.startsWith("testINT") || environment.startsWith("testEXT")) {
+				//if (environment == null) {
+					//this.adp.send(aaiEvent);
+				//} else {
+					//if (environment.startsWith("dev") || environment.startsWith("testINT") || environment.startsWith("testEXT")) {
 
-						WebResource webResource = client.resource(url);
+						//WebResource webResource = client.resource(url);
 
-						ClientResponse response = webResource.accept(contentType).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, aaiEvent);
+						//ClientResponse response = webResource.accept(contentType).type(MediaType.APPLICATION_JSON).post(ClientResponse.class, aaiEvent);
 
-						if (response.getStatus() != 200) {
-							System.out.println("Failed : HTTP error code : " + response.getStatus());
-						}
-					} else {
-						this.adp.send(aaiEvent);
-					}
-				}
+						//if (response.getStatus() != 200) {
+							//System.out.println("Failed : HTTP error code : " + response.getStatus());
+						//}
+					//} else {
+						//this.adp.send(aaiEvent);
+					//}
+				//}
 
-			} catch (IOException e) {
-				if (e instanceof java.net.SocketException) {
-					if (e.getMessage().contains("Connection reset")) {
-					} else {
-						ErrorLogHelper.logError("AAI_7304", "Error reaching DMaaP to send event. " + aaiEvent);
-					}
-				} else {
-					ErrorLogHelper.logError("AAI_7304", "Error reaching DMaaP to send event. " + aaiEvent);
-				}
-			} catch (JMSException | JSONException e) {
-				ErrorLogHelper.logError("AAI_7350", "Error parsing aaievent jsm message for sending to dmaap. " + jsmMessageTxt);
-			}
-		}
+			//} catch (IOException e) {
+				//if (e instanceof java.net.SocketException) {
+					//if (e.getMessage().contains("Connection reset")) {
+					//} else {
+						//ErrorLogHelper.logError("AAI_7304", "Error reaching DMaaP to send event. " + aaiEvent);
+					//}
+				//} else {
+					//ErrorLogHelper.logError("AAI_7304", "Error reaching DMaaP to send event. " + aaiEvent);
+				//}
+			//} catch (JMSException | JSONException e) {
+				//ErrorLogHelper.logError("AAI_7350", "Error parsing aaievent jsm message for sending to dmaap. " + jsmMessageTxt);
+			//}
+		//}
 	}
 }

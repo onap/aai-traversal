@@ -20,25 +20,25 @@
 
 package org.openecomp.aai.dmaap;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.command.ActiveMQQueue;
+//import org.apache.activemq.ActiveMQConnectionFactory;
+//import org.apache.activemq.command.ActiveMQQueue;
 import org.json.JSONObject;
-import org.springframework.jms.connection.CachingConnectionFactory;
-import org.springframework.jms.core.JmsTemplate;
+//import org.springframework.jms.connection.CachingConnectionFactory;
+//import org.springframework.jms.core.JmsTemplate;
 
 public class AAIDmaapEventJMSProducer {
 
-	private JmsTemplate jmsTemplate;
+	//private JmsTemplate jmsTemplate;
 
 	public AAIDmaapEventJMSProducer() {
-		this.jmsTemplate = new JmsTemplate();
-		this.jmsTemplate.setConnectionFactory(new CachingConnectionFactory(new ActiveMQConnectionFactory("tcp://localhost:61446")));
-		this.jmsTemplate.setDefaultDestination(new ActiveMQQueue("IN_QUEUE"));
+		//this.jmsTemplate = new JmsTemplate();
+		//this.jmsTemplate.setConnectionFactory(new CachingConnectionFactory(new ActiveMQConnectionFactory("tcp://localhost:61446")));
+		//this.jmsTemplate.setDefaultDestination(new ActiveMQQueue("IN_QUEUE"));
 	}
 
 	public void sendMessageToDefaultDestination(JSONObject finalJson) {
-		jmsTemplate.convertAndSend(finalJson.toString());
-		CachingConnectionFactory ccf = (CachingConnectionFactory)this.jmsTemplate.getConnectionFactory();
-		ccf.destroy();
+		//jmsTemplate.convertAndSend(finalJson.toString());
+		//CachingConnectionFactory ccf = (CachingConnectionFactory)this.jmsTemplate.getConnectionFactory();
+		//ccf.destroy();
 	}
 }
