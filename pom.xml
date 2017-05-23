@@ -7,7 +7,7 @@
 		<groupId>com.att.ajsc</groupId>
 		<version>2.1.0</version>
 	</parent>
-	<groupId>org.openecomp.aai</groupId>
+	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>traversal</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
 	<name>traversal</name>
