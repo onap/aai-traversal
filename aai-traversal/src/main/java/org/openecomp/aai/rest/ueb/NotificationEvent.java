@@ -31,12 +31,13 @@ import org.openecomp.aai.util.StoreNotificationEvent;
  */
 public class NotificationEvent {
 
-	private Loader loader = null;
+	private final Loader loader;
 	
-	private Introspector eventHeader = null;
+	private final Introspector eventHeader;
 	
-	private Introspector obj = null;
-	
+	private final Introspector obj;
+	private final String transactionId;
+	private final String sourceOfTruth;
 	/**
 	 * Instantiates a new notification event.
 	 *
@@ -44,10 +45,12 @@ public class NotificationEvent {
 	 * @param eventHeader the event header
 	 * @param obj the obj
 	 */
-	public NotificationEvent (Loader loader, Introspector eventHeader, Introspector obj) {
+	public NotificationEvent (Loader loader, Introspector eventHeader, Introspector obj, String transactionId, String sourceOfTruth) {
 		this.loader = loader;
 		this.eventHeader = eventHeader;
 		this.obj = obj;
+		this.transactionId = transactionId;
+		this.sourceOfTruth = sourceOfTruth;
 	}
 	
 	/**
@@ -57,7 +60,7 @@ public class NotificationEvent {
 	 */
 	public void trigger() throws AAIException {
 		
-		StoreNotificationEvent sne = new StoreNotificationEvent();
+		StoreNotificationEvent sne = new StoreNotificationEvent(transactionId, sourceOfTruth);
 		
 		sne.storeEvent(loader, eventHeader, obj);
 

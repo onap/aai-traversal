@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "4c01c948-7607-4d66-8a6c-99c2c2717936",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "22104c9f-29fd-462f-be07-96cd6b46dd33",
+			"model-version" : "1.0",
+			"model-name" : "connector"
+		} ]
+	}
+}

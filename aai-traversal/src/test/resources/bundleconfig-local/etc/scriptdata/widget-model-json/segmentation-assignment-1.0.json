@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "6e814aee-46e1-4583-a9d4-0049bfd2b59b",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "c5171ae0-44fb-4c04-b482-d56702241a44",
+			"model-version" : "1.0",
+			"model-name" : "segmentation-assignment"
+		} ]
+	}
+}

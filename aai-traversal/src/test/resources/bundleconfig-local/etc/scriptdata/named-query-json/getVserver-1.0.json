@@ -1,0 +1,105 @@
+{
+   "named-query-uuid" : "f199cb88-5e69-4b1f-93e0-6f257877d066",
+   "named-query-name" : "getVserver-1.0",
+   "named-query-version" : "1.0",
+   "description" : "Named query - Get vserver",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-name-version-id",
+                              "relationship-value" : "2a160989-b202-47dd-874b-4a0f275998f7"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-name-version-id",
+                        "relationship-value" : "abcc54bc-bb74-49dc-9043-7f7171707545"
+                     } ]
+                  } ]
+               }
+            }, {
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "related-lookups" : {
+                        "related-lookup" : [ {
+                           "source-node-type" : "vf-module",
+                           "source-node-property" : "persona-model-id",
+                           "target-node-type" : "model",
+                           "target-node-property" : "model-id",
+                           "property-collect-list" : [ "model-name-version-id", "model-type", "model-name", "model-id", "model-version" ]
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-name-version-id",
+                              "relationship-value" : "c00563ae-812b-4e62-8330-7c4d0f47088a"
+                           } ]
+                        } ]
+                     }
+                  }, {
+                     "related-lookups" : {
+                        "related-lookup" : [ {
+                           "source-node-type" : "service-instance",
+                           "source-node-property" : "persona-model-id",
+                           "target-node-type" : "model",
+                           "target-node-property" : "model-id",
+                           "property-collect-list" : [ "model-name-version-id", "model-type", "model-name", "model-id", "model-version" ]
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-name-version-id",
+                              "relationship-value" : "46b92144-923a-4d20-b85a-3cbd847668a9"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "related-lookups" : {
+                  "related-lookup" : [ {
+                     "source-node-type" : "generic-vnf",
+                     "source-node-property" : "persona-model-id",
+                     "target-node-type" : "model",
+                     "target-node-property" : "model-id",
+                     "property-collect-list" : [ "model-name-version-id", "model-type", "model-name", "model-id", "model-version" ]
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-name-version-id",
+                        "relationship-value" : "93a6166f-b3d5-4f06-b4ba-aed48d009ad9"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-name-version-id",
+                  "relationship-value" : "8ecb2c5d-7176-4317-a255-26274edfdd53"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

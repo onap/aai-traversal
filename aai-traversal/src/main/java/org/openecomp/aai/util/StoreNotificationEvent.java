@@ -25,15 +25,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.xml.bind.Marshaller;
 
-import org.apache.cxf.helpers.CastUtils;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContext;
 import org.json.JSONException;
@@ -51,29 +46,15 @@ public class StoreNotificationEvent {
 	private AAIDmaapEventJMSProducer messageProducer;
 	private String fromAppId = "";
 	private String transId = "";
-
+	private final String transactionId;
+	private final String sourceOfTruth;
 	/**
 	 * Instantiates a new store notification event.
 	 */
-	public StoreNotificationEvent() {
+	public StoreNotificationEvent(String transactionId, String sourceOfTruth) {
 		this.messageProducer = new AAIDmaapEventJMSProducer();
-		Message inMessage = PhaseInterceptorChain.getCurrentMessage().getExchange().getInMessage();
-		Map<String, List<String>> headersList = CastUtils.cast((Map<?, ?>) inMessage.get(Message.PROTOCOL_HEADERS));
-		if (headersList != null) {
-			List<String> xt = headersList.get("X-TransactionId");
-			if (xt != null) {
-				for (String transIdValue : xt) {
-					transId = transIdValue;
-				}
-			}
-			List<String> fa = headersList.get("X-FromAppId");
-			if (fa != null) {
-				for (String fromAppIdValue : fa) {
-
-					fromAppId = fromAppIdValue;
-				}
-			}
-		}
+		this.transactionId = transactionId;
+		this.sourceOfTruth = sourceOfTruth;
 	}
 
 	/**
@@ -170,7 +151,7 @@ public class StoreNotificationEvent {
 			throw new AAIException("AAI_7350");
 		}
 
-		DynamicEntity notificationEvent = notificationJaxbContext.getDynamicType("inventory.aai.inventory.org." + notificationVersion + ".NotificationEvent").newDynamicEntity();
+		DynamicEntity notificationEvent = notificationJaxbContext.getDynamicType("inventory.aai.openecomp.org." + notificationVersion + ".NotificationEvent").newDynamicEntity();
 
 		if (eventHeader.get("id") == null) {
 			eventHeader.set("id", genDate2() + "-" + UUID.randomUUID().toString());

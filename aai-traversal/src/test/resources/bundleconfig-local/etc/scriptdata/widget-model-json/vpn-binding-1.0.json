@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "9e23b675-db2b-488b-b459-57aa9857baa0",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "21a146e5-9901-448c-9197-723076770119",
+			"model-version" : "1.0",
+			"model-name" : "vpn-binding"
+		} ]
+	}
+}

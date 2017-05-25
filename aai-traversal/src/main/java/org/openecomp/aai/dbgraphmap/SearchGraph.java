@@ -33,6 +33,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -79,6 +80,7 @@ import org.openecomp.aai.serialization.db.EdgeRules;
 import org.openecomp.aai.serialization.engines.QueryStyle;
 import org.openecomp.aai.serialization.engines.TitanDBEngine;
 import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
+import org.openecomp.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
 import org.openecomp.aai.serialization.queryformats.utils.UrlBuilder;
 import org.openecomp.aai.util.AAIApiServerURLBase;
 import org.openecomp.aai.util.AAIApiVersion;
@@ -152,7 +154,7 @@ public class SearchGraph {
 			
 			// there is an issue with service-instance - it is a unique node but still dependent
 			// for now query it directly without attempting to craft a valid URI	
-			if (startNodeType.equalsIgnoreCase("service-instance")) {
+			if (startNodeType.equalsIgnoreCase("service-instance") && startNodeKeyParams.size() == 1) {
 				Introspector obj = loader.introspectorFromName(startNodeType);
 				// Build a hash with keys to uniquely identify the start Node
 				String keyName = null;
@@ -168,7 +170,6 @@ public class SearchGraph {
 						keyName = keyData.substring(0, colonIndex).split("\\.")[1];
 						keyValue = keyData.substring(colonIndex + 1);
 						builder.getVerticesByProperty(keyName, keyValue);
-						
 					}
 				}
 				
@@ -212,19 +213,7 @@ public class SearchGraph {
 			}
 			else {			        		
 				
-				Introspector searchResults = loader.introspectorFromName("search-results");
-				List<Object> resultDataList = searchResults.getValue("result-data");
-				for (Vertex thisNode: queryResults){
-					String nodeType = thisNode.<String>property(AAIProperties.NODE_TYPE).orElse(null);
-					
-					String thisNodeURL = urlBuilder.pathed(thisNode);
-					Introspector resultData = loader.introspectorFromName("result-data");
-					
-					resultData.setValue("resource-type", nodeType);
-					resultData.setValue("resource-link", thisNodeURL);
-					resultDataList.add(resultData.getUnderlyingObject());
-					
-				}
+				Introspector searchResults = createSearchResults(loader, urlBuilder, queryResults);
 
 				String outputMediaType = getMediaType(headers.getAcceptableMediaTypes());
 				org.openecomp.aai.introspection.MarshallerProperties properties = new org.openecomp.aai.introspection.MarshallerProperties.Builder(
@@ -233,7 +222,7 @@ public class SearchGraph {
 				result = searchResults.marshal(properties);
 				response = Response.ok().entity(result).build();
 
-				LOGGER.debug(ver.size() + " node(s) traversed, " + resultDataList.size() + " found");
+				LOGGER.debug(ver.size() + " node(s) traversed, " + queryResults.size() + " found");
 			}
 			success = true;
 		} catch (AAIException e) { 
@@ -418,7 +407,7 @@ public class SearchGraph {
 					
 					GraphTraversal<Vertex, Vertex> edgeSearch = __.start();
 					
-					edgeSearch.both(edgeLabels);
+					edgeSearch.both(edgeLabels).has(AAIProperties.NODE_TYPE, nodeType);
 					if (propName != null) {
 						// check for matching property
 						if (propValue != null) {
@@ -437,19 +426,7 @@ public class SearchGraph {
 			}
 
 			List<Vertex> results = traversal.toList();
-			Introspector searchResults = loader.introspectorFromName("search-results");
-			List<Object> resultDataList = searchResults.getValue("result-data");
-			for (Vertex thisNode: results){
-				String nodeType = thisNode.<String>property(AAIProperties.NODE_TYPE).orElse(null);
-				
-				String thisNodeURL = urlBuilder.pathed(thisNode);
-				Introspector resultData = loader.introspectorFromName("result-data");
-				
-				resultData.setValue("resource-type", nodeType);
-				resultData.setValue("resource-link", thisNodeURL);
-				resultDataList.add(resultData.getUnderlyingObject());
-				
-			}
+			Introspector searchResults = createSearchResults(loader, urlBuilder, results);
 
 			String outputMediaType = getMediaType(headers.getAcceptableMediaTypes());
 			org.openecomp.aai.introspection.MarshallerProperties properties = new org.openecomp.aai.introspection.MarshallerProperties.Builder(
@@ -478,6 +455,42 @@ public class SearchGraph {
 		return response;	
 	}
 
+	protected Introspector createSearchResults(Loader loader, UrlBuilder urlBuilder, List<Vertex> results)
+			throws AAIUnknownObjectException {
+		Introspector searchResults = loader.introspectorFromName("search-results");
+		List<Object> resultDataList = searchResults.getValue("result-data");
+		Stream<Vertex> stream;
+		if (results.size() >= 50) {
+			stream = results.parallelStream();
+		} else {
+			stream = results.stream();
+		}
+		boolean isParallel = stream.isParallel();
+		stream.forEach(v -> {
+			String nodeType = v.<String>property(AAIProperties.NODE_TYPE).orElse(null);
+			
+			String thisNodeURL;
+			try {
+				thisNodeURL = urlBuilder.pathed(v);
+				Introspector resultData = loader.introspectorFromName("result-data");
+
+				resultData.setValue("resource-type", nodeType);
+				resultData.setValue("resource-link", thisNodeURL);
+				if (isParallel) {
+					synchronized (resultDataList) {
+						resultDataList.add(resultData.getUnderlyingObject());
+					}
+				} else {
+					resultDataList.add(resultData.getUnderlyingObject());
+				}
+			} catch (AAIException | AAIFormatVertexException e) {
+				throw new RuntimeException(e);
+			}
+			
+		});
+		return searchResults;
+	}
+
 	private String findDbPropName(Introspector obj, String propName) {
 		
 		Optional<String> result = obj.getPropertyMetadata(propName, PropertyMetadata.DB_ALIAS);
@@ -487,7 +500,7 @@ public class SearchGraph {
 			return propName;
 		}
 	}
-	
+
 
 	/**
 	 * Gets the edge label.
@@ -552,7 +565,7 @@ public class SearchGraph {
 				unmarshaller.setProperty("eclipselink.media-type", "application/json");
 				unmarshaller.setProperty("eclipselink.json.include-root", false);
 			}
-			String dynamicClass = "inventory.aai.ecomp.org." + aaiExtMap.getApiVersion() + ".ModelAndNamedQuerySearch";
+			String dynamicClass = "inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".ModelAndNamedQuerySearch";
 			Class<? extends DynamicEntity> resultClass = jaxbContext.newDynamicEntity(dynamicClass).getClass();
 
 			StringReader reader = new StringReader(queryParameters);
@@ -636,7 +649,6 @@ public class SearchGraph {
 
 		return getResponseFromIntrospector(inventoryItems, aaiExtMap.getHttpHeaders());
 	}
-
 
 	/**
 	 * Execute model operation.
@@ -823,7 +835,7 @@ public class SearchGraph {
 				notificationHeader.set("sourceName", aaiExtMap.getFromAppId());
 				notificationHeader.set("version", notificationVersion);
 
-				StoreNotificationEvent sne = new StoreNotificationEvent();
+				StoreNotificationEvent sne = new StoreNotificationEvent(transId, fromAppId);
 
 				sne.storeDynamicEvent(notificationJaxbContext, notificationVersion, notificationHeader, inventoryItems);
 
@@ -976,7 +988,7 @@ public class SearchGraph {
 			Map<String,String> includeTheseVertices, Map<Object,String> objectToVertMap, AAIExtensionMap aaiExtMap) { 
 
 
-		DynamicEntity inventoryItem = jaxbContext.newDynamicEntity("inventory.aai.ecomp.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItem");
+		DynamicEntity inventoryItem = jaxbContext.newDynamicEntity("inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItem");
 		Object item = invResultItem.get("item");
 		inventoryItem.set("modelName", 			invResultItem.get("modelName"));
 		inventoryItem.set("item", 				item);
@@ -991,7 +1003,7 @@ public class SearchGraph {
 		if (includeTheseVertices.containsKey(vertexId)) { 
 			if (invResultItem.isSet("inventoryResponseItems")) {
 				List<DynamicEntity> invItemList = new ArrayList<DynamicEntity>();
-				DynamicEntity inventoryItems = jaxbContext.newDynamicEntity("inventory.aai.ecomp.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
+				DynamicEntity inventoryItems = jaxbContext.newDynamicEntity("inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
 				DynamicEntity subInventoryResponseItems = invResultItem.get("inventoryResponseItems");
 				List<DynamicEntity> subInventoryResponseItemList = subInventoryResponseItems.get("inventoryResponseItem");
 				for (DynamicEntity ent : subInventoryResponseItemList) { 

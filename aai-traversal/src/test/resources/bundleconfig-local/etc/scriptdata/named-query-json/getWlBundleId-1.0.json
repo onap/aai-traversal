@@ -1,0 +1,81 @@
+{
+   "named-query-uuid" : "88aae9bc-9b3d-44c8-a0ba-3c4911da755c",
+   "named-query-name" : "GetWlBundleId",
+   "named-query-version" : "1.0",
+   "description" : "Named query for wavelength services with same Bundle Id",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "named-query-elements" : {
+                        "named-query-element" : [ {
+                           "named-query-elements" : {
+                              "named-query-element" : [ {
+                                 "relationship-list" : {
+                                    "relationship" : [ {
+                                       "related-to" : "model",
+                                       "relationship-data" : [ {
+                                          "relationship-key" : "model.model-invariant-id",
+                                          "relationship-value" : "c1d4305f-cdbd-4bbe-9069-a2f4978fd89e"
+                                       } ]
+                                    } ]
+                                 }
+                              } ]
+                           },
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "2e1a602a-acd8-4f78-94ff-618b802a303b"
+                                 } ]
+                              } ]
+                           }
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "82194af1-3c2c-485a-8f44-420e22a9eaa4"
+                           } ]
+                        } ]
+                     }
+                  }, {
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "fe012535-2c31-4a39-a739-612374c638a0"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "fe012535-2c31-4a39-a739-612374c638a0"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-invariant-id",
+                  "relationship-value" : "86ffe6e5-4d0e-4cec-80b5-5c38aa3eff98"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

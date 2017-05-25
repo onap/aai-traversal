@@ -1,0 +1,139 @@
+{
+   "named-query-uuid" : "2a183f99-2c66-482b-ade5-7962efd801ef",
+   "named-query-name" : "get-component-list",
+   "named-query-version" : "1.2",
+   "description" : "Named Query - Get Component List",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "property-collect-list" : [ "service-instance-id", "service-instance-name" ],
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "1b2c9ba7-e449-4831-ba15-3073672f5ef2"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "3d560d81-57d0-438b-a2a1-5334dba0651a"
+                     } ]
+                  } ]
+               }
+            }, {
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "fcec1b02-b2d0-4834-aef8-d71be04717dd"
+                           } ]
+                        } ]
+                     }
+                  }, {
+                     "named-query-elements" : {
+                        "named-query-element" : [ {
+                           "do-not-output" : "true",
+                           "named-query-elements" : {
+                              "named-query-element" : [ {
+                                 "relationship-list" : {
+                                    "relationship" : [ {
+                                       "related-to" : "model",
+                                       "relationship-data" : [ {
+                                          "relationship-key" : "model.model-invariant-id",
+                                          "relationship-value" : "6d932c8f-463b-4e76-83fb-87acfbaa2e2d"
+                                       } ]
+                                    } ]
+                                 }
+                              } ]
+                           },
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "ff69d4e0-a8e8-4108-bdb0-dd63217e63c7"
+                                 } ]
+                              } ]
+                           }
+                        }, {
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "fcec1b02-b2d0-4834-aef8-d71be04717dd"
+                                 } ]
+                              } ]
+                           }
+                        }, {
+                           "named-query-elements" : {
+                              "named-query-element" : [ {
+                                 "relationship-list" : {
+                                    "relationship" : [ {
+                                       "related-to" : "model",
+                                       "relationship-data" : [ {
+                                          "relationship-key" : "model.model-invariant-id",
+                                          "relationship-value" : "1b2c9ba7-e449-4831-ba15-3073672f5ef2"
+                                       } ]
+                                    } ]
+                                 }
+                              } ]
+                           },
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "3d560d81-57d0-438b-a2a1-5334dba0651a"
+                                 } ]
+                              } ]
+                           }
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "ef86f9c5-2165-44f3-8fc3-96018b609ea5"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "acc6edd8-a8d4-4b93-afaa-0994068be14c"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-invariant-id",
+                  "relationship-value" : "82194af1-3c2c-485a-8f44-420e22a9eaa4"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

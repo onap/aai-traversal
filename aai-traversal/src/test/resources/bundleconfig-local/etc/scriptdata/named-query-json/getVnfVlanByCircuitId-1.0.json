@@ -1,0 +1,58 @@
+{
+   "named-query-uuid" : "9abb2661-d92c-4f84-aea6-b16acfa00e22",
+   "named-query-name" : "generic-vnf-vlan-by-circuit-id",
+   "named-query-version" : "1.0",
+   "description" : "Named Query - get genericVnf and vlan by circuitId",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "named-query-elements" : {
+                        "named-query-element" : [ {
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "acc6edd8-a8d4-4b93-afaa-0994068be14c"
+                                 } ]
+                              } ]
+                           }
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "cea0a982-8d55-4093-921e-418fbccf7060"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "d2b1eaf1-ae59-4116-9ee4-aa0179faa4f8"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-invariant-id",
+                  "relationship-value" : "fe012535-2c31-4a39-a739-612374c638a0"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "82966045-43ee-4982-8307-7e9610866140",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "d040621d-541a-477b-bb1b-a2b61b14e295",
+			"model-version" : "1.0",
+			"model-name" : "l3-interface-ipv6-address-list"
+		} ]
+	}
+}

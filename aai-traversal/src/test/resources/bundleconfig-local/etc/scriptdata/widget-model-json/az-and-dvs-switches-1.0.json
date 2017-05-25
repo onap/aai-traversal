@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "53dc00d4-e6d9-48ec-b6cc-3d3797e9b896",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "b2dea88d-78a0-49bf-95c9-5819df08e966",
+			"model-version" : "1.0",
+			"model-name" : "az-and-dvs-switches"
+		} ]
+	}
+}

@@ -1,0 +1,101 @@
+{
+   "named-query-uuid" : "4f448e43-339f-4c1c-85f6-896c444e25ca",
+   "named-query-name" : "GetClfiRoadmTailSummary",
+   "named-query-version" : "1.0",
+   "description" : "Named query - Get CLFI ROADM Tail Summary",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "property-collect-list" : [ "link-name", "link-type", "operational-status", "speed-value", "speed-units" ],
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "property-collect-list" : [ "interface-name", "interface-role", "port-description", "equipment-identifier" ],
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "property-collect-list" : [ "pnf-name", "pnf-name2", "equip-model", "equip-type", "frame-id" ],
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "862b25a1-262a-4961-bdaa-cdc55d69785a"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "94043c37-4e73-439c-a790-0fdd697924cd"
+                     } ]
+                  } ]
+               }
+            }, {
+               "property-collect-list" : [ "link-name", "link-name2", "link-type", "link-role", "operational-status"],
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "property-collect-list" : [ "service-instance-id", "service-instance-name", "operational-status" ],
+                     "named-query-elements" : {
+                        "named-query-element" : [ {
+                           "property-collect-list" : [ "service-type" ],
+                           "named-query-elements" : {
+                              "named-query-element" : [ {
+                                 "property-collect-list" : [ "global-customer-id", "subscriber-name" ],
+                                 "relationship-list" : {
+                                    "relationship" : [ {
+                                       "related-to" : "model",
+                                       "relationship-data" : [ {
+                                          "relationship-key" : "model.model-invariant-id",
+                                          "relationship-value" : "c1d4305f-cdbd-4bbe-9069-a2f4978fd89e"
+                                       } ]
+                                    } ]
+                                 }
+                              } ]
+                           },
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "2e1a602a-acd8-4f78-94ff-618b802a303b"
+                                 } ]
+                              } ]
+                           }
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "82194af1-3c2c-485a-8f44-420e22a9eaa4"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "fe012535-2c31-4a39-a739-612374c638a0"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-invariant-id",
+                  "relationship-value" : "fe012535-2c31-4a39-a739-612374c638a0"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

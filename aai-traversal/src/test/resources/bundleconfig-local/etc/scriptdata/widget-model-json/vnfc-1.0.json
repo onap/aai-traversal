@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "96129eb9-f0de-4e05-8af2-73146473f766",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "5761e0a7-c6df-4d8a-9ebd-b8f445054dec",
+			"model-version" : "1.0",
+			"model-name" : "vnfc"
+		} ]
+	}
+}

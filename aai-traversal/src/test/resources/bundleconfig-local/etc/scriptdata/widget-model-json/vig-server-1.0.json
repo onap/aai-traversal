@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "bed7c3b7-35d0-4cd9-abde-41b20e68b28e",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "8e8c22f1-fbdf-48ea-844c-8bdeb44e7b16",
+			"model-version" : "1.0",
+			"model-name" : "vig-server"
+		} ]
+	}
+}

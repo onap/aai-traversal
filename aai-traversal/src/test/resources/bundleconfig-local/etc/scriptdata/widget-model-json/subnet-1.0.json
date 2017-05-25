@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "1b2c9ba7-e449-4831-ba15-3073672f5ef2",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "f902a6bc-6be4-4fe5-8458-a6ec0056b374",
+			"model-version" : "1.0",
+			"model-name" : "subnet"
+		} ]
+	}
+}

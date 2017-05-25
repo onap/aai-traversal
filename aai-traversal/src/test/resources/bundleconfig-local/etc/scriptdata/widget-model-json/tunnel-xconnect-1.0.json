@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "50b9e2fa-005c-4bbe-b651-3251dece4cd8",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "e7cb4ca8-e1a5-4487-a716-4ae0bcd8aef5",
+			"model-version" : "1.0",
+			"model-name" : "tunnel-xconnect"
+		} ]
+	}
+}

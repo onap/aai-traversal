@@ -50,7 +50,6 @@ public class UEBNotification {
 
 	private Loader currentVersionLoader = null;
 	protected List<NotificationEvent> events = null;
-	private String urlBase = null;
 	private Version notificationVersion = null;
 	
 	/**
@@ -61,7 +60,6 @@ public class UEBNotification {
 	public UEBNotification(Loader loader) {
 		events = new ArrayList<>();
 		currentVersionLoader = LoaderFactory.createLoaderForVersion(loader.getModelType(), AAIProperties.LATEST);
-		urlBase = AAIConfig.get("aai.server.url.base","");
 		notificationVersion = Version.valueOf(AAIConfig.get("aai.notification.current.version","v10"));
 	}
 	
@@ -78,7 +76,7 @@ public class UEBNotification {
 	 * @throws IllegalArgumentException the illegal argument exception
 	 * @throws UnsupportedEncodingException the unsupported encoding exception
 	 */
-	public void createNotificationEvent(String transactionId, String sourceOfTruth, Status status, URI uri, Introspector obj, HashMap<String, Introspector> relatedObjects) throws AAIException, IllegalArgumentException, UnsupportedEncodingException {
+	public void createNotificationEvent(String transactionId, String sourceOfTruth, Status status, URI uri, Introspector obj, HashMap<String, Introspector> relatedObjects) throws AAIException, UnsupportedEncodingException {
 		
 		String action = "UPDATE";
 		
@@ -96,9 +94,9 @@ public class UEBNotification {
 
 		String entityLink = "";
 		if (uri.toString().startsWith("/")) {
-			entityLink = urlBase + notificationVersion + uri;
+			entityLink = "/aai/" + notificationVersion + uri;
 		} else {
-			entityLink = urlBase + notificationVersion + "/" + uri;
+			entityLink = "/aai/" + notificationVersion + "/" + uri;
 		}
 		
 
@@ -148,7 +146,7 @@ public class UEBNotification {
 				}
 			}
 
-			final NotificationEvent event = new NotificationEvent(currentVersionLoader, eventHeader, eventObject);
+			final NotificationEvent event = new NotificationEvent(currentVersionLoader, eventHeader, eventObject, transactionId, sourceOfTruth);
 			events.add(event);
 		} catch (AAIUnknownObjectException e) {
 			throw new RuntimeException("Fatal error - notification-event-header object not found!");

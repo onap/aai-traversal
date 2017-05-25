@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "04b2935f-33c4-40a9-8af0-8b52690042dc",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "1e8b331f-3d4a-4160-b7aa-f4d5a8916625",
+			"model-version" : "1.0",
+			"model-name" : "sriov-vf"
+		} ]
+	}
+}

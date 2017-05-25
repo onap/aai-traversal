@@ -42,7 +42,7 @@ if [ "${userid}" != "aaiadmin" ]; then
 fi
 
 . /etc/profile.d/aai.sh
-PROJECT_HOME=/opt/app/aai-graph-query
+PROJECT_HOME=/opt/app/aai-traversal
 prop_file=$PROJECT_HOME/bundleconfig/etc/appprops/aaiconfig.properties
 log_dir=$PROJECT_HOME/logs/misc
 today=$(date +\%Y-\%m-\%d)

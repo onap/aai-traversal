@@ -1,0 +1,58 @@
+{
+   "named-query-uuid" : "35b13965-ef9d-4597-9859-bde64c521c91",
+   "named-query-name" : "getTenantInfoAtSvcSubscription",
+   "named-query-version" : "1.0",
+   "description" : "Named Query - Tenant Info At ServiceSubscription",
+   "named-query-elements" : {
+      "named-query-element" : [ {
+         "named-query-elements" : {
+            "named-query-element" : [ {
+               "named-query-elements" : {
+                  "named-query-element" : [ {
+                     "named-query-elements" : {
+                        "named-query-element" : [ {
+                           "relationship-list" : {
+                              "relationship" : [ {
+                                 "related-to" : "model",
+                                 "relationship-data" : [ {
+                                    "relationship-key" : "model.model-invariant-id",
+                                    "relationship-value" : "af91c2f7-35fc-43cf-a13d-443f385b2353"
+                                 } ]
+                              } ]
+                           }
+                        } ]
+                     },
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "425b2158-e51d-4509-9945-dad4556474a3"
+                           } ]
+                        } ]
+                     }
+                  } ]
+               },
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "97c26c99-6870-44c1-8a07-1d900d3f4ce6"
+                     } ]
+                  } ]
+               }
+            } ]
+         },
+         "relationship-list" : {
+            "relationship" : [ {
+               "related-to" : "model",
+               "relationship-data" : [ {
+                  "relationship-key" : "model.model-invariant-id",
+                  "relationship-value" : "2e1a602a-acd8-4f78-94ff-618b802a303b"
+               } ]
+            } ]
+         }
+      } ]
+   }
+}

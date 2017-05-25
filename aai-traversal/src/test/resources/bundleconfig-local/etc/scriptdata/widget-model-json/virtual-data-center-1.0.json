@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "5150abcf-0c5f-4593-9afe-a19c48fc4824",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "6dd43ced-d789-47af-a759-d3abc14e3ac1",
+			"model-version" : "1.0",
+			"model-name" : "virtual-data-center"
+		} ]
+	}
+}
