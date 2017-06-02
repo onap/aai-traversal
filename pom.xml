@@ -25,7 +25,8 @@
 		<module.ajsc.namespace.version>v1</module.ajsc.namespace.version>
 		<ajscRuntimeVersion>2.1.0</ajscRuntimeVersion>
 		<aai-schema.version>1.1.0-SNAPSHOT</aai-schema.version>
-		<aai.project.version>${project.version}</aai.project.version>
+		<aai.project.version>1.1.0</aai.project.version>
+		<aai.docker.version>1.1</aai.docker.version>
 
 		<!-- This will be the Absolute Root of the Project and should contain NO 
 			Versioning -->

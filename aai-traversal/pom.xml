@@ -598,8 +598,9 @@
 								<name>${docker.push.registry}/openecomp/aai-traversal:%l</name>
 								<build>
 									<tags>
-										<tag>${project.docker.latesttag.version}</tag>
+										<tag>latest</tag>
 										<tag>${project.version}-STAGING-${maven.build.timestamp}</tag>
+										<tag>${aai.docker.version}-STAGING-latest</tag>
 									</tags>
 									<cleanup>try</cleanup>
 									<dockerFileDir>${dockerLocation}</dockerFileDir>
