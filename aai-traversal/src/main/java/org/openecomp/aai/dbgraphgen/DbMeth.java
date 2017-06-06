@@ -2050,7 +2050,7 @@ public class DbMeth{
 			nodeTypeFilter = true;
 		}  
 		
-		ArrayList <String> excludeVidList = new <String> ArrayList ();
+		ArrayList <String> excludeVidList = new ArrayList <String> ();
 		if( DbEdgeRules.CanBeRecursiveNT.containsKey(startNodeNT) && excludeRecurComingIn ){
 			// If we're starting on a nodeType that supports recursion, then find any connected
 			// nodes that are coming from IN edges so we can exclude them later.
