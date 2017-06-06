@@ -34,6 +34,7 @@
 		</cxf:outInterceptors>
 	</cxf:bus>
 	<context:component-scan base-package="org.openecomp.aai.tasks" />
+	<context:component-scan base-package="org.openecomp.aai.config" />
 
 	<task:scheduler id="taskScheduler" pool-size="10" />
 	<task:executor id="taskExecutor" pool-size="10"
@@ -41,7 +42,57 @@
 	<task:annotation-driven executor="taskExecutor"
 		scheduler="taskScheduler" />
 
+	<bean id="jmsProperties"
+		  class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		  name="jmsProperties">
+		<property name="order" value="99999" />
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="properties">
+			<value>
 
-	
+				<!-- JMS -->
+				JMS.BROKER.URL=tcp://localhost:61446
+				JMS.QUEUE.NAME=IN_QUEUE
 
-</beans>		
+			</value>
+		</property>
+	</bean>
+
+	<!-- ActiveMQ connection factory -->
+	<bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<constructor-arg index="0" value="${JMS.BROKER.URL}" />
+	</bean>
+
+	<!-- ConnectionFactory Definition -->
+	<bean id="connectionFactory"
+		  class="org.springframework.jms.connection.CachingConnectionFactory">
+		<constructor-arg ref="amqConnectionFactory" />
+	</bean>
+
+	<!-- Destination Queue -->
+	<bean id="destinationQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${JMS.QUEUE.NAME}" />
+	</bean>
+
+	<!-- JmsTemplate Definition -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="defaultDestination" ref="destinationQueue" />
+	</bean>
+
+	<!-- Message Producer -->
+	<bean id="messageProducer" class="org.openecomp.aai.dmaap.AAIDmaapEventJMSProducer" />
+
+	<!-- Message Consumer from Default Destination -->
+	<bean id="messageDefaultConsumer" class="org.openecomp.aai.dmaap.AAIDmaapEventJMSConsumer" />
+
+	<!-- Message Consumer Container for Default Destination -->
+	<bean
+			class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="destinationName" value="${JMS.QUEUE.NAME}" />
+		<property name="messageListener" ref="messageDefaultConsumer" />
+	</bean>
+
+</beans>
