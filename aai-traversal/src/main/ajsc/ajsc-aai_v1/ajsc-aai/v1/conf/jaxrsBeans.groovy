@@ -8,7 +8,6 @@ beans{
 	QueryConsumer(org.openecomp.aai.rest.QueryConsumer)
 
 	V3ThroughV7Retired(org.openecomp.aai.rest.retired.V3ThroughV7Consumer)
-	V7V8NamedQueries(org.openecomp.aai.rest.retired.V7V8NamedQueries)
 
 	EchoResponse(org.openecomp.aai.rest.util.EchoResponse)
 
@@ -18,9 +17,7 @@ beans{
 		ref(bean:'SearchProvider')
 		ref(bean:'ModelAndNamedQueryRestProvider')
 		ref(bean:'QueryConsumer')
-		ref(bean: 'V7V8NamedQueries')
 		ref(bean:'V3ThroughV7Retired')
-
 		ref(bean:'EchoResponse')
 	}
 }

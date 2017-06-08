@@ -19,68 +19,49 @@
  */
 
 package org.openecomp.aai.dbgraphgen;
-//package org.openecomp.aai.dbgen;
-//
-//import java.util.ArrayList;
-//
-//import org.junit.BeforeClass;
-//import org.junit.Rule;
-//import org.junit.Test;
-//import org.junit.rules.ExpectedException;
-//
-//import org.openecomp.aai.exceptions.AAIException;
-//import org.openecomp.aai.ingestModel.DbMaps;
-//import org.openecomp.aai.ingestModel.IngestModelMoxyOxm;
-//import org.openecomp.aai.util.AAIConstants;
-//
-//public class ModelBasedProcessingTest {
-//	
-//	private static DbMaps dbMaps = null;
-//	private static ModelBasedProcessing processor;
-//	@BeforeClass
-//	public static void configure() throws Exception {
-//		System.setProperty("AJSC_HOME", ".");
-//		System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
-//		ArrayList<String> apiVersions = new ArrayList<String>();
-//		apiVersions.add("v9");
-//		apiVersions.add("v8");
-//		apiVersions.add("v7");
-//		apiVersions.add("v2");
-//		IngestModelMoxyOxm m = new IngestModelMoxyOxm();
-//		m.init(apiVersions);
-//		
-//		dbMaps = m.dbMapsContainer.get(AAIConstants.AAI_DEFAULT_API_VERSION);
-//		processor = new ModelBasedProcessing();
-//		
-//	}
-//	
-//	@Rule
-//	public ExpectedException expectedEx = ExpectedException.none();
-//
-//	@Test
-//	public void check4EdgeRuleThrowsExceptionWhenNodeTypeADoesNotExist() throws Exception {
-//		String nodeTypeA = "cccomplex";
-//		String nodeTypeB = "pserver";
-//	    expectedEx.expect(AAIException.class);
-//	    expectedEx.expectMessage("AAI_6115");
-//	    processor.check4EdgeRule(nodeTypeA, nodeTypeB, dbMaps);    
-//	}
-//	
-//	@Test
-//	public void check4EdgeRuleThrowsExceptionWhenNodeTypeBDoesNotExist() throws Exception {
-//		String nodeTypeA = "complex";
-//		String nodeTypeB = "ppppserver";
-//	    expectedEx.expect(AAIException.class);
-//	    expectedEx.expectMessage("AAI_6115");
-//	    processor.check4EdgeRule(nodeTypeA, nodeTypeB, dbMaps);    
-//	}
-//	
-//	@Test
-//	public void check4EdgeRuleThrowsExceptionWhenNoRuleExists() throws Exception {
-//		String nodeTypeA = "complex";
-//		String nodeTypeB = "service";
-//		expectedEx.expect(AAIException.class);
-//	    expectedEx.expectMessage("AAI_6120");
-//	    processor.check4EdgeRule(nodeTypeA, nodeTypeB, dbMaps);    
-//	}
-//}
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.openecomp.aai.db.props.AAIProperties;
+import org.openecomp.aai.introspection.Loader;
+import org.openecomp.aai.introspection.LoaderFactory;
+import org.openecomp.aai.introspection.ModelType;
+import org.openecomp.aai.introspection.exceptions.AAIUnknownObjectException;
+import org.openecomp.aai.serialization.db.DBSerializer;
+import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
+
+public class ModelBasedProcessingTest {
+	
+	@Mock private static TransactionalGraphEngine dbEngine;
+	private static Loader loader;
+	@Mock private static DBSerializer serializer;
+	@BeforeClass
+	public static void configure() throws Exception {
+		System.setProperty("AJSC_HOME", ".");
+		System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+		loader = LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
+		
+	}
+	
+	@Before
+	public void init() {
+		MockitoAnnotations.initMocks(this);
+	}
+	
+	@Test
+	public void testPropNameChange() throws AAIUnknownObjectException {
+		String result;
+		ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
+		result = processor.getPropNameWithAliasIfNeeded("generic-vnf", "model-invariant-id");
+		assertEquals("result has -local tacked on the end as it should", "model-invariant-id" + AAIProperties.DB_ALIAS_SUFFIX, result);
+		result = processor.getPropNameWithAliasIfNeeded("generic-vnf", "vnf-id");
+		assertEquals("result does NOT have -local tacked on the end as it should", "vnf-id", result);
+		result = processor.getPropNameWithAliasIfNeeded("generic-vnf", "model-invariant-id" + AAIProperties.DB_ALIAS_SUFFIX);
+		assertEquals("property not modified because it already includes the right suffix", "model-invariant-id" + AAIProperties.DB_ALIAS_SUFFIX, result);
+	}
+}

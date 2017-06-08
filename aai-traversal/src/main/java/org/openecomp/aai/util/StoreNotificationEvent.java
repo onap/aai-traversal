@@ -21,9 +21,6 @@
 package org.openecomp.aai.util;
 
 import java.io.StringWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -33,9 +30,9 @@ import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.openecomp.aai.dmaap.AAIDmaapEventJMSProducer;
 import org.openecomp.aai.domain.notificationEvent.NotificationEvent;
+import org.openecomp.aai.domain.notificationEvent.ObjectFactory;
 import org.openecomp.aai.exceptions.AAIException;
 import org.openecomp.aai.introspection.Introspector;
 import org.openecomp.aai.introspection.Loader;
@@ -73,9 +70,9 @@ public class StoreNotificationEvent {
 			throw new AAIException("AAI_7350");
 		}
 
-		org.openecomp.aai.domain.notificationEvent.ObjectFactory factory = new org.openecomp.aai.domain.notificationEvent.ObjectFactory();
+		ObjectFactory factory = new ObjectFactory();
 
-		org.openecomp.aai.domain.notificationEvent.NotificationEvent ne = factory.createNotificationEvent();
+		NotificationEvent ne = factory.createNotificationEvent();
 
 		if (eh.getId() == null) {
 			eh.setId(genDate2() + "-" + UUID.randomUUID().toString());
@@ -297,6 +294,9 @@ public class StoreNotificationEvent {
 		entityJsonObjectUpdated.put("event-header", entityHeader);
 		entityJsonObjectUpdated.put("cambria.partition", cambriaPartition);
 		
+		String transId = entityHeader.getString("id");
+		String fromAppId = entityHeader.getString("source-name");
+		
 		Iterator<String> iter = entityJsonObject.keys();
 		JSONObject entity = new JSONObject();
 		if (iter.hasNext()) {
@@ -320,9 +320,8 @@ public class StoreNotificationEvent {
 	 * @return the string
 	 */
 	public static String genDate() {
-		Date date = new Date();
-		DateFormat formatter = new SimpleDateFormat("YYYYMMdd-HH:mm:ss:SSS");
-		return formatter.format(date);
+		FormatDate fd = new FormatDate("YYMMdd-HH:mm:ss:SSS");
+		return fd.getDateTime();
 	}
 
 	/**
@@ -331,9 +330,8 @@ public class StoreNotificationEvent {
 	 * @return the string
 	 */
 	public static String genDate2() {
-		Date date = new Date();
-		DateFormat formatter = new SimpleDateFormat("YYYYMMddHHmmss");
-		return formatter.format(date);
+		FormatDate fd = new FormatDate("YYYYMMddHHmmss");
+		return fd.getDateTime();
 	}
 
 }

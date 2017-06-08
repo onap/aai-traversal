@@ -24,9 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -36,19 +34,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
-import org.eclipse.persistence.dynamic.DynamicEntity;
-import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContext;
 
 import org.openecomp.aai.db.props.AAIProperties;
 import org.openecomp.aai.dbgraphmap.SearchGraph;
 import org.openecomp.aai.dbmap.DBConnectionType;
-import org.openecomp.aai.domain.model.AAIResource;
-import org.openecomp.aai.domain.model.AAIResources;
 import org.openecomp.aai.exceptions.AAIException;
-import org.openecomp.aai.extensions.AAIExtensionMap;
-import org.openecomp.aai.ingestModel.IngestModelMoxyOxm;
 import org.openecomp.aai.introspection.Loader;
 import org.openecomp.aai.introspection.LoaderFactory;
 import org.openecomp.aai.introspection.ModelType;
@@ -60,7 +50,6 @@ import org.openecomp.aai.serialization.engines.QueryStyle;
 import org.openecomp.aai.serialization.engines.TitanDBEngine;
 import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
 import org.openecomp.aai.serialization.queryformats.utils.UrlBuilder;
-import org.openecomp.aai.util.AAIApiVersion;
 
 /**
  * Implements the search subdomain in the REST API. All API calls must include

@@ -36,23 +36,21 @@ import java.util.concurrent.TimeUnit;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
-
 import org.openecomp.aai.db.DbMethHelper;
 import org.openecomp.aai.db.props.AAIProperties;
 import org.openecomp.aai.dbgen.PropertyLimitDesc;
 import org.openecomp.aai.exceptions.AAIException;
-import org.openecomp.aai.ingestModel.DbMaps;
-import org.openecomp.aai.ingestModel.IngestModelMoxyOxm;
 import org.openecomp.aai.introspection.Introspector;
 import org.openecomp.aai.introspection.Loader;
 import org.openecomp.aai.introspection.exceptions.AAIUnknownObjectException;
 import org.openecomp.aai.query.builder.QueryBuilder;
+import org.openecomp.aai.schema.enums.PropertyMetadata;
 import org.openecomp.aai.serialization.db.DBSerializer;
 import org.openecomp.aai.serialization.db.EdgeRules;
 import org.openecomp.aai.serialization.db.EdgeType;
 import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
 import org.openecomp.aai.util.AAIConfig;
-import org.openecomp.aai.util.AAIConstants;
+
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import com.google.common.collect.ArrayListMultimap;
@@ -137,12 +135,12 @@ public class ModelBasedProcessing{
 					String calcModId = modVtx.<String>property("model-invariant-id").orElse(null);
 					// Now we can look up instances that match this model's info
 					if( calcModId != null ){
-						startVerts = this.engine.asAdmin().getReadOnlyTraversalSource().V().has("model-invariant-id-local",calcModId).has("model-version-id-local",passedModelVersionId);
+						startVerts = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(addDBAliasedSuffix("model-invariant-id"),calcModId).has(addDBAliasedSuffix("model-version-id"),passedModelVersionId);
 					}
 				}	
 				else if( passedModelInvId != null && !passedModelInvId.equals("") ){
 					// They gave us the model-invariant-id
-					startVerts = this.engine.asAdmin().getReadOnlyTraversalSource().V().has("model-invariant-id-local",passedModelInvId);
+					startVerts = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(addDBAliasedSuffix("model-invariant-id"),passedModelInvId);
 				}
 				else if( passedModelName != null && !passedModelName.equals("") ){
 					List<Vertex> modelVerVtxList = getModelVersUsingName(transId, fromAppId, passedModelName);
@@ -154,7 +152,7 @@ public class ModelBasedProcessing{
 							Vertex modVtx = getModelGivenModelVer(modelVerVtxList.get(i),"");
 							String calcModInvId = modVtx.<String>property("model-invariant-id").orElse(null);		
 							// Now we can look up instances that match this model's info
-							Iterator<Vertex> tmpStartIter = this.engine.asAdmin().getReadOnlyTraversalSource().V().has("model-invariant-id-local",calcModInvId).has("model-version-id-local",calcModVerId);
+							Iterator<Vertex> tmpStartIter = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(addDBAliasedSuffix("model-invariant-id"),calcModInvId).has(addDBAliasedSuffix("model-version-id"),calcModVerId);
 							while( tmpStartIter.hasNext() ){
 								Vertex tmpStartVert = (Vertex) tmpStartIter.next();
 								startVtxList.add(tmpStartVert);
@@ -171,8 +169,8 @@ public class ModelBasedProcessing{
 				while( startVerts.hasNext() ){
 					Vertex tmpStartVert = (Vertex) startVerts.next();
 					String vid = tmpStartVert.id().toString();
-					String tmpModId =  tmpStartVert.<String>property("model-invariant-id-local").orElse(null);
-					String tmpModVerId =  tmpStartVert.<String>property("model-version-id-local").orElse(null);
+					String tmpModId =  tmpStartVert.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
+					String tmpModVerId =  tmpStartVert.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
 					startVertInfo.put(vid, tmpModVerId);
 				}
 			}
@@ -264,8 +262,8 @@ public class ModelBasedProcessing{
 				}
 			
 				String vid = startVtx.id().toString();
-				String personaModInvId = startVtx.<String>property("model-invariant-id-local").orElse(null);
-				String personaModVerId = startVtx.<String>property("model-version-id-local").orElse(null);
+				String personaModInvId = startVtx.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
+				String personaModVerId = startVtx.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
 					
 				// Either this start-node has persona info (which should not contradict any passed-in model info)
 				//    or they should have passed in the model to use - so we'd just use that.
@@ -425,9 +423,7 @@ public class ModelBasedProcessing{
 			List<Map<String,Object>> startNodeFilterArrayOfHashesVal, 
 			String apiVer ) 
 					throws AAIException{
-	
-		DbMaps dbMaps = IngestModelMoxyOxm.dbMapsContainer.get(AAIConfig.get(AAIConstants.AAI_DEFAULT_API_VERSION_PROP));
-				
+					
 		List<ResultSet> resultArray = new ArrayList<>();
 		
 		// NOTE: this method can be used for different styles of queries:
@@ -537,7 +533,7 @@ public class ModelBasedProcessing{
 			if( ! skipModelVerIdList.contains(modVerKey) ){
 				Vertex modelVerVtx = (Vertex)distinctModelVersHash.get(modVerKey);
 				Multimap<String, String> tmpTopoMap = genTopoMap4ModelVer( transId, fromAppId,
-						modelVerVtx, modVerKey, dbMaps );
+						modelVerVtx, modVerKey);
 				validNextStepHash.put(modVerKey, tmpTopoMap);
 			}
 		} 
@@ -550,7 +546,7 @@ public class ModelBasedProcessing{
 		Map<String, String> firstStepInfoHash = new HashMap<>(); 
 			// For firstStepInfoHash:   key = startNodeVtxId, val=topNodeType plus personaData if applicable
 			//                            ie. the value is what we'd use as the "first-step" for this model.
-		if( !nodeTypeSupportsPersona( startNodeType, dbMaps) ){
+		if( !nodeTypeSupportsPersona( startNodeType) ){
 			// This node type doesn't have persona info, so we just use startNodeType for the first-step-info 
 			snKeySet = startNode2ModelVerHash.keySet();
 			startNodeIterator = snKeySet.iterator();
@@ -575,8 +571,8 @@ public class ModelBasedProcessing{
 				Vertex modelVerVtx = (Vertex)distinctModelVersHash.get(thisVtxModelVerId);
 				Vertex modelVtx = getModelGivenModelVer( modelVerVtx, "" );
 				String modInvId = modelVtx.<String>property("model-invariant-id").orElse(null);
-				String personaModInvId = tmpVtx.<String>property("model-invariant-id-local").orElse(null);
-				String personaModVerId = tmpVtx.<String>property("model-version-id-local").orElse(null);
+				String personaModInvId = tmpVtx.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
+				String personaModVerId = tmpVtx.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
 				if( modInvId.equals(personaModInvId) && thisVtxModelVerId.equals(personaModVerId) ){
 					String tmpPersonaInfoStr = startNodeType + "," + personaModInvId + "," + personaModVerId;
 					firstStepInfoHash.put(vtxKey, tmpPersonaInfoStr );
@@ -666,9 +662,7 @@ public class ModelBasedProcessing{
 					throws AAIException{
 		
 		Map<String,String> retHash = new HashMap<>();
-		
-		DbMaps dbMaps = IngestModelMoxyOxm.dbMapsContainer.get(AAIConfig.get(AAIConstants.AAI_DEFAULT_API_VERSION_PROP));
-		
+				
 		// Locate the Model-ver node to be used 
 		Vertex modelVerVtx = null;
 		if( modelVersionId != null && !modelVersionId.equals("") ){
@@ -688,7 +682,7 @@ public class ModelBasedProcessing{
 			}
 			Vertex startVtx = result.get();
 			
-			String startVertModVerId = startVtx.<String>property("model-version-id-local").orElse(null);
+			String startVertModVerId = startVtx.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
 			modelVerVtx = getNodeUsingUniqueId(transId, fromAppId, "model-ver", 
 					"model-version-id", startVertModVerId);
 		}
@@ -733,7 +727,7 @@ public class ModelBasedProcessing{
 			String msg = "Could not determine the top-node nodeType for model-version-id: [" + modelVersionId + "]";
 			throw new AAIException("AAI_6132", msg);
 		}
-		if( nodeTypeSupportsPersona(topNType, dbMaps) ){
+		if( nodeTypeSupportsPersona(topNType) ){
 			Vertex modelVtx = getModelGivenModelVer(modelVerVtx,"");
 			chkFirstNodePersonaModInvId = modelVtx.<String>property("model-invariant-id").orElse(null);
 			chkFirstNodePersonaModVerId = modelVerVtx.<String>property("model-version-id").orElse(null);
@@ -747,7 +741,7 @@ public class ModelBasedProcessing{
 		ArrayList <String>  vidsTraversed = new ArrayList<>();
 		Map<String, String> delKeyHash = collectDeleteKeyHash( transId, fromAppId,
 				  firstModElementVertex, incomingTrail, currentHash, vidsTraversed, 
-				  0, dbMaps, modConHash, 
+				  0, modConHash, 
 				  chkFirstNodePersonaModInvId, chkFirstNodePersonaModVerId ); 
 	
 		
@@ -765,8 +759,8 @@ public class ModelBasedProcessing{
 		if( !chkFirstNodePersonaModInvId.equals("") ){
 			// NOTE:  For Service or Resource models, if this is a nodeType that supports persona's, then
 			// 		we need to make sure that the start node matches the persona values.
-			String startVertPersonaModInvId = startVtx.<String>property("model-invariant-id-local").orElse(null);
-			String startVertPersonaModVerId = startVtx.<String>property("model-version-id-local").orElse(null);
+			String startVertPersonaModInvId = startVtx.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
+			String startVertPersonaModVerId = startVtx.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
 			if( !chkFirstNodePersonaModInvId.equals(startVertPersonaModInvId) 
 					|| !chkFirstNodePersonaModVerId.equals(startVertPersonaModVerId) ){
 				String msg = "Persona-Model data mismatch for start node (" + topNType +  "), " +
@@ -778,7 +772,7 @@ public class ModelBasedProcessing{
 		
 		// Read the model-ver into a Map for processing
 		Multimap <String, String> validNextStepMap = genTopoMap4ModelVer(transId, fromAppId, 
-				modelVerVtx, modelVersionId, dbMaps );
+				modelVerVtx, modelVersionId);
 			
 		// Collect the data
 		String elementLocationTrail = topNType + personaData;
@@ -1555,7 +1549,7 @@ public class ModelBasedProcessing{
 			  modPipe = this.engine.asAdmin().getReadOnlyTraversalSource().V(thisLevelElemVtx).both().has(AAIProperties.NODE_TYPE, targetNodeType);
 		  }
 		  else {
-			  modPipe = this.engine.asAdmin().getReadOnlyTraversalSource().V(thisLevelElemVtx).both().has(AAIProperties.NODE_TYPE, targetNodeType).has("model-invariant-id-local",pmid).has("model-version-id-local",pmv);
+			  modPipe = this.engine.asAdmin().getReadOnlyTraversalSource().V(thisLevelElemVtx).both().has(AAIProperties.NODE_TYPE, targetNodeType).has(addDBAliasedSuffix("model-invariant-id"),pmid).has(addDBAliasedSuffix("model-version-id"),pmv);
 		  }
 		  
 		  if( modPipe == null || !modPipe.hasNext() ){
@@ -1591,12 +1585,12 @@ public class ModelBasedProcessing{
 	 * @param fromAppId the from app id
 	 * @param modelVerVertex the model-ver vertex
 	 * @param modelVerId the model-version-id
-	 * @param dbMaps the db maps
+	 * @param loader the db maps
 	 * @return MultiMap of valid next steps for each potential model-element
 	 * @throws AAIException the AAI exception
 	 */
 	public Multimap<String, String> genTopoMap4ModelVer( String transId, String fromAppId, 
-		 Vertex modelVerVertex, String modelVerId, DbMaps dbMaps )   
+		 Vertex modelVerVertex, String modelVerId)   
 				  throws AAIException {
 	  
 		if( modelVerVertex == null ){
@@ -1643,7 +1637,7 @@ public class ModelBasedProcessing{
 		}
 	    
 		 Multimap <String, String> collectedMap = collectTopology4ModelVer( transId, fromAppId, 
-				firstElementVertex, "", initialEmptyMap, vidsTraversed, 0, dbMaps, null, firstModelInvId, firstModelVersion );
+				firstElementVertex, "", initialEmptyMap, vidsTraversed, 0, null, firstModelInvId, firstModelVersion );
 		 
 		 return collectedMap;
 	  
@@ -1965,6 +1959,9 @@ public class ModelBasedProcessing{
 			Vertex relLookupVtx = (Vertex) lookPipe.next();
 			// We found a related-lookup record to try and use
 			String srcProp = relLookupVtx.<String>property("source-node-property").orElse(null);
+			String srcNodeType = relLookupVtx.<String>property("source-node-type").orElse(null);
+			srcProp = getPropNameWithAliasIfNeeded(srcNodeType, srcProp);
+			
 			if( (srcProp == null) || srcProp.equals("")){
 				String msg = " Bad related-lookup (source-node-property) found in Named Query definition. ";
 				throw new AAIException("AAI_6133", msg);
@@ -1975,6 +1972,8 @@ public class ModelBasedProcessing{
 				throw new AAIException("AAI_6133", msg);
 			}
 			String targetProp = relLookupVtx.<String>property("target-node-property").orElse(null);
+			targetProp = getPropNameWithAliasIfNeeded(targetNodeType, targetProp);
+					
 			if( (targetProp == null) || targetProp.equals("")){
 				String msg = " Bad related-lookup (target-node-property) found in Named Query definition. ";
 				throw new AAIException("AAI_6133", msg);
@@ -1986,10 +1985,16 @@ public class ModelBasedProcessing{
 				propCollectList.add((String)vpI.next().value());
 			}
 
-			// Use the value from the source to see if we can find ONE target record using the value from the source
+			// Use the value from the source to see if we can find ONE target record using the 
+			//     value from the source
 			String valFromInstance = instanceVertex.<String>property(srcProp).orElse(null);
 			if( valFromInstance == null ){
-				valFromInstance = "";
+				// if there is no key to use to go look up something, we should end it here and just
+				// note what happened  - no need to try to look something up by an empty key 
+				LOGGER.debug("WARNING - the instance data node of type [" + srcNodeType 
+						+ "] did not have a value for property [" + srcProp 
+						+ "], so related-lookup is being abandoned.");
+				return retHash;
 			}
 			
 			Map<String,Object> propHash = new HashMap<String,Object>();
@@ -1997,17 +2002,25 @@ public class ModelBasedProcessing{
 			
 			Optional<Vertex> result = dbMethHelper.locateUniqueVertex(targetNodeType, propHash);
 			if (!result.isPresent()) {
-				throw new AAIException("AAI_6114", "No Node of type " + targetNodeType + " found for properties");
+				// If it can't find the lookup node, don't fail, just log that it couldn't be found ---
+				LOGGER.debug("WARNING - Could not find lookup node that corresponds to nodeType [" 
+						+ targetNodeType + "] propertyName = [" + srcProp 
+						+ "], propVal = [" + valFromInstance
+						+ "] so related-lookup is being abandoned.");
+				return retHash;
 			}
+			else {
 			Vertex tmpVtx = result.get();
 			// Pick up the properties from the target vertex that they wanted us to get
 			for( int j = 0; j < propCollectList.size(); j++ ){
 				String tmpPropName = propCollectList.get(j);
+					tmpPropName = getPropNameWithAliasIfNeeded(targetNodeType, tmpPropName);
 				Object valObj = tmpVtx.<Object>property(tmpPropName).orElse(null);
 				String lookupKey = targetNodeType + "." + tmpPropName;
 				retHash.put(lookupKey, valObj);
 				
 			}
+		}
 		}
 		 
 	  	return retHash;
@@ -2107,7 +2120,7 @@ public class ModelBasedProcessing{
      * @param Map that got us to this point (that we will use as the base of the map we will return)
 	 * @param vidsTraversed the vids traversed ---- ArrayList of vertexId's that we traversed to get to this point
 	 * @param levelCounter the level counter
-	 * @param dbMaps the db maps
+	 * @param loader the db maps
 	 * @param modConstraintHash the mod constraint hash
 	 * @param overRideModelId the over ride model id
 	 * @param overRideModelVersionId the over ride model version id
@@ -2117,7 +2130,7 @@ public class ModelBasedProcessing{
 	public Map<String, String> collectDeleteKeyHash( String transId, String fromAppId,
 		  Vertex thisLevelElemVtx, String incomingTrail, 
 		  Map<String,String> currentHash, ArrayList <String> vidsTraversed, 
-		  int levelCounter, DbMaps dbMaps, Map<String, Vertex> modConstraintHash,
+		  int levelCounter, Map<String, Vertex> modConstraintHash,
 		  String overRideModelId, String overRideModelVersionId )   
 				  throws AAIException {
 	
@@ -2207,7 +2220,7 @@ public class ModelBasedProcessing{
 			  firstElementModelInfo = "," + overRideModelId + "," + overRideModelVersionId;
 		  }
 	  }	
-	  else if( nodeTypeSupportsPersona(thisElementNodeType, dbMaps) ){
+	  else if( nodeTypeSupportsPersona(thisElementNodeType) ){
 		  firstElementModelInfo = "," + subModelFirstModInvId + "," + subModelFirstVerId;
 	  }
 			  
@@ -2314,12 +2327,12 @@ public class ModelBasedProcessing{
 				  Vertex elVert = (Vertex)(entry.getValue());
 				  String tmpElVid = elVert.id().toString();
 				  String tmpElNT = getModElementWidgetType( elVert, thisGuysTrail );
-				  check4EdgeRule(tmpElNT, thisElementNodeType, dbMaps);
+				  check4EdgeRule(tmpElNT, thisElementNodeType);
 				  if( !vidsTraversed.contains(tmpElVid) ){
 					  // This is one we would like to use - so we'll recursively get it's result set to add to ours
 					  Map<String, String> tmpHash = collectDeleteKeyHash( transId, fromAppId, 
 								elVert, thisGuysTrail, 
-								currentHash, vidsTraversed, levelCounter, dbMaps, modConstraintHash2Use,
+								currentHash, vidsTraversed, levelCounter, modConstraintHash2Use,
 								"", "" );
 					  thisHash.putAll(tmpHash);
 				  }
@@ -2377,7 +2390,7 @@ public class ModelBasedProcessing{
 	 * @param currentMap the current map -- map that got us to this point (that we will use as the base of the map we will return)
 	 * @param vidsTraversed the vids traversed -- ArrayList of vertexId's that we traversed to get to this point
 	 * @param levelCounter the level counter
-	 * @param dbMaps the db maps
+	 * @param loader the db maps
 	 * @param modConstraintHash the mod constraint hash
 	 * @param overRideModelInvId the override model-invariant-id
 	 * @param overRideModelVersionId the override model-version-id
@@ -2387,7 +2400,7 @@ public class ModelBasedProcessing{
 	public Multimap<String, String> collectTopology4ModelVer( String transId, String fromAppId,
 		  Vertex thisLevelElemVtx, String incomingTrail, 
 		  Multimap <String,String> currentMap, List<String> vidsTraversed, 
-		  int levelCounter, DbMaps dbMaps, Map<String, Vertex> modConstraintHash,
+		  int levelCounter, Map<String, Vertex> modConstraintHash,
 		  String overRideModelInvId, String overRideModelVersionId )   
 				  throws AAIException {
 	
@@ -2414,7 +2427,7 @@ public class ModelBasedProcessing{
 	  // first element which is a single widget-type model. 
 	  String firstElementModelInfo = "";
 	  String thisElementNodeType = getModElementWidgetType( thisLevelElemVtx, incomingTrail );
-	  if( nodeTypeSupportsPersona(thisElementNodeType, dbMaps) && overRideModelInvId != null && !overRideModelInvId.equals("") ){
+	  if( nodeTypeSupportsPersona(thisElementNodeType) && overRideModelInvId != null && !overRideModelInvId.equals("") ){
 		  firstElementModelInfo = "," + overRideModelInvId + "," + overRideModelVersionId;
 	  }
 	  
@@ -2434,7 +2447,7 @@ public class ModelBasedProcessing{
 		  subModelFirstModInvId = thisElementsModelVtx.<String>property("model-invariant-id").orElse(null);
 		  subModelFirstModVerId = thisElementsModelVerVtx.<String>property("model-version-id").orElse(null);
 		  
-		  if( nodeTypeSupportsPersona(thisElementNodeType, dbMaps) ){
+		  if( nodeTypeSupportsPersona(thisElementNodeType) ){
 				modInfo4Trail = "," + subModelFirstModInvId + "," + subModelFirstModVerId;
 		  }
 		  String modelVerId = thisElementsModelVerVtx.<String>property("model-version-id").orElse(null);
@@ -2501,7 +2514,7 @@ public class ModelBasedProcessing{
 			  Vertex elVert = (Vertex)(entry.getValue());
 			  String tmpElVid = elVert.id().toString();
 			  String tmpElNT = getModElementWidgetType( elVert, thisGuysTrail );
-			  String tmpElStepName = getModelElementStepName( elVert, thisGuysTrail, dbMaps );
+			  String tmpElStepName = getModelElementStepName( elVert, thisGuysTrail);
 			  
 			  List<String> linkagePtList = new ArrayList <String>();
 			  Iterator <VertexProperty<Object>> vpI = elVert.properties("linkage-points");
@@ -2519,19 +2532,19 @@ public class ModelBasedProcessing{
 				  // rest of this "trail" 
 				  for( int i = 0; i < linkagePtList.size(); i++ ){
 					  Multimap<String, String> tmpMap = collectTopology4LinkagePoint( transId, fromAppId,  
-								linkagePtList.get(i), thisGuysTrail, currentMap, dbMaps);
+								linkagePtList.get(i), thisGuysTrail, currentMap);
 					  thisMap.putAll(tmpMap);
 				  }
 			  }
 			  else {
-				  check4EdgeRule(tmpElNT, thisElementNodeType, dbMaps);
+				  check4EdgeRule(tmpElNT, thisElementNodeType);
 				  thisMap.put(thisGuysTrail, tmpElStepName);
 				  if( !thisTrailsVidsTraversed.contains(tmpElVid) ){
 					  // This is one we would like to use - so we'll recursively get it's result set to add to ours
 					  Multimap<String, String> tmpMap = collectTopology4ModelVer( transId, fromAppId, 
 								elVert, thisGuysTrail, 
 								currentMap, thisTrailsVidsTraversed, levelCounter, 
-								dbMaps, modConstraintHash2Use, subModelFirstModInvId, subModelFirstModVerId );
+								 modConstraintHash2Use, subModelFirstModInvId, subModelFirstModVerId );
 					  thisMap.putAll(tmpMap);
 				  }
 				  else {
@@ -2556,10 +2569,10 @@ public class ModelBasedProcessing{
 	 *
 	 * @param nodeTypeA the node type A
 	 * @param nodeTypeB the node type B
-	 * @param dbMaps the db maps
+	 * @param loader the db maps
 	 * @throws AAIException the AAI exception
 	 */
-	public void check4EdgeRule( String nodeTypeA, String nodeTypeB, DbMaps dbMaps ) throws AAIException {
+	public void check4EdgeRule( String nodeTypeA, String nodeTypeB) throws AAIException {
 		// Throw an exception if there is no defined edge rule for this combination of nodeTypes in DbEdgeRules.
 		
 		final EdgeRules edgeRules = EdgeRules.getInstance();
@@ -2568,20 +2581,24 @@ public class ModelBasedProcessing{
 				&&  !edgeRules.hasEdgeRule(nodeTypeB, nodeTypeA) ){
 			// There's no EdgeRule for this -- find out if one of the nodeTypes is invalid or if
 			// they are valid, but there's just no edgeRule for them.
-			if( ! dbMaps.NodeProps.containsKey(nodeTypeA) ){
+			try {
+				loader.introspectorFromName(nodeTypeA);
+			} catch (AAIUnknownObjectException e) {
 				String emsg = " Unrecognized nodeType aa [" + nodeTypeA + "]\n";
 				throw new AAIException("AAI_6115", emsg); 
 			}
-			else if( ! dbMaps.NodeProps.containsKey(nodeTypeB) ){
+			try {
+				loader.introspectorFromName(nodeTypeB);
+			} catch (AAIUnknownObjectException e) {
 				String emsg = " Unrecognized nodeType bb [" + nodeTypeB + "]\n";
 				throw new AAIException("AAI_6115", emsg); 
 			}
-			else {
+		} else {
 				String msg = " No Edge Rule found for this pair of nodeTypes (order does not matter) [" 
 					  + nodeTypeA + "], [" + nodeTypeB + "].";
 				throw new AAIException("AAI_6120", msg);
-			}
 		}
+		
 		
 	}
 	
@@ -2594,12 +2611,12 @@ public class ModelBasedProcessing{
 	 * @param linkagePointStr -- Note it is in reverse order from where we connect to it.
 	 * @param incomingTrail -- trail of nodeTypes that got us here (this vertex) from the top
 	 * @param currentMap the current map -- that got us to this point (that we will use as the base of the map we will return)
-	 * @param dbMaps the db maps
+	 * @param loader the db maps
 	 * @return Map of the topology
 	 * @throws AAIException the AAI exception
 	 */
 	public Multimap<String, String> collectTopology4LinkagePoint( String transId, String fromAppId, 
-		  String linkagePointStrVal, String incomingTrail, Multimap <String,String> currentMap, DbMaps dbMaps )   
+		  String linkagePointStrVal, String incomingTrail, Multimap <String,String> currentMap)   
 				  throws AAIException {
 
 	  Multimap <String, String> thisMap = ArrayListMultimap.create();
@@ -2641,7 +2658,7 @@ public class ModelBasedProcessing{
 		  }
 		  for( int i=(linkageSteps.length - 1); i >= 0; i-- ){
 			  thisStepNT = linkageSteps[i];
-			  check4EdgeRule(lastStepNT, thisStepNT, dbMaps);
+			  check4EdgeRule(lastStepNT, thisStepNT);
 			  thisMap.put(thisGuysTrail, thisStepNT);
 			  thisGuysTrail = thisGuysTrail + "|" + thisStepNT;
 			  lastStepNT = thisStepNT;
@@ -3062,11 +3079,11 @@ public class ModelBasedProcessing{
 	 *
 	 * @param elementVtx the model-element vtx
 	 * @param elementTrail the element trail
-	 * @param dbMaps the db maps
+	 * @param loader the db maps
 	 * @return the element step name
 	 * @throws AAIException the AAI exception
 	 */
-	public String getModelElementStepName( Vertex elementVtx, String elementTrail, DbMaps dbMaps)
+	public String getModelElementStepName( Vertex elementVtx, String elementTrail)
 		throws AAIException {
 		
 		// Get the "step name"  for a model-element 
@@ -3106,7 +3123,7 @@ public class ModelBasedProcessing{
 			}
 			
 			String stepName = "";
-			if( nodeTypeSupportsPersona(thisElementNodeType, dbMaps) ){
+			if( nodeTypeSupportsPersona(thisElementNodeType) ){
 				// This nodeType that this resource or service model refers to does support persona-related fields, so
 				// we will use model-invariant-id and model-version-id as part of the step name.
 				stepName = thisElementNodeType + "," + modInvId + "," + modVerId;
@@ -3129,25 +3146,26 @@ public class ModelBasedProcessing{
 	 * Node type supports persona.
 	 *
 	 * @param nodeType the node type
-	 * @param dbMaps the db maps
+	 * @param loader the db maps
 	 * @return the boolean
 	 * @throws AAIException the AAI exception
 	 */
-	public Boolean nodeTypeSupportsPersona(String nodeType, DbMaps dbMaps)
+	public Boolean nodeTypeSupportsPersona(String nodeType)
 			throws AAIException {
 		
 		if( nodeType == null || nodeType.equals("") ){
 			return false;
 		}
-		
-		// Return true if this type of node supports the properties: "model-invariant-id-local" and "model-version-id-local"
-		if( ! dbMaps.NodeProps.containsKey(nodeType) ){
+		Introspector obj = null;
+		try {
+			obj = loader.introspectorFromName(nodeType);
+		} catch (AAIUnknownObjectException e) {
 			String emsg = " Unrecognized nodeType [" + nodeType + "]\n";
-			throw new AAIException("AAI_6115", emsg); 
-		}  
+			throw new AAIException("AAI_6115", emsg);
+		}
 		
-		Collection <String> props4ThisNT = dbMaps.NodeProps.get(nodeType);
-		if( !props4ThisNT.contains("model-invariant-id-local") || !props4ThisNT.contains("model-version-id-local") ){
+		Collection <String> props4ThisNT = loader.introspectorFromName(nodeType).getProperties();
+		if( !props4ThisNT.contains(addDBAliasedSuffix("model-invariant-id")) || !props4ThisNT.contains(addDBAliasedSuffix("model-version-id")) ){
 			return false;
 		}
 		else {
@@ -3582,7 +3600,6 @@ public class ModelBasedProcessing{
 	
 		// Note - this will throw an exception if the model either can't be found, or if 
 		//     we can't figure out its topology map.
-		DbMaps dbMaps = IngestModelMoxyOxm.dbMapsContainer.get(AAIConfig.get(AAIConstants.AAI_DEFAULT_API_VERSION_PROP));
 		Vertex modelVerVtx = getNodeUsingUniqueId(transId, fromAppId, "model-ver", 
 				"model-version-id", modelVersionIdVal);
 		if( modelVerVtx == null ){
@@ -3591,7 +3608,7 @@ public class ModelBasedProcessing{
 		}
 		else {
 			Multimap<String, String> topoMap = genTopoMap4ModelVer( transId, fromAppId,
-					modelVerVtx, modelVersionIdVal, dbMaps );
+					modelVerVtx, modelVersionIdVal);
 			String msg = " modelVer [" + modelVersionIdVal + "] topo multiMap looks like: \n[" + topoMap + "]";
 			System.out.println("INFO --  " + msg );
 		}
@@ -3711,7 +3728,19 @@ public class ModelBasedProcessing{
 		}
 		QueryBuilder builder = this.engine.getQueryBuilder(startV).union(builders);
 		return builder;
+	}
 
+	private String addDBAliasedSuffix(String propName) {
+		return propName + AAIProperties.DB_ALIAS_SUFFIX;
+	}
+	
+	protected String getPropNameWithAliasIfNeeded(String nodeType, String propName) throws AAIUnknownObjectException {
+		
+		String retPropName = propName;
+		if( loader.introspectorFromName(nodeType).getPropertyMetadata(propName, PropertyMetadata.DB_ALIAS).isPresent() ){
+			return propName + AAIProperties.DB_ALIAS_SUFFIX;
+		}
+		return retPropName;
 	}
 		  
 }

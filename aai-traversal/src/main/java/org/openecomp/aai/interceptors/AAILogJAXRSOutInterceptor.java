@@ -21,10 +21,7 @@
 package org.openecomp.aai.interceptors;
 
 import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +33,12 @@ import org.apache.cxf.io.CachedOutputStream;
 import org.apache.cxf.io.CachedOutputStreamCallback;
 import org.apache.cxf.jaxrs.interceptor.JAXRSOutInterceptor;
 import org.apache.cxf.message.Message;
-
 import org.openecomp.aai.exceptions.AAIException;
 import org.openecomp.aai.logging.ErrorLogHelper;
 import org.openecomp.aai.util.AAIConfig;
 import org.openecomp.aai.util.AAIConstants;
+import org.openecomp.aai.util.FormatDate;
+
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 
@@ -269,34 +267,15 @@ public class AAILogJAXRSOutInterceptor extends JAXRSOutInterceptor {
 	}
 
 	protected String genDate() {
-		Date date = new Date();
-		DateFormat formatter = null;
-		try {
-			formatter = new SimpleDateFormat(AAIConfig.get(AAIConstants.HBASE_TABLE_TIMESTAMP_FORMAT));
-		} catch (AAIException ex) {
-			ErrorLogHelper.logException(ex);
-		} finally {
-			if (formatter == null) {
-				formatter = new SimpleDateFormat("YYMMdd-HH:mm:ss:SSS");
-			}
-		}
-		return formatter.format(date);
+		FormatDate fd = new FormatDate(AAIConfig.get(AAIConstants.HBASE_TABLE_TIMESTAMP_FORMAT, "YYMMdd-HH:mm:ss:SSS"));
+		return fd.getDateTime();
 	}
 
 	public String putTransaction(String tid, String status, String rqstTm, String respTm, String srcId, String rsrcId, String rsrcType, String rqstBuf, String respBuf, String actualResponse) {
 		String tm = null;
-		String fromAppId = srcId.substring(0, srcId.indexOf(':'));
-		String transId = srcId.substring(srcId.indexOf(':') + 1);
 
 		if (tid == null || "".equals(tid)) {
-			Date date = new Date();
-			DateFormat formatter = null;
-			try {
-				formatter = new SimpleDateFormat(AAIConfig.get(AAIConstants.HBASE_TABLE_TIMESTAMP_FORMAT));
-			} catch (Exception e) {
-				formatter = new SimpleDateFormat("YYYYMMdd-HH:mm:ss:SSS");
-			}
-			tm = formatter.format(date);	
+			tm = this.genDate();
 			tid = tm + "-";
 		}
 

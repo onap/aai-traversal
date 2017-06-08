@@ -81,11 +81,6 @@
              org.openecomp.aai.util.AAIAppServletContextListener
         </listener-class>
    </listener>
-    <listener>
-		<listener-class>
-             org.openecomp.aai.ingestModel.IngestModelListener
-        </listener-class>
-   </listener>
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Open Source</web-resource-name>

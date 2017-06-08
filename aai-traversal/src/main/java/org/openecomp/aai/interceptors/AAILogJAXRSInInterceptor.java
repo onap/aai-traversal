@@ -21,11 +21,8 @@
 package org.openecomp.aai.interceptors;
 
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -39,13 +36,14 @@ import org.apache.cxf.helpers.CastUtils;
 import org.apache.cxf.interceptor.LoggingMessage;
 import org.apache.cxf.jaxrs.interceptor.JAXRSInInterceptor;
 import org.apache.cxf.message.Message;
-
 import org.openecomp.aai.exceptions.AAIException;
 import org.openecomp.aai.logging.ErrorLogHelper;
 import org.openecomp.aai.rest.util.EchoResponse;
 import org.openecomp.aai.util.AAIConfig;
 import org.openecomp.aai.util.AAIConstants;
+import org.openecomp.aai.util.FormatDate;
 import org.openecomp.aai.util.HbaseSaltPrefixer;
+
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 
@@ -265,19 +263,8 @@ public class AAILogJAXRSInInterceptor extends JAXRSInInterceptor {
 	 * @return the string
 	 */
 	protected String genDate() {
-		Date date = new Date();
-		DateFormat formatter = null;
-		try {
-			formatter = new SimpleDateFormat(AAIConfig.get(AAIConstants.HBASE_TABLE_TIMESTAMP_FORMAT));
-		} catch (AAIException ex) {
-			ErrorLogHelper.logException(ex);
-		} finally {
-			if (formatter == null) {
-				formatter = new SimpleDateFormat("YYMMdd-HH:mm:ss:SSS");
-			}
-		}
-
-		return formatter.format(date);
+		FormatDate fd = new FormatDate(AAIConfig.get(AAIConstants.HBASE_TABLE_TIMESTAMP_FORMAT, "YYMMdd-HH:mm:ss:SSS"));
+		return fd.getDateTime();
 	}
 
 }

@@ -51,7 +51,7 @@ public class UEBNotification {
 	private Loader currentVersionLoader = null;
 	protected List<NotificationEvent> events = null;
 	private Version notificationVersion = null;
-	
+
 	/**
 	 * Instantiates a new UEB notification.
 	 *

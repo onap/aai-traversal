@@ -20,8 +20,6 @@
 
 package org.openecomp.aai.dbgraphmap;
 
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,10 +27,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -40,7 +36,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilderException;
 import javax.xml.bind.JAXBException;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -50,25 +45,20 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.eclipse.persistence.dynamic.DynamicType;
 import org.eclipse.persistence.exceptions.DynamicException;
-import org.eclipse.persistence.jaxb.JAXBMarshaller;
-import org.eclipse.persistence.jaxb.JAXBUnmarshaller;
-import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContext;
-
 import org.openecomp.aai.db.DbMethHelper;
 import org.openecomp.aai.db.props.AAIProperties;
 import org.openecomp.aai.dbgen.PropertyLimitDesc;
 import org.openecomp.aai.dbgraphgen.ModelBasedProcessing;
 import org.openecomp.aai.dbgraphgen.ResultSet;
 import org.openecomp.aai.dbmap.DBConnectionType;
-import org.openecomp.aai.domain.model.AAIResources;
 import org.openecomp.aai.exceptions.AAIException;
 import org.openecomp.aai.extensions.AAIExtensionMap;
 import org.openecomp.aai.introspection.Introspector;
 import org.openecomp.aai.introspection.Loader;
 import org.openecomp.aai.introspection.LoaderFactory;
 import org.openecomp.aai.introspection.ModelType;
-import org.openecomp.aai.introspection.PropertyPredicates;
+import org.openecomp.aai.introspection.MoxyLoader;
 import org.openecomp.aai.introspection.exceptions.AAIUnknownObjectException;
 import org.openecomp.aai.parsers.relationship.RelationshipToURI;
 import org.openecomp.aai.query.builder.QueryBuilder;
@@ -82,13 +72,8 @@ import org.openecomp.aai.serialization.engines.TitanDBEngine;
 import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
 import org.openecomp.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
 import org.openecomp.aai.serialization.queryformats.utils.UrlBuilder;
-import org.openecomp.aai.util.AAIApiServerURLBase;
-import org.openecomp.aai.util.AAIApiVersion;
-import org.openecomp.aai.util.AAIConfig;
-import org.openecomp.aai.util.AAIConstants;
-import org.openecomp.aai.util.PojoUtils;
-import org.openecomp.aai.util.RestURL;
 import org.openecomp.aai.util.StoreNotificationEvent;
+
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import com.google.common.base.CaseFormat;
@@ -468,7 +453,7 @@ public class SearchGraph {
 		boolean isParallel = stream.isParallel();
 		stream.forEach(v -> {
 			String nodeType = v.<String>property(AAIProperties.NODE_TYPE).orElse(null);
-			
+
 			String thisNodeURL;
 			try {
 				thisNodeURL = urlBuilder.pathed(v);
@@ -486,7 +471,7 @@ public class SearchGraph {
 			} catch (AAIException | AAIFormatVertexException e) {
 				throw new RuntimeException(e);
 			}
-			
+
 		});
 		return searchResults;
 	}
@@ -531,13 +516,6 @@ public class SearchGraph {
 	public Response runNamedQuery(String fromAppId, String transId, String queryParameters,
 			DBConnectionType connectionType,
 			AAIExtensionMap aaiExtMap) throws JAXBException, AAIException {
-		// TODO Auto-generated method stub
-		AAIResources aaiResources = org.openecomp.aai.ingestModel.IngestModelMoxyOxm.aaiResourceContainer
-				.get(aaiExtMap.getApiVersion());
-		DynamicJAXBContext jaxbContext = aaiResources.getJaxbContext();
-		JAXBUnmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-		//String dynamicClass = aaiRes.getResourceClassName();
 
 		Introspector inventoryItems;
 		boolean success = true;
@@ -545,7 +523,8 @@ public class SearchGraph {
 		TransactionalGraphEngine dbEngine = null;
 		try {
 			
-			Loader loader = LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
+			MoxyLoader loader = (MoxyLoader)LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
+			DynamicJAXBContext jaxbContext = loader.getJAXBContext();
 			dbEngine = new TitanDBEngine(
 					QueryStyle.TRAVERSAL,
 					connectionType,
@@ -554,28 +533,20 @@ public class SearchGraph {
 			ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
 
 			g = dbEngine.startTransaction();
-			if (aaiExtMap.getHttpServletRequest().getContentType() == null || // default to json
-					aaiExtMap.getHttpServletRequest().getContentType().contains("application/json")) {
-				unmarshaller.setProperty("eclipselink.media-type", "application/json");
-				unmarshaller.setProperty("eclipselink.json.include-root", false);
+			org.openecomp.aai.restcore.MediaType mediaType = org.openecomp.aai.restcore.MediaType.APPLICATION_JSON_TYPE;
+			String contentType = aaiExtMap.getHttpServletRequest().getContentType();
+			if (contentType != null && contentType.contains("application/xml")) {
+				mediaType = org.openecomp.aai.restcore.MediaType.APPLICATION_XML_TYPE;
 			}
 
 			if (queryParameters.length() == 0) { 
 				queryParameters = "{}";
-				unmarshaller.setProperty("eclipselink.media-type", "application/json");
-				unmarshaller.setProperty("eclipselink.json.include-root", false);
 			}
-			String dynamicClass = "inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".ModelAndNamedQuerySearch";
-			Class<? extends DynamicEntity> resultClass = jaxbContext.newDynamicEntity(dynamicClass).getClass();
 
-			StringReader reader = new StringReader(queryParameters);
-
-			DynamicEntity modelAndNamedQuerySearch = (DynamicEntity) unmarshaller.unmarshal(new StreamSource(reader), resultClass).getValue();
-
+			DynamicEntity modelAndNamedQuerySearch = (DynamicEntity)loader.unmarshal("ModelAndNamedQuerySearch", queryParameters, mediaType).getUnderlyingObject();
 			if (modelAndNamedQuerySearch == null) { 
 				throw new AAIException("AAI_5105");
 			}
-
 			HashMap<String,Object> namedQueryLookupHash = new HashMap<String,Object>();
 
 			DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
@@ -668,20 +639,14 @@ public class SearchGraph {
 			DBConnectionType connectionType,
 			boolean isDelete,
 			AAIExtensionMap aaiExtMap) throws JAXBException, AAIException, DynamicException, UnsupportedEncodingException {
-		// TODO Auto-generated method stub
-		AAIResources aaiResources = org.openecomp.aai.ingestModel.IngestModelMoxyOxm.aaiResourceContainer
-				.get(aaiExtMap.getApiVersion());
-		DynamicJAXBContext jaxbContext = aaiResources.getJaxbContext();
-		JAXBUnmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-		//String dynamicClass = aaiRes.getResourceClassName();
 		Response response;
 		boolean success = true;
 		TitanTransaction g = null;
 		TransactionalGraphEngine dbEngine = null;
 		try {
 			
-			Loader loader = LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
+			MoxyLoader loader = (MoxyLoader) LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
+			DynamicJAXBContext jaxbContext = loader.getJAXBContext();
 			dbEngine = new TitanDBEngine(
 					QueryStyle.TRAVERSAL,
 					connectionType,
@@ -691,24 +656,20 @@ public class SearchGraph {
 			g = dbEngine.startTransaction();
 
 
-			if (aaiExtMap.getHttpServletRequest().getContentType() == null || // default to json
-					aaiExtMap.getHttpServletRequest().getContentType().contains("application/json")) {
-				unmarshaller.setProperty("eclipselink.media-type", "application/json");
-				unmarshaller.setProperty("eclipselink.json.include-root", false);
+			org.openecomp.aai.restcore.MediaType mediaType = org.openecomp.aai.restcore.MediaType.APPLICATION_JSON_TYPE;
+			String contentType = aaiExtMap.getHttpServletRequest().getContentType();
+			if (contentType != null && contentType.contains("application/xml")) {
+				mediaType = org.openecomp.aai.restcore.MediaType.APPLICATION_XML_TYPE;
 			}
 
 			if (queryParameters.length() == 0) { 
 				queryParameters = "{}";
-				unmarshaller.setProperty("eclipselink.media-type", "application/json");
-				unmarshaller.setProperty("eclipselink.json.include-root", false);
 			}
-			String dynamicClass = "inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".ModelAndNamedQuerySearch";
-			Class<? extends DynamicEntity> resultClass = jaxbContext.newDynamicEntity(dynamicClass).getClass();
 
-			StringReader reader = new StringReader(queryParameters);
-
-			DynamicEntity modelAndNamedQuerySearch = (DynamicEntity) unmarshaller.unmarshal(new StreamSource(reader), resultClass).getValue();
-
+			DynamicEntity modelAndNamedQuerySearch = (DynamicEntity)loader.unmarshal("ModelAndNamedQuerySearch", queryParameters, mediaType).getUnderlyingObject();
+			if (modelAndNamedQuerySearch == null) {
+				throw new AAIException("AAI_5105");
+			}
 			if (modelAndNamedQuerySearch == null) { 
 				throw new AAIException("AAI_5105");
 			}
@@ -797,7 +758,6 @@ public class SearchGraph {
 				ResultSet rs = resultSet.get(0);
 
 				TitanVertex firstVert = rs.getVert();
-				String restURL = RestURL.get(g, firstVert);
 
 				Map<String,String> delResult = processor.runDeleteByModel( transId, fromAppId,
 						modelVersionId, topNodeType, startNodeFilterHash.get(0), aaiExtMap.getApiVersion(), resourceVersion );
@@ -814,20 +774,17 @@ public class SearchGraph {
 				List<DynamicEntity> newInvItemList = new ArrayList<DynamicEntity>();
 				newInvItemList.add(topInvItem);
 				inventoryItems.set("inventoryResponseItem", newInvItemList);
+				String notificationVersion = AAIProperties.LATEST.toString();
 
-				// put the inventoryItems in a UEB notification object
-				String notificationVersion = AAIConfig.get("aai.notification.current.version");
+				String restURI = serializer.getURIForVertex(firstVert).toString();
 
-				AAIResources aaiNotificationResources = org.openecomp.aai.ingestModel.IngestModelMoxyOxm.aaiResourceContainer
-						.get(notificationVersion);
-
-				DynamicJAXBContext notificationJaxbContext = aaiNotificationResources.getJaxbContext();
-
-				DynamicEntity notificationHeader = notificationJaxbContext
-						.getDynamicType("inventory.aai.openecomp.org." + notificationVersion + ".NotificationEventHeader")
-						.newDynamicEntity();
-
-				notificationHeader.set("entityLink", restURL);
+				if (restURI.startsWith("/")) {
+					restURI = "/aai/" + notificationVersion + restURI;
+				} else {
+					restURI = "/aai/" + notificationVersion + "/" + restURI;
+				}
+				DynamicEntity notificationHeader = (DynamicEntity) loader.introspectorFromName("notification-event-header").getUnderlyingObject();
+				notificationHeader.set("entityLink", restURI);
 				notificationHeader.set("action", "DELETE");	
 
 				notificationHeader.set("entityType", "inventory-response-items");
@@ -837,7 +794,7 @@ public class SearchGraph {
 
 				StoreNotificationEvent sne = new StoreNotificationEvent(transId, fromAppId);
 
-				sne.storeDynamicEvent(notificationJaxbContext, notificationVersion, notificationHeader, inventoryItems);
+				sne.storeDynamicEvent(loader.getJAXBContext(), notificationVersion, notificationHeader, inventoryItems);
 
 				response = Response.ok(resultStr).build();
 
@@ -1059,8 +1016,7 @@ public class SearchGraph {
 			String aaiNodeType = vert.<String>property("aai-node-type").orElse(null);
 
 			
-				
-			PojoUtils pu = new PojoUtils();
+
 			if (aaiNodeType != null) {
 				Introspector thisObj = loader.introspectorFromName(aaiNodeType);
 
