@@ -17,7 +17,7 @@
 	</modules>
 	<properties>
 		<nexusproxy>https://nexus.onap.org</nexusproxy>
-		<sitePath>/content/sites/site/${project.groupId}/${project.artifactId}/${project.version}</sitePath>
+		<sitePath>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</sitePath>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
