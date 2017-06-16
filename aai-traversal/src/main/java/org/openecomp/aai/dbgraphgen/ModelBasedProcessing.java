@@ -2593,10 +2593,10 @@ public class ModelBasedProcessing{
 				String emsg = " Unrecognized nodeType bb [" + nodeTypeB + "]\n";
 				throw new AAIException("AAI_6115", emsg); 
 			}
-		} else {
-				String msg = " No Edge Rule found for this pair of nodeTypes (order does not matter) [" 
+			
+			String msg = " No Edge Rule found for this pair of nodeTypes (order does not matter) [" 
 					  + nodeTypeA + "], [" + nodeTypeB + "].";
-				throw new AAIException("AAI_6120", msg);
+			throw new AAIException("AAI_6120", msg);
 		}
 		
 		

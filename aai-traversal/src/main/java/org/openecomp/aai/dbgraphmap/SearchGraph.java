@@ -453,7 +453,7 @@ public class SearchGraph {
 		boolean isParallel = stream.isParallel();
 		stream.forEach(v -> {
 			String nodeType = v.<String>property(AAIProperties.NODE_TYPE).orElse(null);
-
+			
 			String thisNodeURL;
 			try {
 				thisNodeURL = urlBuilder.pathed(v);
@@ -471,7 +471,7 @@ public class SearchGraph {
 			} catch (AAIException | AAIFormatVertexException e) {
 				throw new RuntimeException(e);
 			}
-
+			
 		});
 		return searchResults;
 	}
@@ -667,7 +667,7 @@ public class SearchGraph {
 			}
 
 			DynamicEntity modelAndNamedQuerySearch = (DynamicEntity)loader.unmarshal("ModelAndNamedQuerySearch", queryParameters, mediaType).getUnderlyingObject();
-			if (modelAndNamedQuerySearch == null) {
+			if (modelAndNamedQuerySearch == null) { 
 				throw new AAIException("AAI_5105");
 			}
 			if (modelAndNamedQuerySearch == null) { 
@@ -758,6 +758,13 @@ public class SearchGraph {
 				ResultSet rs = resultSet.get(0);
 
 				TitanVertex firstVert = rs.getVert();
+				String restURI = serializer.getURIForVertex(firstVert).toString();
+				String notificationVersion = AAIProperties.LATEST.toString();
+				if (restURI.startsWith("/")) {
+					restURI = "/aai/" + notificationVersion + restURI;
+				} else {
+					restURI = "/aai/" + notificationVersion + "/" + restURI;
+				}
 
 				Map<String,String> delResult = processor.runDeleteByModel( transId, fromAppId,
 						modelVersionId, topNodeType, startNodeFilterHash.get(0), aaiExtMap.getApiVersion(), resourceVersion );
@@ -768,25 +775,16 @@ public class SearchGraph {
 				}
 				resultStr.trim();
 
-				DynamicEntity inventoryItems = jaxbContext.newDynamicEntity("inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
+				DynamicEntity inventoryItems = jaxbContext.newDynamicEntity("inventory.aai.att.com." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
 				DynamicEntity topInvItem = remapInventoryItems((DynamicEntity)invItemList.get(0), jaxbContext, delResult, objectToVertMap, aaiExtMap);
-
 				List<DynamicEntity> newInvItemList = new ArrayList<DynamicEntity>();
+
 				newInvItemList.add(topInvItem);
 				inventoryItems.set("inventoryResponseItem", newInvItemList);
-				String notificationVersion = AAIProperties.LATEST.toString();
 
-				String restURI = serializer.getURIForVertex(firstVert).toString();
-
-				if (restURI.startsWith("/")) {
-					restURI = "/aai/" + notificationVersion + restURI;
-				} else {
-					restURI = "/aai/" + notificationVersion + "/" + restURI;
-				}
 				DynamicEntity notificationHeader = (DynamicEntity) loader.introspectorFromName("notification-event-header").getUnderlyingObject();
 				notificationHeader.set("entityLink", restURI);
-				notificationHeader.set("action", "DELETE");	
-
+				notificationHeader.set("action", "DELETE");
 				notificationHeader.set("entityType", "inventory-response-items");
 				notificationHeader.set("topEntityType", "inventory-response-items");
 				notificationHeader.set("sourceName", aaiExtMap.getFromAppId());
@@ -945,7 +943,7 @@ public class SearchGraph {
 			Map<String,String> includeTheseVertices, Map<Object,String> objectToVertMap, AAIExtensionMap aaiExtMap) { 
 
 
-		DynamicEntity inventoryItem = jaxbContext.newDynamicEntity("inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItem");
+		DynamicEntity inventoryItem = jaxbContext.newDynamicEntity("inventory.aai.att.com." + aaiExtMap.getApiVersion() + ".InventoryResponseItem");
 		Object item = invResultItem.get("item");
 		inventoryItem.set("modelName", 			invResultItem.get("modelName"));
 		inventoryItem.set("item", 				item);
@@ -960,7 +958,7 @@ public class SearchGraph {
 		if (includeTheseVertices.containsKey(vertexId)) { 
 			if (invResultItem.isSet("inventoryResponseItems")) {
 				List<DynamicEntity> invItemList = new ArrayList<DynamicEntity>();
-				DynamicEntity inventoryItems = jaxbContext.newDynamicEntity("inventory.aai.openecomp.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
+				DynamicEntity inventoryItems = jaxbContext.newDynamicEntity("inventory.aai.att.com." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
 				DynamicEntity subInventoryResponseItems = invResultItem.get("inventoryResponseItems");
 				List<DynamicEntity> subInventoryResponseItemList = subInventoryResponseItems.get("inventoryResponseItem");
 				for (DynamicEntity ent : subInventoryResponseItemList) { 
@@ -1016,7 +1014,7 @@ public class SearchGraph {
 			String aaiNodeType = vert.<String>property("aai-node-type").orElse(null);
 
 			
-
+				
 			if (aaiNodeType != null) {
 				Introspector thisObj = loader.introspectorFromName(aaiNodeType);
 
