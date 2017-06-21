@@ -2,9 +2,12 @@ FROM ubuntu:14.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+
 ENV HTTP_PROXY  ${HTTP_PROXY}
-ENV HTTPS_PROXY ${HTTP_PROXY}
-ENV https_proxy ${HTTP_PROXY}
+ENV HTTPS_PROXY ${HTTPS_PROXY}
+ENV https_proxy ${HTTPS_PROXY}
 ENV http_proxy  ${HTTP_PROXY}
 
 # Setup JAVA_HOME, this is useful for docker commandline
@@ -18,7 +21,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 # for the best possible performance out of your image
 
 RUN if [ ! -z ${HTTP_PROXY} ]; then echo "Acquire::http::proxy  \"${HTTP_PROXY}\";" >> /etc/apt/apt.conf; fi && \
-    if [ ! -z ${HTTP_PROXY} ]; then echo "Acquire::https::proxy \"${HTTP_PROXY}\";" >> /etc/apt/apt.conf; fi && \
+    if [ ! -z ${HTTPS_PROXY} ]; then echo "Acquire::https::proxy \"${HTTPS_PROXY}\";" >> /etc/apt/apt.conf; fi && \
     apt-get update && \
     apt-get install -y software-properties-common uuid-runtime && \
     apt-get install --reinstall ca-certificates && \
