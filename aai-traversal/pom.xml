@@ -464,17 +464,6 @@
 							<goals>
 								<goal>copy</goal>
 							</goals>
-							<configuration>
-								<artifactItems>
-									<artifactItem>
-										<groupId>org.powermock</groupId>
-										<artifactId>powermock-module-javaagent</artifactId>
-										<version>1.6.2</version>
-										<outputDirectory>${project.build.directory}/agents</outputDirectory>
-										<destFileName>powermock-javaagent.jar</destFileName>
-									</artifactItem>
-								</artifactItems>
-							</configuration>
 						</execution>
 						<execution>
 							<id>unpack-schema-dependency</id>
@@ -502,8 +491,7 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.12.4</version>
 					<configuration>
-						<argLine>-javaagent:${project.build.directory}/agents/powermock-javaagent.jar
-							-noverify</argLine>
+					    <argLine>-noverify ${argLine}</argLine>
 						<systemPropertyVariables>
 							<AJSC_HOME>.</AJSC_HOME>
 							<BUNDLECONFIG_DIR>bundleconfig-local</BUNDLECONFIG_DIR>
