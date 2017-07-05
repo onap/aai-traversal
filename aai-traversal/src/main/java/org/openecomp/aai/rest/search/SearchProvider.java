@@ -132,9 +132,6 @@ public class SearchProvider extends RESTAPI {
 													   );
 	
 			String respTm = genDate();
-			logTransaction(fromAppId, transId,
-					"GETGENERICQUERYRESPONSE", req.getRequestURI(), rqstTm, respTm,
-					"", searchResult);
 		
 		} catch (AAIException e) { 
 			// send error response
@@ -224,8 +221,6 @@ public class SearchProvider extends RESTAPI {
 													urlBuilder);
 	
 			String respTm = genDate();
-			logTransaction(fromAppId, transId, "GETNODESQUERYRESPONSE",
-					req.getRequestURI(), rqstTm, respTm, "", searchResult);
 		} catch (AAIException e) { 
 			// send error response
 			ex = e;
