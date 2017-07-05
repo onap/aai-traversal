@@ -267,7 +267,7 @@ public class AAILogJAXRSOutInterceptor extends JAXRSOutInterceptor {
 	}
 
 	protected String genDate() {
-		FormatDate fd = new FormatDate(AAIConfig.get(AAIConstants.HBASE_TABLE_TIMESTAMP_FORMAT, "YYMMdd-HH:mm:ss:SSS"));
+		FormatDate fd = new FormatDate("YYMMdd-HH:mm:ss:SSS");
 		return fd.getDateTime();
 	}
 

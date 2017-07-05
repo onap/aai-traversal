@@ -95,8 +95,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			response = searchGraph.runNamedQuery(fromAppId, transId, queryParameters, type, aaiExtMap);
 	
 			String respTm = genDate();
-			logTransaction(fromAppId, transId, "GETSDNZONERESPONSE",
-					req.getRequestURI(), rqstTm, respTm, "", response);
 
 		} catch (AAIException e) {
 			// send error response
@@ -170,8 +168,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 				response = searchGraph.executeModelOperation(fromAppId, transId, inboundPayload, type, false, aaiExtMap);
 			}
 			String respTm = genDate();
-			logTransaction(fromAppId, transId, "POSTMODELQUERYRESPONSE",
-					req.getRequestURI(), rqstTm, respTm, "", response);
 			
 		} catch (AAIException e) {
 			// send error response
