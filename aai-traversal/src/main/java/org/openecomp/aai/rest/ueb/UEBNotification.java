@@ -60,7 +60,7 @@ public class UEBNotification {
 	public UEBNotification(Loader loader) {
 		events = new ArrayList<>();
 		currentVersionLoader = LoaderFactory.createLoaderForVersion(loader.getModelType(), AAIProperties.LATEST);
-		notificationVersion = Version.valueOf(AAIConfig.get("aai.notification.current.version","v10"));
+		notificationVersion = Version.valueOf(AAIConfig.get("aai.notification.current.version","v11"));
 	}
 	
 	

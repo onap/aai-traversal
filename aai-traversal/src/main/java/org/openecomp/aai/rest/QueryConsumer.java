@@ -66,7 +66,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-@Path("{version: v9|v1[0]}/query")
+@Path("{version: v9|v1[01]}/query")
 public class QueryConsumer extends RESTAPI {
 	
 	/** The introspector factory type. */

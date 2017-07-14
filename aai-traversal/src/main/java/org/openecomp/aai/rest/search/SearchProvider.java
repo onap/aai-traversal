@@ -59,7 +59,7 @@ import org.openecomp.aai.serialization.queryformats.utils.UrlBuilder;
  *
  */
 
-@Path("/{version: v2|v[789]|v1[0]|latest}/search")
+@Path("/{version: v2|v[789]|v1[01]|latest}/search")
 public class SearchProvider extends RESTAPI {
 	
 	protected static String authPolicyFunctionName = "search";
