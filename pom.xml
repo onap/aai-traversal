@@ -60,6 +60,14 @@
 		<aai-core.version>1.1.0-SNAPSHOT</aai-core.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>maven.restlet.org</id>
+			<name>maven.restlet.org</name>
+			<url>http://maven.restlet.org</url>
+		</repository>
+	</repositories>
+
 	<distributionManagement>
 		<repository>
 			<id>ecomp-releases</id>
