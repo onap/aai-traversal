@@ -49,10 +49,19 @@ public class VnfInstancesFromServiceInstancebyModelVersionTest extends QueryTest
         Vertex servicesubscription = graph.addVertex(T.label, "service-subscription", T.id, "2", "aai-node-type", "service-subscription", "service-subscription-id", "service-subscription-id-1","service-subscription-name","service-subscription-name1");
         Vertex customer = graph.addVertex(T.label, "customer", T.id, "3", "aai-node-type", "customer", "customer-id", "customer-id-1", "customer-name", "customer-name1");
         
+<<<<<<< HEAD
 		Vertex model1 = graph.addVertex(T.label, "model", T.id, "4", "aai-node-type", "model", "model-invariant-id", "modinvariant-id1", "model-type", "modtype");
 		Vertex modelver1 = graph.addVertex(T.label, "model-ver", T.id, "5", "aai-node-type", "model-ver", "model-version-id", "modver-id1", "model-name", "modname1", "model-version", "v1.0");
 		Vertex vnf1 = graph.addVertex(T.label, "generic-vnf", T.id, "6", "aai-node-type", "generic-vnf", "vnf-id", "vnfid1", "vnf-name", "vnfname1", "vnf-type", "vnftype1", "model-invariant-id", "modinvariant-id1","model-invariant-id-local", "modinvariant-id1",  "model-version-id", "modver-id1", "model-version-id-local", "modver-id1");
 		
+=======
+		Vertex model1 = graph.addVertex(T.label, "model", T.id, "4", "aai-node-type", "model", "model-invariant-id", "modinvariant-id1", "model-invariant-id-local", "modinvariant-id1", "model-type", "modtype");
+		Vertex modelver1 = graph.addVertex(T.label, "model-ver", T.id, "5", "aai-node-type", "model-ver", "model-version-id", "modver-id1", "model-name", "modname1", "model-version", "v1.0");
+		Vertex vnf1 = graph.addVertex(T.label, "generic-vnf", T.id, "6", "aai-node-type", "generic-vnf", "vnf-id", "vnfid1", "vnf-name", "vnfname1", "vnf-type", "vnftype1", "model-invariant-id", "modinvariant-id1","model-invariant-id-local", "modinvariant-id1",  "model-version-id", "modver-id1", "model-version-id-local", "modver-id1");
+		
+//		Vertex model2 = graph.addVertex(T.label, "model", T.id, "7", "aai-node-type", "model", "model-invariant-id", "modinvariant-id2", "model-type", "modtype");
+//		Vertex modelver2 = graph.addVertex(T.label, "model-ver", T.id, "8", "aai-node-type", "model-ver", "model-version-id", "modver-id2", "model-name", "modname2", "model-version", "v1.0");
+>>>>>>> feature/AAI-9325
 		Vertex vnf2 = graph.addVertex(T.label, "generic-vnf", T.id, "9", "aai-node-type", "generic-vnf", "vnf-id", "vnfid2", "vnf-name", "vnfname2", "vnf-type", "vnftype2", "model-invariant-id", "modinvariant-id1", "model-invariant-id-local", "modinvariant-id1", "model-version-id", "modver-id1", "model-version-id-local", "modver-id1");
 
 		

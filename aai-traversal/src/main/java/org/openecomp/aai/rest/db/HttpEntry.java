@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
 
@@ -75,7 +76,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.thinkaurelius.titan.core.TitanException;
-import com.thinkaurelius.titan.core.TitanTransaction;
 
 /**
  * The Class HttpEntry.
@@ -499,7 +499,7 @@ public class HttpEntry {
 	 * @throws UnsupportedEncodingException the unsupported encoding exception
 	 * @throws AAIException the AAI exception
 	 */
-	private Response invokeExtension(TransactionalGraphEngine dbEngine, TitanTransaction g, HttpMethod httpMethod, DBRequest request, String fromAppId, Version apiVersion, Loader loader, Introspector obj, URI uri, boolean isPreprocess) throws IllegalArgumentException, UnsupportedEncodingException, AAIException {
+	private Response invokeExtension(TransactionalGraphEngine dbEngine, Graph g, HttpMethod httpMethod, DBRequest request, String fromAppId, Version apiVersion, Loader loader, Introspector obj, URI uri, boolean isPreprocess) throws IllegalArgumentException, UnsupportedEncodingException, AAIException {
 		AAIExtensionMap aaiExtMap = new AAIExtensionMap();
 		ModelInjestor injestor = ModelInjestor.getInstance();
 		Response response = null;

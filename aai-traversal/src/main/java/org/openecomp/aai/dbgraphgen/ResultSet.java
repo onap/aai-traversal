@@ -25,11 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.openecomp.aai.dbgen.PropertyLimitDesc;
-import com.thinkaurelius.titan.core.TitanVertex;
 
 public class ResultSet {
-	private TitanVertex vert;
+	private Vertex vert;
 	private String newDataDelFlag;  
 	private String doNotOutputFlag;
 	private String locationInModelSubGraph;
@@ -62,7 +62,7 @@ public class ResultSet {
  	 *
  	 * @return the vert
  	 */
- 	public TitanVertex getVert(){
+ 	public Vertex getVert(){
 		 return this.vert;
 	 }
 	 
@@ -130,7 +130,7 @@ public class ResultSet {
 	 }
 
 
-	public void setVert(TitanVertex vert) {
+	public void setVert(Vertex vert) {
 		this.vert = vert;
 	}
 
