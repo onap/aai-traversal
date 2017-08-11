@@ -320,7 +320,7 @@ public class StoreNotificationEvent {
 	 * @return the string
 	 */
 	public static String genDate() {
-		FormatDate fd = new FormatDate("YYMMdd-HH:mm:ss:SSS");
+		FormatDate fd = new FormatDate("YYYYMMdd-HH:mm:ss:SSS");
 		return fd.getDateTime();
 	}
 
