@@ -41,7 +41,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
-
 import org.openecomp.aai.restcore.util.URITools;
 import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
 import org.openecomp.aai.serialization.queryformats.SubGraphStyle;
@@ -57,6 +56,7 @@ public abstract class GenericQueryProcessor {
 	protected Optional<String> gremlin;
 	protected final TransactionalGraphEngine dbEngine;
 	protected static GremlinServerSingleton gremlinServerSingleton = GremlinServerSingleton.getInstance();
+	protected static GroovyQueryBuilderSingleton queryBuilderSingleton = GroovyQueryBuilderSingleton.getInstance();
 	protected final boolean isGremlin;
 	
 	protected GenericQueryProcessor(Builder builder) {
@@ -127,7 +127,10 @@ public abstract class GenericQueryProcessor {
 			query = gremlinServerSingleton.getStoredQuery(queryName);
 			if (query == null) {
 				query = "";
+			} else {
+				query = queryBuilderSingleton.executeTraversal(dbEngine, query, params);
 			}
+			
 			
 			List<Object> ids = new ArrayList<>();
 			
@@ -141,7 +144,7 @@ public abstract class GenericQueryProcessor {
 				sb.append("]");
 				String startPrefix = "aaiStartQuery = " + sb.toString() + " as Object[];g.V(aaiStartQuery)";
 				if (!"".equals(query)) {
-					query = startPrefix + "." + query;
+					query = startPrefix + query;
 				} else {
 					query = startPrefix;
 				}

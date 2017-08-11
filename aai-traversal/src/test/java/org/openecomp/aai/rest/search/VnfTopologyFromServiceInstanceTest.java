@@ -27,7 +27,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
-
 import org.openecomp.aai.exceptions.AAIException;
 import org.openecomp.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 
@@ -105,7 +104,6 @@ public class VnfTopologyFromServiceInstanceTest extends QueryTest {
         expectedResult.add(tenant);
         expectedResult.add(region1);
         expectedResult.add(pserver);
-        expectedResult.add(vserver);
         expectedResult.add(l3inter2ipv4addresslist);
         expectedResult.add(l3network3);
         expectedResult.add(l3inter2ipv6addresslist);

@@ -43,7 +43,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-
 import org.openecomp.aai.dbmap.DBConnectionType;
 import org.openecomp.aai.exceptions.AAIException;
 import org.openecomp.aai.introspection.ModelType;
@@ -62,6 +61,7 @@ import org.openecomp.aai.serialization.queryformats.Format;
 import org.openecomp.aai.serialization.queryformats.FormatFactory;
 import org.openecomp.aai.serialization.queryformats.Formatter;
 import org.openecomp.aai.serialization.queryformats.SubGraphStyle;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -72,7 +72,7 @@ public class QueryConsumer extends RESTAPI {
 	/** The introspector factory type. */
 	private ModelType introspectorFactoryType = ModelType.MOXY;
 	
-	private QueryProcessorType processorType = QueryProcessorType.GREMLIN_SERVER;
+	private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
 	/** The query style. */
 	private QueryStyle queryStyle = QueryStyle.TRAVERSAL;
 	@PUT
