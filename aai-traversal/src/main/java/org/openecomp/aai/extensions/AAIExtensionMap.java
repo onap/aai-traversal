@@ -28,15 +28,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContext;
-
 import org.openecomp.aai.domain.responseMessage.AAIResponseMessages;
 import org.openecomp.aai.introspection.Loader;
 import org.openecomp.aai.rest.db.DBRequest;
 import org.openecomp.aai.rest.db.HttpEntry;
 import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
-import com.thinkaurelius.titan.core.TitanTransaction;
-import com.thinkaurelius.titan.core.TitanVertex;
 
 public class AAIExtensionMap {
 	// =======================================================================
@@ -95,13 +94,13 @@ public class AAIExtensionMap {
 	private boolean postExtSkipErrorCallback = true;
 	private String fromAppId;
 	private String transId;
-	private TitanTransaction graph;
+	private Graph graph;
 	private Object objectFromResponse;
 	private HashMap<String, Object> lookupHashMap;
 	private HashMap<String, ArrayList<String>> precheckAddedList;
 	private AAIResponseMessages precheckResponseMessages;
 	private HashMap<String, Object> topology;
-	private HashMap<String, TitanVertex> vertexCache;
+	private HashMap<String, Vertex> vertexCache;
 	private String baseObject;
 	private String namespace;
 	private String fullResourceName;
@@ -435,7 +434,7 @@ public class AAIExtensionMap {
 	 *
 	 * @return the graph
 	 */
-	public TitanTransaction getGraph() {
+	public Graph getGraph() {
 		return graph;
 	}
 
@@ -444,7 +443,7 @@ public class AAIExtensionMap {
 	 *
 	 * @param graph the new graph
 	 */
-	public void setGraph(TitanTransaction graph) {
+	public void setGraph(Graph graph) {
 		this.graph = graph;
 	}
 
@@ -546,9 +545,9 @@ public class AAIExtensionMap {
 	 *
 	 * @return the vertex cache
 	 */
-	public HashMap<String, TitanVertex> getVertexCache() {
+	public HashMap<String, Vertex> getVertexCache() {
 		if (this.vertexCache == null) { 
-			this.vertexCache = new HashMap<String, TitanVertex>();
+			this.vertexCache = new HashMap<String, Vertex>();
 		}
 		return vertexCache;
 	}

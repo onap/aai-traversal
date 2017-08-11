@@ -77,8 +77,6 @@ import org.openecomp.aai.util.StoreNotificationEvent;
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import com.google.common.base.CaseFormat;
-import com.thinkaurelius.titan.core.TitanTransaction;
-import com.thinkaurelius.titan.core.TitanVertex;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -519,7 +517,6 @@ public class SearchGraph {
 
 		Introspector inventoryItems;
 		boolean success = true;
-		TitanTransaction g = null;
 		TransactionalGraphEngine dbEngine = null;
 		try {
 			
@@ -532,7 +529,7 @@ public class SearchGraph {
 			DBSerializer serializer = new DBSerializer(AAIProperties.LATEST, dbEngine, ModelType.MOXY, fromAppId);
 			ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
 
-			g = dbEngine.startTransaction();
+			dbEngine.startTransaction();
 			org.openecomp.aai.restcore.MediaType mediaType = org.openecomp.aai.restcore.MediaType.APPLICATION_JSON_TYPE;
 			String contentType = aaiExtMap.getHttpServletRequest().getContentType();
 			if (contentType != null && contentType.contains("application/xml")) {
@@ -609,11 +606,11 @@ public class SearchGraph {
 			success = false;
 			throw new AAIException("AAI_5105", e);
 		} finally {
-			if (g != null) {
+			if (dbEngine != null) {
 				if (success) {
-					g.commit();
+					dbEngine.commit();
 				} else {
-					g.rollback();
+					dbEngine.rollback();
 				}
 			}
 		}
@@ -641,7 +638,6 @@ public class SearchGraph {
 			AAIExtensionMap aaiExtMap) throws JAXBException, AAIException, DynamicException, UnsupportedEncodingException {
 		Response response;
 		boolean success = true;
-		TitanTransaction g = null;
 		TransactionalGraphEngine dbEngine = null;
 		try {
 			
@@ -653,7 +649,7 @@ public class SearchGraph {
 					loader);
 			DBSerializer serializer = new DBSerializer(AAIProperties.LATEST, dbEngine, ModelType.MOXY, fromAppId);
 			ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
-			g = dbEngine.startTransaction();
+			dbEngine.startTransaction();
 
 
 			org.openecomp.aai.restcore.MediaType mediaType = org.openecomp.aai.restcore.MediaType.APPLICATION_JSON_TYPE;
@@ -757,7 +753,7 @@ public class SearchGraph {
 
 				ResultSet rs = resultSet.get(0);
 
-				TitanVertex firstVert = rs.getVert();
+				Vertex firstVert = rs.getVert();
 				String restURI = serializer.getURIForVertex(firstVert).toString();
 				String notificationVersion = AAIProperties.LATEST.toString();
 				if (restURI.startsWith("/")) {
@@ -816,11 +812,11 @@ public class SearchGraph {
 			success = false;
 			throw new AAIException("AAI_5105", e);
 		} finally {
-			if (g != null) {
+			if (dbEngine != null) {
 				if (success) {
-					g.commit();
+					dbEngine.commit();
 				} else {
-					g.rollback();
+					dbEngine.rollback();
 				}
 			}
 		}
@@ -1007,14 +1003,10 @@ public class SearchGraph {
 			// add this inventoryItem to the resultList for this level
 			resultList.add(inventoryItem.getUnderlyingObject());
 
-			TitanVertex vert = resultSet.getVert();
-
-			Long vertId = (Long)vert.longId();
+			Vertex vert = resultSet.getVert();
 
 			String aaiNodeType = vert.<String>property("aai-node-type").orElse(null);
 
-			
-				
 			if (aaiNodeType != null) {
 				Introspector thisObj = loader.introspectorFromName(aaiNodeType);
 

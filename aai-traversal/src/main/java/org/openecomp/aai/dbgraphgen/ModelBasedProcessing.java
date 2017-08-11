@@ -58,7 +58,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
-import com.thinkaurelius.titan.core.TitanVertex;
 
 /**
  * Utility class that uses Model/Named-Query definitions to navigate the graph.   
@@ -824,13 +823,13 @@ public class ModelBasedProcessing{
 			return retHash;
 		}
 		
-		TitanVertex thisVtx = resSet.getVert();
+		Vertex thisVtx = resSet.getVert();
 		String thisGuyId = "";
 		String thisNT = "";
 		String thisGuyStr = "";
 		
 		try {
-			if( thisVtx != null &&  !thisVtx.isRemoved() ){
+			if( thisVtx != null){
 				thisGuyId = thisVtx.id().toString();
 				thisNT = thisVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 				thisGuyStr = thisGuyId + "[" + thisNT + " found at:" + resSet.getLocationInModelSubGraph() + "]";
@@ -1488,7 +1487,7 @@ public class ModelBasedProcessing{
 		  rs.setExtraPropertyHash(tmpExtraPropHash);
 	  }
 	  
-	  rs.setVert((TitanVertex)thisLevelElemVtx);
+	  rs.setVert(thisLevelElemVtx);
 	  rs.setLocationInModelSubGraph(thisVertsTrail);
 	  if( delKeyHash.containsKey(thisVertsTrail) && delKeyHash.get(thisVertsTrail).equals("T") ){
 		  rs.setNewDataDelFlag("T");
