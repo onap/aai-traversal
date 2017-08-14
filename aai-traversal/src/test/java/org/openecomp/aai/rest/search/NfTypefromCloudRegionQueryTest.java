@@ -27,7 +27,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
-
 import org.openecomp.aai.exceptions.AAIException;
 import org.openecomp.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 
