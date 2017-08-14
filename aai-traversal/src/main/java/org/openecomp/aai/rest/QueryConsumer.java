@@ -38,6 +38,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -87,7 +88,7 @@ public class QueryConsumer extends RESTAPI {
 		Response response = null;
 		TransactionalGraphEngine dbEngine = null;
 		try {
-
+			this.checkQueryParams(info.getQueryParameters());
 			Format format = Format.valueOf(queryFormat);
 			if (queryProcessor != null) {
 				processorType = QueryProcessorType.valueOf(queryProcessor);
@@ -156,7 +157,7 @@ public class QueryConsumer extends RESTAPI {
 			DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
 			FormatFactory ff = new FormatFactory(httpEntry.getLoader(), serializer);
 			
-			Formatter formater =  ff.get(format);
+			Formatter formater =  ff.get(format, info.getQueryParameters());
 		
 			result = formater.output(vertices).toString();
 
@@ -177,6 +178,19 @@ public class QueryConsumer extends RESTAPI {
 		}
 		
 		return response;
+	}
+	
+	public void checkQueryParams(MultivaluedMap<String, String> params) throws AAIException {
+		
+		if (params.containsKey("depth") && params.getFirst("depth").matches("\\d+")) {
+			String depth = params.getFirst("depth");
+			Integer i = Integer.parseInt(depth);
+			if (i > 1) {
+				throw new AAIException("AAI_3303");
+			}
+		}
+		
+		
 	}
 
 }
