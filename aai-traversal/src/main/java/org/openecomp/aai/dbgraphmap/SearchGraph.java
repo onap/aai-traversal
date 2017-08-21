@@ -547,9 +547,8 @@ public class SearchGraph {
 			HashMap<String,Object> namedQueryLookupHash = new HashMap<String,Object>();
 
 			DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
-
 			String namedQueryUuid = null;
-			if (qp.isSet("namedQuery")) { 
+			if ((qp != null) && qp.isSet("namedQuery")) {    
 				DynamicEntity namedQuery = (DynamicEntity) qp.get("namedQuery");
 
 				if (namedQuery.isSet("namedQueryUuid")) { 
@@ -663,9 +662,6 @@ public class SearchGraph {
 			}
 
 			DynamicEntity modelAndNamedQuerySearch = (DynamicEntity)loader.unmarshal("ModelAndNamedQuerySearch", queryParameters, mediaType).getUnderlyingObject();
-			if (modelAndNamedQuerySearch == null) { 
-				throw new AAIException("AAI_5105");
-			}
 			if (modelAndNamedQuerySearch == null) { 
 				throw new AAIException("AAI_5105");
 			}
