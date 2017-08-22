@@ -1,371 +1,379 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<artifactId>ajsc-archetype-parent</artifactId>
-		<groupId>com.att.ajsc</groupId>
-		<version>2.1.0</version>
-	</parent>
-	<groupId>org.onap.aai.traversal</groupId>
-	<artifactId>traversal</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
-	<name>traversal</name>
-	<packaging>pom</packaging>
-	<modules>
-		<module>aai-traversal</module>
-	</modules>
-	<properties>
-		<nexusproxy>https://nexus.onap.org</nexusproxy>
-		<sitePath>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</sitePath>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<module.ajsc.namespace.name>ActiveAndAvailableInventory-Traversal</module.ajsc.namespace.name>
-		<module.ajsc.namespace.version>v1</module.ajsc.namespace.version>
-		<ajscRuntimeVersion>2.1.0</ajscRuntimeVersion>
-		<aai-schema.version>1.1.0-SNAPSHOT</aai-schema.version>
-		<aai.project.version>1.1.0</aai.project.version>
-		<aai.docker.version>1.1</aai.docker.version>
+    <parent>
+        <artifactId>ajsc-archetype-parent</artifactId>
+        <groupId>com.att.ajsc</groupId>
+        <version>2.1.0</version>
+    </parent>
+    <groupId>org.onap.aai.traversal</groupId>
+    <artifactId>traversal</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <name>traversal</name>
+    <packaging>pom</packaging>
+    <modules>
+        <module>aai-traversal</module>
+    </modules>
+    <properties>
+        <nexusproxy>https://nexus.onap.org</nexusproxy>
+        <sitePath>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</sitePath>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <module.ajsc.namespace.name>ActiveAndAvailableInventory-Traversal</module.ajsc.namespace.name>
+        <module.ajsc.namespace.version>v1</module.ajsc.namespace.version>
+        <ajscRuntimeVersion>2.1.0</ajscRuntimeVersion>
+        <aai-schema.version>1.1.0-SNAPSHOT</aai-schema.version>
+        <aai.project.version>1.1.0</aai.project.version>
+        <aai.docker.version>1.1</aai.docker.version>
 
-		<!-- This will be the Absolute Root of the Project and should contain NO 
-			Versioning -->
-		<absoluteDistFilesRoot>/opt/app/aai-traversal</absoluteDistFilesRoot>
+        <!-- This will be the Absolute Root of the Project and should contain NO
+            Versioning -->
+        <absoluteDistFilesRoot>/opt/app/aai-traversal</absoluteDistFilesRoot>
 
-		<!-- For Versioning upon installation, add /${project.version} to distFilesRoot. 
-			For NO Versioning, leave as is -->
-		<!-- example: /appl/${project.artifactId}/${project.version}. Also, add 
-			${project.version} to ${runAjscHome} for running locally. -->
-		<distFilesRoot>/opt/app/${project.artifactId}</distFilesRoot>
-		<!-- <distFilesRoot>/opt/app/traversal/${project.version}</distFilesRoot> -->
-		<aaiAppHome>${basedir}</aaiAppHome>
-		<runAjscHome>${aaiAppHome}/target/swm/package/nix/dist_files${distFilesRoot}</runAjscHome>
-		<!-- For SOA Cloud Installation -->
-		<installOwnerUser>aaiadmin</installOwnerUser>
-		<installOwnerGroup>aaiadmin</installOwnerGroup>
-		<ownerManagementGroup>org.openecomp.aai.dev</ownerManagementGroup>
+        <!-- For Versioning upon installation, add /${project.version} to distFilesRoot.
+            For NO Versioning, leave as is -->
+        <!-- example: /appl/${project.artifactId}/${project.version}. Also, add
+            ${project.version} to ${runAjscHome} for running locally. -->
+        <distFilesRoot>/opt/app/${project.artifactId}</distFilesRoot>
+        <!-- <distFilesRoot>/opt/app/traversal/${project.version}</distFilesRoot> -->
+        <aaiAppHome>${basedir}</aaiAppHome>
+        <runAjscHome>${aaiAppHome}/target/swm/package/nix/dist_files${distFilesRoot}</runAjscHome>
+        <!-- For SOA Cloud Installation -->
+        <installOwnerUser>aaiadmin</installOwnerUser>
+        <installOwnerGroup>aaiadmin</installOwnerGroup>
+        <ownerManagementGroup>org.openecomp.aai.dev</ownerManagementGroup>
 
-		<!-- Port Selection. A value of 0 will allow for dynamic port selection. 
-			For local testing, you may choose to hardcode this value to something like 
-			8080 -->
-		<serverPort>8083</serverPort>
-		<sslport>8446</sslport>
-		<testRouteOffer>workstation</testRouteOffer>
-		<testEnv>DEV</testEnv>
+        <!-- Port Selection. A value of 0 will allow for dynamic port selection.
+            For local testing, you may choose to hardcode this value to something like
+            8080 -->
+        <serverPort>8083</serverPort>
+        <sslport>8446</sslport>
+        <testRouteOffer>workstation</testRouteOffer>
+        <testEnv>DEV</testEnv>
 
-		<!-- For using CXF with Maven -->
-		<cxf.version>3.0.4</cxf.version>
-		<swmpkgversion>0.0.1</swmpkgversion>
-		<snapshot.file>int1-data.graphson</snapshot.file>
-		<aai-core.version>1.1.0-SNAPSHOT</aai-core.version>
-	</properties>
+        <!-- For using CXF with Maven -->
+        <cxf.version>3.0.4</cxf.version>
+        <swmpkgversion>0.0.1</swmpkgversion>
+        <snapshot.file>int1-data.graphson</snapshot.file>
+        <aai-core.version>1.1.0-SNAPSHOT</aai-core.version>
+    </properties>
 
-	<repositories>
-		<repository>
-			<id>maven.restlet.org</id>
-			<name>maven.restlet.org</name>
-			<url>http://maven.restlet.org</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>maven.restlet.org</id>
+            <name>maven.restlet.org</name>
+            <url>http://maven.restlet.org</url>
+        </repository>
+    </repositories>
 
-	<distributionManagement>
-		<repository>
-			<id>ecomp-releases</id>
-			<name>ECOMP Release Repository</name>
-			<url>${nexusproxy}/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>ecomp-snapshots</id>
-			<name>ECOMP Snapshot Repository</name>
-			<url>${nexusproxy}/content/repositories/snapshots/</url>
-		</snapshotRepository>
-		<site>
-			<id>ecomp-site</id>
-			<url>dav:${nexusproxy}${sitePath}</url>
-		</site>
-	</distributionManagement>
-	<profiles>
-		<profile>
-			<id>jenkins-properties</id>
-			<activation>
-				<os>
-					<family>unix</family>
-				</os>
-			</activation>
-			<properties>
-				<swmpkgversion>${env.swmpkgversion}</swmpkgversion>
-			</properties>
-		</profile>
-		<profile>
-			<id>runAjsc</id>
-			<build>
-				<defaultGoal>initialize</defaultGoal>
-				<plugins>
+    <distributionManagement>
+        <repository>
+            <id>ecomp-releases</id>
+            <name>ECOMP Release Repository</name>
+            <url>${nexusproxy}/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ecomp-snapshots</id>
+            <name>ECOMP Snapshot Repository</name>
+            <url>${nexusproxy}/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <site>
+            <id>ecomp-site</id>
+            <url>dav:${nexusproxy}${sitePath}</url>
+        </site>
+    </distributionManagement>
+    <profiles>
+        <profile>
+            <id>jenkins-properties</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <swmpkgversion>${env.swmpkgversion}</swmpkgversion>
+            </properties>
+        </profile>
+        <profile>
+            <id>runAjsc</id>
+            <build>
+                <defaultGoal>initialize</defaultGoal>
+                <plugins>
 
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.3.2</version>
-						<executions>
-							<execution>
-								<id>run ajsc</id>
-								<phase>initialize</phase>
-								<goals>
-									<goal>java</goal>
-								</goals>
-								<configuration>
-									<!-- In order to better mimic a SOA cloud installation of AJSC (and 
-										to help eliminate Maven/Eclipse/AJSC classpath issues that may be difficult 
-										to diagnose), within this profile used to run locally, we are NOT including 
-										project dependencies. These will be loaded by AJSC from $AJSC_HOME/extJars. 
-										The only jar needed to run AJSC is the ajsc-runner.jar, and therefore is 
-										the only dependency required by this profile to run locally. -->
-									<includeProjectDependencies>false</includeProjectDependencies>
-									<includePluginDependencies>true</includePluginDependencies>
-									<executable>java</executable>
-									<mainClass>com.att.ajsc.runner.Runner</mainClass>
-									<executableDependency>
-										<groupId>com.att.ajsc</groupId>
-										<artifactId>ajsc-runner</artifactId>
-									</executableDependency>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.3.2</version>
+                        <executions>
+                            <execution>
+                                <id>run ajsc</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <!-- In order to better mimic a SOA cloud installation of AJSC (and
+                                        to help eliminate Maven/Eclipse/AJSC classpath issues that may be difficult
+                                        to diagnose), within this profile used to run locally, we are NOT including
+                                        project dependencies. These will be loaded by AJSC from $AJSC_HOME/extJars.
+                                        The only jar needed to run AJSC is the ajsc-runner.jar, and therefore is
+                                        the only dependency required by this profile to run locally. -->
+                                    <includeProjectDependencies>false</includeProjectDependencies>
+                                    <includePluginDependencies>true</includePluginDependencies>
+                                    <executable>java</executable>
+                                    <mainClass>com.att.ajsc.runner.Runner</mainClass>
+                                    <executableDependency>
+                                        <groupId>com.att.ajsc</groupId>
+                                        <artifactId>ajsc-runner</artifactId>
+                                    </executableDependency>
 
-									<environmentVariables>
-										<AJSC_HOME>${runAjscHome}</AJSC_HOME>
-									</environmentVariables>
-									<additionalClasspathElements>
-										<additionalClasspathElement>${runAjscHome}/extJars/logback-access-1.1.7.jar</additionalClasspathElement>
-										<additionalClasspathElement>${runAjscHome}/extJars/logback-core-1.1.7.jar</additionalClasspathElement>
-										<additionalClasspathElement>${runAjscHome}/extJars/aai-core-${aai-core.version}.jar</additionalClasspathElement>
-									</additionalClasspathElements>
+                                    <environmentVariables>
+                                        <AJSC_HOME>${runAjscHome}</AJSC_HOME>
+                                    </environmentVariables>
+                                    <additionalClasspathElements>
+                                        <additionalClasspathElement>${runAjscHome}/extJars/logback-access-1.1.7.jar
+                                        </additionalClasspathElement>
+                                        <additionalClasspathElement>${runAjscHome}/extJars/logback-core-1.1.7.jar
+                                        </additionalClasspathElement>
+                                        <additionalClasspathElement>
+                                            ${runAjscHome}/extJars/aai-core-${aai-core.version}.jar
+                                        </additionalClasspathElement>
+                                    </additionalClasspathElements>
 
-									<!-- Main AJSC System Properties below (necessary for proper startup) -->
-									<systemProperties>
-										<systemProperty>
-											<key>AJSC_HOME</key>
-											<value>${runAjscHome}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>AFT_HOME</key>
-											<value>${runAjscHome}/bundleconfig/</value>
-										</systemProperty>
-										<systemProperty>
-											<key>AJSC_CONF_HOME</key>
-											<value>${aaiAppHome}/bundleconfig-local</value>
-										</systemProperty>
-										<systemProperty>
-											<key>logback.configurationFile</key>
-											<value>${aaiAppHome}/ajsc-shared-config/etc/logback.xml</value>
-										</systemProperty>
-										<systemProperty>
-											<key>AJSC_SHARED_CONFIG</key>
-											<value>${aaiAppHome}/ajsc-shared-config</value>
-										</systemProperty>
-										<systemProperty>
-											<key>file.separator</key>
-											<value>/</value>
-										</systemProperty>
-										<systemProperty>
-											<key>snapshot.location</key>
-											<value>${basedir}/ajsc-aai/snapshots/${snapshot.file}</value>
-										</systemProperty>
-										<!-- Please, NOTE: The following 2 system properties will normally 
-											be set within the sys-props.properties file once deployed to a node. We are 
-											setting them HERE to run locally to make more efficient use of maven variable 
-											replacement for ${basedir} -->
-										<!-- AJSC_EXTERNAL_LIB_FOLDERS represents the particular jars that 
-											will be externalized on a CSI node. This includes dme2 and csm related artifact. -->
-										<sysproperty>
-											<key>AJSC_EXTERNAL_LIB_FOLDERS</key>
-											<value>${aaiAppHome}/target/commonLibs</value>
-										</sysproperty>
-										<!-- AJSC_EXTERNAL_PROPERTIES_FOLDERS represents the particular 
-											files that may need to be added to the classpath. These files will be externalized 
-											on a CSI node. This includes dme2 and csm related artifact (such as csm-config-app.properties). 
-											Failure to have these files on the classpath may result in errors thrown 
-											by csm framework. -->
-										<sysproperty>
-											<key>AJSC_EXTERNAL_PROPERTIES_FOLDERS</key>
-											<value>${aaiAppHome}/ajsc-shared-config/etc</value>
-										</sysproperty>
+                                    <!-- Main AJSC System Properties below (necessary for proper startup) -->
+                                    <systemProperties>
+                                        <systemProperty>
+                                            <key>AJSC_HOME</key>
+                                            <value>${runAjscHome}</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>AFT_HOME</key>
+                                            <value>${runAjscHome}/bundleconfig/</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>AJSC_CONF_HOME</key>
+                                            <value>${aaiAppHome}/bundleconfig-local</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>logback.configurationFile</key>
+                                            <value>${aaiAppHome}/ajsc-shared-config/etc/logback.xml</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>AJSC_SHARED_CONFIG</key>
+                                            <value>${aaiAppHome}/ajsc-shared-config</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>file.separator</key>
+                                            <value>/</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>snapshot.location</key>
+                                            <value>${basedir}/ajsc-aai/snapshots/${snapshot.file}</value>
+                                        </systemProperty>
+                                        <!-- Please, NOTE: The following 2 system properties will normally
+                                            be set within the sys-props.properties file once deployed to a node. We are
+                                            setting them HERE to run locally to make more efficient use of maven variable
+                                            replacement for ${basedir} -->
+                                        <!-- AJSC_EXTERNAL_LIB_FOLDERS represents the particular jars that
+                                            will be externalized on a CSI node. This includes dme2 and csm related artifact. -->
+                                        <sysproperty>
+                                            <key>AJSC_EXTERNAL_LIB_FOLDERS</key>
+                                            <value>${aaiAppHome}/target/commonLibs</value>
+                                        </sysproperty>
+                                        <!-- AJSC_EXTERNAL_PROPERTIES_FOLDERS represents the particular
+                                            files that may need to be added to the classpath. These files will be externalized
+                                            on a CSI node. This includes dme2 and csm related artifact (such as csm-config-app.properties).
+                                            Failure to have these files on the classpath may result in errors thrown
+                                            by csm framework. -->
+                                        <sysproperty>
+                                            <key>AJSC_EXTERNAL_PROPERTIES_FOLDERS</key>
+                                            <value>${aaiAppHome}/ajsc-shared-config/etc</value>
+                                        </sysproperty>
 
-										<systemProperty>
-											<key>AJSC_SERVICE_NAMESPACE</key>
-											<value>${module.ajsc.namespace.name}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>AJSC_SERVICE_VERSION</key>
-											<value>${module.ajsc.namespace.version}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>SOACLOUD_SERVICE_VERSION</key>
-											<value>${project.version}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>server.port</key>
-											<value>${serverPort}</value>
-										</systemProperty>
-										<systemProperty>
-											<key>aai-core.version</key>
-											<value>${aai-core.version}</value>
-										</systemProperty>
-									</systemProperties>
+                                        <systemProperty>
+                                            <key>AJSC_SERVICE_NAMESPACE</key>
+                                            <value>${module.ajsc.namespace.name}</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>AJSC_SERVICE_VERSION</key>
+                                            <value>${module.ajsc.namespace.version}</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>SOACLOUD_SERVICE_VERSION</key>
+                                            <value>${project.version}</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>server.port</key>
+                                            <value>${serverPort}</value>
+                                        </systemProperty>
+                                        <systemProperty>
+                                            <key>aai-core.version</key>
+                                            <value>${aai-core.version}</value>
+                                        </systemProperty>
+                                    </systemProperties>
 
-									<!-- Command Line Arguments to add to the java command. Here, you 
-										can specify the port as well as the Context you want your service to run 
-										in. Use context=/ to run in an unnamed Context (Root Context). The default 
-										configuration of the AJSC is to run under the / Context. Setting the port 
-										here can aid during the development phase of your service. However, you can 
-										leave this argument out entirely, and the AJSC will default to using an Ephemeral 
-										port. -->
-									<arguments>
-										<argument>context=/</argument>
-										<argument>port=${serverPort}</argument>
-										<argument>sslport=${sslport}</argument>
-									</arguments>
-								</configuration>
-							</execution>
-						</executions>
-						<configuration>
-							<executable>java</executable>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>com.att.ajsc</groupId>
-								<artifactId>ajsc-runner</artifactId>
-								<version>${ajscRuntimeVersion}</version>
-							</dependency>
-						</dependencies>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-<build>
-	<pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<compilerId>groovy-eclipse-compiler</compilerId>
-					<verbose>false</verbose>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.codehaus.groovy</groupId>
-						<artifactId>groovy-eclipse-compiler</artifactId>
-						<version>2.9.0-01</version>
-					</dependency>
-					<dependency>
-						<groupId>org.codehaus.groovy</groupId>
-						<artifactId>groovy-eclipse-batch</artifactId>
-						<version>2.3.4-01</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-        <plugin>
-    		<groupId>org.apache.maven.plugins</groupId>
-    		<artifactId>maven-deploy-plugin</artifactId>
-    		<executions>
-        		<execution>
-            		<id>default-deploy</id>
-            		<phase>none</phase>
-        		</execution>
-   			</executions>
-		</plugin>        
-		<plugin>
-		    <groupId>org.sonatype.plugins</groupId>
-		    <artifactId>nexus-staging-maven-plugin</artifactId>
-		    <version>1.6.7</version>
-		    <extensions>true</extensions>
-		    <configuration>
-			<nexusUrl>${nexusproxy}</nexusUrl>
-			<stagingProfileId>176c31dfe190a</stagingProfileId>
-			<serverId>ecomp-staging</serverId>
-		    </configuration>
-		</plugin>
-		</plugins>
-	</pluginManagement>
-		    <plugins>
+                                    <!-- Command Line Arguments to add to the java command. Here, you
+                                        can specify the port as well as the Context you want your service to run
+                                        in. Use context=/ to run in an unnamed Context (Root Context). The default
+                                        configuration of the AJSC is to run under the / Context. Setting the port
+                                        here can aid during the development phase of your service. However, you can
+                                        leave this argument out entirely, and the AJSC will default to using an Ephemeral
+                                        port. -->
+                                    <arguments>
+                                        <argument>context=/</argument>
+                                        <argument>port=${serverPort}</argument>
+                                        <argument>sslport=${sslport}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>java</executable>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.att.ajsc</groupId>
+                                <artifactId>ajsc-runner</artifactId>
+                                <version>${ajscRuntimeVersion}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                    <configuration>
+                        <compilerId>groovy-eclipse-compiler</compilerId>
+                        <verbose>false</verbose>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.groovy</groupId>
+                            <artifactId>groovy-eclipse-compiler</artifactId>
+                            <version>2.9.0-01</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.codehaus.groovy</groupId>
+                            <artifactId>groovy-eclipse-batch</artifactId>
+                            <version>2.3.4-01</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-deploy</id>
+                            <phase>none</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.7</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <nexusUrl>${nexusproxy}</nexusUrl>
+                        <stagingProfileId>176c31dfe190a</stagingProfileId>
+                        <serverId>ecomp-staging</serverId>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
             <!-- license plugin -->
-		    <plugin>
-		    <groupId>org.codehaus.mojo</groupId>
-		    <artifactId>license-maven-plugin</artifactId>
-		    <version>1.12</version>
-		    <configuration>
-			<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-			<licenseName>apache_v2</licenseName>
-			<inceptionYear>2017</inceptionYear>
-			<organizationName>AT&amp;T Intellectual Property. All rights reserved.</organizationName>
-			<projectName>org.openecomp.aai</projectName>
-			<canUpdateCopyright>true</canUpdateCopyright>
-			<canUpdateDescription>true</canUpdateDescription>
-			<canUpdateLicense>true</canUpdateLicense>
-			<emptyLineAfterHeader>true</emptyLineAfterHeader>
-			<processStartTag>============LICENSE_START=======================================================</processStartTag>
-			<processEndTag>============LICENSE_END=========================================================</processEndTag>
-			<sectionDelimiter>================================================================================</sectionDelimiter>
-			<includes>
-				<include>**/*.java</include>
-				<include>**/*.ksh</include>
-				<include>**/*.sh</include>
-				<include>**/*.ftl</include>
-				<include>**/*.xsd</include>
-				<include>**/*.xjb</include>
-				<include>**/*.yml</include>
-				<include>**/*.yaml</include>
-				<include>**/aai*.xml</include>
-				<include>**/*logback*.xml</include>
-				<include>**/*aaiconfig*.properties</include>
-				<include>**/*titan*.properties</include>
-			</includes>
-			</configuration>
-		    <executions>
-			<execution>
-			     <id>first</id>
-			      <goals>
-				  <goal>update-file-header</goal>
-			      </goals>
-				  <phase>process-sources</phase>
-			 </execution>
-		      </executions>
-		   </plugin>
-			<plugin>
-			  <groupId>org.apache.maven.plugins</groupId>
-			  <artifactId>maven-site-plugin</artifactId>
-			  <version>3.6</version>
-			  <dependencies>
-			    <dependency>
-			      <groupId>org.apache.maven.wagon</groupId>
-			      <artifactId>wagon-webdav-jackrabbit</artifactId>
-			      <version>2.10</version>
-			    </dependency>
-			  </dependencies>
-		    </plugin>
-	       </plugins>
-	</build>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.12</version>
+                <configuration>
+                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                    <licenseName>apache_v2</licenseName>
+                    <inceptionYear>2017</inceptionYear>
+                    <organizationName>AT&amp;T Intellectual Property. All rights reserved.</organizationName>
+                    <projectName>org.openecomp.aai</projectName>
+                    <canUpdateCopyright>true</canUpdateCopyright>
+                    <canUpdateDescription>true</canUpdateDescription>
+                    <canUpdateLicense>true</canUpdateLicense>
+                    <emptyLineAfterHeader>true</emptyLineAfterHeader>
+                    <processStartTag>============LICENSE_START=======================================================
+                    </processStartTag>
+                    <processEndTag>============LICENSE_END=========================================================
+                    </processEndTag>
+                    <sectionDelimiter>================================================================================
+                    </sectionDelimiter>
+                    <includes>
+                        <include>**/*.java</include>
+                        <include>**/*.ksh</include>
+                        <include>**/*.sh</include>
+                        <include>**/*.ftl</include>
+                        <include>**/*.xsd</include>
+                        <include>**/*.xjb</include>
+                        <include>**/*.yml</include>
+                        <include>**/*.yaml</include>
+                        <include>**/aai*.xml</include>
+                        <include>**/*logback*.xml</include>
+                        <include>**/*aaiconfig*.properties</include>
+                        <include>**/*titan*.properties</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.6</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.wagon</groupId>
+                        <artifactId>wagon-webdav-jackrabbit</artifactId>
+                        <version>2.10</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
     <reporting>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.4</version>
-          <configuration>
-            <failOnError>false</failOnError>
-            <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
-            <docletArtifact>
-              <groupId>org.umlgraph</groupId>
-              <artifactId>umlgraph</artifactId>
-              <version>5.6</version>
-            </docletArtifact>
-            <additionalparam>-views</additionalparam>
-            <useStandardDocletOptions>true</useStandardDocletOptions>
-          </configuration>
-        </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+                    <docletArtifact>
+                        <groupId>org.umlgraph</groupId>
+                        <artifactId>umlgraph</artifactId>
+                        <version>5.6</version>
+                    </docletArtifact>
+                    <additionalparam>-views</additionalparam>
+                    <useStandardDocletOptions>true</useStandardDocletOptions>
+                </configuration>
+            </plugin>
+        </plugins>
     </reporting>
-	
+
 </project>
