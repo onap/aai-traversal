@@ -828,20 +828,32 @@ public class ModelBasedProcessing{
 		String thisNT = "";
 		String thisGuyStr = "";
 		
+		Boolean gotVtxOK = false;
 		try {
-			if( thisVtx != null){
+			if( thisVtx != null ){
 				thisGuyId = thisVtx.id().toString();
 				thisNT = thisVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 				thisGuyStr = thisGuyId + "[" + thisNT + " found at:" + resSet.getLocationInModelSubGraph() + "]";
+				
+				// NOTE -- will try to set the NodeType to itself to see if the node has been deleted already in 
+				//       this transaction. It lets you get properties from nodes being deleted where the 
+				//       delete hasn't been committed yet.  This check used to be accomplished with a call to 
+				//       "vtx.isRemoved()" but that was a Titan-only feature and is not available anymore since
+				//       we no longer use Titan vertices.
+				// If we don't do this check, we get errors later when we try to delete the node.
+				thisVtx.property(AAIProperties.NODE_TYPE, thisNT); 
+				gotVtxOK = true;
 			}
 		}
 		catch (Exception ex) {
 			// Sometimes things have already been deleted by the time we get to them - just log it.
-			LOGGER.warn("Exception when deleting " + thisGuyStr + ".  msg = " + ex.getMessage(), ex);
+			LOGGER.warn("Exception when trying to delete: " + thisGuyStr + ".  msg = " + ex.getMessage(), ex);
 		}
 		
-		if( thisGuyId.equals("") ){
+		if( !gotVtxOK ){
 			// The vertex must have already been removed.   Just return.
+			// Note - We need to catch this because the DB sometimes can still have the vtx 
+			// and be able to get its ID but it is flagged internally as removed already.
 			return retHash;
 		}
 		else {

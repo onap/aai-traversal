@@ -757,7 +757,7 @@ public class SearchGraph {
 				} else {
 					restURI = "/aai/" + notificationVersion + "/" + restURI;
 				}
-
+				
 				Map<String,String> delResult = processor.runDeleteByModel( transId, fromAppId,
 						modelVersionId, topNodeType, startNodeFilterHash.get(0), aaiExtMap.getApiVersion(), resourceVersion );
 
@@ -767,24 +767,7 @@ public class SearchGraph {
 				}
 				resultStr.trim();
 
-				DynamicEntity inventoryItems = jaxbContext.newDynamicEntity("inventory.aai.att.com." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
-				DynamicEntity topInvItem = remapInventoryItems((DynamicEntity)invItemList.get(0), jaxbContext, delResult, objectToVertMap, aaiExtMap);
-				List<DynamicEntity> newInvItemList = new ArrayList<DynamicEntity>();
-
-				newInvItemList.add(topInvItem);
-				inventoryItems.set("inventoryResponseItem", newInvItemList);
-
-				DynamicEntity notificationHeader = (DynamicEntity) loader.introspectorFromName("notification-event-header").getUnderlyingObject();
-				notificationHeader.set("entityLink", restURI);
-				notificationHeader.set("action", "DELETE");
-				notificationHeader.set("entityType", "inventory-response-items");
-				notificationHeader.set("topEntityType", "inventory-response-items");
-				notificationHeader.set("sourceName", aaiExtMap.getFromAppId());
-				notificationHeader.set("version", notificationVersion);
-
-				StoreNotificationEvent sne = new StoreNotificationEvent(transId, fromAppId);
-
-				sne.storeDynamicEvent(loader.getJAXBContext(), notificationVersion, notificationHeader, inventoryItems);
+				// Note - notifications are now done down in the individual "remove" calls done in runDeleteByModel() above.
 
 				response = Response.ok(resultStr).build();
 
