@@ -918,7 +918,7 @@ public class SearchGraph {
 			Map<String,String> includeTheseVertices, Map<Object,String> objectToVertMap, AAIExtensionMap aaiExtMap) { 
 
 
-		DynamicEntity inventoryItem = jaxbContext.newDynamicEntity("inventory.aai.att.com." + aaiExtMap.getApiVersion() + ".InventoryResponseItem");
+		DynamicEntity inventoryItem = jaxbContext.newDynamicEntity("inventory.aai.onap.org." + aaiExtMap.getApiVersion() + ".InventoryResponseItem");
 		Object item = invResultItem.get("item");
 		inventoryItem.set("modelName", 			invResultItem.get("modelName"));
 		inventoryItem.set("item", 				item);
