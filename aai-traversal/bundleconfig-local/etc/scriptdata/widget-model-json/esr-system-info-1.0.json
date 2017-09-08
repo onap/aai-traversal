@@ -1,0 +1,11 @@
+{
+	"model-invariant-id" : "0562518b-e5b3-49f4-8ad8-19b43766c79d",
+	"model-type" : "widget",
+	"model-vers" : {
+		"model-ver" : [ {
+			"model-version-id" : "5ded840b-42aa-4692-a7ac-9a6ed5f3146b",
+			"model-version" : "1.0",
+			"model-name" : "esr-system-info"
+		} ]
+	}
+}

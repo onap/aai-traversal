@@ -77,7 +77,7 @@ public class MakeNamedQuery {
 		ArrayList<String> processedWidgets = new ArrayList<String>();
 
 
-		HashMap<String, Introspector> widgetToRelationship = new HashMap<String, Introspector>();
+		HashMap<String, List<Introspector>> widgetToRelationship = new HashMap<String, List<Introspector>>();
 		for (Entry<String, Introspector> aaiResEnt : loader.getAllObjects().entrySet()) {
 			Introspector meObject = loader.introspectorFromName("model");
 			// no need for a ModelVers DynamicEntity
@@ -105,46 +105,66 @@ public class MakeNamedQuery {
 						Introspector modelVers = meObject.getWrappedValue("model-vers");
 						List<Introspector> modelVerList = (List<Introspector>) modelVers.getWrappedListValue("model-ver");
 						for (Introspector modelVer : modelVerList) {
-							widgetToRelationship.put(widgetName, makeWidgetRelationship(loader, modelInvariantId, 
-									modelVer.getValue("model-version-id").toString()));
+							
+							List<Introspector> relList = new ArrayList<Introspector>();
+							Introspector widgetRelationship = makeWidgetRelationship(loader, modelInvariantId, 
+									modelVer.getValue("model-version-id").toString());
+							relList.add(widgetRelationship);
+														
+							widgetToRelationship.put(widgetName, relList);
 						}
 					}
 				}
 			}
 		}
+		
+//		esr-system-info-from-vnf=builder.store('x').union(\
+//                builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(\
+//                        builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').store('x')\
+//                        .createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x')\
+//                        .createEdgeTraversal(EdgeType.TREE, 'cloud-region', 'esr-system-info').store('x')\
+//                )).cap('x').unfold.dedup()
+ 
 		//source vnf-id, related service-instance-id, all related vnfs in this service-instance-id
-		Introspector genericVnfRelationship = widgetToRelationship.get("generic-vnf");
-		Introspector serviceInstanceRelationship = widgetToRelationship.get("service-instance");
-		Introspector vceRelationship = widgetToRelationship.get("vce");
+		
+		//this should be abstracted and moved to a file
+		
+		HashMap<String, List<Introspector>> relationshipMap = new HashMap<String, List<Introspector>>();
+				
+		List<Introspector> genericVnfRelationship = widgetToRelationship.get("generic-vnf");
+		List<Introspector> vserverRelationship = widgetToRelationship.get("vserver");
+		List<Introspector> tenantRelationship = widgetToRelationship.get("tenant");
+		List<Introspector> cloudRegionRelationship = widgetToRelationship.get("cloud-region");
+		List<Introspector> esrSystemInfoRelationship = widgetToRelationship.get("esr-system-info");
 
 		Introspector namedQueryObj = loader.introspectorFromName("named-query");
 		namedQueryObj.setValue("named-query-uuid", namedQueryUuid);
-		namedQueryObj.setValue("named-query-name", "vnf-to-service-instance");
+		namedQueryObj.setValue("named-query-name", "vnf-to-esr-system-info");
 		namedQueryObj.setValue("named-query-version", "1.0");
-		namedQueryObj.setValue("description", "Named Query - VNF to Service Instance");
+		namedQueryObj.setValue("description", "Named Query - VNF to ESR System Info");
+					 
+		Introspector genericVnfNQE = setupNQElements(namedQueryObj, genericVnfRelationship);
 				
-		List<Introspector> genericVnfRels = new ArrayList<Introspector>();
-		genericVnfRels.add(genericVnfRelationship);
-		List<Introspector> serviceInstanceRels = new ArrayList<Introspector>();
-		serviceInstanceRels.add(serviceInstanceRelationship);
-		List<Introspector> vceRels = new ArrayList<Introspector>();
-		vceRels.add(vceRelationship);
+		Introspector vserverNQE = setupNQElements(genericVnfNQE, vserverRelationship);
+		
+		Introspector tenantNQE = setupNQElements(vserverNQE, tenantRelationship);
+		
+		Introspector cloudRegionNQE = setupNQElements(tenantNQE, cloudRegionRelationship);
 
-		 
-		Introspector genericVnfNQE = setupNQElements(namedQueryObj, genericVnfRels);
-				
-		//Introspector vceNQE2 = setupNQElements(namedQueryObj, vceRels);
-		
-		Introspector serviceInstanceNQE = setupNQElements(genericVnfNQE, serviceInstanceRels);
-		
-		Introspector newGenericVnfNQE = setupNQElements(serviceInstanceNQE, genericVnfRels);
+		Introspector esrSystemInfoNQE = setupNQElements(cloudRegionNQE, esrSystemInfoRelationship);
 		
 		System.out.println(namedQueryObj.marshal(true));
 		
 		System.exit(0);
 
 	}	
-
+	private static List<Introspector> getRels(String widgetName, HashMap<String, Introspector> widgetToRelationship) {
+		List<Introspector> relList = new ArrayList<Introspector>();
+		Introspector genericVnfRelationship = widgetToRelationship.get(widgetName);
+		relList.add(genericVnfRelationship);
+		return relList;
+	}
+	
 	private static Introspector setupNQElements (Introspector nqeObj, List<Introspector> listOfRelationships) {
 		Introspector newNQElement = null;
 		try {
