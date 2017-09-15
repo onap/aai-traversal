@@ -53,4 +53,15 @@ chef-solo \
       -j /var/chef/aai-config/cookbooks/runlist-${project.artifactId}.json \
       -E ${AAI_CHEF_ENV};
 
-java -cp ${CLASSPATH}:/opt/app/commonLibs/*:/opt/app/aai-traversal/etc:/opt/app/aai-traversal/lib/*:/opt/app/aai-traversal/extJars/logback-access-1.1.7.jar:/opt/app/aai-traversal/extJars/logback-core-1.1.7.jar:/opt/app/aai-traversal/extJars/aai-core-${AAI_CORE_VERSION}.jar -server -XX:NewSize=512m -XX:MaxNewSize=512m -XX:SurvivorRatio=8 -XX:+DisableExplicitGC -verbose:gc -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:-UseBiasedLocking -XX:ParallelGCThreads=4 -XX:LargePageSizeInBytes=128m -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Dsun.net.inetaddr.ttl=180 -XX:+HeapDumpOnOutOfMemoryError -Dhttps.protocols=TLSv1.1,TLSv1.2 -DSOACLOUD_SERVICE_VERSION=1.0.1 -DAJSC_HOME=/opt/app/aai-traversal/ -DAJSC_CONF_HOME=/opt/app/aai-traversal/bundleconfig -DAJSC_SHARED_CONFIG=/opt/app/aai-traversal/bundleconfig -DAFT_HOME=/opt/app/aai-traversal -DAAI_CORE_VERSION=${AAI_CORE_VERSION} -Daai-core.version=${AAI_CORE_VERSION} -Dlogback.configurationFile=/opt/app/aai-traversal/bundleconfig/etc/logback.xml -Xloggc:/opt/app/aai-traversal/logs/ajsc-jetty/gc/graph-query_gc.log com.att.ajsc.runner.Runner context=/ port=8086 sslport=8446
+
+nohup java -cp ${CLASSPATH}:/opt/app/commonLibs/*:/opt/app/aai-traversal/etc:/opt/app/aai-traversal/lib/*:/opt/app/aai-traversal/extJars/logback-access-1.1.7.jar:/opt/app/aai-traversal/extJars/logback-core-1.1.7.jar:/opt/app/aai-traversal/extJars/aai-core-${AAI_CORE_VERSION}.jar -server -XX:NewSize=512m -XX:MaxNewSize=512m -XX:SurvivorRatio=8 -XX:+DisableExplicitGC -verbose:gc -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:-UseBiasedLocking -XX:ParallelGCThreads=4 -XX:LargePageSizeInBytes=128m -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Dsun.net.inetaddr.ttl=180 -XX:+HeapDumpOnOutOfMemoryError -Dhttps.protocols=TLSv1.1,TLSv1.2 -DSOACLOUD_SERVICE_VERSION=1.0.1 -DAJSC_HOME=/opt/app/aai-traversal/ -DAJSC_CONF_HOME=/opt/app/aai-traversal/bundleconfig -DAJSC_SHARED_CONFIG=/opt/app/aai-traversal/bundleconfig -DAFT_HOME=/opt/app/aai-traversal -DAAI_CORE_VERSION=${AAI_CORE_VERSION} -Daai-core.version=${AAI_CORE_VERSION} -Dlogback.configurationFile=/opt/app/aai-traversal/bundleconfig/etc/logback.xml -Xloggc:/opt/app/aai-traversal/logs/ajsc-jetty/gc/graph-query_gc.log com.att.ajsc.runner.Runner context=/ port=8086 sslport=8446 & 
+
+echo "Wait for server start..."
+sleep 30
+
+/opt/app/aai-traversal/bin/install/updateQueryData.sh
+
+while :
+do
+	sleep 1d
+done
