@@ -19,13 +19,16 @@
 ###
 
 # Set the current path to be the application home and common libs home
-APP_HOME=$(pwd);
+export APP_HOME=$(pwd);
 COMMONLIBS_HOME="/opt/app/commonLibs";
 
 export CHEF_CONFIG_REPO=${CHEF_CONFIG_REPO:-aai-config};
 export CHEF_GIT_URL=${CHEF_GIT_URL:-http://gerrit.onap.org/r/aai};
 export CHEF_CONFIG_GIT_URL=${CHEF_CONFIG_GIT_URL:-$CHEF_GIT_URL};
 export CHEF_DATA_GIT_URL=${CHEF_DATA_GIT_URL:-$CHEF_GIT_URL};
+
+export RESOURCES_HOSTNAME=${RESOURCES_HOSTNAME:-aai-resources.api.simpledemo.openecomp.org};
+export RESOURCES_PORT=${RESOURCES_PORT:-8447};
 
 USER_ID=${LOCAL_USER_ID:-9001}
 

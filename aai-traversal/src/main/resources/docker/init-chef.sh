@@ -51,4 +51,13 @@ if [ ! -d "aai-data" ]; then
        -j /var/chef/aai-config/cookbooks/runlist-aai-traversal.json \
        -E ${AAI_CHEF_ENV};
 
+    while ! nc -z ${RESOURCES_HOSTNAME} ${RESOURCES_PORT} ;
+    do
+        echo "Waiting for resources to be up";
+        sleep 5;
+    done
+
+    cd ${APP_HOME}
+
+    nohup /opt/app/aai-traversal/bin/install/updateQueryData.sh &
 fi
