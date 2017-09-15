@@ -1,0 +1,18 @@
+{
+  "query-parameters": {
+    "named-query": {
+      "named-query-name": "wan-connector",
+      "named-query-version": "1",
+      "named-query-uuid": "afsjdiofjsia-afiojadfio-dsjfoisajfid"
+    }
+  },
+  "instance-filters": {
+    "instance-filter": [
+      {
+        "connector": {
+          "resource-instance-id": "123456-16102016"
+        }
+      }
+    ]
+  }
+}
