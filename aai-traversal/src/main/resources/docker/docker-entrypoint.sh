@@ -19,13 +19,16 @@
 ###
 
 # Set the current path to be the application home and common libs home
-APP_HOME=$(pwd);
+export APP_HOME=$(pwd);
 COMMONLIBS_HOME="/opt/app/commonLibs";
 
 export CHEF_CONFIG_REPO=${CHEF_CONFIG_REPO:-aai-config};
 export CHEF_GIT_URL=${CHEF_GIT_URL:-http://gerrit.onap.org/r/aai};
 export CHEF_CONFIG_GIT_URL=${CHEF_CONFIG_GIT_URL:-$CHEF_GIT_URL};
 export CHEF_DATA_GIT_URL=${CHEF_DATA_GIT_URL:-$CHEF_GIT_URL};
+
+export RESOURCES_HOSTNAME=${RESOURCES_HOSTNAME:-aai-resources.api.simpledemo.openecomp.org};
+export RESOURCES_PORT=${RESOURCES_PORT:-8447};
 
 USER_ID=${LOCAL_USER_ID:-9001}
 
@@ -44,6 +47,21 @@ httpPort=8086;
 httpsPort=8446;
 
 cd ${APP_HOME};
+
+# If the variable DISABLE_UPDATE_QUERY is empty
+# then the update query date shell script will be ran
+# This makes it configurable to run update query or not
+
+if [ -z ${DISABLE_UPDATE_QUERY} ]; then
+
+	while ! nc -z ${RESOURCES_HOSTNAME} ${RESOURCES_PORT} ;
+	do
+		echo "Waiting for resources to be up";
+		sleep 5;
+	done
+
+	/opt/app/aai-traversal/bin/install/updateQueryData.sh
+fi
 
 CP=${COMMONLIBS_HOME}/*;
 CP="$CP":${APP_HOME}/etc;
