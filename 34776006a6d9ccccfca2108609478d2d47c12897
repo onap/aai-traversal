@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a437d4f_7e6eef97",
+        "filename": "aai-traversal/src/main/resources/docker/docker-entrypoint.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2017-09-18T16:24:11Z",
+      "side": 1,
+      "message": "Using nohup is a problem because we are now going to use exec command to make the java process the main process so the signal to kill process will be properly forwarded to java process. Doing this will surely conflict with that behaviour",
+      "revId": "34776006a6d9ccccfca2108609478d2d47c12897",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a437d4f_5e6d6b97",
+        "filename": "aai-traversal/src/main/resources/docker/docker-entrypoint.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2017-09-18T16:24:11Z",
+      "side": 1,
+      "message": "Also, this will end up failing due to the fact docker haproxy is not yet up. Needs to ensure that haproxy is up before the resources and traversal in test-config repo. Also need to move this before java command. As the haproxy actually makes the request against resources repo. Having this in the background will be better than having java to be in background",
+      "revId": "34776006a6d9ccccfca2108609478d2d47c12897",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a437d4f_3e686786",
+        "filename": "aai-traversal/src/main/resources/docker/docker-entrypoint.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2017-09-18T16:24:11Z",
+      "side": 1,
+      "message": "After 1 day the application will exit itself. Usually the practice in docker startup script is to wait for ever using wait command and capture the SIGINT and SIGTERM signals and gracefully shutdown the application.",
+      "revId": "34776006a6d9ccccfca2108609478d2d47c12897",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
