@@ -25,8 +25,30 @@
 #
 ##############################################################################
 
-#echo "AAI_CHEF_ENV=${AAI_CHEF_ENV}" >> /etc/environment
-#echo "AAI_CHEF_LOC=${AAI_CHEF_LOC}" >> /etc/environment
-#touch /root/.bash_profile
-chef-solo -c /var/chef/aai-data/chef-config/dev/.knife/solo.rb -j /var/chef/aai-config/cookbooks/runlist-app-server.json -E ${AAI_CHEF_ENV}
+cd /var/chef;
 
+if [ ! -d "aai-config" ]; then
+
+    git clone --depth 1 -b ${CHEF_BRANCH} --single-branch ${CHEF_CONFIG_GIT_URL}/${CHEF_CONFIG_REPO}.git aai-config || {
+        echo "Error: Unable to clone the aai-config repo with url: ${CHEF_GIT_URL}/${CHEF_CONFIG_REPO}.git";
+        exit;
+    }
+
+    (cd aai-config/cookbooks/aai-traversal/ && \
+        for f in $(ls); do mv $f ../; done && \
+        cd ../ && rmdir aai-traversal);
+fi
+
+if [ ! -d "aai-data" ]; then
+
+    git clone --depth 1 -b ${CHEF_BRANCH} --single-branch ${CHEF_DATA_GIT_URL}/aai-data.git aai-data || {
+        echo "Error: Unable to clone the aai-data repo with url: ${CHEF_GIT_URL}";
+        exit;
+    }
+
+    chef-solo \
+       -c /var/chef/aai-data/chef-config/dev/.knife/solo.rb \
+       -j /var/chef/aai-config/cookbooks/runlist-aai-traversal.json \
+       -E ${AAI_CHEF_ENV};
+
+fi
