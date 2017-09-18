@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a437d4f_98c52b90",
+        "filename": "aai-traversal/src/main/java/org/openecomp/aai/interceptors/AAILogJAXRSInInterceptor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 703
+      },
+      "writtenOn": "2017-09-18T09:12:48Z",
+      "side": 1,
+      "message": "Should this put be contained in the for-loop above?",
+      "revId": "75ea836990332d1d8797e0e2ec10820d628c95b3",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
