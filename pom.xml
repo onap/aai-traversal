@@ -19,7 +19,7 @@
     <properties>
         <nexusproxy>https://nexus.onap.org</nexusproxy>
         <onap.nexus.url>https://nexus.onap.org</onap.nexus.url>
-        <sitePath>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</sitePath>
+	<sitePath>/content/sites/site/org/onap/aai/${project.artifactId}/${project.version}</sitePath>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -74,16 +74,16 @@
         <repository>
             <id>ecomp-releases</id>
             <name>ECOMP Release Repository</name>
-            <url>${nexusproxy}/content/repositories/releases/</url>
+            <url>${onap.nexus.url}/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
             <id>ecomp-snapshots</id>
             <name>ECOMP Snapshot Repository</name>
-            <url>${nexusproxy}/content/repositories/snapshots/</url>
+            <url>${onap.nexus.url}/content/repositories/snapshots/</url>
         </snapshotRepository>
         <site>
             <id>ecomp-site</id>
-            <url>dav:${nexusproxy}${sitePath}</url>
+	    <url>dav:${onap.nexus.url}${sitePath}</url>
         </site>
     </distributionManagement>
     <profiles>
@@ -288,7 +288,7 @@
                     <version>1.6.7</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <nexusUrl>${nexusproxy}</nexusUrl>
+                        <nexusUrl>${onap.nexus.url}</nexusUrl>
                         <stagingProfileId>176c31dfe190a</stagingProfileId>
                         <serverId>ecomp-staging</serverId>
                     </configuration>
