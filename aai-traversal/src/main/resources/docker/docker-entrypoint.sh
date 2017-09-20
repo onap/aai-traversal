@@ -60,7 +60,12 @@ if [ -z ${DISABLE_UPDATE_QUERY} ]; then
 		sleep 5;
 	done
 
-	/opt/app/aai-traversal/bin/install/updateQueryData.sh
+	UPDATE_QUERY_RAN_FILE="updateQueryRan.txt";
+
+	if [ ! -f ${UPDATE_QUERY_RAN_FILE} ]; then
+		gosu aaiadmin /opt/app/aai-traversal/bin/install/updateQueryData.sh
+		touch ${UPDATE_QUERY_RAN_FILE};
+	fi
 fi
 
 CP=${COMMONLIBS_HOME}/*;
