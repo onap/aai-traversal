@@ -942,10 +942,8 @@ public class SearchGraph {
 						invItemList.add(invItem);
 					}
 				}
-				if (invItemList != null) { 
-					inventoryItems.set("inventoryResponseItem", invItemList);
-					inventoryItem.set("inventoryResponseItems",  inventoryItems);
-				}
+				inventoryItems.set("inventoryResponseItem", invItemList);
+				inventoryItem.set("inventoryResponseItems",  inventoryItems);
 			}
 		}
 		return inventoryItem;
