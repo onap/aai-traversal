@@ -105,7 +105,7 @@ public class SearchProvider extends RESTAPI {
 			//only consider header value for search		
 			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 			final Version version;
-			if (versionParam.equals("latest")) {
+			if ("latest".equals(versionParam)) {
 				version = AAIProperties.LATEST;
 			} else {
 				version = Version.valueOf(versionParam);
@@ -197,7 +197,7 @@ public class SearchProvider extends RESTAPI {
 			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 			
 			final Version version;
-			if (versionParam.equals("latest")) {
+			if ("latest".equals(versionParam)) {
 				version = AAIProperties.LATEST;
 			} else {
 				version = Version.valueOf(versionParam);
