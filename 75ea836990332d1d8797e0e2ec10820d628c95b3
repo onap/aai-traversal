@@ -16,6 +16,24 @@
       "revId": "75ea836990332d1d8797e0e2ec10820d628c95b3",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a437d4f_f1a2f649",
+        "filename": "aai-traversal/src/main/java/org/openecomp/aai/interceptors/AAILogJAXRSInInterceptor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1139
+      },
+      "writtenOn": "2017-09-22T17:46:51Z",
+      "side": 1,
+      "message": "ONAP logging guidelines(https://wiki.onap.org/display/DW/ONAP+Application+Logging+Guidelines+v1.1) suggest that PartnerName should be the name of the client invoking the API. So I am setting the last value of X-FromAppId as PartnerName which should be name of client application calling AAI.",
+      "parentUuid": "9a437d4f_98c52b90",
+      "revId": "75ea836990332d1d8797e0e2ec10820d628c95b3",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
