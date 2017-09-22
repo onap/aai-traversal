@@ -94,7 +94,7 @@ public class AAILogJAXRSInInterceptor extends JAXRSInInterceptor {
 			ErrorLogHelper.logException(e1);
 		}
 		
-		if (uri.contains(EchoResponse.echoPath)) {
+		if ((uri != null) && (uri.contains(EchoResponse.echoPath))) {
 			// if it's a health check, we don't want to log ANYTHING if it's a lightweight one
 			if (query == null) {
 				if (message.getExchange().containsKey("AAI_LOGGING_HBASE_ENABLED")) {
@@ -106,7 +106,7 @@ public class AAILogJAXRSInInterceptor extends JAXRSInInterceptor {
 				go = false;
 			}
 		}
-		else if (uri.contains("/translog/")) {
+		else if ((uri != null) && (uri.contains("/translog/"))) {
 			// if it's a translog query, we don't want to log the responses
 			if (message.getExchange().containsKey("AAI_LOGGING_HBASE_LOGRESPONSE")) {
 				message.getExchange().remove("AAI_LOGGING_HBASE_LOGRESPONSE");
