@@ -100,5 +100,10 @@ public class AAIAppServletContextListener implements ServletContextListener {
 			LOGGER.error("Unknown failure while initializing AAI Server", e);
 			throw new RuntimeException("Unknown failure while initializing AAI server", e);
 		}
+
+		LOGGER.info("Graph-Query MicroService Started");
+		LOGGER.error("Graph-Query MicroService Started");
+		LOGGER.debug("Graph-Query MicroService Started");
+
 	}
 }
