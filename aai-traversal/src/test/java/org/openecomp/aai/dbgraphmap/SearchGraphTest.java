@@ -21,29 +21,41 @@
 package org.openecomp.aai.dbgraphmap;
 
 import com.thinkaurelius.titan.core.TitanGraph;
+import com.thinkaurelius.titan.graphdb.types.system.EmptyVertex;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
+import org.apache.velocity.util.ArrayListWrapper;
+import org.eclipse.persistence.dynamic.DynamicEntity;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.openecomp.aai.dbgraphgen.ModelBasedProcessing;
 import org.openecomp.aai.dbmap.DBConnectionType;
 import org.openecomp.aai.exceptions.AAIException;
-import org.openecomp.aai.introspection.Loader;
-import org.openecomp.aai.introspection.LoaderFactory;
-import org.openecomp.aai.introspection.ModelType;
-import org.openecomp.aai.introspection.Version;
+import org.openecomp.aai.extensions.AAIExtensionMap;
+import org.openecomp.aai.introspection.*;
+import org.openecomp.aai.parsers.relationship.RelationshipToURI;
 import org.openecomp.aai.serialization.db.DBSerializer;
 import org.openecomp.aai.serialization.engines.QueryStyle;
 import org.openecomp.aai.serialization.engines.TitanDBEngine;
 import org.openecomp.aai.serialization.engines.TransactionalGraphEngine;
 import org.openecomp.aai.serialization.queryformats.utils.UrlBuilder;
 
+
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
+import java.net.URI;
+import java.sql.ResultSet;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class SearchGraphTest {
 
@@ -131,6 +143,20 @@ public class SearchGraphTest {
                 loader);
     }
 
+@Test(expected = AAIException.class)
+    public void runNodesQuery() throws  AAIException{
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        searchGraph.runNodesQuery(httpHeaders,"",null,
+                null,dbEngine,loader,urlBuilder);
+    }
+    @Test(expected = AAIException.class)
+    public void runNodesQueryNull() throws  AAIException{
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        searchGraph.runNodesQuery(httpHeaders,"nnn",null,
+                null,dbEngine,loader,urlBuilder);
+    }
     @Test(expected = AAIException.class)
     public void testRunGenericQueryFailWhenInvalidRelationshipList() throws AAIException {
 
@@ -142,7 +168,211 @@ public class SearchGraphTest {
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
-        Response response = searchGraph.runGenericQuery(httpHeaders, "cloud-region", keys, includeStrings, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(httpHeaders, "service-instance", keys, includeStrings, 1, dbEngine, loader, urlBuilder);
         System.out.println(response);
+    }
+
+
+    @Test(expected = AAIException.class)
+    public void testRunGenericQueryFailWhenInvalidRelationshipList1() throws AAIException {
+
+        List<String> keys = new ArrayList<>();
+        keys.add("cloud-region.cloud-owner:test-aic");
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        Response response = searchGraph.runGenericQuery(httpHeaders, null, keys, includeStrings, 1, dbEngine, loader, urlBuilder);
+        System.out.println(response);
+    }
+
+    @Test(expected = AAIException.class)
+    public void testRunGenericQueryFailWhenInvalidRelationshipList2() throws AAIException {
+
+        List<String> keys = new ArrayList<>();
+        keys.add("cloud-region.cloud-owner:test-aic");
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        Response response = searchGraph.runGenericQuery(httpHeaders, "", null, includeStrings, 1, dbEngine, loader, urlBuilder);
+        System.out.println(response);
+    }
+
+    @Test(expected = AAIException.class)
+    public void testRunGenericQueryFailWhenInvalidRelationshipList3() throws AAIException {
+
+        List<String> keys = new ArrayList<>();
+        keys.add("cloud-region.cloud-owner:test-aic");
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        Response response = searchGraph.runGenericQuery(httpHeaders, "", keys, null, 1, dbEngine, loader, urlBuilder);
+        System.out.println(response);
+    }
+
+
+    /*@Test(expected = NullPointerException.class)
+    public void createSearchResults() throws AAIException {
+
+        List<Vertex> keys = new ArrayList<>();
+        Vertex vertex=new EmptyVertex();
+        keys.add(vertex);
+
+
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        Introspector response = searchGraph.createSearchResults(loader, urlBuilder, keys);
+        System.out.println(response);
+    }*/
+    @Test
+    public void createSearchResults1() throws Exception {
+
+        List<Vertex> keys = new ArrayList<>();
+        Vertex vertex=new EmptyVertex();
+        keys.add(vertex);
+         DBSerializer ds=mock(DBSerializer.class);
+          UrlBuilder urlBuilder=mock(UrlBuilder.class);
+          when(urlBuilder.pathed(vertex)).thenReturn("cloud-region");
+        Stream<Vertex> stream=mock(Stream.class);
+        when(stream.isParallel()).thenReturn(true);
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+        RelationshipToURI relationshipToURI=mock(RelationshipToURI.class);
+        URI uri =new URI("");
+        when(relationshipToURI.getUri()).thenReturn(uri);
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+     //   UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        Introspector response = searchGraph.createSearchResults(loader, urlBuilder, keys);
+        System.out.println(response);
+    }
+    @Test(expected = AAIException.class)
+    public void executeModelOperationTest() throws  Exception{
+        Vertex vertex=new EmptyVertex();
+        vertex.property("model-name");
+        Map<String,Object> mapObj=new HashMap<String,Object>();
+        mapObj.put("modle-version",vertex);
+        List<Map<String,Object>> startNodeFilterArrayOfHashes=new ArrayList<>();
+        startNodeFilterArrayOfHashes.add(mapObj);
+        List<org.openecomp.aai.dbgraphgen.ResultSet> resultSet=new ArrayList<org.openecomp.aai.dbgraphgen.ResultSet>();
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+      //  ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
+        AAIExtensionMap map=mock(AAIExtensionMap.class);
+        HttpServletRequest servletRequest=mock(HttpServletRequest.class);
+
+        when(map.getHttpServletRequest()).thenReturn(servletRequest);
+        when(servletRequest.getContentType()).thenReturn("application/json");
+        DynamicEntity modelAndNamedQuerySearch=mock(DynamicEntity.class);
+        when(modelAndNamedQuerySearch.isSet("topNodeType")).thenReturn(true);
+
+
+/*        when(processor.queryByModel("9999","model-ver","model-version-id",
+                "model-inv-id","modelname","aai",
+                startNodeFilterArrayOfHashes,"aai-ver")).thenReturn(resultSet);*/
+
+        searchGraph.executeModelOperation("","","",type,true,
+                map);
+    }
+
+    @Test(expected = AAIException.class)
+    public void executeModelOperationXMLTest() throws  Exception{
+        Vertex vertex=new EmptyVertex();
+        vertex.property("model-name");
+        Map<String,Object> mapObj=new HashMap<String,Object>();
+        mapObj.put("modle-version",vertex);
+        List<Map<String,Object>> startNodeFilterArrayOfHashes=new ArrayList<>();
+        startNodeFilterArrayOfHashes.add(mapObj);
+        List<org.openecomp.aai.dbgraphgen.ResultSet> resultSet=new ArrayList<org.openecomp.aai.dbgraphgen.ResultSet>();
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        //  ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
+        AAIExtensionMap map=mock(AAIExtensionMap.class);
+        HttpServletRequest servletRequest=mock(HttpServletRequest.class);
+
+        when(map.getHttpServletRequest()).thenReturn(servletRequest);
+        when(servletRequest.getContentType()).thenReturn("application/xml");
+
+        DynamicEntity modelAndNamedQuerySearch=mock(DynamicEntity.class);
+        when(modelAndNamedQuerySearch.isSet("queryParameters")).thenReturn(true);
+/*        when(processor.queryByModel("9999","model-ver","model-version-id",
+                "model-inv-id","modelname","aai",
+                startNodeFilterArrayOfHashes,"aai-ver")).thenReturn(resultSet);*/
+
+        searchGraph.executeModelOperation("","","",type,true,
+                map);
+    }
+    @Test
+    public void runNodesQueryTest() throws  AAIException{
+        UrlBuilder urlBuilder=mock(UrlBuilder.class);
+        List<String> filter=new ArrayList<String>();
+        filter.add("model:EQUALS:DOES-NOT-EXIST:AAI");
+        List<String> edgeFilter=new ArrayList<String>();
+        edgeFilter.add("model:DOES-NOT-EXIST:DOES-NOT-EXIST:AAI");
+      Response response=  searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
+                filter,dbEngine,loader,urlBuilder);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void runNodesQueryExistsTest() throws  AAIException{
+        UrlBuilder urlBuilder=mock(UrlBuilder.class);
+        List<String> filter=new ArrayList<String>();
+        filter.add("model:EQUALS:DOES-NOT-EXIST:AAI");
+        List<String> edgeFilter=new ArrayList<String>();
+        edgeFilter.add("model:EXISTS:DOES-NOT-EXIST:AAI");
+        Response response=  searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
+                filter,dbEngine,loader,urlBuilder);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void runNodesQueryTestDOESNOTEQUAL() throws  AAIException{
+        UrlBuilder urlBuilder=mock(UrlBuilder.class);
+        List<String> filter=new ArrayList<String>();
+        filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST");
+        List<String> edgeFilter=new ArrayList<String>();
+        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
+                filter,dbEngine,loader,urlBuilder);
+    }
+
+    @Test
+    public void runNodesQueryTestGreaterThan3() throws  AAIException{
+        UrlBuilder urlBuilder=mock(UrlBuilder.class);
+        List<String> filter=new ArrayList<String>();
+        filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST:AAI");
+        List<String> edgeFilter=new ArrayList<String>();
+        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
+                filter,dbEngine,loader,urlBuilder);
+    }
+
+    @Test
+    public void runNodesQueryTestGreaterThanExists() throws  AAIException{
+        UrlBuilder urlBuilder=mock(UrlBuilder.class);
+        List<String> filter=new ArrayList<String>();
+        filter.add("model:EXISTS:DOES-NOT-EXIST:AAI");
+        List<String> edgeFilter=new ArrayList<String>();
+        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
+                filter,dbEngine,loader,urlBuilder);
+    }
+
+    @Test(expected = AAIException.class)
+    public void runNodesQueryTestGreaterThanDoesNotExists() throws  AAIException{
+        UrlBuilder urlBuilder=mock(UrlBuilder.class);
+        List<String> filter=new ArrayList<String>();
+        filter.add("model:DOES_NOT_EXIST:DOES-NOT-EXIST:AAI");
+        List<String> edgeFilter=new ArrayList<String>();
+        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
+                filter,dbEngine,loader,urlBuilder);
     }
 }
