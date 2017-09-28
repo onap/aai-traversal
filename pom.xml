@@ -45,7 +45,7 @@
         <!-- For SOA Cloud Installation -->
         <installOwnerUser>aaiadmin</installOwnerUser>
         <installOwnerGroup>aaiadmin</installOwnerGroup>
-        <ownerManagementGroup>org.openecomp.aai.dev</ownerManagementGroup>
+        <ownerManagementGroup>org.onap.aai.dev</ownerManagementGroup>
 
         <!-- Port Selection. A value of 0 will allow for dynamic port selection.
             For local testing, you may choose to hardcode this value to something like

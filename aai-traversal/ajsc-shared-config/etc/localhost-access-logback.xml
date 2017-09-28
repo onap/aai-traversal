@@ -1,3 +1,26 @@
+<!--
+
+    ============LICENSE_START=======================================================
+    org.onap.aai
+    ================================================================================
+    Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+    ================================================================================
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    ============LICENSE_END=========================================================
+
+    ECOMP is a trademark and service mark of AT&T Intellectual Property.
+
+-->
 <configuration>
 	<appender name="ACCESS"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -6,7 +29,7 @@
 			<fileNamePattern>${AJSC_HOME}/logs/ajsc-jetty/localhost_access.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.CustomLogPatternLayoutEncoder">
+		<encoder class="org.onap.aai.logging.CustomLogPatternLayoutEncoder">
 			<Pattern>%a %u %z [%t] "%m %U" %s %b %y %i{X-TransactionId} %i{X-FromAppId} %i{X-Forwarded-For} %i{X-AAI-SSL-Client-CN} %i{X-AAI-SSL-Client-OU} %i{X-AAI-SSL-Client-O} %i{X-AAI-SSL-Client-L} %i{X-AAI-SSL-Client-ST} %i{X-AAI-SSL-Client-C} %i{X-AAI-SSL-Client-NotBefore} %i{X-AAI-SSL-Client-NotAfter} %i{X-AAI-SSL-Client-DN} %D</Pattern>
 		</encoder>
 	</appender>

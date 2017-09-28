@@ -20,11 +20,11 @@
 	<!-- <bean id="processRestletHeaders" name="processRestletHeaders" class="ajsc.restlet.ProcessRestletHeaders" 
 		/> -->
 	<bean id="servicePropsBean" name="servicePropsBean"
-		class="org.openecomp.aai.ajsc_aai.util.ServicePropertiesMapBean" />
-	<bean id="jsonProvider" class="org.openecomp.aai.restcore.CustomJacksonJaxBJsonProvider" />
+		class="org.onap.aai.ajsc_aai.util.ServicePropertiesMapBean" />
+	<bean id="jsonProvider" class="org.onap.aai.restcore.CustomJacksonJaxBJsonProvider" />
 
-	<bean id="inInterceptor" class="org.openecomp.aai.interceptors.AAILogJAXRSInInterceptor" />
-	<bean id="outInterceptor" class="org.openecomp.aai.interceptors.AAILogJAXRSOutInterceptor" />
+	<bean id="inInterceptor" class="org.onap.aai.interceptors.AAILogJAXRSInInterceptor" />
+	<bean id="outInterceptor" class="org.onap.aai.interceptors.AAILogJAXRSOutInterceptor" />
 	<cxf:bus bus="cxfBus">
 		<cxf:inInterceptors>
 			<ref bean="inInterceptor" />
@@ -33,8 +33,8 @@
 			<ref bean="outInterceptor" />
 		</cxf:outInterceptors>
 	</cxf:bus>
-	<context:component-scan base-package="org.openecomp.aai.tasks" />
-	<context:component-scan base-package="org.openecomp.aai.config" />
+	<context:component-scan base-package="org.onap.aai.tasks" />
+	<context:component-scan base-package="org.onap.aai.config" />
 
 	<task:scheduler id="taskScheduler" pool-size="10" />
 	<task:executor id="taskExecutor" pool-size="10"
@@ -82,10 +82,10 @@
 	</bean>
 
 	<!-- Message Producer -->
-	<bean id="messageProducer" class="org.openecomp.aai.dmaap.AAIDmaapEventJMSProducer" />
+	<bean id="messageProducer" class="org.onap.aai.dmaap.AAIDmaapEventJMSProducer" />
 
 	<!-- Message Consumer from Default Destination -->
-	<bean id="messageDefaultConsumer" class="org.openecomp.aai.dmaap.AAIDmaapEventJMSConsumer" />
+	<bean id="messageDefaultConsumer" class="org.onap.aai.dmaap.AAIDmaapEventJMSConsumer" />
 
 	<!-- Message Consumer Container for Default Destination -->
 	<bean

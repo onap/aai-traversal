@@ -3,13 +3,13 @@ beans{
 	xmlns jaxrs: "http://cxf.apache.org/jaxrs"
 	xmlns util: "http://www.springframework.org/schema/util"
 
-	SearchProvider(org.openecomp.aai.rest.search.SearchProvider)
-	ModelAndNamedQueryRestProvider(org.openecomp.aai.rest.search.ModelAndNamedQueryRestProvider)
-	QueryConsumer(org.openecomp.aai.rest.QueryConsumer)
+	SearchProvider(org.onap.aai.rest.search.SearchProvider)
+	ModelAndNamedQueryRestProvider(org.onap.aai.rest.search.ModelAndNamedQueryRestProvider)
+	QueryConsumer(org.onap.aai.rest.QueryConsumer)
 
-	V3ThroughV7Retired(org.openecomp.aai.rest.retired.V3ThroughV7Consumer)
+	V3ThroughV7Retired(org.onap.aai.rest.retired.V3ThroughV7Consumer)
 
-	EchoResponse(org.openecomp.aai.rest.util.EchoResponse)
+	EchoResponse(org.onap.aai.rest.util.EchoResponse)
 
 
 	util.list(id: 'jaxrsServices') {

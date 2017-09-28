@@ -1,3 +1,26 @@
+<!--
+
+    ============LICENSE_START=======================================================
+    org.onap.aai
+    ================================================================================
+    Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+    ================================================================================
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    ============LICENSE_END=========================================================
+
+    ECOMP is a trademark and service mark of AT&T Intellectual Property.
+
+-->
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
 	<contextName>${module.ajsc.namespace.name}</contextName>
 	<jmxConfigurator />
@@ -47,7 +70,7 @@
 			<fileNamePattern>${logDirectory}/rest/metrics.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfMetricLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -69,7 +92,7 @@
 			<fileNamePattern>${logDirectory}/rest/debug.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -90,7 +113,7 @@
 			<fileNamePattern>${logDirectory}/rest/error.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -108,7 +131,7 @@
 			<fileNamePattern>${logDirectory}/rest/audit.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfAuditLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -131,7 +154,7 @@
 			<fileNamePattern>${logDirectory}/rest/translog.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -152,7 +175,7 @@
 			<fileNamePattern>${logDirectory}/dmaapAAIEventConsumer/error.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -169,7 +192,7 @@
 			<fileNamePattern>${logDirectory}/dmaapAAIEventConsumer/debug.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -185,7 +208,7 @@
 			<fileNamePattern>${logDirectory}/dmaapAAIEventConsumer/metrics.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 		</rollingPolicy>
-		<encoder class="org.openecomp.aai.logging.EcompEncoder">
+		<encoder class="org.onap.aai.logging.EcompEncoder">
 			<pattern>${eelfLogPattern}</pattern>
 		</encoder>
 	</appender>
@@ -304,20 +327,20 @@
 	</logger>
 	<!-- logback jms appenders & loggers definition ends here -->
 
-	<logger name="org.openecomp.aai.interceptors" level="DEBUG"
+	<logger name="org.onap.aai.interceptors" level="DEBUG"
 		additivity="false">
 		<appender-ref ref="asynctranslog" />
 	</logger>
 
-	<logger name="org.openecomp.aai.interceptors.PreAaiAjscInterceptor" level="DEBUG">
+	<logger name="org.onap.aai.interceptors.PreAaiAjscInterceptor" level="DEBUG">
 		<appender-ref ref="asyncAUDIT"/>
 	</logger>
 
-	<logger name="org.openecomp.aai.interceptors.PostAaiAjscInterceptor" level="DEBUG">
+	<logger name="org.onap.aai.interceptors.PostAaiAjscInterceptor" level="DEBUG">
 		<appender-ref ref="asyncAUDIT"/>
 	</logger>
 
-	<logger name="org.openecomp.aai.dmaap" level="DEBUG" additivity="false">
+	<logger name="org.onap.aai.dmaap" level="DEBUG" additivity="false">
 		<appender-ref ref="dmaapAAIEventConsumer" />
 		<appender-ref ref="dmaapAAIEventConsumerDebug" />
 		<appender-ref ref="dmaapAAIEventConsumerMetric" />

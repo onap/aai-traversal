@@ -78,7 +78,7 @@
 	
 	<listener>
 		<listener-class>
-             org.openecomp.aai.util.AAIAppServletContextListener
+             org.onap.aai.util.AAIAppServletContextListener
         </listener-class>
    </listener>
 	<security-constraint>
