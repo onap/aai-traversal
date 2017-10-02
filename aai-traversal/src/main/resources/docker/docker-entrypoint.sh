@@ -71,7 +71,7 @@ if [ -z ${DISABLE_UPDATE_QUERY} ]; then
 
 	if [ ! -f ${UPDATE_QUERY_RAN_FILE} ]; then
 		OLD_RESOURCES_URL=$(grep -o "^aai.server.url=.*" ${AAICONFIG_FILE} | cut -d"=" -f2-);
-		TEMP_RESOURCES_URL=https://${RESOURCES_HOSTNAME}:${RESOURCES_PORT};
+		TEMP_RESOURCES_URL=https://${RESOURCES_HOSTNAME}:${RESOURCES_PORT}/aai/v11/;
 		sed -i "s%^aai.server.url=.*$%aai.server.url=${TEMP_RESOURCES_URL}%g" ${AAICONFIG_FILE};
 		gosu aaiadmin /opt/app/aai-traversal/bin/install/updateQueryData.sh
 		touch ${UPDATE_QUERY_RAN_FILE};
