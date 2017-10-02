@@ -32,7 +32,7 @@ if [ ! -d "aai-config" ]; then
 
     git clone --depth 1 -b ${CHEF_BRANCH} --single-branch ${CHEF_CONFIG_GIT_URL}/${CHEF_CONFIG_REPO}.git aai-config || {
         echo "Error: Unable to clone the aai-config repo with url: ${CHEF_GIT_URL}/${CHEF_CONFIG_REPO}.git";
-        exit;
+        exit 1;
     }
 
 fi
@@ -49,7 +49,7 @@ if [ ! -d "aai-data" ]; then
 
     git clone --depth 1 -b ${CHEF_BRANCH} --single-branch ${CHEF_DATA_GIT_URL}/aai-data.git aai-data || {
         echo "Error: Unable to clone the aai-data repo with url: ${CHEF_GIT_URL}";
-        exit;
+        exit 1;
     }
 
 fi

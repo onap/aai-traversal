@@ -67,9 +67,15 @@ if [ -z ${DISABLE_UPDATE_QUERY} ]; then
 
 	UPDATE_QUERY_RAN_FILE="updateQueryRan.txt";
 
+	AAICONFIG_FILE=/opt/app/aai-traversal/bundleconfig/etc/appprops/aaiconfig.properties;
+
 	if [ ! -f ${UPDATE_QUERY_RAN_FILE} ]; then
+		OLD_RESOURCES_URL=$(grep -o "^aai.server.url=.*" ${AAICONFIG_FILE} | cut -d"=" -f2-);
+		TEMP_RESOURCES_URL=https://${RESOURCES_HOSTNAME}:${RESOURCES_PORT};
+		sed -i "s%^aai.server.url=.*$%aai.server.url=${TEMP_RESOURCES_URL}%g" ${AAICONFIG_FILE};
 		gosu aaiadmin /opt/app/aai-traversal/bin/install/updateQueryData.sh
 		touch ${UPDATE_QUERY_RAN_FILE};
+		sed -i "s%^aai.server.url=.*$%aai.server.url=${OLD_RESOURCES_URL}%g" ${AAICONFIG_FILE};
 	fi
 fi
 
