@@ -33,7 +33,7 @@ public class JaxrsUserService {
 	
 	private static final Map<String,String> userIdToNameMap;
 	static {
-		userIdToNameMap = new HashMap<String,String>();
+		userIdToNameMap = new HashMap<>();
 		userIdToNameMap.put("userID1","Name1");
 		userIdToNameMap.put("userID2","Name2");
 	}
