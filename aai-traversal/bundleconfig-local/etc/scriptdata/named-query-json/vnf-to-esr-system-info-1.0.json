@@ -42,10 +42,20 @@
                               "relationship-key" : "model.model-invariant-id",
                               "relationship-value" : "97c26c99-6870-44c1-8a07-1d900d3f4ce6"
                            } ]
-                        } ]
-                     }
-                  } ]
-               },
+                        }
+		     ] }
+		   },
+		   {
+                     "relationship-list" : {
+                        "relationship" : [ {
+                           "related-to" : "model",
+                           "relationship-data" : [ {
+                              "relationship-key" : "model.model-invariant-id",
+                              "relationship-value" : "96129eb9-f0de-4e05-8af2-73146473f766"
+                           } ]
+                        }
+		     ] }
+		 } ] },
                "relationship-list" : {
                   "relationship" : [ {
                      "related-to" : "model",
