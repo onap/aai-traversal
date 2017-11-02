@@ -19,8 +19,6 @@
         <dockerLocation>${basedir}/target/swm/package/nix/dist_files/</dockerLocation>
         <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
         <docker.image.version>1.0.0</docker.image.version>
-        <aai-core.version>1.1.0-SNAPSHOT</aai-core.version>
-        <aai-schema.version>1.1.0-SNAPSHOT</aai-schema.version>
         <hbase.version>1.0.2</hbase.version>
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -33,12 +31,12 @@
         <dependency>
             <groupId>org.onap.aai.aai-common</groupId>
             <artifactId>aai-schema</artifactId>
-            <version>${aai-schema.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.onap.aai.aai-common</groupId>
             <artifactId>aai-core</artifactId>
-            <version>${aai-core.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <!-- Scamper related dependencies -->
         <dependency>
@@ -458,7 +456,7 @@
                             <artifactItem>
                                 <groupId>org.onap.aai.aai-common</groupId>
                                 <artifactId>aai-schema</artifactId>
-                                <version>${aai-schema.version}</version>
+                                <version>${project.version}</version>
                                 <outputDirectory>bundleconfig-local/etc</outputDirectory>
                                 <includes>oxm/*.xml</includes>
                             </artifactItem>

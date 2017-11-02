@@ -51,6 +51,8 @@ gosu aaiadmin ./init-chef.sh || {
 httpPort=8086;
 httpsPort=8446;
 
+AAI_CORE_JAR=$(ls ${APP_HOME}/extJars/aai-core*.jar);
+
 cd ${APP_HOME};
 
 # If the variable DISABLE_UPDATE_QUERY is empty
@@ -84,7 +86,7 @@ CP="$CP":${APP_HOME}/etc;
 CP="$CP":${APP_HOME}/lib/*;
 CP="$CP":${APP_HOME}/extJars/logback-access-1.1.7.jar;
 CP="$CP":${APP_HOME}/extJars/logback-core-1.1.7.jar;
-CP="$CP":${APP_HOME}/extJars/aai-core-${AAI_CORE_VERSION}.jar;
+CP="$CP":${AAI_CORE_JAR};
 
 # You can add additional jvm options by adding environment variable JVM_PRE_OPTS
 # If you need to add more jvm options at the end then you can use JVM_POST_OPTS
