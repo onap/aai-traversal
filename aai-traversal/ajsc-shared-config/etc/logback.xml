@@ -218,6 +218,7 @@
 	<logger name="org.springframework.beans" level="WARN" />
 	<logger name="org.springframework.web" level="WARN" />
 	<logger name="com.blog.spring.jms" level="WARN" />
+	<logger name="com.jayway.jsonpath" level="WARN" />
 
 	<!-- AJSC Services (bootstrap services) -->
 	<logger name="ajsc" level="WARN" />
