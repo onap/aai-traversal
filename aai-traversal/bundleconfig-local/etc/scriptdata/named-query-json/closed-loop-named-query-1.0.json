@@ -1,78 +1,187 @@
 {
-   "named-query-uuid" : "4ff56a54-9e3f-46b7-a337-07a1d3c6b469",
-   "named-query-name" : "closed-loop-named-query",
-   "named-query-version" : "1.0",
-   "description" : "Named Query - For closed loop flow",
-   "named-query-elements" : {
-      "named-query-element" : [ {
-         "named-query-elements" : {
-            "named-query-element" : [ {
-               "named-query-elements" : {
-                  "named-query-element" : [ {
-                     "relationship-list" : {
-                        "relationship" : [ {
-                           "related-to" : "model",
-                           "relationship-data" : [ {
-                              "relationship-key" : "model.model-invariant-id",
-                              "relationship-value" : "425b2158-e51d-4509-9945-dad4556474a3"
-                           } ]
-                        } ]
-                     }
-                  } ]
-               },
-               "relationship-list" : {
-                  "relationship" : [ {
-                     "related-to" : "model",
-                     "relationship-data" : [ {
-                        "relationship-key" : "model.model-invariant-id",
-                        "relationship-value" : "97c26c99-6870-44c1-8a07-1d900d3f4ce6"
-                     } ]
-                  } ]
-               }
-            }, {
-               "named-query-elements" : {
-                  "named-query-element" : [ {
-                     "relationship-list" : {
-                        "relationship" : [ {
-                           "related-to" : "model",
-                           "relationship-data" : [ {
-                              "relationship-key" : "model.model-invariant-id",
-                              "relationship-value" : "ef86f9c5-2165-44f3-8fc3-96018b609ea5"
-                           } ]
-                        } ]
-                     }
-                  }, {
-                     "relationship-list" : {
-                        "relationship" : [ {
-                           "related-to" : "model",
-                           "relationship-data" : [ {
-                              "relationship-key" : "model.model-invariant-id",
-                              "relationship-value" : "82194af1-3c2c-485a-8f44-420e22a9eaa4"
-                           } ]
-                        } ]
-                     }
-                  } ]
-               },
-               "relationship-list" : {
-                  "relationship" : [ {
-                     "related-to" : "model",
-                     "relationship-data" : [ {
-                        "relationship-key" : "model.model-invariant-id",
-                        "relationship-value" : "acc6edd8-a8d4-4b93-afaa-0994068be14c"
-                     } ]
-                  } ]
-               }
-            } ]
-         },
-         "relationship-list" : {
-            "relationship" : [ {
-               "related-to" : "model",
-               "relationship-data" : [ {
-                  "relationship-key" : "model.model-invariant-id",
-                  "relationship-value" : "ff69d4e0-a8e8-4108-bdb0-dd63217e63c7"
-               } ]
-            } ]
-         }
-      } ]
-   }
+    "description": "Named Query - For closed loop flow",
+    "named-query-elements": {
+        "named-query-element": [
+            {
+                "named-query-elements": {
+                    "named-query-element": [
+                        {
+                            "named-query-elements": {
+                                "named-query-element": [
+                                    {
+                                        "relationship-list": {
+                                            "relationship": [
+                                                {
+                                                    "related-to": "model",
+                                                    "relationship-data": [
+                                                        {
+                                                            "relationship-key": "model.model-invariant-id",
+                                                            "relationship-value": "425b2158-e51d-4509-9945-dad4556474a3"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "relationship-list": {
+                                "relationship": [
+                                    {
+                                        "related-to": "model",
+                                        "relationship-data": [
+                                            {
+                                                "relationship-key": "model.model-invariant-id",
+                                                "relationship-value": "97c26c99-6870-44c1-8a07-1d900d3f4ce6"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "named-query-elements": {
+                                "named-query-element": [
+                                    {
+                                        "related-lookups": {
+                                            "related-lookup": [
+                                                {
+                                                    "property-collect-list": [
+                                                        "model-invariant-id",
+                                                        "model-type"
+                                                    ],
+                                                    "source-node-property": "model-invariant-id-local",
+                                                    "source-node-type": "vf-module",
+                                                    "target-node-property": "model-invariant-id",
+                                                    "target-node-type": "model"
+                                                },
+                                                {
+                                                    "property-collect-list": [
+                                                        "model-name",
+                                                        "model-version-id",
+                                                        "model-version"
+                                                    ],
+                                                    "source-node-property": "model-version-id-local",
+                                                    "source-node-type": "vf-module",
+                                                    "target-node-property": "model-version-id",
+                                                    "target-node-type": "model-ver"
+                                                }
+                                            ]
+                                        },
+                                        "relationship-list": {
+                                            "relationship": [
+                                                {
+                                                    "related-to": "model",
+                                                    "relationship-data": [
+                                                        {
+                                                            "relationship-key": "model.model-invariant-id",
+                                                            "relationship-value": "ef86f9c5-2165-44f3-8fc3-96018b609ea5"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "related-lookups": {
+                                            "related-lookup": [
+                                                {
+                                                    "property-collect-list": [
+                                                        "model-invariant-id",
+                                                        "model-type"
+                                                    ],
+                                                    "source-node-property": "model-invariant-id-local",
+                                                    "source-node-type": "service-instance",
+                                                    "target-node-property": "model-invariant-id",
+                                                    "target-node-type": "model"
+                                                },
+                                                {
+                                                    "property-collect-list": [
+                                                        "model-name",
+                                                        "model-version-id",
+                                                        "model-version"
+                                                    ],
+                                                    "source-node-property": "model-version-id-local",
+                                                    "source-node-type": "service-instance",
+                                                    "target-node-property": "model-version-id",
+                                                    "target-node-type": "model-ver"
+                                                }
+                                            ]
+                                        },
+                                        "relationship-list": {
+                                            "relationship": [
+                                                {
+                                                    "related-to": "model",
+                                                    "relationship-data": [
+                                                        {
+                                                            "relationship-key": "model.model-invariant-id",
+                                                            "relationship-value": "82194af1-3c2c-485a-8f44-420e22a9eaa4"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "related-lookups": {
+                                "related-lookup": [
+                                    {
+                                        "property-collect-list": [
+                                            "model-invariant-id",
+                                            "model-type"
+                                        ],
+                                        "source-node-property": "model-invariant-id-local",
+                                        "source-node-type": "generic-vnf",
+                                        "target-node-property": "model-invariant-id",
+                                        "target-node-type": "model"
+                                    },
+                                    {
+                                        "property-collect-list": [
+                                            "model-name",
+                                            "model-version-id",
+                                            "model-version"
+                                        ],
+                                        "source-node-property": "model-version-id-local",
+                                        "source-node-type": "generic-vnf",
+                                        "target-node-property": "model-version-id",
+                                        "target-node-type": "model-ver"
+                                    }
+                                ]
+                            },
+                            "relationship-list": {
+                                "relationship": [
+                                    {
+                                        "related-to": "model",
+                                        "relationship-data": [
+                                            {
+                                                "relationship-key": "model.model-invariant-id",
+                                                "relationship-value": "acc6edd8-a8d4-4b93-afaa-0994068be14c"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "relationship-list": {
+                    "relationship": [
+                        {
+                            "related-to": "model",
+                            "relationship-data": [
+                                {
+                                    "relationship-key": "model.model-invariant-id",
+                                    "relationship-value": "ff69d4e0-a8e8-4108-bdb0-dd63217e63c7"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "named-query-name": "closed-loop-named-query",
+    "named-query-uuid": "4ff56a54-9e3f-46b7-a337-07a1d3c6b469",
+    "named-query-version": "1.0"
 }
