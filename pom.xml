@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>
@@ -26,8 +26,8 @@
         <module.ajsc.namespace.name>ActiveAndAvailableInventory-Traversal</module.ajsc.namespace.name>
         <module.ajsc.namespace.version>v1</module.ajsc.namespace.version>
         <ajscRuntimeVersion>2.1.0</ajscRuntimeVersion>
-        <aai.project.version>1.1.0</aai.project.version>
-        <aai.docker.version>1.1</aai.docker.version>
+        <aai.project.version>1.2.0</aai.project.version>
+        <aai.docker.version>1.2</aai.docker.version>
 
         <!-- This will be the Absolute Root of the Project and should contain NO
             Versioning -->
