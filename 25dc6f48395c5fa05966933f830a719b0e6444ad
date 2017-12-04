@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_86e9ab1c",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2017-12-04T19:05:30Z",
+      "side": 1,
+      "message": "Jessica, aai.project.version is set to 1.1.0 still. That didn\u0027t get updated. Is the plan to override that pom property with 1.1.1-amsterdam in a release job?",
+      "revId": "25dc6f48395c5fa05966933f830a719b0e6444ad",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
