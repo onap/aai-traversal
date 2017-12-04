@@ -16,6 +16,24 @@
       "revId": "25dc6f48395c5fa05966933f830a719b0e6444ad",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d04d25c6",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 481
+      },
+      "writtenOn": "2017-12-04T20:13:36Z",
+      "side": 1,
+      "message": "I believe this particular line is incorrect. Could have been a small issue in the script used to bump the version.. let me correct it.",
+      "parentUuid": "5a93c517_86e9ab1c",
+      "revId": "25dc6f48395c5fa05966933f830a719b0e6444ad",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
