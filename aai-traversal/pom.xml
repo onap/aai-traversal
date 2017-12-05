@@ -561,7 +561,7 @@
                         <apiVersion>1.23</apiVersion>
                         <images>
                             <image>
-                                <name>${docker.push.registry}/openecomp/aai-traversal:%l</name>
+                                <name>${docker.push.registry}/onap/aai-traversal:%l</name>
                                 <build>
                                     <tags>
                                         <tag>latest</tag>
@@ -584,7 +584,7 @@
                             </goals>
                             <configuration>
                                 <removeAll>true</removeAll>
-                                <image>openecomp/aai-traversal:%l</image>
+                                <image>onap/aai-traversal:%l</image>
                             </configuration>
                         </execution>
                         <execution>
@@ -602,7 +602,7 @@
                                 <goal>push</goal>
                             </goals>
                             <configuration>
-                                <image>openecomp/aai-traversal:%l</image>
+                                <image>onap/aai-traversal:%l</image>
                             </configuration>
                         </execution>
                     </executions>
