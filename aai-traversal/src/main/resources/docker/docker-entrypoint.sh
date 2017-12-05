@@ -53,6 +53,11 @@ httpsPort=8446;
 
 AAI_CORE_JAR=$(ls ${APP_HOME}/extJars/aai-core*.jar);
 
+# Get the basename of the aai-core-X.Y.Z-SNAPSHOT.jar
+# Then extract the X.Y.Z-SNAPSHOT part
+AAI_CORE_VERSION=$(basename ${AAI_CORE_JAR} | grep -o '[0-9]*\.[0-9]*\.[0-9]*[^.]*');
+
+
 cd ${APP_HOME};
 
 # If the variable DISABLE_UPDATE_QUERY is empty
