@@ -75,7 +75,7 @@ public class MakeNamedQuery {
 
 		// iterate the collection of resources
 
-		ArrayList<String> processedWidgets = new ArrayList<String>();
+		ArrayList<String> processedWidgets = new ArrayList<>();
 
 
 		HashMap<String, List<Introspector>> widgetToRelationship = new HashMap<String, List<Introspector>>();
