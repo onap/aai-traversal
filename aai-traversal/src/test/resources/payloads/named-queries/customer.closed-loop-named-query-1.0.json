@@ -1,0 +1,32 @@
+ 	{
+	"global-customer-id": "customer-closed-loop-junit",
+	"subscriber-name": "example-subscriber-name-val-closed-loop-junitcustomer-closed-loop-junit",
+	"subscriber-type": "example-subscriber-type-val-closed-loop-junit",
+	"service-subscriptions": {
+		"service-subscription": [
+			{
+				"service-type": "service-type-closed-loop-junit",
+				"temp-ub-sub-account-id": "example-temp-ub-sub-account-id-val-closed-loop-junit",
+				"service-instances": {
+					"service-instance": [
+						{
+							"service-instance-id": "service-instance-closed-loop-junit",
+							"service-instance-name": "example-service-instance-name-val-closed-loop-junit",
+							"model-invariant-id": "model-invariant-id-closed-loop-junit",
+							"model-version-id": "model-version-id-closed-loop-junit",
+							"widget-model-id": "example-widget-model-id-val-closed-loop-junit",
+							"widget-model-version": "example-widget-model-version-val-closed-loop-junit",
+							"bandwidth-total": "example-bandwidth-total-val-closed-loop-junit",
+							"bandwidth-up-wan1": "example-bandwidth-up-wan1-val-closed-loop-junit",
+							"bandwidth-down-wan1": "example-bandwidth-down-wan1-val-closed-loop-junit",
+							"bandwidth-up-wan2": "example-bandwidth-up-wan2-val-closed-loop-junit",
+							"bandwidth-down-wan2": "example-bandwidth-down-wan2-val-closed-loop-junit",
+							"vhn-portal-url": "example-vhn-portal-url-val-closed-loop-junit",
+							"service-instance-location-id": "example-service-instance-location-id-val-closed-loop-junit"
+						}
+					]
+				}
+			}
+		]
+	}
+}

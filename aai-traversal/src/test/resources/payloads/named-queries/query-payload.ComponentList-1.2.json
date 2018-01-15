@@ -1,0 +1,23 @@
+ 	{
+    "query-parameters": {
+        "named-query": {
+            "named-query-uuid": "2a183f99-2c66-482b-ade5-7962efd801ef"
+        }
+    },
+    "instance-filters": {
+        "instance-filter": [
+            {
+                  
+                "customer": {
+                    "global-customer-id": "customer-component-list-junit"
+                },
+                  "service-subscription": {
+                    "service-type": "service-type-component-list-junit"
+                },
+                "service-instance": {
+                    "service-instance-id": "service-instance-id-component-list-junit"
+                }
+            }
+        ]
+    }
+}

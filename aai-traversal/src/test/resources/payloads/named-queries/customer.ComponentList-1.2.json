@@ -1,0 +1,18 @@
+{
+	"global-customer-id": "customer-component-list-junit",
+	"subscriber-name": "subscriber-name-component-list-junit",
+	"subscriber-type": "subscriber-type-component-list",
+	"service-subscriptions": {
+		"service-subscription": [{
+			"service-type": "service-type-component-list-junit",
+			"service-instances": {
+				"service-instance": [{
+					"service-instance-id": "service-instance-id-component-list-junit",
+					"service-instance-name": "service-instance-name-component-list-junit",
+					"model-invariant-id": "model-invariant-id-component-list-junit",
+					"model-version-id": "model-version-id-component-list-junit"
+				}]
+			}
+		}]
+	}
+}

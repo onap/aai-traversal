@@ -1,0 +1,131 @@
+{
+	"vnf-id": "generic-vnf-closed-loop-junit",
+	"vnf-name": "example-vnf-name-val-closed-loop",
+	"vnf-name2": "example-vnf-name2-val-closed-loop",
+	"vnf-type": "example-vnf-type-val-closed-loop",
+	"prov-status": "example-prov-status-val-closed-loop",
+	"service-id": "example-service-id-val-closed-loop",
+	"model-invariant-id": "model-invariant-id-closed-loop-junit",
+	"model-version-id": "model-version-id-closed-loop-junit",
+	"regional-resource-zone": "example-regional-resource-zone-val-closed-loop",
+	"license-key": "example-license-key-val-closed-loop",
+	"equipment-role": "example-equipment-role-val-closed-loop",
+	"orchestration-status": "example-orchestration-status-val-closed-loop",
+	"heat-stack-id": "example-heat-stack-id-val-closed-loop",
+	"mso-catalog-key": "example-mso-catalog-key-val-closed-loop",
+	"management-option": "example-management-option-val-closed-loop",
+	"ipv4-oam-address": "example-ipv4-oam-address-val-closed-loop",
+	"ipv4-loopback0-address": "example-ipv4-loopback0-address-val-closed-loop",
+	"nm-lan-v6-address": "example-nm-lan-v6-address-val-closed-loop",
+	"management-v6-address": "example-management-v6-address-val-closed-loop",
+	"vcpu": 7957,
+	"vcpu-units": "example-vcpu-units-val-closed-loop",
+	"vmemory": 168,
+	"vmemory-units": "example-vmemory-units-val-closed-loop",
+	"vdisk": 3227,
+	"vdisk-units": "example-vdisk-units-val-closed-loop",
+	"l-interfaces": {
+		"l-interface": [{
+			"interface-name": "interface-name-generic-vnf-closed-loop-junit",
+			"interface-role": "example-interface-role-val-closed-loop",
+			"v6-wan-link-ip": "example-v6-wan-link-ip-val-closed-loop",
+			"selflink": "example-selflink-val-closed-loop",
+			"interface-id": "example-interface-id-val-closed-loop",
+			"macaddr": "example-macaddr-val-closed-loop",
+			"network-name": "example-network-name-val-closed-loop",
+			"vlans": {
+				"vlan": [{
+					"vlan-interface": "vlan-interface-generic-vnf-closed-loop-junit",
+					"vlan-id-inner": 498,
+					"vlan-id-outer": 2746,
+					"l3-interface-ipv4-address-list": [{
+						"l3-interface-ipv4-address": "1.1.1.1",
+						"l3-interface-ipv4-prefix-length": 3722,
+						"vlan-id-inner": 6519,
+						"vlan-id-outer": 194,
+						"is-floating": true,
+						"neutron-network-id": "1.1.1.1",
+						"neutron-subnet-id": "1.1.1.1"
+					}],
+					"l3-interface-ipv6-address-list": [{
+						"l3-interface-ipv6-address": "1111:4444:2222:3333::5555:7777",
+						"l3-interface-ipv6-prefix-length": 9215,
+						"vlan-id-inner": 9602,
+						"vlan-id-outer": 5177,
+						"is-floating": true,
+						"neutron-network-id": "2.2.2.2",
+						"neutron-subnet-id": "2.2.2.2"
+					}]
+				}]
+			},
+			"l3-interface-ipv4-address-list": [{
+				"l3-interface-ipv4-address": "3.3.3.3",
+				"l3-interface-ipv4-prefix-length": 9797,
+				"vlan-id-inner": 5534,
+				"vlan-id-outer": 8820,
+				"is-floating": true,
+				"neutron-network-id": "3.3.3.3",
+				"neutron-subnet-id": "3.3.3.3"
+			}],
+			"l3-interface-ipv6-address-list": [{
+				"l3-interface-ipv6-address": "1111:4444:2222:3333::5555:6666",
+				"l3-interface-ipv6-prefix-length": 5983,
+				"vlan-id-inner": 747,
+				"vlan-id-outer": 7535,
+				"is-floating": true,
+				"neutron-network-id": "4.4.4.4",
+				"neutron-subnet-id": "4.4.4.4"
+			}]
+		}]
+	},
+	"lag-interfaces": {
+		"lag-interface": [{
+			"interface-name": "interface-name-generic-vnf-closed-loop-junit"
+		}]
+	},
+	"relationship-list": {
+		"relationship": [{
+			"related-to": "service-instance",
+			"relationship-data": [{
+				"relationship-key": "service-instance.service-instance-id",
+				"relationship-value": "service-instance-closed-loop-junit"
+			}, {
+				"relationship-key": "service-subscription.service-type",
+				"relationship-value": "service-type-closed-loop-junit"
+			}, {
+				"relationship-key": "customer.global-customer-id",
+				"relationship-value": "customer-closed-loop-junit"
+			}]
+		}, {
+			"related-to": "vserver",
+			"relationship-data": [{
+				"relationship-key": "vserver.vserver-id",
+				"relationship-value": "vserver-closed-loop-junit"
+			}, {
+				"relationship-key": "tenant.tenant-id",
+				"relationship-value": "tenant-closed-loop-junit"
+			}, {
+				"relationship-key": "cloud-region.cloud-owner",
+				"relationship-value": "cloud-owner-closed-loop-junit"
+			}, {
+				"relationship-key": "cloud-region.cloud-region-id",
+				"relationship-value": "cloud-region-id-closed-loop-junit"
+			}]
+		}, {
+			"related-to": "vserver",
+			"relationship-data": [{
+				"relationship-key": "vserver.vserver-id",
+				"relationship-value": "vserver2-closed-loop-junit"
+			}, {
+				"relationship-key": "tenant.tenant-id",
+				"relationship-value": "tenant2-closed-loop-junit"
+			}, {
+				"relationship-key": "cloud-region.cloud-owner",
+				"relationship-value": "cloud-owner2-closed-loop-junit"
+			}, {
+				"relationship-key": "cloud-region.cloud-region-id",
+				"relationship-value": "cloud-region-id2-closed-loop-junit"
+			}]
+		}]
+	}
+}

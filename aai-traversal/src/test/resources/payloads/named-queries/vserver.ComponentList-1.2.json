@@ -1,0 +1,22 @@
+ 	{
+	"vserver-id": "vserver-id-component-list-junit",
+	"vserver-name": "vserver-name-component-list-junit",
+	"vserver-name2": "vserver-name2-component-list",
+	"prov-status": "prov-status-component-list",
+	"vserver-selflink": "vserver-selflink-component-list",
+	"relationship-list": {
+		"relationship": [{
+				"related-to": "vf-module",
+				"relationship-data": [{ 
+							"relationship-key": "generic-vnf.vnf-id",
+							"relationship-value": "vnf-id-component-list-junit"
+						},
+						{
+						"relationship-key": "vf-module.vf-module-id",
+						"relationship-value": "vf-module-id-component-list-junit"
+					}
+				]
+			}
+		]
+	}
+}

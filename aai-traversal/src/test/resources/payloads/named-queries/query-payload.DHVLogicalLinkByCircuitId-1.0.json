@@ -1,0 +1,16 @@
+{
+  "query-parameters": {
+    "named-query": {
+      "named-query-uuid": "4028faed-b7d5-4059-9d49-7df06da9ebfb"
+    }
+  },
+  "instance-filters": {
+    "instance-filter": [
+      {
+        "logical-link": {
+          "circuit-id": "junit-circuit-id"
+        }
+      }
+    ]
+  }
+}

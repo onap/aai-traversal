@@ -1,0 +1,29 @@
+ 	{
+	"query-parameters": {
+		"named-query": {
+			"named-query-uuid": "4ff56a54-9e3f-46b7-a337-07a1d3c6b469"
+		}
+	},
+	"instance-filters": {
+		"instance-filter": [
+			{
+				"vserver": {
+					"vserver-name": "example-vserver-name-val-closed-loopvserver-closed-loop-junit"
+				}
+			}
+		]
+	},
+	"secondary-filts": {
+		"secondary-filt": [
+			{
+				"cloud-region": {
+					"cloud-owner": "cloud-owner2-closed-loop-junit"
+				},
+				"cloud-region": {
+					"cloud-region-id": "cloud-region-id2-closed-loop-junit"
+				}				
+			}
+		]
+	},
+	"secondary-filter-cut-point": "cloud-region"
+}

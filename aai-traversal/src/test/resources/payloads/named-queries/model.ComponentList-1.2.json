@@ -1,0 +1,22 @@
+ 	{
+	"model-invariant-id": "model-invariant-id-component-list-junit",
+	"model-type": "example-model-type-val-component-list",
+	"model-vers": {
+		"model-ver": [
+			{
+				"model-version-id": "model-version-id-component-list-junit",
+				"model-name": "example-model-name-val-component-list",
+				"model-version": "5.0",
+				"model-description": "example-model-description-val-component-list",
+				"metadata": {
+					"metadatum": [
+						{
+							"metaname": "metaname-component-list-junit",
+							"metaval": "example-metaval-val-component-list"
+						}
+					]
+				}
+			}
+		]
+	}
+}

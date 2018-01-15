@@ -1,0 +1,20 @@
+{
+"instance-filters": {
+"instance-filter": [
+{
+"customer": {
+"global-customer-id": "junit-global-customer-id"
+},
+"service-subscription": {
+"service-type": "junit-service-type"
+}
+
+}
+]
+},
+"query-parameters": {
+"named-query": {
+"named-query-uuid": "6e806bc2-8f9b-4534-bb68-be91267ff6c8"
+}
+}
+}

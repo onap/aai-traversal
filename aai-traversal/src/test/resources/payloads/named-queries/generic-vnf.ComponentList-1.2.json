@@ -1,0 +1,27 @@
+ 	{
+		"vnf-id": "vnf-id-component-list-junit",
+		"vnf-name": "vnf-id-component-list-junit",
+		"vnf-type": "vnf-type-component-list",
+		"equipment-role": "equipment-role-component-list",
+		"service-id": "service-id-component-list",
+		"prov-status": "prov-status-component-list",
+		"relationship-list": {
+			"relationship": [{
+					"related-to": "service-instance",
+					"relationship-data": [{ 
+						"relationship-key": "customer.global-customer-id", 
+						"relationship-value": "customer-component-list-junit" 
+					}, 
+					{ 
+						"relationship-key": "service-subscription.service-type", 
+						"relationship-value": "service-type-component-list-junit" 
+					}, 
+					{ 
+						"relationship-key": "service-instance.service-instance-id", 
+						"relationship-value": "service-instance-id-component-list-junit" 
+					} 
+					]
+				}
+			]
+		}
+}
