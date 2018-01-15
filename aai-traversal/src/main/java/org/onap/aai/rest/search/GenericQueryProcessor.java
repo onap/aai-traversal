@@ -2,7 +2,7 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
+import org.onap.aai.query.builder.MissingOptionalParameter;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
@@ -117,27 +119,40 @@ public abstract class GenericQueryProcessor {
 		if (!this.isGremlin) {
 			Matcher m = p.matcher(uri.get().getPath());
 			String queryName = "";
+			List<String> optionalParameters = Collections.emptyList();
 			if (m.find()) {
 				queryName = m.group(1);
+				CustomQueryConfig queryConfig = gremlinServerSingleton.getCustomQueryConfig(queryName);
+				if ( queryConfig != null ) {
+					query = queryConfig.getQuery();
+					optionalParameters = queryConfig.getQueryOptionalProperties();
+				}
 			}
-		
+			
 			for (String key : queryParams.keySet()) {
 				params.put(key, queryParams.getFirst(key));
+				if ( optionalParameters.contains(key) ){
+					optionalParameters.remove(key);
+				}
 			}
 			
-			query = gremlinServerSingleton.getStoredQuery(queryName);
-			if (query == null) {
-				query = "";
-			} else {
-				query = queryBuilderSingleton.executeTraversal(dbEngine, query, params);
+			if (!optionalParameters.isEmpty()){
+				MissingOptionalParameter missingParameter = MissingOptionalParameter.getInstance();
+				for ( String key : optionalParameters ) {
+					params.put(key, missingParameter);
+				}
 			}
-			
 			
 			List<Object> ids = new ArrayList<>();
 			
 			if (vertices.isPresent() && !vertices.get().isEmpty()) {
 				for (Vertex v : vertices.get()) {
 					ids.add(v.id());
+				}
+				if (query == null) {
+					query = "";
+				} else {
+					query = queryBuilderSingleton.executeTraversal(dbEngine, query, params);
 				}
 				StringBuilder sb = new StringBuilder();
 				sb.append("[");

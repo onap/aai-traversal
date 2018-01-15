@@ -23,6 +23,7 @@ package org.onap.aai.rest;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,9 +50,12 @@ import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.introspection.Version;
+import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.parsers.query.QueryParser;
 import org.onap.aai.rest.db.HttpEntry;
+import org.onap.aai.rest.search.CustomQueryConfig;
 import org.onap.aai.rest.search.GenericQueryProcessor;
+import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.rest.search.QueryProcessorType;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
@@ -121,7 +125,6 @@ public class QueryConsumer extends RESTAPI {
 					startURIs.add(new URI(startElement.getAsString()));
 				}
 			}
-			
 			if (queryElement != null) {
 				queryURI = queryElement.getAsString();
 			}
@@ -129,6 +132,18 @@ public class QueryConsumer extends RESTAPI {
 				gremlin = gremlinElement.getAsString();
 			}
 			URI queryURIObj = new URI(queryURI);
+			
+			CustomQueryConfig customQueryConfig = getCustomQueryConfig(queryURIObj);
+			if ( customQueryConfig != null ) {
+				List<String> missingRequiredQueryParameters =  checkForMissingQueryParameters( customQueryConfig.getQueryRequiredProperties(), URITools.getQueryMap(queryURIObj));
+				if ( !missingRequiredQueryParameters.isEmpty() ) {
+					return( createMessageMissingQueryRequiredParameters( missingRequiredQueryParameters, headers, info, req));
+				}
+			} else if ( queryElement != null ) {
+				return( createMessageInvalidQuerySection( queryURI, headers, info, req));
+			}
+			
+
 			GenericQueryProcessor processor = null;
 			
 			if (!startURIs.isEmpty()) {
@@ -193,5 +208,79 @@ public class QueryConsumer extends RESTAPI {
 		
 		
 	}
+	
+	private List<String> checkForMissingQueryParameters( List<String> requiredParameters, MultivaluedMap<String, String> queryParams ) {
+		List<String> result = new ArrayList<>();
+		Iterator it = requiredParameters.iterator();
+		String param;
+		while(it.hasNext()) {
+			param = (String)it.next();
+			if ( !queryParams.containsKey(param)) {
+				result.add(param);
+			}
+		}
+		return result;
+	}
+	
+	private CustomQueryConfig getCustomQueryConfig(URI uriObj ) {
+		
+		GremlinServerSingleton gremlinServerSingleton;
+		CustomQueryConfig customQueryConfig;
+		String path = uriObj.getPath();
+
+		String[] parts = path.split("/");
+		boolean hasQuery = false;
+		for ( String part:parts ) {
+			if  ( hasQuery) {
+				gremlinServerSingleton = GremlinServerSingleton.getInstance();
+				return gremlinServerSingleton.getCustomQueryConfig(part);
+			}
+			if ( "query".equals(part)) {
+				hasQuery = true;
+			}
+		}
+		
+		return null;
+		
+	}
+	
+	private Response createMessageMissingQueryRequiredParameters(List<String> missingRequiredQueryParams, HttpHeaders headers, UriInfo info, HttpServletRequest req) {
+		AAIException e = new AAIException("AAI_3013");
+		
+		ArrayList<String> templateVars = new ArrayList<>();
+
+		if (templateVars.isEmpty()) {
+			templateVars.add(missingRequiredQueryParams.toString());
+		}
+		Status s = e.getErrorObject().getHTTPResponseCode();
+		String errorResponse = ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
+				templateVars);
+		Response response = Response.status(s).entity(errorResponse).build();
+		/*
+		Response response = Response
+				.status(e.getErrorObject().getHTTPResponseCode())
+				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
+						templateVars)).build();	
+		*/
+		return response;
+	} 
+	
+	private Response createMessageInvalidQuerySection(String invalidQuery, HttpHeaders headers, UriInfo info, HttpServletRequest req) {
+		AAIException e = new AAIException("AAI_3014");
+		
+		ArrayList<String> templateVars = new ArrayList<>();
+
+		if (templateVars.isEmpty()) {
+			templateVars.add(invalidQuery);
+		}
+
+		Response response = Response
+				.status(e.getErrorObject().getHTTPResponseCode())
+				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
+						templateVars)).build();	
+
+		return response;
+	} 
+
 
 }

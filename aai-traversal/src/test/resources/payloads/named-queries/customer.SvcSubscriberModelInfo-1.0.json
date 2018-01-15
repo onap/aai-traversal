@@ -1,0 +1,13 @@
+{
+   "global-customer-id": "junit-global-customer-id",
+   "subscriber-name": "junit-subscriber",
+   "subscriber-type": "CUST",
+   "service-subscriptions": {"service-subscription": [   {
+      "service-type": "junit-service-type",
+      "service-instances": {"service-instance": [      {
+         "service-instance-id": "junit-service-instance-id",
+         "model-invariant-id": "junit-model-invariant-id",
+         "model-version-id": "junit-model-version-id"
+      }]}
+   }]}
+}

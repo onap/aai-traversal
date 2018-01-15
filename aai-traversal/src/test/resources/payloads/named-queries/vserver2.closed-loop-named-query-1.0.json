@@ -1,0 +1,7 @@
+ 	{
+    "vserver-id": "vserver2-closed-loop-junit",
+    "vserver-name": "example-vserver-name-val-closed-loopvserver-closed-loop-junit",
+    "vserver-name2": "example-vserver-name2-val-closed-loop",
+    "prov-status": "example-prov-status-val-closed-loop",
+    "vserver-selflink": "example-vserver-selflink-val-closed-loop"    
+}

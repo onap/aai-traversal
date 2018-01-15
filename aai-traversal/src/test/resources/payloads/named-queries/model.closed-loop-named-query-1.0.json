@@ -1,0 +1,22 @@
+ 	{
+	"model-invariant-id": "model-invariant-id-closed-loop-junit",
+	"model-type": "example-model-type-val-closed-loop",
+	"model-vers": {
+		"model-ver": [
+			{
+				"model-version-id": "model-version-id-closed-loop-junit",
+				"model-name": "example-model-name-val-closed-loop",
+				"model-version": "5.0",
+				"model-description": "example-model-description-val-closed-loop",
+				"metadata": {
+					"metadatum": [
+						{
+							"metaname": "metaname-closed-loop-junit",
+							"metaval": "example-metaval-val-closed-loop"
+						}
+					]
+				}
+			}
+		]
+	}
+}

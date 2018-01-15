@@ -1,0 +1,10 @@
+{
+   "model-invariant-id": "junit-model-invariant-id",
+   "model-type": "junit-model-type",
+   "model-vers": {"model-ver": [   {
+      "model-version-id": "junit-model-version-id",
+      "model-name": "junit-model-name",
+      "model-version": "1",
+      "model-description": "junit-model-description"
+   }]}
+}

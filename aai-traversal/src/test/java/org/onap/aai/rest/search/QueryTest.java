@@ -73,7 +73,7 @@ public abstract class QueryTest {
 	
 	public void run() {
 		
-		String query = gremlinServerSingleton.getStoredQuery(getQueryName());
+		String query = gremlinServerSingleton.getStoredQueryFromConfig(getQueryName());
 		Map<String, Object> params = new HashMap<>();
 		addParam(params);
 		when(dbEngine.getQueryBuilder(any(QueryStyle.class))).thenReturn(new GremlinTraversal<>(loader, graph.traversal()));

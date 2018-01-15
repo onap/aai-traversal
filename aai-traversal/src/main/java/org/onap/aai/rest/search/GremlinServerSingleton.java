@@ -31,6 +31,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Timer;
@@ -43,7 +46,10 @@ public class GremlinServerSingleton {
     private Cluster cluster;
     private boolean timerSet;
     private Timer timer;
-    private Properties properties;
+
+    
+    private GetCustomQueryConfig queryConfig;
+
 
     private static class Helper {
         private static final GremlinServerSingleton INSTANCE = new GremlinServerSingleton();
@@ -68,8 +74,6 @@ public class GremlinServerSingleton {
      */
     private void init() {
 
-        properties = new Properties();
-
         try {
             cluster = Cluster.build(new File(AAIConstants.AAI_HOME_ETC_APP_PROPERTIES + "gremlin-server-config.yaml"))
                     .maxContentLength(6537920)
@@ -78,27 +82,29 @@ public class GremlinServerSingleton {
             logger.error("Unable to find the file: " + e);
         }
 
-        File queryFile = new File(AAIConstants.AAI_HOME_ETC_QUERY);
+		try {
+			String filepath = GetCustomQueryConfig.AAI_HOME_ETC_QUERY_JSON;
+			Path path = Paths.get(filepath);
+			String customQueryConfigJson = new String(Files.readAllBytes(path));
+			
 
-        try (FileInputStream fis = new FileInputStream(queryFile)){
-            properties.load(fis);
-        } catch (IOException e) {
-            logger.error("Error occurred during the processing of query file: " + e);
-        }
+			queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
+		} catch (IOException e) {
+			logger.error("Error occurred during the processing of query json file: " + e);
+		}
 
 
-        TimerTask task = new FileWatcher(new File(AAIConstants.AAI_HOME_ETC_QUERY)) {
+        TimerTask task = new FileWatcher(new File(GetCustomQueryConfig.AAI_HOME_ETC_QUERY_JSON)) {
             @Override
             protected void onChange(File file) {
-                File queryFile = new File(AAIConstants.AAI_HOME_ETC_QUERY);
-                try (FileInputStream fis = new FileInputStream(queryFile)){
-                    properties.load(fis);
-                    logger.debug("File: " + file + " was changed so the cluster is rebuild for gremlin server");
-                } catch (FileNotFoundException e) {
-                    logger.error("Unable to find the file: " + e);
-                } catch (IOException e) {
-                    logger.error("Error occurred during the processing of query file: " + e);
-                }
+        		try {
+        			String filepath = GetCustomQueryConfig.AAI_HOME_ETC_QUERY_JSON;
+        			Path path = Paths.get(filepath);
+        			String customQueryConfigJson = new String(Files.readAllBytes(path));
+        			queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
+        		} catch (IOException e) {
+        			logger.error("Error occurred during the processing of query json file: " + e);
+        		}
             }
         };
 
@@ -113,19 +119,20 @@ public class GremlinServerSingleton {
     public Cluster getCluster(){
         return cluster;
     }
-
+    
     /**
-     * Gets the key if the properties contains that key
-     *
-     * Purposely not checking if the property exists due
-     * to if you check for the property and then get the property
-     * Then you are going to have to synchronize the method
-     *
-     * @param key the query to check if it exists in the file
-     * @return string if the key exists or null if it doesn't
+     * Gets the query using CustomQueryConfig
+     * @param key
+     * @return
      */
-    public String getStoredQuery(String key){
-        return (String) properties.get(key);
+    public String getStoredQueryFromConfig(String key){
+    	CustomQueryConfig customQueryConfig = queryConfig.getStoredQuery(key);
+    	return customQueryConfig.getQuery();
     }
+    
+    public CustomQueryConfig getCustomQueryConfig(String key) {
+    	return queryConfig.getStoredQuery(key);
+    }
+
 
 }
