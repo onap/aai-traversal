@@ -42,6 +42,8 @@ import org.onap.aai.util.AAIConstants;
 public class MakeNamedQuery {
 
 	public static void main(String[] args) throws Exception {
+	    
+		private static final String NAMED_QUERY_ELEMENTS = "named-query-elements";
 		String _apiVersion = AAIConfig.get(AAIConstants.AAI_DEFAULT_API_VERSION_PROP);
 		String widgetJsonDir = null;
 		String modelVersion = null;
@@ -171,12 +173,12 @@ public class MakeNamedQuery {
 		try {
 			Introspector newNQElements = null;
 			List<Object> nqElementList = null;
-			if (nqeObj.getWrappedValue("named-query-elements") != null) {
-				newNQElements = nqeObj.getWrappedValue("named-query-elements");
+			if (nqeObj.getWrappedValue(NAMED_QUERY_ELEMENTS) != null) {
+				newNQElements = nqeObj.getWrappedValue(NAMED_QUERY_ELEMENTS);
 				nqElementList = newNQElements.getValue("named-query-element");
 			} else { 
-				newNQElements = nqeObj.newIntrospectorInstanceOfProperty("named-query-elements");
-				nqeObj.setValue("named-query-elements",  newNQElements.getUnderlyingObject());
+				newNQElements = nqeObj.newIntrospectorInstanceOfProperty(NAMED_QUERY_ELEMENTS);
+				nqeObj.setValue(NAMED_QUERY_ELEMENTS,  newNQElements.getUnderlyingObject());
 				nqElementList = (List<Object>)newNQElements.getValue("named-query-element");
 			}
 			newNQElement = loadNQElement(newNQElements, listOfRelationships);
