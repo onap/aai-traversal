@@ -196,9 +196,6 @@ public class MakeNamedQuery {
 		Introspector newNqElement = null;
 		try {
 			newNqElement = nqElements.getLoader().introspectorFromName("named-query-element");
-				
-			//newNqElement.setValue("named-query-element-uuid", UUID.randomUUID().toString());
-
 			Introspector newRelationshipList = newNqElement.getLoader().introspectorFromName("relationship-list");
 			newNqElement.setValue("relationship-list", newRelationshipList.getUnderlyingObject());
 
@@ -219,6 +216,7 @@ public class MakeNamedQuery {
 
 	}
 	private static Introspector makeWidgetRelationship(Loader loader, String modelInvariantId, String modelVersionId) {
+	
 
 		Introspector newRelationship = null;
 		try {
