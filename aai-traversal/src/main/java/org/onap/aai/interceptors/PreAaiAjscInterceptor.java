@@ -31,6 +31,7 @@ import org.onap.aai.logging.LoggingContext;
 import ajsc.beans.interceptors.AjscInterceptor;
 
 public class PreAaiAjscInterceptor implements AjscInterceptor {
+	private final static String TARGET_ENTITY = "aai-traversal";
 	
 	private static class LazyAaiAjscInterceptor {
     	public static final PreAaiAjscInterceptor INSTANCE = new PreAaiAjscInterceptor();
@@ -46,10 +47,17 @@ public class PreAaiAjscInterceptor implements AjscInterceptor {
 
 		LoggingContext.init();
 
-		LoggingContext.requestId(req.getHeader("X-TransactionId"));
+		String serviceName = req.getMethod() + " " + req.getRequestURI().toString();
 		LoggingContext.partnerName(req.getHeader("X-FromAppId"));
-		LoggingContext.serviceName(req.getMethod() + " " + req.getRequestURI().toString());
-
+		String queryStr = req.getQueryString();
+		if ( queryStr != null ) {
+			serviceName = serviceName + "?" + queryStr;
+		}
+		LoggingContext.serviceName(serviceName);
+		LoggingContext.targetEntity(TARGET_ENTITY);
+		LoggingContext.targetServiceName("allowOrReject");
+		LoggingContext.requestId(req.getHeader("X-TransactionId"));
+		LoggingContext.successStatusFields();
 		return true;
 	}
 }

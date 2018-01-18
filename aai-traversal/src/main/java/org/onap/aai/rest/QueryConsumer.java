@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,10 +23,11 @@ package org.onap.aai.rest;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -67,10 +68,16 @@ import org.onap.aai.serialization.queryformats.Format;
 import org.onap.aai.serialization.queryformats.FormatFactory;
 import org.onap.aai.serialization.queryformats.Formatter;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
+import org.onap.aai.logging.LoggingContext;
+import org.onap.aai.logging.LoggingContext.StatusCode;
+import org.onap.aai.logging.StopWatch;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.onap.aai.util.AAIConstants;
 
 @Path("{version: v9|v1[012]}/query")
 public class QueryConsumer extends RESTAPI {
@@ -81,11 +88,32 @@ public class QueryConsumer extends RESTAPI {
 	private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
 	/** The query style. */
 	private QueryStyle queryStyle = QueryStyle.TRAVERSAL;
+	
+	private static final String TARGET_ENTITY = "DB";
+	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(QueryConsumer.class);
+	
 	@PUT
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response executeQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req) {
-		
+	public Response executeQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req){
+		return runner(AAIConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+				AAIConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+				AAIConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
+				headers,
+				info,
+				HttpMethod.GET,
+				new Callable<Response>() {
+					@Override
+					public Response call() {
+						return processExecuteQuery(content, versionParam, uri, queryFormat, subgraph, headers, info, req);
+					}
+				}
+		);
+	}
+
+	public Response processExecuteQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req) {
+
+		String methodName = "executeQuery";
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 		String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
@@ -93,6 +121,7 @@ public class QueryConsumer extends RESTAPI {
 		Response response = null;
 		TransactionalGraphEngine dbEngine = null;
 		try {
+			LoggingContext.save();
 			this.checkQueryParams(info.getQueryParameters());
 			Format format = Format.valueOf(queryFormat);
 			if (queryProcessor != null) {
@@ -106,9 +135,11 @@ public class QueryConsumer extends RESTAPI {
 			JsonElement startElement = input.get("start");
 			JsonElement queryElement = input.get("query");
 			JsonElement gremlinElement = input.get("gremlin");
+			JsonElement dslElement = input.get("dsl");
 			List<URI> startURIs = new ArrayList<>();
 			String queryURI = "";
 			String gremlin = "";
+			String dsl = "";
 			
 			Version version = Version.valueOf(versionParam);
 			DBConnectionType type = this.determineConnectionType(sourceOfTruth, realTime);
@@ -131,6 +162,9 @@ public class QueryConsumer extends RESTAPI {
 			if (gremlinElement != null) {
 				gremlin = gremlinElement.getAsString();
 			}
+			if (dslElement != null) {
+				dsl = dslElement.getAsString();
+			}
 			URI queryURIObj = new URI(queryURI);
 			
 			CustomQueryConfig customQueryConfig = getCustomQueryConfig(queryURIObj);
@@ -145,6 +179,11 @@ public class QueryConsumer extends RESTAPI {
 			
 
 			GenericQueryProcessor processor = null;
+			
+			LoggingContext.targetEntity(TARGET_ENTITY);
+			LoggingContext.targetServiceName(methodName);
+			LoggingContext.startTime();
+			StopWatch.conditionalStart();
 			
 			if (!startURIs.isEmpty()) {
 				Set<Vertex> vertexSet = new LinkedHashSet<>();
@@ -163,13 +202,18 @@ public class QueryConsumer extends RESTAPI {
 				processor =  new GenericQueryProcessor.Builder(dbEngine)
 						.queryFrom(queryURIObj)
 						.processWith(processorType).create();
-			} else {
+			} else if(!dsl.equals("")){
 				processor =  new GenericQueryProcessor.Builder(dbEngine)
-						.queryFrom(gremlin)
+						.queryFrom(dsl, "dsl")
+						.processWith(processorType).create();
+			}else {
+				processor =  new GenericQueryProcessor.Builder(dbEngine)
+						.queryFrom(gremlin, "gremlin")
 						.processWith(processorType).create();
 			}
 			String result = "";
 			List<Object> vertices = processor.execute(subGraphStyle);
+		
 			DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
 			FormatFactory ff = new FormatFactory(httpEntry.getLoader(), serializer);
 			
@@ -177,6 +221,12 @@ public class QueryConsumer extends RESTAPI {
 		
 			result = formater.output(vertices).toString();
 
+			double msecs = StopWatch.stopIfStarted();
+			LoggingContext.elapsedTime((long)msecs,TimeUnit.MILLISECONDS);
+			LoggingContext.successStatusFields();
+			LOGGER.info ("Completed");
+			
+			
 			response = Response.status(Status.OK)
 					.type(MediaType.APPLICATION_JSON)
 					.entity(result).build();
@@ -185,12 +235,14 @@ public class QueryConsumer extends RESTAPI {
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, e);
 		} catch (Exception e ) {
 			AAIException ex = new AAIException("AAI_4000", e);
-			
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, ex);
 		} finally {
+			LoggingContext.restoreIfPossible();
+			LoggingContext.successStatusFields();
 			if (dbEngine != null) {
 				dbEngine.rollback();
 			}
+			
 		}
 		
 		return response;
@@ -211,10 +263,8 @@ public class QueryConsumer extends RESTAPI {
 	
 	private List<String> checkForMissingQueryParameters( List<String> requiredParameters, MultivaluedMap<String, String> queryParams ) {
 		List<String> result = new ArrayList<>();
-		Iterator it = requiredParameters.iterator();
-		String param;
-		while(it.hasNext()) {
-			param = (String)it.next();
+
+		for ( String param : requiredParameters ) {
 			if ( !queryParams.containsKey(param)) {
 				result.add(param);
 			}
@@ -252,16 +302,12 @@ public class QueryConsumer extends RESTAPI {
 		if (templateVars.isEmpty()) {
 			templateVars.add(missingRequiredQueryParams.toString());
 		}
-		Status s = e.getErrorObject().getHTTPResponseCode();
-		String errorResponse = ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
-				templateVars);
-		Response response = Response.status(s).entity(errorResponse).build();
-		/*
+
 		Response response = Response
 				.status(e.getErrorObject().getHTTPResponseCode())
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
-		*/
+
 		return response;
 	} 
 	
