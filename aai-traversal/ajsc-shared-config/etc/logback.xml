@@ -28,7 +28,7 @@
 	<property name="eelfLogPattern" value="%ecompStartTime|%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ, UTC}|%X{requestId}|%X{serviceInstanceId}|%-10t|%X{serverName}|%X{serviceName}|%X{partnerName}|%X{statusCode}|%X{responseCode}|%replace(%replace(%X{responseDescription}){'\\|', '!'}){'\r|\n', '^'}|%X{instanceUUID}|%level|%X{severity}|%X{serverIpAddress}|%ecompElapsedTime|%X{server}|%X{clientIpAddress}|%eelfClassOfCaller|%X{unused}|%X{processKey}|%X{customField1}|%X{customField2}|%X{customField3}|%X{customField4}|co=%X{component}:%replace(%replace(%m){'\\|', '!'}){'\r|\n', '^'}%n"/>
 	<property name="eelfAuditLogPattern" value="%ecompStartTime|%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ, UTC}|%X{requestId}|%X{serviceInstanceId}|%-10t|%X{serverName}|%X{serviceName}|%X{partnerName}|%X{statusCode}|%X{responseCode}|%replace(%replace(%X{responseDescription}){'\\|', '!'}){'\r|\n|\r\n', '^'}|%X{instanceUUID}|%level|%X{severity}|%X{serverIpAddress}|%ecompElapsedTime|%X{server}|%X{clientIpAddress}|%eelfClassOfCaller|%X{unused}|%X{processKey}|%X{customField1}|%X{customField2}|%X{customField3}|%X{customField4}|co=%X{component}:%replace(%replace(%m){'\\|', '!'}){'\r|\n|\r\n', '^'}%n"/>
 	<property name="eelfMetricLogPattern" value="%ecompStartTime|%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ, UTC}|%X{requestId}|%X{serviceInstanceId}|%-10t|%X{serverName}|%X{serviceName}|%X{partnerName}|%X{targetEntity}|%X{targetServiceName}|%X{statusCode}|%X{responseCode}|%replace(%replace(%X{responseDescription}){'\\|', '!'}){'\r|\n', '^'}|%X{instanceUUID}|%level|%X{severity}|%X{serverIpAddress}|%ecompElapsedTime|%X{server}|%X{clientIpAddress}|%eelfClassOfCaller|%X{unused}|%X{processKey}|%X{targetVirtualEntity}|%X{customField1}|%X{customField2}|%X{customField3}|%X{customField4}|co=%X{component}:%replace(%replace(%m){'\\|', '!'}){'\r|\n', '^'}%n"/>
-	
+	<property name="eelfErrorLogPattern" value="%ecompStartTime|%X{requestId}|%-10t|%X{serviceName}|%X{partnerName}|%X{targetEntity}|%X{targetServiceName}|%ecompErrorCategory|%ecompResponseCode|%ecompResponseDescription|co=%X{component}:%replace(%replace(%m){'\\|', '!'}){'\r|\n', '^'}%n"/>
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<filter class="ch.qos.logback.classic.filter.LevelFilter">
 			<level>ERROR</level>
@@ -114,7 +114,7 @@
 			</fileNamePattern>
 		</rollingPolicy>
 		<encoder class="org.onap.aai.logging.EcompEncoder">
-			<pattern>${eelfLogPattern}</pattern>
+			<pattern>${eelfErrorLogPattern}</pattern>
 		</encoder>
 	</appender>
 
@@ -212,7 +212,26 @@
 			<pattern>${eelfLogPattern}</pattern>
 		</encoder>
 	</appender>
-
+	<appender name="external"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>WARN</level>
+		</filter>
+		<file>${logDirectory}/external/external.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logDirectory}/external/external.log.%d{yyyy-MM-dd}
+			</fileNamePattern>
+		</rollingPolicy>
+		<encoder class="org.onap.aai.logging.EcompEncoder">
+			<pattern>${eelfLogPattern}</pattern>
+		</encoder>
+	</appender>
+	<logger name="org.onap.aai" level="DEBUG" additivity="false">
+		<appender-ref ref="asyncDEBUG" />
+		<appender-ref ref="asyncERROR" />
+		<appender-ref ref="asyncMETRIC" />
+		<appender-ref ref="asyncSANE" />
+	</logger>
 	<!-- Spring related loggers -->
 	<logger name="org.springframework" level="WARN" />
 	<logger name="org.springframework.beans" level="WARN" />
@@ -221,6 +240,8 @@
 	<logger name="com.jayway.jsonpath" level="WARN" />
 
 	<!-- AJSC Services (bootstrap services) -->
+	<logger name="org.codehaus.groovy" level="WARN" />
+	<logger name="com.att.scamper" level="WARN" />
 	<logger name="ajsc" level="WARN" />
 	<logger name="ajsc.RouteMgmtService" level="WARN" />
 	<logger name="ajsc.ComputeService" level="WARN" />
@@ -229,6 +250,7 @@
 	<logger name="ajsc.UserDefinedJarService" level="WARN" />
 	<logger name="ajsc.UserDefinedBeansDefService" level="WARN" />
 	<logger name="ajsc.LoggingConfigurationService" level="WARN" />
+
 
 	<!-- AJSC related loggers (DME2 Registration, csi logging, restlet, servlet 
 		logging) -->
@@ -241,6 +263,7 @@
 	<logger name="com.att.ajsc" level="WARN" />
 	<logger name="com.att.ajsc.csi.logging" level="WARN" />
 	<logger name="com.att.ajsc.filemonitor" level="WARN" />
+	<logger name="com.att.ajsc.runner" level="WARN" />
 
 	<!-- Other Loggers that may help troubleshoot -->
 	<logger name="net.sf" level="WARN" />
@@ -365,5 +388,6 @@
 		<appender-ref ref="asyncERROR" />
 		<appender-ref ref="asyncMETRIC" />
 		<appender-ref ref="asyncSANE" />
+		<appender-ref ref="external" />
 	</root>
 </configuration>

@@ -78,7 +78,6 @@ public class ServiceFromPserverAndSubsNameTest extends QueryTest {
 		rules.addEdge(g, vserver2, pserver1); //true
 		rules.addEdge(g, vnf2, vserver2);  //true
 		rules.addEdge(g, vnf2, servinst2);  //true
-		rules.addEdge(g, vnf2, servinst3);  //false
 		rules.addTreeEdge(g, servinst2, servsub2); //true
 		rules.addTreeEdge(g, servsub2, customer1);  //true
 				
