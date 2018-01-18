@@ -91,6 +91,8 @@ public class SearchProviderTest {
         httpHeaders         = mock(HttpHeaders.class);
         uriInfo             = mock(UriInfo.class);
 
+        when(uriInfo.getPath()).thenReturn("JUNITURI");
+
         headersMultiMap     = new MultivaluedHashMap<>();
         queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
 
@@ -146,7 +148,8 @@ public class SearchProviderTest {
                 "cloud-region",
                 keys,
                 includeStrings,
-                version.toString()
+                version.toString(),
+                uriInfo
         );
 
         assertNotNull(response);
@@ -158,7 +161,8 @@ public class SearchProviderTest {
                 "cloud-region",
                 keys,
                 includeStrings,
-                "latest"
+                "latest",
+                uriInfo
         );
 
         assertNotNull(response);
@@ -188,12 +192,80 @@ public class SearchProviderTest {
                 "cloud-region",
                 keys,
                 includeStrings,
-                version.toString()
+                version.toString(),
+                uriInfo
         );
 
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
+
+    @Test
+    public void testNodesQueryTimeoutThrown() throws Exception {
+
+        List<String> keys = new ArrayList<>();
+        keys.add("cloud-region.cloud-owner:test-aic");
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        httpHeaders = mock(HttpHeaders.class);
+
+        headersMultiMap.putSingle("X-FromAppId", "JUNITTESTAPP1");
+        when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+
+        Response response = searchProvider.getNodesQueryResponse(
+                httpHeaders,
+                null,
+                "cloud-region",
+                keys,
+                includeStrings,
+                version.toString(),
+                uriInfo
+        );
+
+        assertNotNull(response);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(true, response.getEntity().toString().contains("7406"));
+    }
+
+    @Test
+    public void testNodesQueryTimeoutBypassed() throws Exception {
+
+        List<String> keys = new ArrayList<>();
+        keys.add("cloud-region.cloud-owner:test-aic");
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        httpHeaders = mock(HttpHeaders.class);
+
+        headersMultiMap.putSingle("X-FromAppId", "JUNITTESTAPP2");
+        when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+
+        Response response = searchProvider.getNodesQueryResponse(
+                httpHeaders,
+                null,
+                "cloud-region",
+                keys,
+                includeStrings,
+                version.toString(),
+                uriInfo
+        );
+
+        assertNotNull(response);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(true, response.getEntity().toString().contains("4009"));
+    }
+
 
     @Test
     public void testGenericQueryInvalidData() throws Exception {
@@ -214,7 +286,8 @@ public class SearchProviderTest {
                 keys,
                 includeStrings,
                 0,
-                version.toString()
+                version.toString(),
+                uriInfo
         );
 
         assertNotNull(response);
@@ -226,7 +299,8 @@ public class SearchProviderTest {
                 "cloud-region",
                 keys,
                 includeStrings,
-                "latest"
+                "latest",
+                uriInfo
         );
 
         assertNotNull(response);
@@ -257,11 +331,81 @@ public class SearchProviderTest {
                 keys,
                 includeStrings,
                 0,
-                version.toString()
+                version.toString(),
+                uriInfo
         );
 
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
 
+    @Test
+    public void testGenericQueryTimeoutThrown() throws Exception {
+
+        List<String> keys = new ArrayList<>();
+        keys.add("cloud-region.cloud-owner:test-aic");
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        httpHeaders = mock(HttpHeaders.class);
+
+        headersMultiMap.putSingle("X-FromAppId", "JUNITTESTAPP1");
+        when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
+
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+
+        Response response = searchProvider.getGenericQueryResponse(
+                httpHeaders,
+                null,
+                "cloud-region",
+                keys,
+                includeStrings,
+                0,
+                version.toString(),
+                uriInfo
+        );
+
+        assertNotNull(response);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(true, response.getEntity().toString().contains("7406"));
+    }
+
+    @Test
+    public void testGenericQueryBypassTimeout() throws Exception {
+
+        List<String> keys = new ArrayList<>();
+        keys.add("cloud-region.cloud-owner:test-aic");
+
+        List<String> includeStrings = new ArrayList<>();
+        includeStrings.add("cloud-region");
+
+        httpHeaders = mock(HttpHeaders.class);
+
+        headersMultiMap.putSingle("X-FromAppId", "JUNITTESTAPP2");
+        when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
+
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
+
+        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+
+        Response response = searchProvider.getGenericQueryResponse(
+                httpHeaders,
+                null,
+                "cloud-region",
+                keys,
+                includeStrings,
+                0,
+                version.toString(),
+                uriInfo
+        );
+
+        assertNotNull(response);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(true, response.getEntity().toString().contains("4009"));
+    }
 }

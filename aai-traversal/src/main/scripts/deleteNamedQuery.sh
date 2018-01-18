@@ -26,7 +26,11 @@
 #
 
 PROGNAME=$(basename $0)
+<<<<<<< HEAD
 OUTFILE=$PROJECT_HOME/logs/misc/${PROGNAME}.log.$(date +\%Y-\%m-\%d)
+=======
+OUTFILE=/opt/app/aai-traversal/logs/misc/${PROGNAME}.log.$(date +\%Y-\%m-\%d)
+>>>>>>> codecloud/release/1802
 #OUTFILE=/c/temp/${PROGNAME}.log.$(date +\%Y-\%m-\%d)
 
 TS=$(date "+%Y-%m-%d %H:%M:%S")
@@ -45,7 +49,11 @@ error_exit () {
 }
 
 j=0
+<<<<<<< HEAD
 for filepath in `ls $PROJECT_HOME/bundleconfig/etc/scriptdata/named-query-json/*.json|sort -f`
+=======
+for filepath in `ls /opt/app/aai-traversal/bundleconfig/etc/scriptdata/named-query-json/*.json|sort -f`
+>>>>>>> codecloud/release/1802
 #for filepath in `ls /c/sources/aai/aaigitnew/bundleconfig-local/etc/scriptdata/named-query-json/*.json|sort -f`
 do
 j=$(expr "$j" + 1)
@@ -53,7 +61,11 @@ filename=$(basename $filepath)
 echo "Begin deleteTool for named-query $filename" | tee -a $OUTFILE
 vers=`grep named-query-uuid $filepath|cut -d':' -f2|cut -d'"' -f2`
 resource=service-design-and-creation/named-queries/named-query/$vers
+<<<<<<< HEAD
 echo "y" | $PROJECT_HOME/scripts/deleteTool.sh $resource >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+=======
+echo "y" | /opt/app/aai-traversal/scripts/deleteTool.sh $resource >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+>>>>>>> codecloud/release/1802
 echo "End deleteTool for named-query $filename" | tee -a $OUTFILE
 done
 
