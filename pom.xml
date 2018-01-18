@@ -58,6 +58,8 @@
         <cxf.version>3.0.4</cxf.version>
         <swmpkgversion>0.0.1</swmpkgversion>
         <snapshot.file>int1-data.graphson</snapshot.file>
+        <aai.core.version>1.2.1-SNAPSHOT</aai.core.version>
+        <aai.schema.version>1.2.1-SNAPSHOT</aai.schema.version>
     </properties>
 
     <repositories>
@@ -138,7 +140,7 @@
                                         <additionalClasspathElement>${runAjscHome}/extJars/logback-core-1.1.7.jar
                                         </additionalClasspathElement>
                                         <additionalClasspathElement>
-                                            ${runAjscHome}/extJars/aai-core-${project.version}.jar
+                                            ${runAjscHome}/extJars/aai-core-${aai.core.version}.jar
                                         </additionalClasspathElement>
                                     </additionalClasspathElements>
 
@@ -210,7 +212,7 @@
                                         </systemProperty>
                                         <systemProperty>
                                             <key>aai-core.version</key>
-                                            <value>${project.version}</value>
+                                            <value>${aai.core.version}</value>
                                         </systemProperty>
                                     </systemProperties>
 

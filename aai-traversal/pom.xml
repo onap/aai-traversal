@@ -15,6 +15,7 @@
     <properties>
         <nexusproxy>https://nexus.onap.org</nexusproxy>
         <onap.nexus.url>https://nexus.onap.org</onap.nexus.url>
+        <!-- old version <hbase.version>0.98.4-hadoop2</hbase.version> -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dockerLocation>${basedir}/target/swm/package/nix/dist_files/</dockerLocation>
         <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
@@ -26,17 +27,20 @@
         <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
         <sonar.projectVersion>${project.version}</sonar.projectVersion>
+        <!-- Antlr-related properties to auto-gen visitor and listener -->
+        <antlr4.visitor>true</antlr4.visitor>
+        <antlr4.listener>true</antlr4.listener>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.onap.aai.aai-common</groupId>
             <artifactId>aai-schema</artifactId>
-            <version>${project.version}</version>
+            <version>${aai.schema.version}</version>
         </dependency>
         <dependency>
             <groupId>org.onap.aai.aai-common</groupId>
             <artifactId>aai-core</artifactId>
-            <version>${project.version}</version>
+            <version>${aai.core.version}</version>
         </dependency>
         <!-- Scamper related dependencies -->
         <dependency>
@@ -406,6 +410,16 @@
             <artifactId>jolt-complete</artifactId>
             <version>0.0.24</version>
         </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.7</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>traversal</finalName>
@@ -448,7 +462,7 @@
                             <artifactItem>
                                 <groupId>org.onap.aai.aai-common</groupId>
                                 <artifactId>aai-schema</artifactId>
-                                <version>${project.version}</version>
+                                <version>${aai.core.version}</version>
                                 <outputDirectory>bundleconfig-local/etc</outputDirectory>
                                 <includes>oxm/*.xml</includes>
                             </artifactItem>
@@ -647,6 +661,22 @@
                     <stagingProfileId>176c31dfe190a</stagingProfileId>
                     <serverId>ecomp-staging</serverId>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>src/main/resources/antlr4</sourceDirectory>
+                            <!-- <outputDirectory>src/main/java/antlr4</outputDirectory> -->
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -95,6 +95,8 @@ public class ModelAndNamedQueryRestProviderTest {
         httpHeaders         = mock(HttpHeaders.class);
         uriInfo             = mock(UriInfo.class);
 
+        when(uriInfo.getPath()).thenReturn("JUNITURI");
+
         headersMultiMap     = new MultivaluedHashMap<>();
         queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
 
@@ -143,7 +145,8 @@ public class ModelAndNamedQueryRestProviderTest {
         Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
                 httpHeaders,
                 request,
-                queryParameters
+                queryParameters,
+                uriInfo
         );
 
         assertNotNull(response);
@@ -164,11 +167,56 @@ public class ModelAndNamedQueryRestProviderTest {
         Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
                 httpHeaders,
                 null,
-                "cloud-region"
+                "cloud-region",
+                uriInfo
         );
 
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testNamedQueryCallTimeoutThrown() throws Exception {
+
+        String queryParameters = getPayload("payloads/named-queries/named-query.json");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        headersMultiMap.putSingle("X-FromAppId", "JUNITTESTAPP1");
+        when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
+                httpHeaders,
+                request,
+                queryParameters,
+                uriInfo
+        );
+
+        assertNotNull(response);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testNamedQueryCallTimeoutBypassed() throws Exception {
+
+        String queryParameters = getPayload("payloads/named-queries/named-query.json");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        headersMultiMap.putSingle("X-FromAppId", "JUNITTESTAPP2");
+        when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
+                httpHeaders,
+                request,
+                queryParameters,
+                uriInfo
+        );
+
+        assertNotNull(response);
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
 
     public String getPayload(String filename) throws IOException {
