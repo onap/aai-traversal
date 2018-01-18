@@ -135,7 +135,7 @@ public class GroovyShellImplTest {
                 loader);
     GenericQueryProcessor.Builder builder=new GenericQueryProcessor.Builder(dbEngine);
 builder.queryFrom(URI.create("te"));
-builder.queryFrom("te");
+builder.queryFrom("te", "gremlin");
 builder.create();
 builder.processWith(QueryProcessorType.GREMLIN_SERVER);
     builder.processWith(QueryProcessorType.LOCAL_GROOVY);

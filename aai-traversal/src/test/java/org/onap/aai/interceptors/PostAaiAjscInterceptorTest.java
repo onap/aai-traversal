@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.onap.aai.logging.LoggingContext;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -50,11 +51,11 @@ public class PostAaiAjscInterceptorTest {
     public void testAllowOrRejectIfSuccess() throws Exception {
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-
-        LoggingContext.put(LoggingContext.LoggingField.RESPONSE_CODE.toString(), "SUCCESS");
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        response.setStatus(200);
         Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer("/fadsjoifj"));
 
-        boolean success = postAaiAjscInterceptor.allowOrReject(request, null, null);
+        boolean success = postAaiAjscInterceptor.allowOrReject(request, response, null);
 
         assertTrue("Expecting the post interceptor to return success regardless", success);
     }
@@ -63,11 +64,11 @@ public class PostAaiAjscInterceptorTest {
     public void testAllowOrRejectIfFailure() throws Exception {
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-
-        LoggingContext.put(LoggingContext.LoggingField.RESPONSE_CODE.toString(), "ERR.");
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        response.setStatus(400);
         Mockito.when(request.getRequestURL()).thenReturn(new StringBuffer("/fadsjoifj"));
 
-        boolean success = postAaiAjscInterceptor.allowOrReject(request, null, null);
+        boolean success = postAaiAjscInterceptor.allowOrReject(request, response, null);
 
         assertTrue("Expecting the post interceptor to return success regardless", success);
     }

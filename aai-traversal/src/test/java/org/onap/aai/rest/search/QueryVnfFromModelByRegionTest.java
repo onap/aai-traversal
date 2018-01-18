@@ -80,10 +80,7 @@ public class QueryVnfFromModelByRegionTest extends QueryTest {
     rules.addEdge(g, genericVnf3, vserver3);
     rules.addTreeEdge(g, tenant1, vserver3);
 
-    rules.addEdge(g, serviceInst1, genericVnf3);
-
     expectedResult.add(genericVnf1);
-    expectedResult.add(genericVnf3);
   }
 
   @Override

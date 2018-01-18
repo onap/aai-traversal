@@ -23,14 +23,7 @@ package org.onap.aai.rest.search;
 
 import java.io.FileNotFoundException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Vector;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +37,7 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
 import org.onap.aai.query.builder.MissingOptionalParameter;
+import org.onap.aai.rest.dsl.DslQueryProcessor;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
@@ -61,6 +55,11 @@ public abstract class GenericQueryProcessor {
 	protected static GremlinServerSingleton gremlinServerSingleton = GremlinServerSingleton.getInstance();
 	protected static GroovyQueryBuilderSingleton queryBuilderSingleton = GroovyQueryBuilderSingleton.getInstance();
 	protected final boolean isGremlin;
+	/* dsl parameters to store dsl query and to check 
+	 * if this is a DSL request
+	 */
+	protected Optional<String> dsl;
+	protected final boolean isDsl ;
 	
 	protected GenericQueryProcessor(Builder builder) {
 		this.uri = builder.getUri();
@@ -68,6 +67,9 @@ public abstract class GenericQueryProcessor {
 		this.vertices = builder.getVertices();
 		this.gremlin = builder.getGremlin();
 		this.isGremlin = builder.isGremlin();
+		this.dsl = builder.getDsl();
+		this.isDsl = builder.isDsl();
+		
 		if (uri.isPresent()) {
 			queryParams = URITools.getQueryMap(uri.get());
 		} else {
@@ -116,7 +118,18 @@ public abstract class GenericQueryProcessor {
 	protected Pair<String, Map<String, Object>> createQuery() {
 		Map<String, Object> params = new HashMap<>();
 		String query = "";
-		if (!this.isGremlin) {
+		 if (this.isGremlin) {
+			query = gremlin.get();
+			
+		}else if (this.isDsl) {
+			String dslUserQuery = dsl.get();
+			String dslQuery = new DslQueryProcessor.Builder().build(dslUserQuery);
+			
+			query = queryBuilderSingleton.executeTraversal(dbEngine, dslQuery, params);
+			String startPrefix = "g.V()";
+			query = startPrefix + query;
+			
+		}else {
 			Matcher m = p.matcher(uri.get().getPath());
 			String queryName = "";
 			List<String> optionalParameters = Collections.emptyList();
@@ -143,22 +156,25 @@ public abstract class GenericQueryProcessor {
 				}
 			}
 			
-			List<Object> ids = new ArrayList<>();
-			
 			if (vertices.isPresent() && !vertices.get().isEmpty()) {
-				for (Vertex v : vertices.get()) {
-					ids.add(v.id());
-				}
+
+				// Get the vertices and convert them into object array
+				// The reason for this was .V() takes in an array of objects
+				// not a list of objects so that needs to be converted
+                // Also instead of statically creating the list which is a bad practice
+				// We are binding the array dynamically to the groovy processor correctly
+				// This will fix the memory issue of the method size too big
+				// as statically creating a list string and passing is not appropriate
+				params.put("startVertexes", vertices.get().toArray());
+
 				if (query == null) {
 					query = "";
 				} else {
 					query = queryBuilderSingleton.executeTraversal(dbEngine, query, params);
 				}
-				StringBuilder sb = new StringBuilder();
-				sb.append("[");
-				sb.append(Joiner.on(",").join(ids));
-				sb.append("]");
-				String startPrefix = "aaiStartQuery = " + sb.toString() + " as Object[];g.V(aaiStartQuery)";
+
+				String startPrefix = "g.V(startVertexes)";
+
 				if (!"".equals(query)) {
 					query = startPrefix + query;
 				} else {
@@ -166,8 +182,6 @@ public abstract class GenericQueryProcessor {
 				}
 			}
 			
-		} else {
-			query = gremlin.get();
 		}
 		
 		return new Pair<>(query, params);
@@ -181,6 +195,9 @@ public abstract class GenericQueryProcessor {
 		private boolean isGremlin = false;
 		private Optional<Collection<Vertex>> vertices = Optional.empty();
 		private QueryProcessorType processorType = QueryProcessorType.GREMLIN_SERVER;
+		
+		private Optional<String> dsl = Optional.empty();
+		private boolean isDsl = false;
 		
 		public Builder(TransactionalGraphEngine dbEngine) {
 			this.dbEngine = dbEngine;
@@ -197,9 +214,16 @@ public abstract class GenericQueryProcessor {
 			return this;
 		}
 		
-		public Builder queryFrom(String gremlin) {
-			this.gremlin = Optional.of(gremlin);
-			this.isGremlin = true;
+		public Builder queryFrom( String query, String queryType) {
+			
+			if(queryType.equals("gremlin")){
+				this.gremlin = Optional.of(query);
+				this.isGremlin = true;
+			}
+			if(queryType.equals("dsl")){
+				this.dsl = Optional.of(query);
+				this.isDsl = true;
+			}
 			return this;
 		}
 		
@@ -221,6 +245,14 @@ public abstract class GenericQueryProcessor {
 
 		public boolean isGremlin() {
 			return isGremlin;
+		}
+		
+		public Optional<String> getDsl() {
+			return dsl;
+		}
+
+		public boolean isDsl() {
+			return isDsl;
 		}
 
 		public Optional<Collection<Vertex>> getVertices() {
