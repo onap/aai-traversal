@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.onap.aai.util.AAIConstants;
@@ -98,6 +99,8 @@ public class GetCustomQueryConfig {
 	
 	private void getStoredQueryBlock( JsonObject configObject, String config ) {
 		if ( !configObject.has(config)) {
+			customQueryConfig.setQueryRequiredProperties( new ArrayList<String>() );
+			customQueryConfig.setQueryOptionalProperties( new ArrayList<String>()  );
 			return;
 		}
 		
@@ -109,18 +112,15 @@ public class GetCustomQueryConfig {
 		queryConfig = configObject.get(config);
 		subObject = queryConfig.getAsJsonObject();
 		propertyList = getPropertyList(subObject, REQUIRED_CONFIG);
-		if ( QUERY_CONFIG.equals(config)) {
-			customQueryConfig.setQueryRequiredProperties( propertyList );
-		} else {
-			customQueryConfig.setQueryRequiredProperties( null );
+		if ( propertyList == null ) {
+			propertyList = new ArrayList<String>();
 		}
-
+		customQueryConfig.setQueryRequiredProperties( propertyList );
 		propertyList = getPropertyList(subObject, OPTIONAL_CONFIG);
-		if ( QUERY_CONFIG.equals(config)) {
-			customQueryConfig.setQueryOptionalProperties( propertyList );
-		} else {
-			customQueryConfig.setQueryOptionalProperties( null );
+		if ( propertyList == null ) {
+			propertyList = new ArrayList<String>();
 		}
+		customQueryConfig.setQueryOptionalProperties( propertyList );
 			
 	}
 	

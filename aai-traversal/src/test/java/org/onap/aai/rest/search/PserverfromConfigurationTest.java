@@ -53,6 +53,8 @@ public class PserverfromConfigurationTest extends QueryTest {
 				"link-type", "link-type1");
 		Vertex lint1 = graph.addVertex(T.label, "l-interface", T.id, "5", "aai-node-type", "l-interface", "interface-name", "lint1", "is-port-mirrored", "true",
 				"in-maint", "true", "is-ip-unnumbered", "false", "interface-id", "interface-id1");
+		Vertex pnf1 = graph.addVertex(T.label, "pnf", T.id, "17", "aai-node-type", "pnf", "pnf-name", "pnf1name", "equip-vendor", "equip-vendor1", "equip-model",
+				"equip-model1");
 
 		// Following are extra nodes that should not be picked up in
 		// expectedResults
@@ -63,6 +65,8 @@ public class PserverfromConfigurationTest extends QueryTest {
 				"link-type", "link-type2");
 		Vertex lint2 = graph.addVertex(T.label, "l-interface", T.id, "16", "aai-node-type", "l-interface", "interface-name", "lint1", "is-port-mirrored",
 				"true", "in-maint", "true", "is-ip-unnumbered", "false", "interface-id", "interface-id2");
+		Vertex pnf2 = graph.addVertex(T.label, "pnf", T.id, "18", "aai-node-type", "pnf", "pnf-name", "pnf2name", "equip-vendor", "equip-vendor2", "equip-model",
+				"equip-model2");
 
 		GraphTraversalSource g = graph.traversal();
 		rules.addEdge(g, config1, loglink1);
@@ -70,18 +74,20 @@ public class PserverfromConfigurationTest extends QueryTest {
 		rules.addEdge(g, lint2, loglink1);
 		rules.addEdge(g, loglink1, pserver1);
 		rules.addEdge(g, loglink1, gvnf1);
+		rules.addEdge(g, gvnf1, pnf1);
 
 		// These should not be picked up in expectedResults
 		rules.addEdge(g, config2, loglink2);
-		rules.addEdge(g, lint2, loglink2);
 		rules.addEdge(g, loglink2, pserver2);
 		rules.addEdge(g, loglink2, gvnf2);
+		rules.addEdge(g, gvnf2, pnf2);
 
 		expectedResult.add(config1);
 		expectedResult.add(lint1);
 		expectedResult.add(lint2);
 		expectedResult.add(pserver1);
 		expectedResult.add(gvnf1);
+		expectedResult.add(pnf1);
 
 	}
 

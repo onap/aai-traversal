@@ -21,6 +21,7 @@
  */
 package org.onap.aai.rest.search;
 
+import org.onap.aai.logging.LogFormatTools;
 import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.FileWatcher;
 import com.att.eelf.configuration.EELFLogger;
@@ -79,7 +80,7 @@ public class GremlinServerSingleton {
                     .maxContentLength(6537920)
                     .create();
         } catch (FileNotFoundException e) {
-            logger.error("Unable to find the file: " + e);
+            logger.error("Unable to find the file: " + LogFormatTools.getStackTop(e));
         }
 
 		try {
@@ -90,7 +91,7 @@ public class GremlinServerSingleton {
 
 			queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
 		} catch (IOException e) {
-			logger.error("Error occurred during the processing of query json file: " + e);
+			logger.error("Error occurred during the processing of query json file: " + LogFormatTools.getStackTop(e));
 		}
 
 
@@ -103,7 +104,7 @@ public class GremlinServerSingleton {
         			String customQueryConfigJson = new String(Files.readAllBytes(path));
         			queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
         		} catch (IOException e) {
-        			logger.error("Error occurred during the processing of query json file: " + e);
+        			logger.error("Error occurred during the processing of query json file: " + LogFormatTools.getStackTop(e));
         		}
             }
         };
@@ -127,6 +128,9 @@ public class GremlinServerSingleton {
      */
     public String getStoredQueryFromConfig(String key){
     	CustomQueryConfig customQueryConfig = queryConfig.getStoredQuery(key);
+    	if ( customQueryConfig == null ) {
+    		return null;
+    	}
     	return customQueryConfig.getQuery();
     }
     
