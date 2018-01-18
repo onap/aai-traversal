@@ -8,6 +8,16 @@
          "property-collect-list" : [ "service-instance-id", "service-instance-name" ],
          "named-query-elements" : {
             "named-query-element" : [ {
+               "relationship-list" : {
+                  "relationship" : [ {
+                     "related-to" : "model",
+                     "relationship-data" : [ {
+                        "relationship-key" : "model.model-invariant-id",
+                        "relationship-value" : "166c050d-f69d-4305-943e-0bc58c3a26cf"
+                     } ]
+                  } ]
+               }
+            }, {
                "named-query-elements" : {
                   "named-query-element" : [ {
                      "relationship-list" : {

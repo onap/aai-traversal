@@ -240,7 +240,14 @@ public class TopologyFromSubscriberNameAndServiceTypeTest extends QueryTest {
 
 	@Override
 	protected void addStartNode(GraphTraversal<Vertex, Vertex> g) {
-		g.has("aai-node-type", "customer").has("global-customer-id", "global-customer-id-1").out("subscribesTo").has("aai-node-type","service-subscription").has("service-type", "service-type-1").out("hasInstance").has("aai-node-type","service-instance");
+		g
+		.has("aai-node-type", "customer")
+		.has("global-customer-id", "global-customer-id-1")
+		.in("org.onap.relationships.inventory.BelongsTo")
+		.has("aai-node-type","service-subscription")
+		.has("service-type", "service-type-1")
+		.in("org.onap.relationships.inventory.BelongsTo")
+		.has("aai-node-type","service-instance");
 	}
 
 	@Override
