@@ -47,16 +47,24 @@ public class ServiceModelsByDistributionStatusTest extends QueryTest {
         Vertex modelver11 = graph.addVertex(T.label, "model-ver", T.id, "21", "aai-node-type", "model-ver", "model-version-id", "model-version-id-11","model-name","model-name11", "model-version","model-version-1", "distribution-status", "distribution-status2");
         
         Vertex model2 = graph.addVertex(T.label, "model", T.id, "3", "aai-node-type", "model", "model-invariant-id", "model-invariant-id-2", "model-type", "resource");
-        Vertex modelver2 = graph.addVertex(T.label, "model-ver", T.id, "4", "aai-node-type", "model-ver", "model-version-id", "model-version-id-2","model-name","model-name2", "model-version","model-version-1", "distribution-status", "distribution-status2");
-		GraphTraversalSource g = graph.traversal();
+        Vertex modelver2 = graph.addVertex(T.label, "model-ver", T.id, "4", "aai-node-type", "model-ver", "model-version-id", "model-version-id-2","model-name","model-name2", "model-version","model-version-22", "distribution-status", "distribution-status2");
+        
+        Vertex model3 = graph.addVertex(T.label, "model", T.id, "5", "aai-node-type", "model", "model-invariant-id", "model-invariant-id-3", "model-type", "service");
+        Vertex modelver3 = graph.addVertex(T.label, "model-ver", T.id, "6", "aai-node-type", "model-ver", "model-version-id", "model-version-id-13","model-name","model-name3", "model-version","model-version-3", "distribution-status", "distribution-status1");
+        Vertex modelver13 = graph.addVertex(T.label, "model-ver", T.id, "7", "aai-node-type", "model-ver", "model-version-id", "model-version-id-33","model-name","model-name33", "model-version","model-version-33", "distribution-status", "distribution-status2");
+       
+        GraphTraversalSource g = graph.traversal();
 
-		rules.addTreeEdge(g, modelver1, model1);
-		rules.addTreeEdge(g, modelver11, model1);
-		rules.addTreeEdge(g, modelver2, model1);
+        rules.addTreeEdge(g, modelver2,model2);
 		
-		expectedResult.add(model1);
+		rules.addTreeEdge(g, modelver3, model3);
+		rules.addTreeEdge(g, modelver13, model3);
+		rules.addTreeEdge(g, modelver11, model3);
+		
+		expectedResult.add(model3);
+		expectedResult.add(modelver13);
 		expectedResult.add(modelver11);
-		expectedResult.add(modelver2);
+		
 
 	}
 	@Override
@@ -65,7 +73,7 @@ public class ServiceModelsByDistributionStatusTest extends QueryTest {
 	}
 	@Override
 	protected void addStartNode(GraphTraversal<Vertex, Vertex> g) {
-		g.has("aai-node-type", "model").has("model-invariant-id", "model-invariant-id-1");
+		g.has("aai-node-type", "model").has("model-invariant-id", "model-invariant-id-3");
 	}
 	
 	@Override

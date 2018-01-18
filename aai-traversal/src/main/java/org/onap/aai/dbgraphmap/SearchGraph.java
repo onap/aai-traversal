@@ -1063,37 +1063,28 @@ public class SearchGraph {
 
 					String modelName = null;
 					try { 
+						// Try to get the modelName if we can.  Otherwise, do not fail, just return what we have already.
 						String modelInvariantIdLocal = (String)vert.<String>property("model-invariant-id-local").orElse(null); // this one points at a model
 						String modelVersionIdLocal = (String)vert.<String>property("model-version-id-local").orElse(null); // this one points at a model-ver
 						
 						if ( (modelInvariantIdLocal != null && modelVersionIdLocal != null) 
 								&& (modelInvariantIdLocal.length() > 0 && modelVersionIdLocal.length() > 0) ) {
-							HashMap<String,Object> modelLookupHash = new HashMap<String,Object>();
-
 							Introspector modelVer = loader.introspectorFromName("model-ver");
 							modelVer.setValue("model-version-id", modelVersionIdLocal);
 							QueryBuilder builder = engine.getQueryBuilder().createDBQuery(modelVer);
-							
 							List<Vertex> modelVerVerts = builder.toList();
-							if (modelVerVerts.size() != 1) {
-								throw new AAIException("AAI_6112");
-							}
-							Vertex modelVerVert = modelVerVerts.get(0);
-							
-							modelName = modelVerVert.<String>property("model-name").orElse(null); 
-
-							if (modelName != null && modelName.length() > 0) { 
-								inventoryItem.setValue("model-name", modelName);
+							if( (modelVerVerts != null) && (modelVerVerts.size() == 1) ) {
+								Vertex modelVerVert = modelVerVerts.get(0);
+								modelName = modelVerVert.<String>property("model-name").orElse(null); 
+								if (modelName != null && modelName.length() > 0) { 
+									inventoryItem.setValue("model-name", modelName);
+								}
 							}
 						}
 					} catch (DynamicException e) { 
 						; // it's ok, dynamic object might not have these fields
-					} catch (AAIException e) { 
-						if (e.getErrorObject().getErrorCode().equals("6114")) { 
-							// it's ok, couldn't find a matching model
-						} else { 
-							throw e;
-						}
+					} catch (Exception e) { 
+						; // it's ok, couldn't find a matching model
 					}
 					
 					if (resultSet.getSubResultSet() != null) { 

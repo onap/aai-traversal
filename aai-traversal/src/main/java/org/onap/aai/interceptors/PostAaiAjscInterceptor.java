@@ -48,16 +48,18 @@ public class PostAaiAjscInterceptor implements AjscInterceptor {
 	@Override
 	public boolean allowOrReject(HttpServletRequest req, HttpServletResponse resp, Map<?, ?> paramMap)
 			throws Exception {
-		final String responseCode = LoggingContext.responseCode();
-
-		if (responseCode != null && responseCode.startsWith("ERR.")) {
+		final int httpStatusCode = resp.getStatus();
+		LoggingContext.responseCode(Integer.toString(httpStatusCode));
+		if ( httpStatusCode < 200 || httpStatusCode > 299 ) {
 			LoggingContext.statusCode(StatusCode.ERROR);
-			LOGGER.error(req.getRequestURL() + " call failed with responseCode=" + responseCode);
-		} else {
+			LoggingContext.responseDescription("Error");
+			LOGGER.error(req.getRequestURL() + " call failed with responseCode=" + httpStatusCode);
+		}
+		else {
+			LoggingContext.responseDescription(LoggingContext.responseMap.get(LoggingContext.SUCCESS));
 			LoggingContext.statusCode(StatusCode.COMPLETE);
 			LOGGER.info(req.getRequestURL() + " call succeeded");
 		}
-
 		LoggingContext.clear();
 		return true;
 	}
