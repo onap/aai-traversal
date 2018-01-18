@@ -108,8 +108,17 @@ public class TopologyDetailFromVserverQueryTest extends QueryTest {
 	}
 	@Override
 	protected void addStartNode(GraphTraversal<Vertex, Vertex> g) {
-		g.has("aai-node-type", "cloud-region").has("cloud-region-id", "regionid0").has("cloud-owner", "cloudOwnername0").out("has").has("aai-node-type","tenant").has("tenant-id", "tenantid0").out("owns").has("aai-node-type","vserver").has("vserver-id", "vserverid0");
+		g.has("aai-node-type", "cloud-region")
+		.has("cloud-region-id", "regionid0")
+		.has("cloud-owner", "cloudOwnername0")
+		.in("org.onap.relationships.inventory.BelongsTo")
+		.has("aai-node-type","tenant")
+		.has("tenant-id", "tenantid0")
+		.in("org.onap.relationships.inventory.BelongsTo")
+		.has("aai-node-type","vserver")
+		.has("vserver-id", "vserverid0");
 	}
+
 	@Override
 	protected void addParam(Map<String, Object> params) {
 		return;

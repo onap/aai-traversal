@@ -95,7 +95,7 @@ public class TopologyDetailsQueryTest extends QueryTest {
 		rules.addEdge(g, owningentity, servinst);
 		rules.addEdge(g, project, servinst);
 		rules.addEdge(g, genericvnf, vnfc);
-		rules.addEdge(g, vnfc, vserver);
+		rules.addEdge(g, genericvnf,vserver);
 		rules.addTreeEdge(g, linterface, vserver);
 		rules.addTreeEdge(g, l3inter1ipv4addresslist, linterface);
 		rules.addEdge(g, l3inter1ipv4addresslist, subnet4);
@@ -116,7 +116,7 @@ public class TopologyDetailsQueryTest extends QueryTest {
 		rules.addEdge(g, owningentity1, servinst1);
 		rules.addEdge(g, project1, servinst1);
 		rules.addEdge(g, genericvnf1, vnfc1);
-		rules.addEdge(g, vnfc1, vserver1);
+		rules.addEdge(g, genericvnf1,vserver1);
 		rules.addTreeEdge(g, linterface1, vserver1);
 		rules.addTreeEdge(g, l3inter1ipv4addresslist1, linterface1);
 		rules.addEdge(g, l3inter1ipv4addresslist1, subnet41);

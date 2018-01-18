@@ -2,6 +2,8 @@ package org.onap.aai.rest.search;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,7 +45,7 @@ public class GetCustomQueryConfigTest {
 		CustomQueryConfig cqc = getCustomQueryConfig.getStoredQuery("queryName2");
 
 		assertEquals(Lists.newArrayList("prop5"), cqc.getQueryOptionalProperties());
-		assertEquals(null, cqc.getQueryRequiredProperties());
+		assertEquals(new ArrayList<String>(), cqc.getQueryRequiredProperties());
 		assertEquals("out('bar').has('stuff','baz')", cqc.getQuery());
 
 	}
@@ -54,8 +56,8 @@ public class GetCustomQueryConfigTest {
 		GetCustomQueryConfig getCustomQueryConfig = new GetCustomQueryConfig(configJson);
 		CustomQueryConfig cqc = getCustomQueryConfig.getStoredQuery("queryName3");
 
-		assertEquals(null, cqc.getQueryOptionalProperties());
-		assertEquals(null, cqc.getQueryRequiredProperties());
+		assertEquals(new ArrayList<String>(), cqc.getQueryOptionalProperties());
+		assertEquals(new ArrayList<String>(), cqc.getQueryRequiredProperties());
 		assertEquals("out('bar1').has('stuff','baz1')", cqc.getQuery());
 
 	}

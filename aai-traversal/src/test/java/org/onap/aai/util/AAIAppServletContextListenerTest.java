@@ -78,7 +78,7 @@ public class AAIAppServletContextListenerTest {
 		 * Test contextDestroyed.
 		 */
 		@Test(expected = NullPointerException.class)
-		//@Ignore
+		@Ignore
 		public void testContextDestroyed(){
 			listener.contextDestroyed(arg);
 			assertTrue(logContains(Level.DEBUG, "AAI Server shutdown"));
