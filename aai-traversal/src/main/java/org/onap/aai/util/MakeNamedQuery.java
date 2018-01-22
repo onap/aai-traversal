@@ -85,7 +85,7 @@ public class MakeNamedQuery {
 
 			Introspector aaiRes = aaiResEnt.getValue();
 
-			if (!(aaiRes.isContainer() || aaiRes.getName().equals("aai-internal"))) {
+			if (!(aaiRes.isContainer() || "aai-internal".equals(aaiRes.getName()))) {
 				String resource = aaiRes.getName();
 
 				if (processedWidgets.contains(resource)) {
