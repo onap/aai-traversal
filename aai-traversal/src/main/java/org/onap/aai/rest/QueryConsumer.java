@@ -74,6 +74,8 @@ import com.google.gson.JsonParser;
 
 @Path("{version: v9|v1[012]}/query")
 public class QueryConsumer extends RESTAPI {
+
+    private static final String DEPTH = "depth";
 	
 	/** The introspector factory type. */
 	private ModelType introspectorFactoryType = ModelType.MOXY;
@@ -198,8 +200,8 @@ public class QueryConsumer extends RESTAPI {
 	
 	public void checkQueryParams(MultivaluedMap<String, String> params) throws AAIException {
 		
-		if (params.containsKey("depth") && params.getFirst("depth").matches("\\d+")) {
-			String depth = params.getFirst("depth");
+		if (params.containsKey(DEPTH) && params.getFirst(DEPTH).matches("\\d+")) {
+			String depth = params.getFirst(DEPTH);
 			Integer i = Integer.parseInt(depth);
 			if (i > 1) {
 				throw new AAIException("AAI_3303");
