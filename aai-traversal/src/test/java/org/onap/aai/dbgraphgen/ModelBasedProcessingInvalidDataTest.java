@@ -38,7 +38,6 @@ import com.thinkaurelius.titan.graphdb.types.system.EmptyVertex;
 import com.thinkaurelius.titan.graphdb.types.vertices.EdgeLabelVertex;
 import com.thinkaurelius.titan.graphdb.types.vertices.PropertyKeyVertex;
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.openjpa.kernel.exps.Exp;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -81,7 +80,7 @@ public class ModelBasedProcessingInvalidDataTest {
 	@BeforeClass
 	public static void configure() throws Exception {
 		System.setProperty("AJSC_HOME", ".");
-		System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+		System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
 		loader = LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
 
 
