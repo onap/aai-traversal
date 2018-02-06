@@ -16,7 +16,7 @@ public class GetCustomQueryConfigTest {
 	@Before
 	public void setUp() throws Exception {
 		System.setProperty("AJSC_HOME", ".");
-		System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+		System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
 		
 
 		configJson = "{\n	\"stored-queries\": [{\n" +

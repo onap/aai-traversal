@@ -27,7 +27,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
-import org.apache.velocity.util.ArrayListWrapper;
 import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -100,7 +99,7 @@ public class SearchGraphTest {
     public void setup(){
 
         System.setProperty("AJSC_HOME", ".");
-        System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+        System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
 
         searchGraph = new SearchGraph();
 

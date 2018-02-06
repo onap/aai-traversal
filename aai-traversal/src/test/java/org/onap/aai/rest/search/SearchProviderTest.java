@@ -85,7 +85,7 @@ public class SearchProviderTest {
     public void setup(){
         logger.info("Starting the setup for the integration tests of Rest Endpoints");
         System.setProperty("AJSC_HOME", ".");
-        System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+        System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
 
         searchProvider      = new SearchProvider();
         httpHeaders         = mock(HttpHeaders.class);
