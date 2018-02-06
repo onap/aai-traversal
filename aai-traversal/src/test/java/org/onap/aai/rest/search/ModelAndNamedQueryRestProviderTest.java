@@ -89,7 +89,7 @@ public class ModelAndNamedQueryRestProviderTest {
     public void setup(){
         logger.info("Starting the setup for the integration tests of Rest Endpoints");
         System.setProperty("AJSC_HOME", ".");
-        System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+        System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
 
         modelAndNamedQueryRestProvider      = new ModelAndNamedQueryRestProvider();
         httpHeaders         = mock(HttpHeaders.class);

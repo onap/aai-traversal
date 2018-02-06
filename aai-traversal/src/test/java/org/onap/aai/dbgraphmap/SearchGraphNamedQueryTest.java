@@ -98,7 +98,7 @@ public class SearchGraphNamedQueryTest {
     }
     
     private void addWidgets() {
-        String widgetPath = "." + AAIConstants.AAI_FILESEP + "bundleconfig-local" + AAIConstants.AAI_FILESEP + "etc" + 
+        String widgetPath = "." + AAIConstants.AAI_FILESEP + "src/main/resources" + AAIConstants.AAI_FILESEP + "etc" +
         		AAIConstants.AAI_FILESEP + "scriptdata"+ AAIConstants.AAI_FILESEP + "widget-model-json";
         
         File dir = new File(widgetPath);
@@ -120,7 +120,7 @@ public class SearchGraphNamedQueryTest {
     }
     
     private void addNamedQueries() {
-        String namedQueryPath = "." + AAIConstants.AAI_FILESEP + "bundleconfig-local" + AAIConstants.AAI_FILESEP + "etc" + 
+        String namedQueryPath = "." + AAIConstants.AAI_FILESEP + "src/main/resources" + AAIConstants.AAI_FILESEP + "etc" +
         		AAIConstants.AAI_FILESEP + "scriptdata"+ AAIConstants.AAI_FILESEP + "named-query-json";
         
         File dir = new File(namedQueryPath);
@@ -152,7 +152,7 @@ public class SearchGraphNamedQueryTest {
     	 httpTestUtil = new HttpTestUtil();
 
         System.setProperty("AJSC_HOME", ".");
-        System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+        System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
         
 
         searchGraph = new SearchGraph();
