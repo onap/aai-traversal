@@ -1,0 +1,51 @@
+#
+# ============LICENSE_START=======================================================
+# org.onap.aai
+# ================================================================================
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# ================================================================================
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============LICENSE_END=========================================================
+#
+# ECOMP is a trademark and service mark of AT&T Intellectual Property.
+#
+
+# SCLD_ENV is for the environment context for dme2
+# AAI_CHEF_ENV is used for both dme2 properites and
+# also used by chef to generate appropriate properties
+
+version: '2'
+services:
+  aai-traversal:
+    image: __REGISTRY__/__NAMESPACE__/aai-traversal:__IMAGE_VERSION__
+    network_mode: host
+    environment:
+      - LOCAL_USER_ID=__LOCAL_USER_ID__
+      - LOCAL_GROUP_ID=__LOCAL_GROUP_ID__
+    volumes:
+      - /opt/aai/logroot/AAI-GQ:/opt/aai/logroot/AAI-GQ
+      - /opt/app/aai-traversal/appconfig/aai-client-cert.p12:/opt/app/aai-traversal/resources/etc/auth/aai-client-cert.p12
+      - /opt/app/aai-traversal/appconfig/tomcat_keystore:/opt/app/aai-traversal/resources/etc/auth/tomcat_keystore
+      - /opt/app/aai-traversal/appconfig/aai_policy.json:/opt/app/aai-traversal/resources/etc/auth/aai_policy.json
+      - /opt/app/aai-traversal/appconfig/aaiconfig.properties:/opt/app/aai-traversal/resources/etc/appprops/aaiconfig.properties
+      - /opt/app/aai-traversal/appconfig/application.properties:/opt/app/aai-traversal/resources/application.properties
+      - /opt/app/aai-traversal/appconfig/dme2.properties:/opt/app/aai-traversal/resources/dme2.properties
+      - /opt/app/aai-traversal/appconfig/localhost-access-logback.xml:/opt/app/aai-traversal/resources/localhost-access-logback.xml
+      - /opt/app/aai-traversal/appconfig/logback.xml:/opt/app/aai-traversal/resources/logback.xml
+      - /opt/app/aai-traversal/appconfig/titan-cached.properties:/opt/app/aai-traversal/resources/etc/appprops/titan-cached.properties
+      - /opt/app/aai-traversal/appconfig/titan-realtime.properties:/opt/app/aai-traversal/resources/etc/appprops/titan-realtime.properties
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"

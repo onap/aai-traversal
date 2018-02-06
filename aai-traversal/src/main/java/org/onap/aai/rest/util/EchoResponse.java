@@ -42,11 +42,12 @@ import org.onap.aai.restcore.RESTAPI;
 /**
  * The Class EchoResponse.
  */
+@Path("/util")
 public class EchoResponse extends RESTAPI {
 	
 	protected static String authPolicyFunctionName = "util";
 		
-	public static final String echoPath = "/util/echo";
+	public static final String echoPath = "/echo";
 
 	/**
 	 * Simple health-check API that echos back the X-FromAppId and X-TransactionId to clients.
