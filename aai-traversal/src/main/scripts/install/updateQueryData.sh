@@ -41,7 +41,7 @@ error_exit () {
 }
 
 j=0
-for filepath in `ls $PROJECT_HOME/bundleconfig/etc/scriptdata/widget-model-json/*.json|sort -f`
+for filepath in `ls $PROJECT_HOME/resources/etc/scriptdata/widget-model-json/*.json|sort -f`
 do
 j=$(expr "$j" + 1)
 filename=$(basename $filepath)
@@ -54,7 +54,7 @@ echo "End putTool for widget $filename" | tee -a $OUTFILE
 done
 
 j=0
-for filepath in `ls $PROJECT_HOME/bundleconfig/etc/scriptdata/named-query-json/*.json|sort -f`
+for filepath in `ls $PROJECT_HOME/resources/etc/scriptdata/named-query-json/*.json|sort -f`
 do
 j=$(expr "$j" + 1)
 filename=$(basename $filepath)
@@ -67,7 +67,7 @@ echo "End putTool for named-query $filename" | tee -a $OUTFILE
 done
 
 j=0
-for filepath in `ls $PROJECT_HOME/bundleconfig/etc/scriptdata/resource-model-json/*.json|sort -f`
+for filepath in `ls $PROJECT_HOME/resources/etc/scriptdata/resource-model-json/*.json|sort -f`
 do
 j=$(expr "$j" + 1)
 filename=$(basename $filepath)
@@ -80,7 +80,7 @@ echo "End putTool for resource model $filename" | tee -a $OUTFILE
 done
 
 j=0
-for filepath in `ls $PROJECT_HOME/bundleconfig/etc/scriptdata/service-model-json/*.json|sort -f`
+for filepath in `ls $PROJECT_HOME/resources/etc/scriptdata/service-model-json/*.json|sort -f`
 do
 j=$(expr "$j" + 1)
 filename=$(basename $filepath)
