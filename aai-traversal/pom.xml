@@ -1,81 +1,322 @@
-<?xml version="1.0"?>
-<project
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.onap.aai.traversal</groupId>
-        <artifactId>traversal</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
-    </parent>
+    <groupId>org.onap.aai.traversal</groupId>
     <artifactId>aai-traversal</artifactId>
-    <name>aai-traversal</name>
-    <url>http://maven.apache.org</url>
     <version>1.2.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.1.RELEASE</version>
+    </parent>
+
     <properties>
-        <nexusproxy>https://nexus.onap.org</nexusproxy>
-        <onap.nexus.url>https://nexus.onap.org</onap.nexus.url>
-        <!-- old version <hbase.version>0.98.4-hadoop2</hbase.version> -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dockerLocation>${basedir}/target/swm/package/nix/dist_files/</dockerLocation>
-        <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
-        <docker.image.version>1.0.0</docker.image.version>
+        <swagger.directory>${basedir}/target/classes/META-INF/traversal/swagger</swagger.directory>
+        <icd.file>service.json</icd.file>
+        <icd.package>com.att.ajsc.ajsc6configdemo.service.rs</icd.package>
+        <java.version>1.8</java.version>
+        <build.number>local</build.number>
+        <kube.namespace>org-onap-aai</kube.namespace>
+        <service.account>ajsc-svc-account</service.account>
+        <namespace>com.att.ajsc</namespace>
+        <start-class>org.onap.aai.TraversalApp</start-class>
+
+        <aai-schema.version>1.2.1-SNAPSHOT</aai-schema.version>
+        <aai.core.version>1.2.1-SNAPSHOT</aai.core.version>
+        <aai.client.loadbalancer.version>1.2.1-SNAPSHOT</aai.client.loadbalancer.version>
+
         <hbase.version>1.0.2</hbase.version>
+
+        <!-- Start of the jacoco plugin properties -->
         <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
         <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.jacoco.reportMissing.force.zero>false</sonar.jacoco.reportMissing.force.zero>
         <sonar.projectVersion>${project.version}</sonar.projectVersion>
-        <!-- Antlr-related properties to auto-gen visitor and listener -->
+        <!-- End of the jacoco plugin properties -->
+
+        <jolt.version>0.0.24</jolt.version>
+        <jopt.simple.version>4.9</jopt.simple.version>
+
+        <io.swagger.version>1.5.8</io.swagger.version>
+        <apache.log4j.version>1.2.17</apache.log4j.version>
+
+        <commons.beanutils.version>1.9.2</commons.beanutils.version>
+        <commons.compress.version>1.10</commons.compress.version>
+        <commons.configuration.version>1.9</commons.configuration.version>
+
+        <googlecode.diffutils.version>1.3.0</googlecode.diffutils.version>
+        <scamper.encryption.version>1.8.20</scamper.encryption.version>
+        <httpcomponents.httpmime.version>4.5.2</httpcomponents.httpmime.version>
+        <scamper.version>1.8.36</scamper.version>
+        <dom4j.version>1.6.1</dom4j.version>
+        <commons.lang.version>2.6</commons.lang.version>
+        <eelf.core.version>1.0.0</eelf.core.version>
+        <logback.version>1.2.3</logback.version>
+        <hamcrest.junit.version>2.0.0.0</hamcrest.junit.version>
+        <janino.version>2.7.8</janino.version>
+        <google.guava.version>16.0</google.guava.version>
+        <titan.version>1.0.0</titan.version>
+        <gremlin.driver.version>3.0.1-incubating</gremlin.driver.version>
+        <hbase.version>1.0.2</hbase.version>
+        <smack.version>3.0.4</smack.version>
+        <json.simple.version>1.1.1</json.simple.version>
+        <mockito.version>1.10.19</mockito.version>
+        <powermock.version>1.6.2</powermock.version>
+        <jcommander.version>1.48</jcommander.version>
+        <json.version>20090211</json.version>
+        <freemarker.version>2.3.21</freemarker.version>
+        <jaxb.version>2.2.11</jaxb.version>
+        <eclipse.persistence.version>2.6.2</eclipse.persistence.version>
+        <json.patch.version>1.9</json.patch.version>
+        <javatuples.version>1.2</javatuples.version>
+        <gson.version>2.7</gson.version>
+        <dmaap.client.version>0.2.12</dmaap.client.version>
+        <httpcore.version>4.4</httpcore.version>
+        <json.path.version>2.2.0</json.path.version>
+        <activemq.version>5.15.3</activemq.version>
+        <httpclient.version>4.5.3</httpclient.version>
+        <spring.jms.version>4.3.2.RELEASE</spring.jms.version>
+        <spotify.docker.version>0.4.11</spotify.docker.version>
+        <spring.security.version>1.0.3.RELEASE</spring.security.version>
+
+        <dme2.version>2.8.5</dme2.version>
+        <async.retry.version>0.0.7</async.retry.version>
+        <jsonassert.version>1.4.0</jsonassert.version>
+
+        <eclipse.jetty.version>9.4.1.v20170120</eclipse.jetty.version>
+
+        <docker.fabric.version>0.23.0</docker.fabric.version>
+        <!-- Default docker registry that maven fabric plugin will try to pull from -->
+        <docker.registry>docker.io</docker.registry>
+        <!-- Specifying the docker push registry where the image should be pushed -->
+        <!-- This value should be overwritten at runtime to wherever need to be pushed to -->
+        <docker.push.registry>localhost:5000</docker.push.registry>
+
+        <!--
+             Location where assembly of our scripts, resources and main jar will be held
+	         Check the aai-traversal/src/main/assembly/descriptor.xml for more info
+        -->
+        <aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/
+        </aai.build.directory>
+        <aai.docker.namespace>onap</aai.docker.namespace>
+        <maven.skip.tests>true</maven.skip.tests>
+
+        <spring.web.version>4.3.6.RELEASE</spring.web.version>
+        <aai.project.version>1.2.0</aai.project.version>
+        <aai.docker.version>1.2</aai.docker.version>
+
+        <!--
+            Nexus Proxy Properties and Snapshot Locations
+            Ideally this can be overwritten at runtime per internal environment specific values at runtime
+        -->
+        <nexusproxy>https://nexus.onap.org</nexusproxy>
+        <site.path>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
+        <release.path>/content/repositories/releases/</release.path>
+        <snapshot.path>/content/repositories/snapshots/</snapshot.path>
+
+        <netty.handler.version>4.1.9.Final</netty.handler.version>
+        <netty.version>4.0.37.Final</netty.version>
+        <jackson.core.version>2.8.11.1</jackson.core.version>
+        <groovy.version>2.4.4</groovy.version>
+
+        <spring.test.version>4.3.6.RELEASE</spring.test.version>
+
+        <!-- This will be used for the docker images as the default format of maven build has issues -->
+        <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
+
         <antlr4.visitor>true</antlr4.visitor>
         <antlr4.listener>true</antlr4.listener>
+        <antlr.version>4.7</antlr.version>
     </properties>
+    <profiles>
+        <!-- Docker profile to be used for building docker image and pushing to nexus -->
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>${docker.fabric.version}</version>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <apiVersion>1.23</apiVersion>
+                            <images>
+                                <image>
+                                    <name>${docker.push.registry}/${aai.docker.namespace}/aai-traversal:%l</name>
+                                    <build>
+                                        <filter>@</filter>
+                                        <tags>
+                                            <tag>latest</tag>
+                                            <tag>${aai.docker.version}-STAGING-${maven.build.timestamp}</tag>
+                                            <tag>${aai.docker.version}-STAGING-latest</tag>
+                                        </tags>
+                                        <cleanup>try</cleanup>
+                                        <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
+                                        <assembly>
+                                            <inline>
+                                                <fileSets>
+                                                    <fileSet>
+                                                        <directory>${aai.build.directory}</directory>
+                                                        <outputDirectory>/${project.artifactId}</outputDirectory>
+                                                    </fileSet>
+                                                </fileSets>
+                                            </inline>
+                                        </assembly>
+                                    </build>
+                                </image>
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>clean-images</id>
+                                <phase>pre-clean</phase>
+                                <goals>
+                                    <goal>remove</goal>
+                                </goals>
+                                <configuration>
+                                    <removeAll>true</removeAll>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>generate-images</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>push-images</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>push</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!--
+            Use of this profile is a way to support legacy runAjsc profile seen using AJSC 2
+            and also because spring-boot:run doesn't work with large classpaths in windows
+            so this accommodates the behavior of running the application from maven
+        -->
+        <profile>
+            <id>runAjsc</id>
+            <properties>
+                <skipTests>${maven.skip.tests}</skipTests>
+            </properties>
+            <build>
+                <defaultGoal>pre-integration-test</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>run-spring-boot</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>${start-class}</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>snapshot.location</key>
+                                    <value>${snapshot.file}</value>
+                                </systemProperty>
+                            </systemProperties>
+                            <executable>java</executable>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <dependencies>
         <dependency>
-            <groupId>org.onap.aai.aai-common</groupId>
-            <artifactId>aai-schema</artifactId>
-            <version>${aai.schema.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.onap.aai.aai-common</groupId>
-            <artifactId>aai-core</artifactId>
-            <version>${aai.core.version}</version>
-        </dependency>
-        <!-- Scamper related dependencies -->
-        <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <version>3.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>apache-log4j-extras</artifactId>
-            <version>1.2.17</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jersey</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-servlet</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.2</version>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>${jopt.simple.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.10</version>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>${io.swagger.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${io.swagger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jersey-jaxrs</artifactId>
+            <version>${io.swagger.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.jersey.media</groupId>
+                    <artifactId>jersey-media-multipart</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jersey-core</artifactId>
+                    <groupId>com.sun.jersey</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jersey-json</artifactId>
+                    <groupId>com.sun.jersey</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jersey-server</artifactId>
+                    <groupId>com.sun.jersey</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jersey-client</artifactId>
+                    <groupId>com.sun.jersey</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsr311-api</artifactId>
+                    <groupId>javax.ws.rs</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jersey-multipart</artifactId>
+                    <groupId>com.sun.jersey.contribs</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
-            <version>1.9</version>
+            <version>${commons.configuration.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-lang</artifactId>
@@ -83,93 +324,37 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.5.2</version>
-        </dependency>
-
-        <!-- AJSC related dependencies -->
-        <dependency>
-            <groupId>com.att.ajsc</groupId>
-            <artifactId>ajsc-runner</artifactId>
-            <version>${ajscRuntimeVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.att.ajsc</groupId>
-            <artifactId>ajsc-core</artifactId>
-            <version>${ajscRuntimeVersion}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- For dom4j dependency ONLY! - If deploying to CSI env, remove "provided"
-            scope. In CSI env, this jar MUST be included within service project's swm
-            package -->
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>${commons.lang.version}</version>
         </dependency>
-
         <!-- eelf dependency -->
         <dependency>
             <groupId>com.att.eelf</groupId>
             <artifactId>eelf-core</artifactId>
-            <version>1.0.0</version>
+            <version>${eelf.core.version}</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.1.7</version>
+            <version>${logback.version}</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
+            <version>${logback.version}</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-access</artifactId>
-            <version>1.1.7</version>
+            <version>${logback.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-junit</artifactId>
-            <version>2.0.0.0</version>
+            <version>${hamcrest.junit.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.codehaus.janino</groupId>
-            <artifactId>janino</artifactId>
-            <version>2.7.8</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -178,12 +363,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>16.0</version>
+            <version>${google.guava.version}</version>
         </dependency>
         <dependency>
             <groupId>com.thinkaurelius.titan</groupId>
             <artifactId>titan-core</artifactId>
-            <version>1.0.0</version>
+            <version>${titan.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -194,18 +379,22 @@
         <dependency>
             <groupId>com.thinkaurelius.titan</groupId>
             <artifactId>titan-cassandra</artifactId>
-            <version>1.0.0</version>
+            <version>${titan.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>com.thinkaurelius.titan</groupId>
             <artifactId>titan-hbase</artifactId>
-            <version>1.0.0</version>
+            <version>${titan.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -217,7 +406,7 @@
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-driver</artifactId>
-            <version>3.0.1-incubating</version>
+            <version>${gremlin.driver.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hbase</groupId>
@@ -231,6 +420,30 @@
                 <exclusion>
                     <artifactId>log4j</artifactId>
                     <groupId>log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-json</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey.contribs</groupId>
+                    <artifactId>jersey-guice</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-httpclient</groupId>
+                    <artifactId>commons-httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -257,180 +470,364 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
-            <version>1.18</version>
-        </dependency>
-        <dependency>
-            <groupId>jivesoftware</groupId>
-            <artifactId>smack</artifactId>
-            <version>3.0.4</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.1.4</version>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>1.18</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.ws</groupId>
-            <artifactId>spring-ws</artifactId>
-            <version>1.5.2</version>
-            <!--<version>2.1.3-RELEASE</version> -->
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>4.2.5.RELEASE</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>1.6.2</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
-            <version>1.6.2</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
-            <version>1.48</version>
+            <version>${jcommander.version}</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20090211</version>
+            <version>${json.version}</version>
         </dependency>
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
-            <version>2.3.14</version>
+            <version>${freemarker.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.2.11</version>
+            <version>${jaxb.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
-            <version>2.2.11</version>
+            <version>${jaxb.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-core</artifactId>
-            <version>2.2.11</version>
+            <version>${jaxb.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-xjc</artifactId>
-            <version>2.2.11</version>
+            <version>${jaxb.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
-            <version>2.6.2</version>
+            <version>${eclipse.persistence.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.moxy</artifactId>
-            <version>2.6.2</version>
+            <version>${eclipse.persistence.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-javaagent</artifactId>
-            <version>1.6.2</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4-rule-agent</artifactId>
-            <version>1.6.2</version>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.fge</groupId>
             <artifactId>json-patch</artifactId>
-            <version>1.9</version>
+            <version>${json.patch.version}</version>
         </dependency>
         <dependency>
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
-            <version>1.2</version>
+            <version>${javatuples.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.7</version>
+            <version>${gson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.att.nsa</groupId>
             <artifactId>dmaapClient</artifactId>
-            <version>0.2.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4</version>
+            <version>${dmaap.client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.att.aft</groupId>
+                    <artifactId>dme2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.bazaarvoice.jolt</groupId>
             <artifactId>jolt-complete</artifactId>
-            <version>0.0.24</version>
+            <version>${jolt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${json.path.version}</version>
+        </dependency>
+        <!-- Do not use activemq-all because they force you to use a specific logging
+            and they shade it so you can't simply exclude it and when you deploy the
+            jar, you will notice failure -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <version>${activemq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>${activemq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.onap.aai.aai-common</groupId>
+            <artifactId>aai-core</artifactId>
+            <version>${aai.core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.onap.aai.aai-common</groupId>
+            <artifactId>aai-schema</artifactId>
+            <version>${aai-schema.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>${spring.jms.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Do not use the jersey-client since jersey client 1.0 version clashes
+            with jersey 2 which we are using -->
+        <!-- Use this to make http requests instead of jersey 1.0 client -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.skyscreamer</groupId>
+            <artifactId>jsonassert</artifactId>
+            <version>${jsonassert.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${eclipse.jetty.version}</version>
+        </dependency>
+        <!--
+            Explicitly stating the security spring framework and
+            exclude the bouncy castle since that is somehow overwriting
+            our p12 file decryption that's built into java security
+            This will cause the password is incorrect
+            This needs to be added back if org.bouncy castle dependency
+            sneaks backs in and causing issues with the two way ssl
+        -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-rsa</artifactId>
+            <version>${spring.security.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcpkix-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.onap.aai.aai-common</groupId>
+            <artifactId>aai-client-loadbalancer</artifactId>
+            <version>${aai.client.loadbalancer.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey.contribs</groupId>
+                    <artifactId>jersey-apache-client4</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>${netty.handler.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.web.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>${groovy.version}</version>
+            <classifier>indy</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.test.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.7</version>
+            <version>${antlr.version}</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>
-            <version>4.7</version>
+            <version>${antlr.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.sonatype.sisu</groupId>
+                    <artifactId>sisu-guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
     </dependencies>
     <build>
-        <finalName>traversal</finalName>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/swm</directory>
+                <targetPath>${project.build.directory}/swm</targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>application.properties</include>
+                    <include>dme2.properties</include>
+                    <include>logback.xml</include>
+                    <include>localhost-access-logback.xml</include>
+                </includes>
+                <targetPath>${project.build.directory}/swm/package/nix/dist_files/opt/app/aai-traversal/appconfig
+                </targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources/etc/appprops/</directory>
+                <includes>
+                    <include>titan-realtime.properties</include>
+                    <include>titan-cached.properties</include>
+                    <include>aaiconfig.properties</include>
+                </includes>
+                <targetPath>${project.build.directory}/swm/package/nix/dist_files/opt/app/aai-traversal/appconfig
+                </targetPath>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources/etc/auth/</directory>
+                <includes>
+                    <include>aai-client-cert.p12</include>
+                    <include>tomcat_keystore</include>
+                </includes>
+                <targetPath>${project.build.directory}/swm/package/nix/dist_files/opt/app/aai-traversal/appconfig
+                </targetPath>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources/</directory>
+                <includes>
+                    <include>logback.xml</include>
+                    <include>localhost-access-logback.xml</include>
+                </includes>
+                <targetPath>${project.build.directory}/swm/package/nix/dist_files/opt/app/aai-traversal/appconfig
+                </targetPath>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/docker</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <targetPath>${aai.build.directory}</targetPath>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.jsonschema2pojo</groupId>
-                    <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-                    <version>0.4.13</version>
-                    <configuration>
-                        <sourceType>jsonschema</sourceType>
-                        <sourceDirectory>src/main/resources/json</sourceDirectory>
-                        <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                        <annotationStyle>jackson2</annotationStyle>
-                        <generateBuilders>true</generateBuilders>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -457,7 +854,7 @@
                                 <groupId>org.onap.aai.aai-common</groupId>
                                 <artifactId>aai-schema</artifactId>
                                 <version>${aai.core.version}</version>
-                                <outputDirectory>bundleconfig-local/etc</outputDirectory>
+                                <outputDirectory>${project.basedir}/src/main/resources/etc</outputDirectory>
                                 <includes>oxm/*.xml</includes>
                             </artifactItem>
                         </artifactItems>
@@ -465,20 +862,9 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.12.4</version>
-                    <configuration>
-                        <argLine>-noverify ${argLine}</argLine>
-                        <systemPropertyVariables>
-                            <AJSC_HOME>.</AJSC_HOME>
-                            <BUNDLECONFIG_DIR>bundleconfig-local</BUNDLECONFIG_DIR>
-                        </systemPropertyVariables>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.codehaus.groovy.maven</groupId>
                     <artifactId>gmaven-plugin</artifactId>
+                    <version>1.0</version>
                     <executions>
                         <execution>
                             <phase>validate</phase>
@@ -505,122 +891,75 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.7</version>
-                    <executions>
-                        <execution>
-                            <id>copy-docker-file</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${dockerLocation}</outputDirectory>
-                                <overwrite>true</overwrite>
-                                <resources>
-                                    <resource>
-                                        <directory>${basedir}/src/main/resources/docker</directory>
-                                        <filtering>true</filtering>
-                                        <includes>
-                                            <include>**/*</include>
-                                        </includes>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>copy-commonlibs-file</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${dockerLocation}/commonLibs</outputDirectory>
-                                <overwrite>true</overwrite>
-                                <resources>
-                                    <resource>
-                                        <directory>${basedir}/target/commonLibs</directory>
-                                        <filtering>false</filtering>
-                                        <includes>
-                                            <include>*.jar</include>
-                                        </includes>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>io.fabric8</groupId>
-                    <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.16.5</version>
-                    <configuration>
-                        <verbose>true</verbose>
-                        <apiVersion>1.23</apiVersion>
-                        <images>
-                            <image>
-                                <name>${docker.push.registry}/onap/aai-traversal:%l</name>
-                                <build>
-                                    <tags>
-                                        <tag>latest</tag>
-                                        <tag>${project.version}-STAGING-${maven.build.timestamp}</tag>
-                                        <tag>${aai.docker.version}-STAGING-latest</tag>
-                                    </tags>
-                                    <cleanup>try</cleanup>
-                                    <dockerFileDir>${dockerLocation}</dockerFileDir>
-                                    <dockerFile>${dockerLocation}/Dockerfile</dockerFile>
-                                </build>
-                            </image>
-                        </images>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>clean-images</id>
-                            <phase>pre-clean</phase>
-                            <goals>
-                                <goal>remove</goal>
-                            </goals>
-                            <configuration>
-                                <removeAll>true</removeAll>
-                                <image>onap/aai-traversal:%l</image>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>generate-images</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>build</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>push-images</id>
-                            <phase>deploy</phase>
-                            <goals>
-                                <goal>build</goal>
-                                <goal>push</goal>
-                            </goals>
-                            <configuration>
-                                <image>onap/aai-traversal:%l</image>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.groovy.maven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/descriptor.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <argLine>-noverify ${argLine}</argLine>
+                    <runOrder>alphabetical</runOrder>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.3</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.7.201606060606</version>
+                <version>0.7.9</version>
                 <configuration>
                     <dumpOnExit>true</dumpOnExit>
+                    <excludes>
+                        <exclude>**/**/models/**/*.class</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -631,6 +970,19 @@
                         <configuration>
                             <destFile>${project.build.directory}/coverage-reports/jacoco.exec</destFile>
                             <!-- <append>true</append> -->
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -657,6 +1009,21 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>${start-class}</mainClass>
+                    <layout>ZIP</layout>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>4.7</version>
@@ -672,45 +1039,35 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                        <id>unpack-schema-dependency</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>org.onap.aai.aai-common</groupId>
+                            <artifactId>aai-schema</artifactId>
+                            <version>${aai-schema.version}</version>
+                            <outputDirectory>src/main/resources/etc</outputDirectory>
+                            <includes>oxm/*.xml</includes>
+                        </artifactItem>
+                    </artifactItems>
+                    <!-- other configurations here -->
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
-    <profiles>
-        <!-- Use this profile to run the AJSC locally. This profile can be successfully
-            shutdown WITHIN eclipse even in a Windows environment. Debugging is also
-            available with this profile. -->
-        <profile>
-            <id>passwordGenerator</id>
-            <build>
-                <defaultGoal>initialize</defaultGoal>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.3.2</version>
-                        <executions>
-                            <execution>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                                <configuration>
-                                    <mainClass>org.eclipse.jetty.util.security.Password</mainClass>
-                                    <arguments>
-                                        <argument>user</argument>
-                                        <argument>aaiDomain2</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <executable>java</executable>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-    </profiles>
     <reporting>
         <plugins>
             <plugin>
@@ -731,4 +1088,20 @@
             </plugin>
         </plugins>
     </reporting>
+    <distributionManagement>
+        <repository>
+            <id>ecomp-releases</id>
+            <name>ECOMP Release Repository</name>
+            <url>${nexusproxy}${release.path}</url>
+        </repository>
+        <snapshotRepository>
+            <id>ecomp-snapshots</id>
+            <name>ECOMP Snapshot Repository</name>
+            <url>${nexusproxy}${snapshot.path}</url>
+        </snapshotRepository>
+        <site>
+            <id>ecomp-site</id>
+            <url>dav:${nexusproxy}${site.path}</url>
+        </site>
+    </distributionManagement>
 </project>
