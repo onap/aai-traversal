@@ -98,7 +98,7 @@ fi
 
 . /etc/profile.d/aai.sh
 PROJECT_HOME=/opt/app/aai-traversal
-prop_file=$PROJECT_HOME/bundleconfig/etc/appprops/aaiconfig.properties
+prop_file=$PROJECT_HOME/resources/etc/appprops/aaiconfig.properties
 log_dir=$PROJECT_HOME/logs/misc
 today=$(date +\%Y-\%m-\%d)
 
@@ -143,7 +143,7 @@ fi
 
 if [ $MISSING_PROP = false ]; then
         if [ $USEBASICAUTH = false ]; then
-                AUTHSTRING="--cert $PROJECT_HOME/bundleconfig/etc/auth/aaiClientPublicCert.pem --key $PROJECT_HOME/bundleconfig/etc/auth/aaiClientPrivateKey.pem"
+                AUTHSTRING="--cert $PROJECT_HOME/resources/etc/auth/aaiClientPublicCert.pem --key $PROJECT_HOME/resources/etc/auth/aaiClientPrivateKey.pem"
         else
                 AUTHSTRING="-u $CURLUSER:$CURLPASSWORD"
         fi
@@ -155,10 +155,10 @@ if [ $MISSING_PROP = false ]; then
 =======
         
         if [ $RETURNRESPONSE = true ]; then
-			curl --request PUT -sL -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -T $JSONFILE $RESTURL$RESOURCE | python -mjson.tool
+			curl --request PUT -sL -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -T /tmp/$(basename $JSONFILE) $RESTURL$RESOURCE | python -mjson.tool
 			RC=$?
 		else
-        	result=`curl --request PUT -sL -w "%{http_code}" -o /dev/null -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -T $JSONFILE $RESTURL$RESOURCE`
+        	result=`curl --request PUT -sL -w "%{http_code}" -o /dev/null -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -T /tmp/$(basename $JSONFILE) $RESTURL$RESOURCE`
         	#echo "result is $result."
         	RC=0;
         	if [ $? -eq 0 ]; then

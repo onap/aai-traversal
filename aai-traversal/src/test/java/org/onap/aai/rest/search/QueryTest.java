@@ -73,7 +73,7 @@ public abstract class QueryTest {
 
 	public void setUp() throws AAIException, NoEdgeRuleFoundException {
 		System.setProperty("AJSC_HOME", ".");
-		System.setProperty("BUNDLECONFIG_DIR", "bundleconfig-local");
+		System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
 		MockitoAnnotations.initMocks(this);
 		graph = TinkerGraph.open();
 		createGraph();
