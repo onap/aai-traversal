@@ -11,7 +11,7 @@
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
     <version>1.1.1-SNAPSHOT</version>
-    <name>aai-traversal - amsterdam</name>
+    <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>
         <module>aai-traversal</module>
