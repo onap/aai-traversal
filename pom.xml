@@ -140,7 +140,7 @@
                                         <additionalClasspathElement>${runAjscHome}/extJars/logback-core-1.1.7.jar
                                         </additionalClasspathElement>
                                         <additionalClasspathElement>
-                                            ${runAjscHome}/extJars/aai-core-${project.version}.jar
+                                            ${runAjscHome}/extJars/aai-core-${aai.core.version}.jar
                                         </additionalClasspathElement>
                                     </additionalClasspathElements>
 
@@ -212,7 +212,7 @@
                                         </systemProperty>
                                         <systemProperty>
                                             <key>aai-core.version</key>
-                                            <value>${project.version}</value>
+                                            <value>${aai.core.version}</value>
                                         </systemProperty>
                                     </systemProperties>
 
