@@ -19,8 +19,8 @@
  */
 package org.onap.aai.dbgraphmap;
 
-import com.thinkaurelius.titan.core.TitanGraph;
-import com.thinkaurelius.titan.graphdb.types.system.EmptyVertex;
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.graphdb.types.system.EmptyVertex;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -40,7 +40,7 @@ import org.onap.aai.introspection.*;
 import org.onap.aai.parsers.relationship.RelationshipToURI;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.TitanDBEngine;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 
@@ -86,7 +86,7 @@ public class SearchGraphTest {
     private List<MediaType> outputMediaTypes;
 
     private Loader loader;
-    private TitanGraph graph;
+    private JanusGraph graph;
 
     private Graph tx;
 
@@ -135,7 +135,7 @@ public class SearchGraphTest {
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = LoaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new TitanDBEngine(
+        dbEngine = new JanusGraphDBEngine(
                 queryStyle,
                 type,
                 loader);
