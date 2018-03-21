@@ -42,8 +42,8 @@ services:
       - /opt/app/aai-traversal/appconfig/dme2.properties:/opt/app/aai-traversal/resources/dme2.properties
       - /opt/app/aai-traversal/appconfig/localhost-access-logback.xml:/opt/app/aai-traversal/resources/localhost-access-logback.xml
       - /opt/app/aai-traversal/appconfig/logback.xml:/opt/app/aai-traversal/resources/logback.xml
-      - /opt/app/aai-traversal/appconfig/titan-cached.properties:/opt/app/aai-traversal/resources/etc/appprops/titan-cached.properties
-      - /opt/app/aai-traversal/appconfig/titan-realtime.properties:/opt/app/aai-traversal/resources/etc/appprops/titan-realtime.properties
+      - /opt/app/aai-traversal/appconfig/janusgraph-cached.properties:/opt/app/aai-traversal/resources/etc/appprops/janusgraph-cached.properties
+      - /opt/app/aai-traversal/appconfig/janusgraph-realtime.properties:/opt/app/aai-traversal/resources/etc/appprops/janusgraph-realtime.properties
     logging:
       driver: "json-file"
       options:

@@ -9,21 +9,21 @@
     <fileSets>
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>/resources</outputDirectory>
+            <outputDirectory>./resources</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/scripts</directory>
-            <outputDirectory>/bin</outputDirectory>
+            <outputDirectory>./bin</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}</directory>
-            <outputDirectory>/lib</outputDirectory>
+            <outputDirectory>./lib</outputDirectory>
             <includes>
                 <include>${project.artifactId}-${project.version}.jar</include>
             </includes>

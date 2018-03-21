@@ -53,7 +53,7 @@ import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.TitanDBEngine;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.util.AAIConstants;
@@ -153,7 +153,7 @@ public class SearchProvider extends RESTAPI {
 			}
 			final ModelType factoryType = ModelType.MOXY;
 			Loader loader = LoaderFactory.createLoaderForVersion(factoryType, version);
-			TransactionalGraphEngine dbEngine = new TitanDBEngine(
+			TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					type,
 					loader);
@@ -287,7 +287,7 @@ public class SearchProvider extends RESTAPI {
 			}
 			final ModelType factoryType = ModelType.MOXY;
 			Loader loader = LoaderFactory.createLoaderForVersion(factoryType, version);
-			TransactionalGraphEngine dbEngine = new TitanDBEngine(
+			TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					type,
 					loader);

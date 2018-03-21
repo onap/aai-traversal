@@ -67,7 +67,7 @@ import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.db.EdgeRule;
 import org.onap.aai.serialization.db.EdgeRules;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.TitanDBEngine;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
@@ -521,7 +521,7 @@ public class SearchGraph {
 			
 			MoxyLoader loader = (MoxyLoader)LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
 			DynamicJAXBContext jaxbContext = loader.getJAXBContext();
-			dbEngine = new TitanDBEngine(
+			dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					connectionType,
 					loader);
@@ -641,7 +641,7 @@ public class SearchGraph {
 			
 			MoxyLoader loader = (MoxyLoader) LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
 			DynamicJAXBContext jaxbContext = loader.getJAXBContext();
-			dbEngine = new TitanDBEngine(
+			dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					connectionType,
 					loader);

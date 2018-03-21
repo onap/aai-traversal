@@ -31,7 +31,7 @@ import org.onap.aai.introspection.ModelType;
 import org.onap.aai.introspection.Version;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.TitanDBEngine;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 
@@ -122,7 +122,7 @@ public class SearchProviderTest {
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = LoaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new TitanDBEngine(
+        dbEngine = new JanusGraphDBEngine(
                 queryStyle,
                 type,
                 loader);
