@@ -80,8 +80,8 @@
         <hamcrest.junit.version>2.0.0.0</hamcrest.junit.version>
         <janino.version>2.7.8</janino.version>
         <google.guava.version>16.0</google.guava.version>
-        <titan.version>1.0.0</titan.version>
-        <gremlin.driver.version>3.0.1-incubating</gremlin.driver.version>
+        <janusgraph.version>0.2.0</janusgraph.version>
+        <gremlin.version>3.2.2</gremlin.version>
         <hbase.version>1.0.2</hbase.version>
         <smack.version>3.0.4</smack.version>
         <json.simple.version>1.1.1</json.simple.version>
@@ -119,7 +119,7 @@
 
         <!--
              Location where assembly of our scripts, resources and main jar will be held
-	         Check the aai-traversal/src/main/assembly/descriptor.xml for more info
+             Check the aai-traversal/src/main/assembly/descriptor.xml for more info
         -->
         <aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/
         </aai.build.directory>
@@ -152,6 +152,8 @@
         <antlr4.visitor>true</antlr4.visitor>
         <antlr4.listener>true</antlr4.listener>
         <antlr.version>4.7</antlr.version>
+
+        <jacoco.line.coverage.limit>0.66</jacoco.line.coverage.limit>
     </properties>
     <profiles>
         <!-- Docker profile to be used for building docker image and pushing to nexus -->
@@ -387,9 +389,9 @@
             <version>${google.guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-core</artifactId>
-            <version>${titan.version}</version>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-core</artifactId>
+            <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -398,9 +400,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-cassandra</artifactId>
-            <version>${titan.version}</version>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-cassandra</artifactId>
+            <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -409,9 +411,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-hbase</artifactId>
-            <version>${titan.version}</version>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-hbase</artifactId>
+            <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -419,11 +421,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-driver</artifactId>
-            <version>${gremlin.driver.version}</version>
+            <version>${gremlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hbase</groupId>
@@ -716,6 +717,10 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -765,7 +770,27 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-core</artifactId>
+            <version>${gremlin.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>tinkergraph-gremlin</artifactId>
+            <version>${gremlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-groovy</artifactId>
+            <version>${gremlin.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -796,8 +821,8 @@
             <resource>
                 <directory>${project.basedir}/src/main/resources/etc/appprops/</directory>
                 <includes>
-                    <include>titan-realtime.properties</include>
-                    <include>titan-cached.properties</include>
+                    <include>janusgraph-realtime.properties</include>
+                    <include>janusgraph-cached.properties</include>
                     <include>aaiconfig.properties</include>
                 </includes>
                 <targetPath>${project.build.directory}/swm/package/nix/dist_files/opt/app/aai-traversal/appconfig
@@ -990,6 +1015,28 @@
                             <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
                             <!-- Sets the output directory for the code coverage report. -->
                             <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
+                            <rules>
+                                <!--  implementation is needed only for Maven 2  -->
+                                <rule implementation="org.jacoco.maven.RuleConfiguration">
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit implementation="org.jacoco.report.check.Limit">
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.line.coverage.limit}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
                         </configuration>
                     </execution>
                 </executions>
