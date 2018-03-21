@@ -19,7 +19,7 @@
  */
 package org.onap.aai.rest.search;
 
-import com.thinkaurelius.titan.core.TitanGraph;
+import org.janusgraph.core.JanusGraph;
 import groovy.lang.MissingPropertyException;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -36,7 +36,7 @@ import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.introspection.Version;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.TitanDBEngine;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
 
@@ -80,7 +80,7 @@ public class GroovyShellImplTest {
     private List<MediaType> outputMediaTypes;
 
     private Loader loader;
-    private TitanGraph graph;
+    private JanusGraph graph;
 
     private Graph tx;
 
@@ -126,7 +126,7 @@ public class GroovyShellImplTest {
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = LoaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new TitanDBEngine(
+        dbEngine = new JanusGraphDBEngine(
                 queryStyle,
                 type,
                 loader);

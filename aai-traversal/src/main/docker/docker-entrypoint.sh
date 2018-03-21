@@ -35,10 +35,6 @@ USER_ID=${LOCAL_USER_ID:-9001}
 GROUP_ID=${LOCAL_GROUP_ID:-9001}
 
 if [ $(cat /etc/passwd | grep aaiadmin | wc -l) -eq 0 ]; then
-
-    ln -s bin scripts
-    ln -s /opt/aai/logroot/AAI-GQ logs
-
 	groupadd aaiadmin -g ${GROUP_ID} || {
 		echo "Unable to create the group id for ${GROUP_ID}";
 		exit 1;
@@ -53,7 +49,12 @@ chown -R aaiadmin:aaiadmin /opt/app /opt/aai/logroot /var/chef
 find /opt/app/ -name "*.sh" -exec chmod +x {} +
 
 if [ -f ${APP_HOME}/aai.sh ]; then
+
+    gosu aaiadmin ln -s bin scripts
+    gosu aaiadmin ln -s /opt/aai/logroot/AAI-GQ logs
+
     mv ${APP_HOME}/aai.sh /etc/profile.d/aai.sh
+
     chmod 755 /etc/profile.d/aai.sh
 fi;
 
@@ -114,6 +115,6 @@ JAVA_OPTS="${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom";
 JAVA_OPTS="${JAVA_OPTS} -Dloader.path=$APP_HOME/resources";
 JAVA_OPTS="${JAVA_OPTS} ${POST_JAVA_OPTS}";
 
-JAVA_MAIN_JAR=$(ls lib/aai-traversal-*SNAPSHOT.jar);
+JAVA_MAIN_JAR=$(ls lib/aai-traversal*.jar);
 
 ${JAVA_CMD} ${JVM_OPTS} ${JAVA_OPTS} -jar ${JAVA_MAIN_JAR};

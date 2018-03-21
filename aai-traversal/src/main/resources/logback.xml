@@ -373,7 +373,7 @@
 
 	<logger name="org.apache" level="WARN" />
 	<logger name="org.zookeeper" level="WARN" />
-	<logger name="com.thinkaurelius" level="WARN" />
+	<logger name="org.janusgraph" level="WARN" />
 	<logger name="com.att.aft.dme2" level="WARN" />
 
 	<!-- ============================================================================ -->
