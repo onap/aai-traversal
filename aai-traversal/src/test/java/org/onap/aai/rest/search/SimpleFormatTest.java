@@ -44,7 +44,7 @@ import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.db.EdgeRules;
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.TitanDBEngine;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.RawFormat;
 import org.onap.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
@@ -97,7 +97,7 @@ public class SimpleFormatTest {
 
 		final ModelType factoryType = ModelType.MOXY;
 		Loader loader = LoaderFactory.createLoaderForVersion(factoryType, Version.v10);
-		dbEngine = spy(new TitanDBEngine(
+		dbEngine = spy(new JanusGraphDBEngine(
 				QueryStyle.TRAVERSAL,
 				DBConnectionType.CACHED,
 				loader));

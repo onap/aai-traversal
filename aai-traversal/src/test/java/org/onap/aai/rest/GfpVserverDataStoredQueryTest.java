@@ -22,8 +22,8 @@ package org.onap.aai.rest;
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import com.jayway.jsonpath.JsonPath;
-import com.thinkaurelius.titan.core.TitanGraph;
-import com.thinkaurelius.titan.core.TitanTransaction;
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.JanusGraphTransaction;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.After;
 import org.junit.Before;
@@ -258,8 +258,8 @@ public class GfpVserverDataStoredQueryTest {
 
     private void removeVertexes(){
 
-        TitanGraph titanGraph = AAIGraph.getInstance().getGraph();
-        TitanTransaction transaction = titanGraph.newTransaction();
+        JanusGraph JanusGraph = AAIGraph.getInstance().getGraph();
+        JanusGraphTransaction transaction = JanusGraph.newTransaction();
 
         boolean success = true;
 
@@ -282,8 +282,8 @@ public class GfpVserverDataStoredQueryTest {
 
     private void addVservers(int vserversCount){
 
-        TitanGraph titanGraph = AAIGraph.getInstance().getGraph();
-        TitanTransaction transaction = titanGraph.newTransaction();
+        JanusGraph JanusGraph = AAIGraph.getInstance().getGraph();
+        JanusGraphTransaction transaction = JanusGraph.newTransaction();
 
         boolean success = true;
 
