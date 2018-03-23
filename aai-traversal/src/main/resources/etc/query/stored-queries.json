@@ -262,5 +262,10 @@
     "gfp-vnf-data":{ 
       "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE,   'l-interface', 'l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list').store('x'))),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'lag-interface').createEdgeTraversal(EdgeType.TREE, 'lag-interface', 'l-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list').store('x')),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vnf-image').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'network-profile').store('x')).cap('x').unfold().dedup()"
     }
-  }]
+  },{
+    "containment-path":{
+      "stored-query":"builder.until(builder.newInstance().not(builder.newInstance().getParentEdge())).repeat(builder.newInstance().getParentVertex()).path()"
+    }
+  }
+  ]
 }
