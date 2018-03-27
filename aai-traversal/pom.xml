@@ -44,9 +44,9 @@
         <namespace>com.att.ajsc</namespace>
         <start-class>org.onap.aai.TraversalApp</start-class>
 
-        <aai-schema.version>1.2.1-SNAPSHOT</aai-schema.version>
-        <aai.core.version>1.2.1-SNAPSHOT</aai.core.version>
-        <aai.client.loadbalancer.version>1.2.1-SNAPSHOT</aai.client.loadbalancer.version>
+        <aai-schema.version>1.2.2-SNAPSHOT</aai-schema.version>
+        <aai.core.version>1.2.2-SNAPSHOT</aai.core.version>
+        <aai.client.loadbalancer.version>1.2.2-SNAPSHOT</aai.client.loadbalancer.version>
 
         <hbase.version>1.0.2</hbase.version>
 
