@@ -56,6 +56,24 @@ if [ -f ${APP_HOME}/aai.sh ]; then
     mv ${APP_HOME}/aai.sh /etc/profile.d/aai.sh
 
     chmod 755 /etc/profile.d/aai.sh
+
+    scriptName=$1;
+
+    if [ ! -z $scriptName ]; then
+
+        if [ -f ${APP_HOME}/bin/${scriptName} ]; then
+            shift 1;
+            gosu aaiadmin ${APP_HOME}/bin/${scriptName} "$@" || {
+                echo "Failed to run the ${scriptName}";
+                exit 1;
+            }
+        else
+            echo "Unable to find the script ${scriptName} in ${APP_HOME}/bin";
+            exit 1;
+        fi;
+
+        exit 0;
+    fi;
 fi;
 
 if [ -z ${DISABLE_UPDATE_QUERY} ]; then

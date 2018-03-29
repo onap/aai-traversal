@@ -13,6 +13,8 @@ HEALTHCHECK --interval=40s --timeout=10s --retries=3 CMD nc -z -v localhost 8446
 
 ENTRYPOINT ["/bin/bash", "/opt/app/aai-traversal/docker-entrypoint.sh"]
 
+CMD ["/bin/bash", "/opt/app/aai-resources/docker-entrypoint.sh"]
+
 RUN  mkdir -p /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ
 
 VOLUME /opt/aai/logroot/AAI-GQ
