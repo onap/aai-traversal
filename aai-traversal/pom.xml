@@ -151,7 +151,7 @@
         <antlr4.listener>true</antlr4.listener>
         <antlr.version>4.7</antlr.version>
 
-        <jacoco.line.coverage.limit>0.66</jacoco.line.coverage.limit>
+        <jacoco.line.coverage.limit>0.69</jacoco.line.coverage.limit>
     </properties>
     <profiles>
         <!-- Docker profile to be used for building docker image and pushing to nexus -->
