@@ -151,6 +151,8 @@
         <antlr4.listener>true</antlr4.listener>
         <antlr.version>4.7</antlr.version>
 
+        <plexus.utils.version>3.1.0</plexus.utils.version>
+
         <jacoco.line.coverage.limit>0.69</jacoco.line.coverage.limit>
     </properties>
     <profiles>
@@ -716,6 +718,11 @@
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-groovy</artifactId>
             <version>${gremlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>${plexus.utils.version}</version>
         </dependency>
     </dependencies>
     <build>
