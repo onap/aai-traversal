@@ -145,7 +145,7 @@
         <spring.test.version>4.3.6.RELEASE</spring.test.version>
 
         <!-- This will be used for the docker images as the default format of maven build has issues -->
-        <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
+        <maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
 
         <antlr4.visitor>true</antlr4.visitor>
         <antlr4.listener>true</antlr4.listener>
