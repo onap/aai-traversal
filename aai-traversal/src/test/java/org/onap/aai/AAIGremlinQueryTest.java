@@ -38,10 +38,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -104,6 +101,9 @@ public class AAIGremlinQueryTest {
         headers.add("Real-Time", "true");
         headers.add("X-FromAppId", "JUNIT");
         headers.add("X-TransactionId", "JUNIT");
+
+        String authorization = Base64.getEncoder().encodeToString("AAI:AAI".getBytes("UTF-8"));
+        headers.add("Authorization", "Basic " + authorization);
 
         baseUrl = "https://localhost:" + randomPort;
     }
