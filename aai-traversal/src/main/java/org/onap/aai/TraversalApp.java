@@ -50,6 +50,7 @@ import java.util.UUID;
 		"org.onap.aai.config",
 		"org.onap.aai.web",
 		"org.onap.aai.tasks",
+		"org.onap.aai.service",
 		"org.onap.aai.rest",
 		"com.att.ajsc.common"
 })
