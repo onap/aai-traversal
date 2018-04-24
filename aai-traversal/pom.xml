@@ -44,9 +44,9 @@
         <namespace>com.att.ajsc</namespace>
         <start-class>org.onap.aai.TraversalApp</start-class>
 
-        <aai-schema.version>1.2.2</aai-schema.version>
-        <aai.core.version>1.2.2</aai.core.version>
-        <aai.client.loadbalancer.version>1.2.2</aai.client.loadbalancer.version>
+        <aai-schema.version>1.2.3</aai-schema.version>
+        <aai.core.version>1.2.3</aai.core.version>
+        <aai.client.loadbalancer.version>1.2.3</aai.client.loadbalancer.version>
 
 
         <!-- Start of the jacoco plugin properties -->
