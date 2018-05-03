@@ -44,10 +44,8 @@
         <namespace>com.att.ajsc</namespace>
         <start-class>org.onap.aai.TraversalApp</start-class>
 
-        <aai-schema.version>1.2.3</aai-schema.version>
-        <aai.core.version>1.2.3</aai.core.version>
-        <aai.client.loadbalancer.version>1.2.3</aai.client.loadbalancer.version>
-
+        <aai-schema.version>1.2.4</aai-schema.version>
+        <aai.core.version>1.2.4</aai.core.version>
 
         <!-- Start of the jacoco plugin properties -->
         <sonar.language>java</sonar.language>
@@ -614,21 +612,6 @@
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpkix-jdk15on</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.onap.aai.aai-common</groupId>
-            <artifactId>aai-client-loadbalancer</artifactId>
-            <version>${aai.client.loadbalancer.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.jersey.contribs</groupId>
-                    <artifactId>jersey-apache-client4</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
