@@ -5,7 +5,7 @@
 
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>

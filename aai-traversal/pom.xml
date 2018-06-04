@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>aai-traversal</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
