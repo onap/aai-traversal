@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,18 +20,19 @@
 package org.onap.aai.interceptors.pre;
 
 public final class AAIRequestFilterPriority {
-	
-	private AAIRequestFilterPriority() {}
-	
-	public static final int REQUEST_TRANS_LOGGING = 1000;
-	
-	public static final int HEADER_VALIDATION = 2000;
 
-	public static final int SET_LOGGING_CONTEXT = 3000;
+    public static final int REQUEST_TRANS_LOGGING = 1000;
 
-	public static final int AUTHORIZATION = 4000;
+    public static final int HEADER_VALIDATION = 2000;
 
-	public static final int HEADER_MANIPULATION = 5000;
+    public static final int SET_LOGGING_CONTEXT = 3000;
 
-	public static final int REQUEST_MODIFICATION = 6000;
+    public static final int AUTHORIZATION = 4000;
+
+    public static final int HEADER_MANIPULATION = 5000;
+
+    public static final int REQUEST_MODIFICATION = 6000;
+
+    private AAIRequestFilterPriority() {
+    }
 }
