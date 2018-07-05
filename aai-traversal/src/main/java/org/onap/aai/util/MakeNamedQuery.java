@@ -102,7 +102,7 @@ public class MakeNamedQuery {
 					String modelInvariantId = meObject.getValue("model-invariant-id");
 					if (meObject.hasProperty("model-vers")) { 
 						Introspector modelVers = meObject.getWrappedValue("model-vers");
-						List<Introspector> modelVerList = (List<Introspector>) modelVers.getWrappedListValue("model-ver");
+						List<Introspector> modelVerList = modelVers.getWrappedListValue("model-ver");
 						for (Introspector modelVer : modelVerList) {
 							
 							List<Introspector> relList = new ArrayList<Introspector>();
@@ -175,7 +175,7 @@ public class MakeNamedQuery {
 			} else { 
 				newNQElements = nqeObj.newIntrospectorInstanceOfProperty("named-query-elements");
 				nqeObj.setValue("named-query-elements",  newNQElements.getUnderlyingObject());
-				nqElementList = (List<Object>)newNQElements.getValue("named-query-element");
+				nqElementList = newNQElements.getValue("named-query-element");
 			}
 			newNQElement = loadNQElement(newNQElements, listOfRelationships);
 			nqElementList.add(newNQElement.getUnderlyingObject());
@@ -200,7 +200,7 @@ public class MakeNamedQuery {
 			Introspector newRelationshipList = newNqElement.getLoader().introspectorFromName("relationship-list");
 			newNqElement.setValue("relationship-list", newRelationshipList.getUnderlyingObject());
 
-			List<Object> newRelationshipListList = (List<Object>)newRelationshipList.getValue("relationship");
+			List<Object> newRelationshipListList = newRelationshipList.getValue("relationship");
 
 			for (Introspector rel : listOfRelationships) { 
 				newRelationshipListList.add(rel.getUnderlyingObject());
@@ -222,7 +222,7 @@ public class MakeNamedQuery {
 		try {
 			newRelationship = loader.introspectorFromName("relationship");
 
-			List<Object> newRelationshipData = (List<Object>)newRelationship.getValue("relationship-data");
+			List<Object> newRelationshipData = newRelationship.getValue("relationship-data");
 
 			newRelationship.setValue("related-to", "model");
 

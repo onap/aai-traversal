@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -83,28 +83,25 @@ public class JerseyConfiguration extends ResourceConfig {
         // Filter them based on the clazz that was passed in
         Set<Class<? extends ContainerRequestFilter>> filters = reflections.getSubTypesOf(ContainerRequestFilter.class);
 
-
         // Check to ensure that each of the filter has the @Priority annotation and if not throw exception
         for (Class filterClass : filters) {
             if (filterClass.getAnnotation(Priority.class) == null) {
-                throw new RuntimeException("Container filter " + filterClass.getName() + " does not have @Priority annotation");
+                throw new RuntimeException(
+                    "Container filter " + filterClass.getName() + " does not have @Priority annotation");
             }
         }
 
         // Turn the set back into a list
         List<Class<? extends ContainerRequestFilter>> filtersList = filters
-                .stream()
-                .filter(f -> {
-                    if (f.isAnnotationPresent(Profile.class)
-                            && !env.acceptsProfiles(f.getAnnotation(Profile.class).value())) {
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
+            .stream()
+            .filter(f -> !(f.isAnnotationPresent(Profile.class)
+                && !env.acceptsProfiles(f.getAnnotation(Profile.class).value()))
+            )
+            .collect(Collectors.toList());
 
         // Sort them by their priority levels value
-        filtersList.sort((c1, c2) -> Integer.valueOf(c1.getAnnotation(Priority.class).value()).compareTo(c2.getAnnotation(Priority.class).value()));
+        filtersList.sort((c1, c2) -> Integer.valueOf(c1.getAnnotation(Priority.class).value())
+            .compareTo(c2.getAnnotation(Priority.class).value()));
 
         // Then register this to the jersey application
         filtersList.forEach(this::register);
@@ -115,29 +112,26 @@ public class JerseyConfiguration extends ResourceConfig {
         // Find all the classes within the interceptors package
         Reflections reflections = new Reflections("org.onap.aai.interceptors");
         // Filter them based on the clazz that was passed in
-        Set<Class<? extends ContainerResponseFilter>> filters = reflections.getSubTypesOf(ContainerResponseFilter.class);
-
+        Set<Class<? extends ContainerResponseFilter>> filters = reflections
+            .getSubTypesOf(ContainerResponseFilter.class);
 
         // Check to ensure that each of the filter has the @Priority annotation and if not throw exception
         for (Class filterClass : filters) {
             if (filterClass.getAnnotation(Priority.class) == null) {
-                throw new RuntimeException("Container filter " + filterClass.getName() + " does not have @Priority annotation");
+                throw new RuntimeException(
+                    "Container filter " + filterClass.getName() + " does not have @Priority annotation");
             }
         }
 
         // Turn the set back into a list
         List<Class<? extends ContainerResponseFilter>> filtersList = filters.stream()
-                .filter(f -> {
-                    if (f.isAnnotationPresent(Profile.class)
-                            && !env.acceptsProfiles(f.getAnnotation(Profile.class).value())) {
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
+            .filter(f -> !(f.isAnnotationPresent(Profile.class)
+                && !env.acceptsProfiles(f.getAnnotation(Profile.class).value())))
+            .collect(Collectors.toList());
 
         // Sort them by their priority levels value
-        filtersList.sort((c1, c2) -> Integer.valueOf(c1.getAnnotation(Priority.class).value()).compareTo(c2.getAnnotation(Priority.class).value()));
+        filtersList.sort((c1, c2) -> Integer.valueOf(c1.getAnnotation(Priority.class).value())
+            .compareTo(c2.getAnnotation(Priority.class).value()));
 
         // Then register this to the jersey application
         filtersList.forEach(this::register);

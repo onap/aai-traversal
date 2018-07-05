@@ -303,13 +303,11 @@ public class QueryConsumer extends RESTAPI {
 			templateVars.add(missingRequiredQueryParams.toString());
 		}
 
-		Response response = Response
+		return Response
 				.status(e.getErrorObject().getHTTPResponseCode())
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
-
-		return response;
-	} 
+	}
 	
 	private Response createMessageInvalidQuerySection(String invalidQuery, HttpHeaders headers, UriInfo info, HttpServletRequest req) {
 		AAIException e = new AAIException("AAI_3014");
@@ -320,13 +318,11 @@ public class QueryConsumer extends RESTAPI {
 			templateVars.add(invalidQuery);
 		}
 
-		Response response = Response
+		return Response
 				.status(e.getErrorObject().getHTTPResponseCode())
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
-
-		return response;
-	} 
+	}
 
 
 }

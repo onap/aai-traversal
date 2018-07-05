@@ -132,11 +132,9 @@ public abstract class RetiredConsumer extends RESTAPI {
 			templateVars.add(AAIConfig.get("aai.default.api.version", ""));
 		}
 				
-		Response response = Response
+		return Response
 				.status(e.getErrorObject().getHTTPResponseCode())
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
-		
-		return response;
 	}
 }

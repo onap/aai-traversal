@@ -227,7 +227,7 @@ public class SearchGraph {
 		return response;	
 	}	
 
-	private URI craftUriFromQueryParams(Loader loader, String startNodeType, List<String> startNodeKeyParams) throws UnsupportedEncodingException, IllegalArgumentException, UriBuilderException, AAIException {
+	private URI craftUriFromQueryParams(Loader loader, String startNodeType, List<String> startNodeKeyParams) throws UnsupportedEncodingException, AAIException {
 		Introspector relationship = loader.introspectorFromName("relationship");
 		
 		relationship.setValue("related-to", startNodeType);
@@ -492,10 +492,9 @@ public class SearchGraph {
 	 * @return the edge label
 	 * @throws AAIException the AAI exception
 	 */
-	public static String[] getEdgeLabel(String targetNodeType, String nodeType) throws AAIException{
+	public static String[] getEdgeLabel(String targetNodeType, String nodeType) {
 		Map<String, EdgeRule> rules = EdgeRules.getInstance().getEdgeRules(targetNodeType, nodeType);
-		String[] results = rules.keySet().toArray(new String[0]);
-		return results;
+		return rules.keySet().toArray(new String[0]);
 	}
 
 
@@ -512,7 +511,7 @@ public class SearchGraph {
 	 */
 	public Response runNamedQuery(String fromAppId, String transId, String queryParameters,
 			DBConnectionType connectionType,
-			AAIExtensionMap aaiExtMap) throws JAXBException, AAIException {
+			AAIExtensionMap aaiExtMap) throws AAIException {
 
 		Introspector inventoryItems;
 		boolean success = true;
@@ -548,7 +547,7 @@ public class SearchGraph {
 			DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
 			String namedQueryUuid = null;
 			if ((qp != null) && qp.isSet("namedQuery")) {    
-				DynamicEntity namedQuery = (DynamicEntity) qp.get("namedQuery");
+				DynamicEntity namedQuery = qp.get("namedQuery");
 
 				if (namedQuery.isSet("namedQueryUuid")) { 
 					namedQueryUuid = namedQuery.get("namedQueryUuid");
@@ -633,7 +632,7 @@ public class SearchGraph {
 	public Response executeModelOperation(String fromAppId, String transId, String queryParameters,
 			DBConnectionType connectionType,
 			boolean isDelete,
-			AAIExtensionMap aaiExtMap) throws JAXBException, AAIException, DynamicException, UnsupportedEncodingException {
+			AAIExtensionMap aaiExtMap) throws AAIException, UnsupportedEncodingException {
 		Response response;
 		boolean success = true;
 		TransactionalGraphEngine dbEngine = null;
@@ -689,7 +688,7 @@ public class SearchGraph {
 				DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
 
 				if (qp.isSet("model")) { 
-					DynamicEntity model = (DynamicEntity) qp.get("model");
+					DynamicEntity model = qp.get("model");
 
 					// on an old-style model object, the following 4 attrs were all present
 					if (model.isSet("modelNameVersionId")) { 
@@ -714,7 +713,7 @@ public class SearchGraph {
 					if (model.isSet("modelVers")) {
 						// we know that this is new style, because modelVers was not an option
 						// before v9
-						DynamicEntity modelVers = (DynamicEntity) model.get("modelVers");
+						DynamicEntity modelVers = model.get("modelVers");
 						if (modelVers.isSet("modelVer")) {
 							List<DynamicEntity> modelVerList = modelVers.get("modelVer");
 							// if they send more than one, too bad, they get the first one
@@ -735,7 +734,7 @@ public class SearchGraph {
 			
 			List<Map<String,Object>> startNodeFilterHash = new ArrayList<>();
 
-			String resourceVersion = mapInstanceFilters((DynamicEntity)modelAndNamedQuerySearch.get("instanceFilters"), 
+			String resourceVersion = mapInstanceFilters(modelAndNamedQuerySearch.get("instanceFilters"),
 					startNodeFilterHash, jaxbContext);	
 
 			if (isDelete) {
@@ -837,7 +836,7 @@ public class SearchGraph {
 			return null;
 		}
 		@SuppressWarnings("unchecked")
-		List<DynamicEntity> instanceFilter = (ArrayList<DynamicEntity>)instanceFilters.get("instanceFilter");
+		List<DynamicEntity> instanceFilter = instanceFilters.get("instanceFilter");
 		String resourceVersion = null;
 
 		for (DynamicEntity instFilt : instanceFilter) { 
@@ -856,7 +855,7 @@ public class SearchGraph {
 					if (anyEnt.isSet(propName)) {
 						thisNodeFilterHash.put(nodeType + "." + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, propName), anyEnt.get(propName));
 						if (propName.equals("resourceVersion") && resourceVersion == null) { 
-							resourceVersion = (String)anyEnt.get(propName);
+							resourceVersion = anyEnt.get(propName);
 						}
 					}
 				}
@@ -880,7 +879,7 @@ public class SearchGraph {
 			return;
 		}
 		@SuppressWarnings("unchecked")
-		List<DynamicEntity> secondaryFilter = (ArrayList<DynamicEntity>)secondaryFilts.get("secondaryFilt");
+		List<DynamicEntity> secondaryFilter = secondaryFilts.get("secondaryFilt");
 		
 		for (DynamicEntity secondaryFilt : secondaryFilter) { 
 			List<DynamicEntity> any = secondaryFilt.get("any");
@@ -1062,8 +1061,8 @@ public class SearchGraph {
 					String modelName = null;
 					try { 
 						// Try to get the modelName if we can.  Otherwise, do not fail, just return what we have already.
-						String modelInvariantIdLocal = (String)vert.<String>property("model-invariant-id-local").orElse(null); // this one points at a model
-						String modelVersionIdLocal = (String)vert.<String>property("model-version-id-local").orElse(null); // this one points at a model-ver
+						String modelInvariantIdLocal = vert.<String>property("model-invariant-id-local").orElse(null); // this one points at a model
+						String modelVersionIdLocal = vert.<String>property("model-version-id-local").orElse(null); // this one points at a model-ver
 						
 						if ( (modelInvariantIdLocal != null && modelVersionIdLocal != null) 
 								&& (modelInvariantIdLocal.length() > 0 && modelVersionIdLocal.length() > 0) ) {
