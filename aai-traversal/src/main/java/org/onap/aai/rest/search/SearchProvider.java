@@ -68,7 +68,7 @@ import com.att.eelf.configuration.EELFManager;
  *
  */
 
-@Path("/{version: v[789]|v1[0123]|latest}/search")
+@Path("/{version: v[789]|v1[01234]|latest}/search")
 public class SearchProvider extends RESTAPI {
 	
 	protected static String authPolicyFunctionName = "search";

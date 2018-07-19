@@ -77,7 +77,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.onap.aai.util.AAIConstants;
 
-@Path("{version: v9|v1[0123]}/query")
+@Path("{version: v9|v1[01234]}/query")
 public class QueryConsumer extends RESTAPI {
 
     private static final String DEPTH = "depth";
