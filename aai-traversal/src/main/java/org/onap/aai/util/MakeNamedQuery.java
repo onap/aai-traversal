@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -34,8 +35,6 @@ import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.introspection.Version;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
-import org.onap.aai.util.AAIConfig;
-import org.onap.aai.util.AAIConstants;
 
 public class MakeNamedQuery {
 
@@ -142,21 +141,30 @@ public class MakeNamedQuery {
 		namedQueryObj.setValue("named-query-version", "1.0");
 		namedQueryObj.setValue("description", "Named Query - VNF to ESR System Info");
 					 
-		Introspector genericVnfNQE = setupNQElements(namedQueryObj, genericVnfRelationship);
+		Optional<Introspector> genericVnfNQE = tryToSetUpNQElements(Optional.of(namedQueryObj), genericVnfRelationship);
 				
-		Introspector vserverNQE = setupNQElements(genericVnfNQE, vserverRelationship);
+		Optional<Introspector> vserverNQE = tryToSetUpNQElements(genericVnfNQE, vserverRelationship);
 		
-		Introspector tenantNQE = setupNQElements(vserverNQE, tenantRelationship);
+		Optional<Introspector> tenantNQE = tryToSetUpNQElements(vserverNQE, tenantRelationship);
 		
-		Introspector cloudRegionNQE = setupNQElements(tenantNQE, cloudRegionRelationship);
+		Optional<Introspector> cloudRegionNQE = tryToSetUpNQElements(tenantNQE, cloudRegionRelationship);
 
-		Introspector esrSystemInfoNQE = setupNQElements(cloudRegionNQE, esrSystemInfoRelationship);
+		Optional<Introspector> esrSystemInfoNQE = tryToSetUpNQElements(cloudRegionNQE, esrSystemInfoRelationship);
 		
 		System.out.println(namedQueryObj.marshal(true));
 		
 		System.exit(0);
 
-	}	
+	}
+
+	private static Optional<Introspector> tryToSetUpNQElements(Optional<Introspector> genericVnfNQE, List<Introspector> vserverRelationship) {
+		if(genericVnfNQE.isPresent()) {
+			return Optional.ofNullable(setupNQElements(genericVnfNQE.get(), vserverRelationship));
+		} else {
+			return Optional.empty();
+		}
+	}
+
 	private static List<Introspector> getRels(String widgetName, HashMap<String, Introspector> widgetToRelationship) {
 		List<Introspector> relList = new ArrayList<Introspector>();
 		Introspector genericVnfRelationship = widgetToRelationship.get(widgetName);
@@ -172,14 +180,16 @@ public class MakeNamedQuery {
 			if (nqeObj.getWrappedValue("named-query-elements") != null) {
 				newNQElements = nqeObj.getWrappedValue("named-query-elements");
 				nqElementList = newNQElements.getValue("named-query-element");
-			} else { 
+			} else {
 				newNQElements = nqeObj.newIntrospectorInstanceOfProperty("named-query-elements");
 				nqeObj.setValue("named-query-elements",  newNQElements.getUnderlyingObject());
 				nqElementList = newNQElements.getValue("named-query-element");
 			}
 			newNQElement = loadNQElement(newNQElements, listOfRelationships);
-			nqElementList.add(newNQElement.getUnderlyingObject());
-		
+			if (newNQElement != null) {
+				nqElementList.add(newNQElement.getUnderlyingObject());
+			}
+
 		} catch (AAIUnknownObjectException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
