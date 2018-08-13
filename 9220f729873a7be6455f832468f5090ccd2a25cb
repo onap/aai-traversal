@@ -1,0 +1,8 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: William LaMont <wl2432@att.com>
+Code-Review+2: James Forsyth <jf2512@att.com>
+Submitted-by: James Forsyth <jf2512@att.com>
+Submitted-at: Mon, 13 Aug 2018 18:34:39 +0000
+Reviewed-on: https://gerrit.onap.org/r/60203
+Project: aai/traversal
+Branch: refs/heads/master
