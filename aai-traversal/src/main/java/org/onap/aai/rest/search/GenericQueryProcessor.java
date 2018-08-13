@@ -19,30 +19,34 @@
  */
 package org.onap.aai.rest.search;
 
-import java.io.FileNotFoundException;
-import java.net.URI;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
+import org.onap.aai.config.SpringContextAware;
+import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.query.builder.MissingOptionalParameter;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
+import org.onap.aai.restcore.search.GroovyQueryBuilderSingleton;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.FileNotFoundException;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class GenericQueryProcessor {
+
+	private static EELFLogger LOGGER = EELFManager.getInstance().getLogger(GenericQueryProcessor.class);
 
 	protected final Optional<URI> uri;
 	protected final MultivaluedMap<String, String> queryParams;
@@ -50,15 +54,16 @@ public abstract class GenericQueryProcessor {
 	protected static Pattern p = Pattern.compile("query/(.*+)");
 	protected Optional<String> gremlin;
 	protected final TransactionalGraphEngine dbEngine;
-	protected static GremlinServerSingleton gremlinServerSingleton = GremlinServerSingleton.getInstance();
+	protected GremlinServerSingleton gremlinServerSingleton;
 	protected static GroovyQueryBuilderSingleton queryBuilderSingleton = GroovyQueryBuilderSingleton.getInstance();
 	protected final boolean isGremlin;
-	/* dsl parameters to store dsl query and to check 
+	protected Optional<DslQueryProcessor> dslQueryProcessorOptional;
+	/* dsl parameters to store dsl query and to check
 	 * if this is a DSL request
 	 */
 	protected Optional<String> dsl;
 	protected final boolean isDsl ;
-	
+
 	protected GenericQueryProcessor(Builder builder) {
 		this.uri = builder.getUri();
 		this.dbEngine = builder.getDbEngine();
@@ -67,6 +72,8 @@ public abstract class GenericQueryProcessor {
 		this.isGremlin = builder.isGremlin();
 		this.dsl = builder.getDsl();
 		this.isDsl = builder.isDsl();
+		this.gremlinServerSingleton = builder.getGremlinServerSingleton();
+		this.dslQueryProcessorOptional = builder.getDslQueryProcessor();
 		
 		if (uri.isPresent()) {
 			queryParams = URITools.getQueryMap(uri.get());
@@ -79,12 +86,12 @@ public abstract class GenericQueryProcessor {
 	
 	protected List<Object> processSubGraph(SubGraphStyle style, GraphTraversal<?,?> g) {
 		final List<Object> resultVertices = new Vector<>();
-		g.store("x");
+		g.store("y");
 		
 		if (SubGraphStyle.prune.equals(style) || SubGraphStyle.star.equals(style)) {
 			g.barrier().bothE();
 			if (SubGraphStyle.prune.equals(style)) {
-				g.where(__.otherV().where(P.within("x")));
+				g.where(__.otherV().where(P.within("y")));
 			}
 			g.dedup().subgraph("subGraph").cap("subGraph").map(x -> (Graph)x.get()).next().traversal().V().forEachRemaining(x -> {
 				resultVertices.add(x);
@@ -95,7 +102,7 @@ public abstract class GenericQueryProcessor {
 		return resultVertices;
 	}
 	
-	public List<Object> execute(SubGraphStyle style) {
+	public List<Object> execute(SubGraphStyle style) throws FileNotFoundException, AAIException {
 		final List<Object> resultVertices;
 
 		Pair<String, Map<String, Object>> tuple = this.createQuery();
@@ -113,7 +120,7 @@ public abstract class GenericQueryProcessor {
 		return resultVertices;
 	}
 	
-	protected Pair<String, Map<String, Object>> createQuery() {
+	protected Pair<String, Map<String, Object>> createQuery() throws AAIException {
 		Map<String, Object> params = new HashMap<>();
 		String query = "";
 		 if (this.isGremlin) {
@@ -121,12 +128,13 @@ public abstract class GenericQueryProcessor {
 			
 		}else if (this.isDsl) {
 			String dslUserQuery = dsl.get();
-			String dslQuery = new DslQueryProcessor.Builder().build(dslUserQuery);
-			
-			query = queryBuilderSingleton.executeTraversal(dbEngine, dslQuery, params);
-			String startPrefix = "g.V()";
-			query = startPrefix + query;
-			
+			 if(dslQueryProcessorOptional.isPresent()){
+				 String dslQuery = dslQueryProcessorOptional.get().parseAaiQuery(dslUserQuery);
+				 query = queryBuilderSingleton.executeTraversal(dbEngine, dslQuery, params);
+				 String startPrefix = "g.V()";
+				 query = startPrefix + query;
+			 }
+			 LOGGER.debug("Converted to gremlin query\n {}", query);
 		}else {
 			Matcher m = p.matcher(uri.get().getPath());
 			String queryName = "";
@@ -163,7 +171,10 @@ public abstract class GenericQueryProcessor {
 				// We are binding the array dynamically to the groovy processor correctly
 				// This will fix the memory issue of the method size too big
 				// as statically creating a list string and passing is not appropriate
-				params.put("startVertexes", vertices.get().toArray());
+
+				Object [] startVertices = vertices.get().toArray();
+
+				params.put("startVertexes", startVertices);
 
 				if (query == null) {
 					query = "";
@@ -178,6 +189,23 @@ public abstract class GenericQueryProcessor {
 				} else {
 					query = startPrefix;
 				}
+
+				// Getting all the vertices and logging them is not reasonable
+				// As it could have performance impacts so doing a check here
+				// to see if the logger is trace so only print the start vertexes
+				// otherwise we would like to see what the gremlin query that was converted
+                // So to check if the output matches the desired behavior
+				// This way if to enable deeper logging, just changing logback would work
+				if(LOGGER.isTraceEnabled()){
+					String readQuery = query.replaceAll("startVertexes",
+							Arrays.toString(startVertices).replaceAll("[^0-9,]", ""));
+					LOGGER.trace("Converted to gremlin query including the start vertices \n {}", readQuery);
+				}
+				else if(LOGGER.isDebugEnabled()){
+					LOGGER.debug("Converted to gremlin query without the start vertices \n {}", query);
+				}
+			} else {
+				throw new AAIException("AAI_6148");
 			}
 			
 		}
@@ -196,9 +224,15 @@ public abstract class GenericQueryProcessor {
 		
 		private Optional<String> dsl = Optional.empty();
 		private boolean isDsl = false;
+		private DslQueryProcessor dslQueryProcessor;
+		private GremlinServerSingleton gremlinServerSingleton;
+		private Optional<String> nodeType = Optional.empty();
+		private boolean isNodeTypeQuery = false;
+		protected  MultivaluedMap<String, String> uriParams; 
 		
-		public Builder(TransactionalGraphEngine dbEngine) {
+		public Builder(TransactionalGraphEngine dbEngine, GremlinServerSingleton gremlinServerSingleton) {
 			this.dbEngine = dbEngine;
+			this.gremlinServerSingleton = gremlinServerSingleton;
 		}
 		
 		public Builder queryFrom(URI uri) {
@@ -222,12 +256,30 @@ public abstract class GenericQueryProcessor {
 				this.dsl = Optional.of(query);
 				this.isDsl = true;
 			}
+			if(queryType.equals("nodeQuery")){
+				this.nodeType = Optional.of(query);
+				this.isNodeTypeQuery = true;
+			}
+			return this;
+		}
+		
+		public Builder uriParams(MultivaluedMap<String, String> uriParams) {
+			this.uriParams = uriParams;
 			return this;
 		}
 		
 		public Builder processWith(QueryProcessorType type) {
 			this.processorType = type;
 			return this;
+		}
+
+		public Builder queryProcessor(DslQueryProcessor dslQueryProcessor){
+			this.dslQueryProcessor = dslQueryProcessor;
+			return this;
+		}
+
+		public Optional<DslQueryProcessor> getDslQueryProcessor(){
+			return Optional.ofNullable(this.dslQueryProcessor);
 		}
 		public TransactionalGraphEngine getDbEngine() {
 			return dbEngine;
@@ -260,16 +312,24 @@ public abstract class GenericQueryProcessor {
 		public QueryProcessorType getProcessorType() {
 			return processorType;
 		}
+
+		public GremlinServerSingleton getGremlinServerSingleton(){
+			return gremlinServerSingleton;
+		}
+
+		public Optional<String> getNodeType() {
+			return nodeType;
+		}
+		
+		public boolean isNodeTypeQuery() {
+			return isNodeTypeQuery;
+		}
 		
 		public GenericQueryProcessor create() {
-			
-			if (this.getProcessorType().equals(QueryProcessorType.GREMLIN_SERVER)) {
-				return new GremlinServerImpl(this);
-			} else if (this.getProcessorType().equals(QueryProcessorType.LOCAL_GROOVY)) {
-				return new GroovyShellImpl(this);
-			} else {
-				return new GremlinServerImpl(this);
+			if (isNodeTypeQuery()) {
+				return new NodeQueryProcessor(this);
 			}
+			return new GroovyShellImpl(this);
 		}
 		
 	}

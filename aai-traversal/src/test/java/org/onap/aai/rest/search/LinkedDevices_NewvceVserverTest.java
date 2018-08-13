@@ -68,7 +68,7 @@ public class LinkedDevices_NewvceVserverTest extends QueryTest {
 										"interface-name", "lint3", "is-port-mirrored", "true", "in-maint", "true", "is-ip-unnumbered", "false");
 		
 		Vertex cloudregion = graph.addVertex(T.label, "cloud-region", T.id, "50", "aai-node-type", "cloud-region",
-											"cloud-owner", "onap", "cloud-region-id", "crId");
+											"cloud-owner", "att", "cloud-region-id", "crId");
 		Vertex tenant = graph.addVertex(T.label, "tenant", T.id, "60", "aai-node-type", "tenant",
 										"tenant-id", "tenId", "tenant-name", "verity");
 		Vertex vserver = graph.addVertex(T.label, "vserver", T.id, "30", "aai-node-type", "vserver",

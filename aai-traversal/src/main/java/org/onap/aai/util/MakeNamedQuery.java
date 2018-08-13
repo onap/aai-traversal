@@ -24,17 +24,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
-
+import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class MakeNamedQuery {
 
@@ -67,104 +68,98 @@ public class MakeNamedQuery {
 			System.exit(0);
 		}
 
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				"org.onap.aai.config",
+				"org.onap.aai.setup"
+		);
 
-		Loader loader = LoaderFactory.createLoaderForVersion(ModelType.MOXY, Version.valueOf(_apiVersion));
+		LoaderFactory loaderFactory   = ctx.getBean(LoaderFactory.class);
+		SchemaVersions schemaVersions = ctx.getBean(SchemaVersions.class);
 
-		// iterate the collection of resources
+		if(schemaVersions.getVersions().contains(_apiVersion)){
 
-		ArrayList<String> processedWidgets = new ArrayList<>();
+			Loader loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, new SchemaVersion(_apiVersion));
+
+			// iterate the collection of resources
+
+			ArrayList<String> processedWidgets = new ArrayList<>();
 
 
-		HashMap<String, List<Introspector>> widgetToRelationship = new HashMap<String, List<Introspector>>();
-		for (Entry<String, Introspector> aaiResEnt : loader.getAllObjects().entrySet()) {
-			Introspector meObject = loader.introspectorFromName("model");
-			// no need for a ModelVers DynamicEntity
+			HashMap<String, List<Introspector>> widgetToRelationship = new HashMap<>();
+			for (Entry<String, Introspector> aaiResEnt : loader.getAllObjects().entrySet()) {
+				Introspector meObject = loader.introspectorFromName("model");
+				// no need for a ModelVers DynamicEntity
 
-			Introspector aaiRes = aaiResEnt.getValue();
+				Introspector aaiRes = aaiResEnt.getValue();
 
-			if (!(aaiRes.isContainer() || aaiRes.getName().equals("aai-internal"))) {
-				String resource = aaiRes.getName();
+				if (!(aaiRes.isContainer() || aaiRes.getName().equals("aai-internal"))) {
+					String resource = aaiRes.getName();
 
-				if (processedWidgets.contains(resource)) {
-					continue;
-				}
-				processedWidgets.add(resource);
+					if (processedWidgets.contains(resource)) {
+						continue;
+					}
+					processedWidgets.add(resource);
 
-				String widgetName = resource;
-				String filePathString = widgetJsonDir + "/" + widgetName + "-" + modelVersion + ".json";
-				File f = new File(filePathString);
-				if (f.exists()) { 
-					System.out.println(f.toString());
-					String json = FileUtils.readFileToString(f);
+					String widgetName = resource;
+					String filePathString = widgetJsonDir + "/" + widgetName + "-" + modelVersion + ".json";
+					File f = new File(filePathString);
+					if (f.exists()) {
+						System.out.println(f.toString());
+						String json = FileUtils.readFileToString(f);
 
-					meObject = loader.unmarshal("Model", json);
-					String modelInvariantId = meObject.getValue("model-invariant-id");
-					if (meObject.hasProperty("model-vers")) { 
-						Introspector modelVers = meObject.getWrappedValue("model-vers");
-						List<Introspector> modelVerList = modelVers.getWrappedListValue("model-ver");
-						for (Introspector modelVer : modelVerList) {
-							
-							List<Introspector> relList = new ArrayList<Introspector>();
-							Introspector widgetRelationship = makeWidgetRelationship(loader, modelInvariantId, 
-									modelVer.getValue("model-version-id").toString());
-							relList.add(widgetRelationship);
-														
-							widgetToRelationship.put(widgetName, relList);
+						meObject = loader.unmarshal("Model", json);
+						String modelInvariantId = meObject.getValue("model-invariant-id");
+						if (meObject.hasProperty("model-vers")) {
+							Introspector modelVers = meObject.getWrappedValue("model-vers");
+							List<Introspector> modelVerList = (List<Introspector>) modelVers.getWrappedListValue("model-ver");
+							for (Introspector modelVer : modelVerList) {
+
+								List<Introspector> relList = new ArrayList<Introspector>();
+								Introspector widgetRelationship = makeWidgetRelationship(loader, modelInvariantId,
+										modelVer.getValue("model-version-id").toString());
+								relList.add(widgetRelationship);
+
+								widgetToRelationship.put(widgetName, relList);
+							}
 						}
 					}
 				}
 			}
+
+			//source vnf-id, related service-instance-id, all related vnfs in this service-instance-id
+			//this should be abstracted and moved to a file
+
+			HashMap<String, List<Introspector>> relationshipMap = new HashMap<String, List<Introspector>>();
+
+			List<Introspector> genericVnfRelationship = widgetToRelationship.get("generic-vnf");
+			List<Introspector> vserverRelationship = widgetToRelationship.get("vserver");
+			List<Introspector> tenantRelationship = widgetToRelationship.get("tenant");
+			List<Introspector> cloudRegionRelationship = widgetToRelationship.get("cloud-region");
+			List<Introspector> esrSystemInfoRelationship = widgetToRelationship.get("esr-system-info");
+
+			Introspector namedQueryObj = loader.introspectorFromName("named-query");
+			namedQueryObj.setValue("named-query-uuid", namedQueryUuid);
+			namedQueryObj.setValue("named-query-name", "vnf-to-esr-system-info");
+			namedQueryObj.setValue("named-query-version", "1.0");
+			namedQueryObj.setValue("description", "Named Query - VNF to ESR System Info");
+
+			Introspector genericVnfNQE = setupNQElements(namedQueryObj, genericVnfRelationship);
+
+			Introspector vserverNQE = setupNQElements(genericVnfNQE, vserverRelationship);
+
+			Introspector tenantNQE = setupNQElements(vserverNQE, tenantRelationship);
+
+			Introspector cloudRegionNQE = setupNQElements(tenantNQE, cloudRegionRelationship);
+
+			Introspector esrSystemInfoNQE = setupNQElements(cloudRegionNQE, esrSystemInfoRelationship);
+
+			System.out.println(namedQueryObj.marshal(true));
+
 		}
-		
-//		esr-system-info-from-vnf=builder.store('x').union(\
-//                builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(\
-//                        builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').store('x')\
-//                        .createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x')\
-//                        .createEdgeTraversal(EdgeType.TREE, 'cloud-region', 'esr-system-info').store('x')\
-//                )).cap('x').unfold.dedup()
- 
-		//source vnf-id, related service-instance-id, all related vnfs in this service-instance-id
-		
-		//this should be abstracted and moved to a file
-		
-		HashMap<String, List<Introspector>> relationshipMap = new HashMap<String, List<Introspector>>();
-				
-		List<Introspector> genericVnfRelationship = widgetToRelationship.get("generic-vnf");
-		List<Introspector> vserverRelationship = widgetToRelationship.get("vserver");
-		List<Introspector> tenantRelationship = widgetToRelationship.get("tenant");
-		List<Introspector> cloudRegionRelationship = widgetToRelationship.get("cloud-region");
-		List<Introspector> esrSystemInfoRelationship = widgetToRelationship.get("esr-system-info");
 
-		Introspector namedQueryObj = loader.introspectorFromName("named-query");
-		namedQueryObj.setValue("named-query-uuid", namedQueryUuid);
-		namedQueryObj.setValue("named-query-name", "vnf-to-esr-system-info");
-		namedQueryObj.setValue("named-query-version", "1.0");
-		namedQueryObj.setValue("description", "Named Query - VNF to ESR System Info");
-					 
-		Optional<Introspector> genericVnfNQE = tryToSetUpNQElements(Optional.of(namedQueryObj), genericVnfRelationship);
-				
-		Optional<Introspector> vserverNQE = tryToSetUpNQElements(genericVnfNQE, vserverRelationship);
-		
-		Optional<Introspector> tenantNQE = tryToSetUpNQElements(vserverNQE, tenantRelationship);
-		
-		Optional<Introspector> cloudRegionNQE = tryToSetUpNQElements(tenantNQE, cloudRegionRelationship);
-
-		Optional<Introspector> esrSystemInfoNQE = tryToSetUpNQElements(cloudRegionNQE, esrSystemInfoRelationship);
-		
-		System.out.println(namedQueryObj.marshal(true));
-		
 		System.exit(0);
 
-	}
-
-	private static Optional<Introspector> tryToSetUpNQElements(Optional<Introspector> genericVnfNQE, List<Introspector> vserverRelationship) {
-		if(genericVnfNQE.isPresent()) {
-			return Optional.ofNullable(setupNQElements(genericVnfNQE.get(), vserverRelationship));
-		} else {
-			return Optional.empty();
-		}
-	}
-
+	}	
 	private static List<Introspector> getRels(String widgetName, HashMap<String, Introspector> widgetToRelationship) {
 		List<Introspector> relList = new ArrayList<Introspector>();
 		Introspector genericVnfRelationship = widgetToRelationship.get(widgetName);
@@ -180,16 +175,14 @@ public class MakeNamedQuery {
 			if (nqeObj.getWrappedValue("named-query-elements") != null) {
 				newNQElements = nqeObj.getWrappedValue("named-query-elements");
 				nqElementList = newNQElements.getValue("named-query-element");
-			} else {
+			} else { 
 				newNQElements = nqeObj.newIntrospectorInstanceOfProperty("named-query-elements");
 				nqeObj.setValue("named-query-elements",  newNQElements.getUnderlyingObject());
-				nqElementList = newNQElements.getValue("named-query-element");
+				nqElementList = (List<Object>)newNQElements.getValue("named-query-element");
 			}
 			newNQElement = loadNQElement(newNQElements, listOfRelationships);
-			if (newNQElement != null) {
-				nqElementList.add(newNQElement.getUnderlyingObject());
-			}
-
+			nqElementList.add(newNQElement.getUnderlyingObject());
+		
 		} catch (AAIUnknownObjectException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -210,7 +203,7 @@ public class MakeNamedQuery {
 			Introspector newRelationshipList = newNqElement.getLoader().introspectorFromName("relationship-list");
 			newNqElement.setValue("relationship-list", newRelationshipList.getUnderlyingObject());
 
-			List<Object> newRelationshipListList = newRelationshipList.getValue("relationship");
+			List<Object> newRelationshipListList = (List<Object>)newRelationshipList.getValue("relationship");
 
 			for (Introspector rel : listOfRelationships) { 
 				newRelationshipListList.add(rel.getUnderlyingObject());
@@ -232,7 +225,7 @@ public class MakeNamedQuery {
 		try {
 			newRelationship = loader.introspectorFromName("relationship");
 
-			List<Object> newRelationshipData = newRelationship.getValue("relationship-data");
+			List<Object> newRelationshipData = (List<Object>)newRelationship.getValue("relationship-data");
 
 			newRelationship.setValue("related-to", "model");
 

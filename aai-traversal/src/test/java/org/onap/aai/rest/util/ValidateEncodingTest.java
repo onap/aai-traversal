@@ -76,6 +76,7 @@ public class ValidateEncodingTest {
 		
 		assertEquals(false, validator.validate(mockUriInfo));
 	}
+
 	@Test
 	public void goodQueryParams() throws UnsupportedEncodingException {
 		MultivaluedHashMap<String, String> map = new MultivaluedHashMap<String, String>();
@@ -88,7 +89,19 @@ public class ValidateEncodingTest {
 		
 		assertEquals(true, validator.validate(mockUriInfo));
 	}
-	
+
+	@Test
+	public void testWhenQueryParameterHasPlusSignItShouldPass() throws UnsupportedEncodingException {
+
+		MultivaluedHashMap<String, String> map = new MultivaluedHashMap<String, String>();
+		map.putSingle("some-key", "test+one+two+three");
+		UriInfo mockUriInfo = getMockUriInfo("", map);
+
+		ValidateEncoding validator = ValidateEncoding.getInstance();
+
+		assertEquals(true, validator.validate(mockUriInfo));
+	}
+
 	private UriInfo getMockUriInfo(String path, MultivaluedMap<String, String> map) {
 		UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
 		Mockito.when(mockUriInfo.getPath(false)).thenReturn(path);

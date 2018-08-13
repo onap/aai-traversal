@@ -19,11 +19,13 @@
  */
 package org.onap.aai.interceptors.pre;
 
+import org.onap.aai.Profiles;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.interceptors.AAIContainerFilter;
 import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.service.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -36,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Profile(Profiles.ONE_WAY_SSL)
 @PreMatching
 @Priority(AAIRequestFilterPriority.AUTHORIZATION)
 public class OneWaySslAuthorization extends AAIContainerFilter implements ContainerRequestFilter {

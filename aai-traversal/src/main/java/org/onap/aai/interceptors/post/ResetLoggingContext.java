@@ -19,21 +19,21 @@
  */
 package org.onap.aai.interceptors.post;
 
-import java.io.IOException;
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.logging.LoggingContext;
+import org.onap.aai.logging.LoggingContext.StatusCode;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.logging.LoggingContext;
-import org.onap.aai.logging.LoggingContext.StatusCode;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
+import java.io.IOException;
 
 @Priority(AAIResponseFilterPriority.RESET_LOGGING_CONTEXT)
 public class ResetLoggingContext extends AAIContainerFilter implements ContainerResponseFilter {
@@ -47,23 +47,52 @@ public class ResetLoggingContext extends AAIContainerFilter implements Container
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
 			throws IOException {
 
-		this.cleanLoggingContext();
+		this.cleanLoggingContext(responseContext);
 
 	}
 
-	private void cleanLoggingContext() {
-		final String responseCode = LoggingContext.responseCode();
-		String url = httpServletRequest.getRequestURL().toString();
+	private void cleanLoggingContext(ContainerResponseContext responseContext) {
+		//String url = httpServletRequest.getRequestURL().toString();
+		boolean success = true;
+		String uri = httpServletRequest.getRequestURI();
+		String queryString = httpServletRequest.getQueryString();
 
-		if (responseCode != null && responseCode.startsWith("ERR.")) {
-			LoggingContext.statusCode(StatusCode.ERROR);
-			LOGGER.error(url + " call failed with responseCode=" + responseCode);
-		} else {
-			LoggingContext.statusCode(StatusCode.COMPLETE);
-			LOGGER.info(url + " call succeeded");
+		if(queryString != null && !queryString.isEmpty()){
+		    uri = uri + "?" + queryString;
 		}
+		// For now, we use the the HTTP status code, 
+		// This may change, once the requirements for response codes are defined
 
+		int httpStatusCode = responseContext.getStatus();
+		if ( httpStatusCode < 100 || httpStatusCode > 599 ) {
+			httpStatusCode = Status.INTERNAL_SERVER_ERROR.getStatusCode();
+		}
+		LoggingContext.responseCode(Integer.toString(httpStatusCode));
+		
+		StatusType sType = responseContext.getStatusInfo();
+		if ( sType != null ) {
+			Status.Family sFamily = sType.getFamily();
+			if ( ! ( Status.Family.SUCCESSFUL.equals(sFamily)  ||
+				( Status.NOT_FOUND.equals(Status.fromStatusCode(httpStatusCode)) ) ) ) {
+				success = false;
+			}		
+		}
+		else {
+			if ( (httpStatusCode < 200 || httpStatusCode > 299) && ( ! ( Status.NOT_FOUND.equals(Status.fromStatusCode(httpStatusCode) ) ) ) ) {
+				success = false;
+			}
+		}
+		if (success) {
+			LoggingContext.statusCode(StatusCode.COMPLETE);
+			LOGGER.info(uri + " call succeeded");
+		}
+		else {
+			LoggingContext.statusCode(StatusCode.ERROR);
+			LOGGER.error(uri + " call failed with responseCode=" + httpStatusCode);
+		}
 		LoggingContext.clear();
+		
+
 	}
 
 }

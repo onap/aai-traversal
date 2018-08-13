@@ -53,9 +53,9 @@ public class UcpeTopologyQueryTest extends QueryTest {
 		Vertex tenant = graph.addVertex(T.label, "tenant", T.id, "5", "aai-node-type", "tenant", "tenant-id", "tenantuuid", "tenant-name", "tenantname");
 		Vertex cloudregion = graph.addVertex(T.label, "cloud-region", T.id, "6", "aai-node-type", "cloud-region", "cloud-region-id", "clouduuid", "cloud-region-owner", "cloudOwnername");
 		Vertex vnf1 = graph.addVertex(T.label, "generic-vnf", T.id, "7", "aai-node-type", "generic-vnf", "vnf-id", "vnf1uuid");
-		Vertex vnf1image = graph.addVertex(T.label, "vnf-image", T.id, "8", "aai-node-type", "vnf-image", "vnf-image-uuid", "vnf1imageuuid");
+		Vertex vnf1image = graph.addVertex(T.label, "vnf-image", T.id, "8", "aai-node-type", "vnf-image", "att-uuid", "vnf1imageuuid");
 		Vertex vnf2 = graph.addVertex(T.label, "generic-vnf", T.id, "9", "aai-node-type", "generic-vnf", "vnf-id", "vnf1uuid");
-		Vertex vnf2image = graph.addVertex(T.label, "vnf-image", T.id, "10", "aai-node-type", "vnf-image", "vnf-image-uuid", "vnf2imageuuid");
+		Vertex vnf2image = graph.addVertex(T.label, "vnf-image", T.id, "10", "aai-node-type", "vnf-image", "att-uuid", "vnf2imageuuid");
 		Vertex pnf = graph.addVertex(T.label, "pnf", T.id, "11", "aai-node-type", "pnf", "pnf-name", "pnf1name");
 		Vertex pnfint = graph.addVertex(T.label, "p-interface", T.id, "12", "aai-node-type", "p-interface", "interface-name", "ge0/0/0");
 		Vertex plink1 = graph.addVertex(T.label, "physical-link", T.id, "13", "aai-node-type", "physical-link", "link-name", "ge0/0/0-to-xe0/0/0");

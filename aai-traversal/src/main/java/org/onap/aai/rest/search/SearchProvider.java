@@ -22,7 +22,6 @@ package org.onap.aai.rest.search;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -37,18 +36,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.onap.aai.db.props.AAIProperties;
 import org.onap.aai.dbgraphmap.SearchGraph;
 import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
 import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.logging.LoggingContext;
 import org.onap.aai.logging.StopWatch;
-import org.onap.aai.logging.LoggingContext.StatusCode;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.db.DBSerializer;
@@ -56,29 +52,53 @@ import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.util.AAIConstants;
+import org.onap.aai.util.TraversalConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.onap.aai.concurrent.AaiCallable;
 
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * Implements the search subdomain in the REST API. All API calls must include
  * X-FromAppId and X-TransactionId in the header.
- * 
- 
- *
  */
-
-@Path("/{version: v[789]|v1[01234]|latest}/search")
+@Path("/{version: v[1-9][0-9]*|latest}/search")
 public class SearchProvider extends RESTAPI {
-	
-	protected static String authPolicyFunctionName = "search";
+
+	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchProvider.class);
 
 	public static final String GENERIC_QUERY = "/generic-query";
 
 	public static final String NODES_QUERY = "/nodes-query";
 
 	public static final String TARGET_ENTITY = "DB";
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchProvider.class);
+
+	private SearchGraph searchGraph;
+	
+	private LoaderFactory loaderFactory;
+
+	private SchemaVersions schemaVersions;
+
+	private String basePath;
+
+	@Autowired
+	public SearchProvider(
+		LoaderFactory loaderFactory,
+		SearchGraph searchGraph,
+		SchemaVersions schemaVersions,
+		@Value("${schema.uri.base.path}") String basePath
+	){
+		this.loaderFactory  = loaderFactory;
+		this.searchGraph    = searchGraph;
+		this.schemaVersions = schemaVersions;
+		this.basePath       = basePath;
+	}
+
 	/**
 	 * Gets the generic query response.
 	 *
@@ -103,15 +123,15 @@ public class SearchProvider extends RESTAPI {
 											@PathParam("version")String versionParam,
 											@Context UriInfo info
 	) {
-		return runner(AAIConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
+		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
 				headers,
 				info,
 				HttpMethod.GET,
-				new Callable<Response>() {
+				new AaiCallable<Response>() {
 					@Override
-					public Response call() {
+					public Response process() {
 						return processGenericQueryResponse(headers, req, startNodeType, startNodeKeyParams, includeNodeTypes, depth, versionParam);
 					}
 				}
@@ -145,22 +165,17 @@ public class SearchProvider extends RESTAPI {
 			String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 			//only consider header value for search		
 			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
-			final Version version;
-			if ("latest".equals(versionParam)) {
-				version = AAIProperties.LATEST;
-			} else {
-				version = Version.valueOf(versionParam);
-			}
+
+			final SchemaVersion version = new SchemaVersion(versionParam);
+
 			final ModelType factoryType = ModelType.MOXY;
-			Loader loader = LoaderFactory.createLoaderForVersion(factoryType, version);
+			Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
 			TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					type,
 					loader);
 			DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
-			UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer);
-			SearchGraph searchGraph = new SearchGraph();
-			
+			UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
 			LoggingContext.startTime();
 			StopWatch.conditionalStart();
 			searchResult = searchGraph.runGenericQuery(
@@ -240,15 +255,15 @@ public class SearchProvider extends RESTAPI {
 										  @Context UriInfo info)
 
 	{
-		return runner(AAIConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
+		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
 				headers,
 				info,
 				HttpMethod.GET,
-				new Callable<Response>() {
+				new AaiCallable<Response>() {
 					@Override
-					public Response call() {
+					public Response process() {
 						return processNodesQueryResponse(headers, req, searchNodeType, edgeFilterList, filterList, versionParam);
 					}
 				}
@@ -279,25 +294,19 @@ public class SearchProvider extends RESTAPI {
 			//only consider header value for search		
 			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 			
-			final Version version;
-			if ("latest".equals(versionParam)) {
-				version = AAIProperties.LATEST;
-			} else {
-				version = Version.valueOf(versionParam);
-			}
+			final SchemaVersion version = new SchemaVersion(versionParam);
+
 			final ModelType factoryType = ModelType.MOXY;
-			Loader loader = LoaderFactory.createLoaderForVersion(factoryType, version);
+			Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
 			TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					type,
 					loader);
 			DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
-			UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer);
-			SearchGraph searchGraph = new SearchGraph();
+			UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
 			
 			LoggingContext.startTime();
 			StopWatch.conditionalStart();
-			
 			searchResult = searchGraph.runNodesQuery(headers,
 													searchNodeType,
 													edgeFilterList, 
