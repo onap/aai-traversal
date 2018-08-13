@@ -2,7 +2,7 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============LICENSE_END=========================================================
- *
- * ECOMP is a trademark and service mark of AT&T Intellectual Property.
  */
 package org.onap.aai.dbgraphgen;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
@@ -33,28 +34,25 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.onap.aai.AAISetup;
 import org.onap.aai.db.props.AAIProperties;
 import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
-import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
 import org.onap.aai.parsers.exceptions.AAIIdentityMapParseException;
 import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.db.EdgeRules;
-import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.QueryStyle;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.onap.aai.setup.SchemaVersion;
 
-public class ModelBasedProcessingTest {
+public class ModelBasedProcessingTest extends AAISetup{
 
-    private static final Version version = Version.getLatest();
+    private SchemaVersion version;
     private static final ModelType introspectorFactoryType = ModelType.MOXY;
     private static final QueryStyle queryStyle = QueryStyle.TRAVERSAL;
     private static final DBConnectionType type = DBConnectionType.REALTIME;
@@ -81,7 +79,6 @@ public class ModelBasedProcessingTest {
 	private static TransactionalGraphEngine.Admin admin;
 	DBSerializer serializer;
 	private static Loader loader;
-	EdgeRules rules;
 	
 	ModelBasedProcessing modelBasedProcessor;
 
@@ -106,8 +103,9 @@ public class ModelBasedProcessingTest {
 	@Before
 	public void init() throws AAIException {
 		MockitoAnnotations.initMocks(this);
-		rules = EdgeRules.getInstance();
-		loader = LoaderFactory.createLoaderForVersion(introspectorFactoryType, AAIProperties.LATEST);
+		version = schemaVersions.getDefaultVersion();
+		//rules = EdgeRules.getInstance();
+		loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
 		TransactionalGraphEngine newDbEngine = new JanusGraphDBEngine(queryStyle, type, loader);
 		dbEngine = Mockito.spy(newDbEngine);
 		serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
@@ -135,17 +133,17 @@ public class ModelBasedProcessingTest {
 				"new-data-del-flag", "F");
 
 		GraphTraversalSource g = graph.traversal();
-		rules.addTreeEdge(g, model, modelVersion);
-		rules.addTreeEdge(g, modelElement, modelConstraint);
-		rules.addTreeEdge(g, constrainedElementSet, modelConstraint);
-		rules.addTreeEdge(g, modelVersion, modelElement);
-		rules.addTreeEdge(g, modelElement, constrainedElementSet);
-		rules.addTreeEdge(g, constrainedElementSet, elementChoiceSet);
-		rules.addTreeEdge(g, modelElement, elementChoiceSet);
-		rules.addTreeEdge(g, namedQuery, namedQueryElement);
-		rules.addTreeEdge(g, namedQueryElement, namedQueryElement);
-		rules.addEdge(g, modelVersion, modelElement);
-		rules.addEdge(g, model, namedQueryElement);
+		edgeSer.addTreeEdge(g, model, modelVersion);
+		edgeSer.addTreeEdge(g, modelElement, modelConstraint);
+		edgeSer.addTreeEdge(g, constrainedElementSet, modelConstraint);
+		edgeSer.addTreeEdge(g, modelVersion, modelElement);
+		edgeSer.addTreeEdge(g, modelElement, constrainedElementSet);
+		edgeSer.addTreeEdge(g, constrainedElementSet, elementChoiceSet);
+		edgeSer.addTreeEdge(g, modelElement, elementChoiceSet);
+		edgeSer.addTreeEdge(g, namedQuery, namedQueryElement);
+		edgeSer.addTreeEdge(g, namedQueryElement, namedQueryElement);
+		edgeSer.addEdge(g, modelVersion, modelElement);
+		edgeSer.addEdge(g, model, namedQueryElement);
 		return g;
 	}
 	
@@ -438,10 +436,10 @@ public class ModelBasedProcessingTest {
 		Vertex modelElementV = graph.addVertex(T.label, "model-element", T.id, "22", AAI_NODE_TYPE, "model-element");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, modelV, modelVerV);
-		rules4Service.addTreeEdge(gts, modelElementV, modelVerV);
-		rules4Service.addEdge(gts, modelElementV, modelVerV);
+		//EdgeRules rules4Service = EdgeRules.getInstance();
+		edgeSer.addTreeEdge(gts, modelV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelElementV, modelVerV);
+		edgeSer.addEdge(gts, modelElementV, modelVerV);
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
 		modelBasedProcessor.genTopoMap4ModelVer(TRANSACTION_ID, FROM_APP_ID, modelVerV, MODEL_VERSION_ID_VALUE);
@@ -517,8 +515,7 @@ public class ModelBasedProcessingTest {
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "32", AAI_NODE_TYPE, "instance-vertex", "property-name", "property-name");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
+		edgeSer.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -536,8 +533,8 @@ public class ModelBasedProcessingTest {
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "35", AAI_NODE_TYPE, "instance-vertex", "property-name", "property-name");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
+		//EdgeRules rules4Service = EdgeRules.getInstance();
+		edgeSer.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -556,8 +553,7 @@ public class ModelBasedProcessingTest {
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "38", AAI_NODE_TYPE, "instance-vertex", "property-name", "property-name");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
+		edgeSer.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -576,8 +572,7 @@ public class ModelBasedProcessingTest {
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "41", AAI_NODE_TYPE, "instance-vertex", "property-name", "property-name");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
+		edgeSer.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -596,8 +591,7 @@ public class ModelBasedProcessingTest {
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "44", AAI_NODE_TYPE, "instance-vertex", "property-name", "property-name");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
+		edgeSer.addTreeEdge(gts, namedQueryElementV, propertyContraintV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -615,8 +609,7 @@ public class ModelBasedProcessingTest {
 				"source-node-property", "source-node-property", "source-node-type", "generic-vnf");
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "47", AAI_NODE_TYPE, "instance-vertex", "property-name", "property-name");
 		GraphTraversalSource gts = serviceGraph.traversal();
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, relatedLookUpV);
+		edgeSer.addTreeEdge(gts, namedQueryElementV, relatedLookUpV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -635,8 +628,7 @@ public class ModelBasedProcessingTest {
 				"target-node-property", "generic-vnf", "property-collect-list", "property-collect-list");
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "53", AAI_NODE_TYPE, "instance-vertex", "property-name", "property-name");
 		GraphTraversalSource gts = serviceGraph.traversal();
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, relatedLookUpV);
+		edgeSer.addTreeEdge(gts, namedQueryElementV, relatedLookUpV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -654,8 +646,7 @@ public class ModelBasedProcessingTest {
 				"source-node-property", "source-node-property", "source-node-type", "generic-vnf", "target-node-type", "generic-vnf", "target-node-property", "generic-vnf");
 		Vertex instanceVertexV = graph.addVertex(T.label, "instance-vertex", T.id, "56", AAI_NODE_TYPE, "instance-vertex", "source-node-property", "source-node-property");
 		GraphTraversalSource gts = serviceGraph.traversal();
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, namedQueryElementV, relatedLookUpV);
+		edgeSer.addTreeEdge(gts, namedQueryElementV, relatedLookUpV);
 		
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
@@ -737,10 +728,9 @@ public class ModelBasedProcessingTest {
 		Vertex modelElementV = graph.addVertex(T.label, "model-element", T.id, "59", AAI_NODE_TYPE, "model-element");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, modelV, modelVerV);
-		rules4Service.addTreeEdge(gts, modelElementV, modelVerV);
-		rules4Service.addEdge(gts, modelElementV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelElementV, modelVerV);
+		edgeSer.addEdge(gts, modelElementV, modelVerV);
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
 		modelBasedProcessor.getModelVerTopWidgetType(modelVerV, "");
@@ -755,10 +745,9 @@ public class ModelBasedProcessingTest {
 		Vertex modelElementV = graph.addVertex(T.label, "model-element", T.id, "62", AAI_NODE_TYPE, "model-element");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, modelV, modelVerV);
-		rules4Service.addTreeEdge(gts, modelElementV, modelVerV);
-		rules4Service.addEdge(gts, modelElementV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelElementV, modelVerV);
+		edgeSer.addEdge(gts, modelElementV, modelVerV);
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
 		modelBasedProcessor.getModelElementStepName(modelElementV, "");
@@ -801,10 +790,9 @@ public class ModelBasedProcessingTest {
 		Vertex modelElementV = graph.addVertex(T.label, "model-element", T.id, "65", AAI_NODE_TYPE, "model-element");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, modelV, modelVerV);
-		rules4Service.addTreeEdge(gts, modelElementV, modelVerV);
-		rules4Service.addEdge(gts, modelElementV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelElementV, modelVerV);
+		edgeSer.addEdge(gts, modelElementV, modelVerV);
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
 		
@@ -891,8 +879,7 @@ public class ModelBasedProcessingTest {
 		//Vertex modelElementV = graph.addVertex(T.label, "model-element", T.id, "68", AAI_NODE_TYPE, "model-element");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
-		EdgeRules rules4Service = EdgeRules.getInstance();
-		rules4Service.addTreeEdge(gts, modelV, modelVerV);
+		edgeSer.addTreeEdge(gts, modelV, modelVerV);
 		//rules4Service.addTreeEdge(gts, modelElementV, modelVerV);
 		//rules4Service.addEdge(gts, modelElementV, modelVerV);
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);

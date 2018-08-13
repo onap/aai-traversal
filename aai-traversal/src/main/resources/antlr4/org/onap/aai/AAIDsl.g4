@@ -6,21 +6,15 @@ grammar AAIDsl;
 
 aaiquery: dslStatement;
 
-dslStatement: (queryStep) (traverseStep | unionTraverseStep)* limitStep*;
-
-queryStep : (singleNodeStep |singleQueryStep | multiQueryStep);
+dslStatement: (singleNodeStep ) (traverseStep )* limitStep*;
 
 unionQueryStep: LBRACKET dslStatement ( COMMA (dslStatement))* RBRACKET;
 
-traverseStep: (TRAVERSE (  queryStep | unionQueryStep));
+traverseStep: (TRAVERSE (  singleNodeStep | unionQueryStep));
 
-unionTraverseStep: TRAVERSE unionQueryStep;
+singleNodeStep: NODE STORE? (filterStep | filterTraverseStep)*;
 
-singleNodeStep: NODE STORE? ;
-singleQueryStep: NODE STORE? (filterStep | filterTraverseStep);
-multiQueryStep:  NODE STORE? (filterStep | filterTraverseStep) (filterStep)+;
-
-filterStep: NOT? (LPAREN KEY COMMA KEY (COMMA KEY)*RPAREN);
+filterStep: NOT? (LPAREN KEY (COMMA KEY)* RPAREN);
 filterTraverseStep: (LPAREN traverseStep* RPAREN);
 
 limitStep: LIMIT NODE;
@@ -28,7 +22,8 @@ limitStep: LIMIT NODE;
 LIMIT: 'LIMIT';
 NODE: ID;
 
-KEY: ['] ID ['] ;
+KEY: ['] (ID | ' ')* ['] ;
+
 
 AND: [&];
 

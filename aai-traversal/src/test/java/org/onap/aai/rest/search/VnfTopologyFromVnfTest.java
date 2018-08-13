@@ -92,10 +92,12 @@ public class VnfTopologyFromVnfTest extends QueryTest {
 
 		expectedResult.add(gnvf1);
 		expectedResult.add(serviceinstance);
+		expectedResult.add(servicesubscription);
 		expectedResult.add(customer);
 		expectedResult.add(allottedresource);
 		expectedResult.add(vfmodule);
 		expectedResult.add(volumegroup);
+		expectedResult.add(linter1);
 		expectedResult.add(l3inter1ipv4addresslist);
 		expectedResult.add(l3network1);
 		expectedResult.add(l3inter1ipv6addresslist);
@@ -104,7 +106,7 @@ public class VnfTopologyFromVnfTest extends QueryTest {
 		expectedResult.add(tenant);
 		expectedResult.add(region1);
 		expectedResult.add(pserver);
-		expectedResult.add(vserver);
+		expectedResult.add(linter2);
 		expectedResult.add(l3inter2ipv4addresslist);
 		expectedResult.add(l3network3);
 		expectedResult.add(l3inter2ipv6addresslist);

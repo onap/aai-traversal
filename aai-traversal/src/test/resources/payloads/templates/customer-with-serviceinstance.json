@@ -1,0 +1,20 @@
+{
+  "global-customer-id": "${customer-id}",
+  "subscriber-name": "customer-subscriber-name",
+  "subscriber-type": "CUST",
+  "service-subscriptions": {
+    "service-subscription": [
+      {
+        "service-type": "VVIG",
+        "service-instances": {
+          "service-instance": [
+            {
+              "service-instance-id": "${service-instance-id}",
+              "service-instance-name": "${service-instance-name}"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

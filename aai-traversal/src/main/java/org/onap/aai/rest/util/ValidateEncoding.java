@@ -133,6 +133,9 @@ public class ValidateEncoding {
 				valid = false;
 			}
 			for (String item : params.get(key)) {
+				if(item.contains("+")){
+					item = item.replaceAll("\\+", "%20");
+				}
 				if (!this.checkEncoding(item)) {
 					valid = false;
 				}

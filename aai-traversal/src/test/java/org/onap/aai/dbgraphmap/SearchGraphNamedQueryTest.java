@@ -22,7 +22,6 @@ package org.onap.aai.dbgraphmap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -33,7 +32,7 @@ import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.extensions.AAIExtensionMap;
 import org.onap.aai.introspection.*;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.util.AAIApiVersion;
+import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.util.AAIConstants;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,30 +40,22 @@ import javax.ws.rs.core.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
+import org.onap.aai.AAISetup;
 
-public class SearchGraphNamedQueryTest {
-
-    private SearchGraph searchGraph;
+public class SearchGraphNamedQueryTest extends AAISetup{
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
     private static final Set<Integer> VALID_HTTP_STATUS_CODES = new HashSet<>();
-
-    private final static Version version = Version.getLatest();
-    private final static ModelType introspectorFactoryType = ModelType.MOXY;
-    private final static QueryStyle queryStyle = QueryStyle.TRAVERSAL;
-    private final static DBConnectionType type = DBConnectionType.REALTIME;
 
     static {
         VALID_HTTP_STATUS_CODES.add(200);
@@ -141,7 +132,7 @@ public class SearchGraphNamedQueryTest {
     }
     
     private String addVersionToUri(String uri ) {
-    	return "/aai/" + Version.getLatest() + "/" + uri;
+    	return "/aai/" + schemaVersions.getDefaultVersion() + "/" + uri;
     }
 
     @Before
@@ -149,12 +140,7 @@ public class SearchGraphNamedQueryTest {
     	
     	 httpTestUtil = new HttpTestUtil();
 
-        System.setProperty("AJSC_HOME", ".");
-        System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
         
-
-        searchGraph = new SearchGraph();
-
         httpHeaders         = mock(HttpHeaders.class);
 
         headersMultiMap     = new MultivaluedHashMap<>();
@@ -211,10 +197,10 @@ public class SearchGraphNamedQueryTest {
         Mockito.when(request.getContentType()).thenReturn("application/json");
        
 		aaiExtMap.setUri("/search/named-query");
-		aaiExtMap.setApiVersion(AAIApiVersion.get());
+		aaiExtMap.setApiVersion(schemaVersions.getDefaultVersion().toString());
 		aaiExtMap.setServletRequest(request);
 		
-		SearchGraph searchGraph = new SearchGraph();
+		
 		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
         System.out.println("response was\n" + response.getEntity().toString());
         assertEquals("Expected success from query", 200, response.getStatus());
@@ -245,10 +231,10 @@ public class SearchGraphNamedQueryTest {
         Mockito.when(request.getContentType()).thenReturn("application/json");
        
 		aaiExtMap.setUri("/search/named-query");
-		aaiExtMap.setApiVersion(AAIApiVersion.get());
+		aaiExtMap.setApiVersion(schemaVersions.getDefaultVersion().toString());
 		aaiExtMap.setServletRequest(request);
 		
-		SearchGraph searchGraph = new SearchGraph();
+		
 		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
         assertEquals("Expected success from query", 200, response.getStatus());
         boolean hasModelName = response.getEntity().toString().indexOf("junit-model-name") > 0 ? true : false;
@@ -326,10 +312,10 @@ public class SearchGraphNamedQueryTest {
         Mockito.when(request.getContentType()).thenReturn("application/json");
        
 		aaiExtMap.setUri("/search/named-query");
-		aaiExtMap.setApiVersion(AAIApiVersion.get());
+		aaiExtMap.setApiVersion(schemaVersions.getDefaultVersion().toString());
 		aaiExtMap.setServletRequest(request);
 		
-		SearchGraph searchGraph = new SearchGraph();
+		
 		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
         assertEquals("Expected success from query", 200, response.getStatus());
         boolean hasModelName = response.getEntity().toString().indexOf("example-model-name-val-closed-loop") > 0 ? true : false;
@@ -392,10 +378,10 @@ public class SearchGraphNamedQueryTest {
         Mockito.when(request.getContentType()).thenReturn("application/json");
        
 		aaiExtMap.setUri("/search/named-query");
-		aaiExtMap.setApiVersion(AAIApiVersion.get());
+		aaiExtMap.setApiVersion(schemaVersions.getDefaultVersion().toString());
 		aaiExtMap.setServletRequest(request);
 		
-		SearchGraph searchGraph = new SearchGraph();
+		
 		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
         assertEquals("Expected success from query", 200, response.getStatus());
         boolean hasModelName = response.getEntity().toString().indexOf("example-model-name-val-component-list") > 0 ? true : false;

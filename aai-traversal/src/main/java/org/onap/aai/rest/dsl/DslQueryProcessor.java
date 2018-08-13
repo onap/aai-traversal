@@ -36,12 +36,21 @@ import org.antlr.v4.runtime.Token;
 
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
+import org.springframework.beans.factory.annotation.Autowired;
+
 /**
  * The Class DslQueryProcessor.
  */
 public class DslQueryProcessor {
 
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(DslQueryProcessor.class);
+
+	private DslListener dslListener;
+
+	@Autowired
+	public DslQueryProcessor(DslListener dslListener){
+		this.dslListener = dslListener;
+	}
 
 	public String parseAaiQuery(String aaiQuery) {
 		try {
@@ -64,34 +73,18 @@ public class DslQueryProcessor {
 
 			// Walk it and attach our listener
 			ParseTreeWalker walker = new ParseTreeWalker();
-			DslListener listener = new DslListener();
-			walker.walk(listener, ptree);
-			LOGGER.info("Final QUERY" + listener.query);
+			walker.walk(dslListener, ptree);
+			LOGGER.info("Final QUERY" + dslListener.getQuery());
 
 			/*
 			 * TODO - Visitor patternQueryDslVisitor visitor = new
 			 * QueryDslVisitor(); String query = visitor.visit(ptree);
 			 * 
 			 */
-			return listener.query;
+			return dslListener.getQuery();
 		} catch (Exception e) {
 			LOGGER.error("Error while processing the query"+e.getMessage());
 		}
 		return "";
-	}
-
-	public static class Builder {
-
-		/*
-		 * Builder constructor doesnt do anything
-		 */
-		public Builder() {
-			// Do nothing
-		}
-
-		public String build(String aaiQuery) {
-
-			return new DslQueryProcessor().parseAaiQuery(aaiQuery);
-		}
 	}
 }

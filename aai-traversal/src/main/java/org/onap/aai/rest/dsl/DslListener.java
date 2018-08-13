@@ -20,16 +20,21 @@
 package org.onap.aai.rest.dsl;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.List;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import org.onap.aai.AAIDslParser;
-import org.onap.aai.serialization.db.EdgeRules;
+import org.onap.aai.edges.EdgeRuleQuery;
+import org.onap.aai.edges.enums.EdgeType;
+import org.onap.aai.exceptions.AAIException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.onap.aai.AAIDslBaseListener;
-
+import org.onap.aai.edges.EdgeIngestor;
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 
@@ -39,246 +44,150 @@ import com.att.eelf.configuration.EELFManager;
 public class DslListener extends AAIDslBaseListener {
 
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(DslQueryProcessor.class);
-	private final EdgeRules edgeRules = EdgeRules.getInstance();
 
-	protected List<String> list = null;
-	//TODO Use StringBuilder to build the query than concat
-	String query = "";
+	private final EdgeIngestor edgeRules;
 
-	Map<Integer, String> unionMap = new HashMap<>();
-	Map<String, String> flags = new HashMap<>();
-
-	String currentNode = "";
-	String prevsNode = "";
-	int commas = 0;
-
-	int unionKey = 0;
-	int unionMembers = 0;
-	boolean isUnionBeg = false;
-	boolean isUnionTraversal = false;
-
-	boolean isTraversal = false;
-	boolean isWhereTraversal = false;
-	String whereTraversalNode = "";
-
-	String limitQuery = "";
-	boolean isNot = false;
+	DslContext context = null;
+	DslQueryBuilder dslBuilder = null;
 
 	/**
 	 * Instantiates a new DslListener.
 	 */
+	@Autowired
+	public DslListener(EdgeIngestor edgeIngestor) {
+		this.edgeRules = edgeIngestor;
+		context = new DslContext();
+		dslBuilder = new DslQueryBuilder(edgeIngestor);
+	}
 
-	public DslListener() {
-		list = new ArrayList<>();
+	public String getQuery() {
+		return dslBuilder.getQuery().toString();
 	}
 
 	@Override
 	public void enterAaiquery(AAIDslParser.AaiqueryContext ctx) {
-		query += "builder";
-	}
-
-	@Override
-	public void enterDslStatement(AAIDslParser.DslStatementContext ctx) {
-		// LOGGER.info("Statement Enter"+ctx.getText());
-		/*
-		 * This block of code is entered for every query statement
-		 */
-		if (isUnionBeg) {
-			isUnionBeg = false;
-			isUnionTraversal = true;
-
-		} else if (unionMembers > 0) {
-			unionMembers--;
-			query += ",builder.newInstance()";
-			isUnionTraversal = true;
-		}
-
-	}
-
-	@Override
-	public void exitDslStatement(AAIDslParser.DslStatementContext ctx) {
-		/*
-		 * Nothing to be done here for now
-		 * LOGGER.info("Statement Exit"+ctx.getText());
-		 */
+		dslBuilder.start();
 	}
 
 	@Override
 	public void exitAaiquery(AAIDslParser.AaiqueryContext ctx) {
-		/*
-		 * dedup is by default for all queries If the query has limit in it
-		 * include this as well LOGGER.info("Statement Exit"+ctx.getText());
-		 */
-
-		query += ".cap('x').unfold().dedup()" + limitQuery;
+		dslBuilder.end(context);
 	}
 
-	/*
-	 * TODO: The contexts are not inherited from a single parent in AAIDslParser
-	 * Need to find a way to do that
-	 */
+	@Override
+	public void enterDslStatement(AAIDslParser.DslStatementContext ctx) {
+		if (context.isUnionStart()) {
+			dslBuilder.startUnion();
+		}
+	}
+
+	@Override
+	public void exitDslStatement(AAIDslParser.DslStatementContext ctx) {
+		if (context.isUnionQuery()) {
+			dslBuilder.comma(context);
+			context.setUnionStart(true);
+		}
+	}
+
 	@Override
 	public void enterSingleNodeStep(AAIDslParser.SingleNodeStepContext ctx) {
-		
-		prevsNode = currentNode;
-		currentNode = ctx.NODE().getText();
+		try {
+			/*
+			 * Set the previous Node to current node and get the new current
+			 * node
+			 */
+			context.setPreviousNode(context.getCurrentNode());
+			context.setCurrentNode(ctx.NODE().getText());
 
-		this.generateQuery();
-		if (ctx.STORE() != null && ctx.STORE().getText().equals("*")) {
-			flags.put(currentNode, "store");
-		}
+			if (context.isUnionQuery() || context.isTraversal() || context.isWhereQuery()) {
+				String oldPreviousNode = context.getPreviousNode();
 
-	}
+				if (context.isUnionStart()) {
+					String previousNode = context.getUnionStartNodes().peek();
+					context.setPreviousNode(previousNode);
 
-	@Override
-	public void enterSingleQueryStep(AAIDslParser.SingleQueryStepContext ctx) {
-		
-		prevsNode = currentNode;
-		currentNode = ctx.NODE().getText();
-		this.generateQuery();
+					context.setUnionStart(false);
+				}
 
-		if (ctx.STORE() != null && ctx.STORE().getText().equals("*")) {
-			flags.put(currentNode, "store");
-		}
-	}
+				dslBuilder.edgeQuery(context);
 
-	@Override
-	public void enterMultiQueryStep(AAIDslParser.MultiQueryStepContext ctx) {
-		
-		prevsNode = currentNode;
-		currentNode = ctx.NODE().getText();
-		this.generateQuery();
-		
-		if (ctx.STORE() != null && ctx.STORE().getText().equals("*")) {
-			flags.put(currentNode, "store");
-		}
+				/*
+				 * Reset is required bcos for union queries im changing the
+				 * context
+				 */
+				context.setPreviousNode(oldPreviousNode);
 
-	}
-
-	/*
-	 * Generates the QueryBuilder syntax for the dsl query
-	 */
-	private void generateQuery() {
-		String edgeType = "";
-
-		if (isUnionTraversal || isTraversal || isWhereTraversal) {
-			String previousNode = prevsNode;
-			if (isUnionTraversal) {
-				previousNode = unionMap.get(unionKey);
-				isUnionTraversal = false;
 			}
 
-			if (edgeRules.hasTreeEdgeRule(previousNode, currentNode)) {
-				edgeType = "EdgeType.TREE";
-			}else if (edgeRules.hasCousinEdgeRule(previousNode, currentNode, "")) {
-				edgeType = "EdgeType.COUSIN";
-			} else 
-				edgeType = "EdgeType.COUSIN";
-			
-			query += ".createEdgeTraversal(" + edgeType + ", '" + previousNode + "','" + currentNode + "')";
+			else {
+				dslBuilder.nodeQuery(context);
+			}
 
+		} catch (AAIException e) {
+			LOGGER.info("AAIException in DslListener" + e.getMessage());
 		}
 
-		else
-			query += ".getVerticesByProperty('aai-node-type', '" + currentNode + "')";
 	}
 
 	@Override
 	public void exitSingleNodeStep(AAIDslParser.SingleNodeStepContext ctx) {
-
-		generateExitStep();
-	}
-
-	@Override
-	public void exitSingleQueryStep(AAIDslParser.SingleQueryStepContext ctx) {
-		generateExitStep();
-	}
-
-	@Override
-	public void exitMultiQueryStep(AAIDslParser.MultiQueryStepContext ctx) {
-		generateExitStep();
-
+		context.setCtx(ctx);
+		dslBuilder.store(context);
 	}
 
 	private void generateExitStep() {
-		if (flags.containsKey(currentNode)) {
-			String storeFlag = flags.get(currentNode);
-			if (storeFlag != null && storeFlag.equals("store"))
-				query += ".store('x')";
-			flags.remove(currentNode);
-		}
+
 	}
 
 	@Override
 	public void enterUnionQueryStep(AAIDslParser.UnionQueryStepContext ctx) {
-		isUnionBeg = true;
 
-		unionKey++;
-		unionMap.put(unionKey, currentNode);
-		query += ".union(builder.newInstance()";
+		Deque<String> unionStartNodes = context.getUnionStartNodes();
+		unionStartNodes.add(context.getCurrentNode());
 
-		List<TerminalNode> commaNodes = ctx.COMMA();
+		context.setUnionStart(true);
+		/*
+		 * I may not need this
+		 */
+		context.setUnionQuery(true);
+		dslBuilder.union(context);
 
-		for (TerminalNode node : commaNodes) {
-			unionMembers++;
-		}
 	}
 
 	@Override
 	public void exitUnionQueryStep(AAIDslParser.UnionQueryStepContext ctx) {
-		isUnionBeg = false;
-		unionMap.remove(unionKey);
+		context.setUnionStart(false);
+		context.setUnionQuery(false);
+		Deque<String> unionStartNodes = context.getUnionStartNodes();
+		if (unionStartNodes.peek() != null) {
+			unionStartNodes.pop();
+		}
 
-		query += ")";
-		unionKey--;
+		dslBuilder.endUnion(context);
 
 	}
 
 	@Override
 	public void enterFilterTraverseStep(AAIDslParser.FilterTraverseStepContext ctx) {
-		isWhereTraversal = true;
-		whereTraversalNode = currentNode;
-		query += ".where(builder.newInstance()";
+		context.setWhereQuery(true);
+		context.setWhereStartNode(context.getCurrentNode());
+		dslBuilder.where(context);
+
 	}
 
 	@Override
 	public void exitFilterTraverseStep(AAIDslParser.FilterTraverseStepContext ctx) {
-		query += ")";
-		isWhereTraversal = false;
-		currentNode = whereTraversalNode;
+		context.setWhereQuery(false);
+		context.setCurrentNode(context.getWhereStartNode());
+
+		dslBuilder.endWhere(context);
+
 	}
 
 	@Override
 	public void enterFilterStep(AAIDslParser.FilterStepContext ctx) {
-		if (ctx.NOT() != null && ctx.NOT().getText().equals("!"))
-			isNot = true;
-
-		List<TerminalNode> nodes = ctx.KEY();
-		String key = ctx.KEY(0).getText();
-
-		if (isNot) {
-			query += ".getVerticesExcludeByProperty(";
-			isNot = false;
-		} else
-			query += ".getVerticesByProperty(";
-
-		if (nodes.size() == 2) {
-			query += key + "," + ctx.KEY(1).getText();
-			query += ")";
-		}
-
-		if (nodes.size() > 2) {
-
-			for (TerminalNode node : nodes) {
-				if (node.getText().equals(key))
-					continue;
-
-				query += key + "," + node.getText();
-				query += ")";
-			}
-
-		}
-
+		context.setCtx(ctx);
+		dslBuilder.filter(context);
 	}
 
 	@Override
@@ -288,17 +197,17 @@ public class DslListener extends AAIDslBaseListener {
 
 	@Override
 	public void enterTraverseStep(AAIDslParser.TraverseStepContext ctx) {
-		isTraversal = true;
+		context.setTraversal(true);
 	}
 
 	@Override
 	public void exitTraverseStep(AAIDslParser.TraverseStepContext ctx) {
-		isTraversal = false;
+		context.setTraversal(false);
 	}
 
 	@Override
 	public void enterLimitStep(AAIDslParser.LimitStepContext ctx) {
-		String value = ctx.NODE().getText();
-		limitQuery += ".limit(" + value + ")";
+		context.setCtx(ctx);
+		dslBuilder.limit(context);
 	}
 }

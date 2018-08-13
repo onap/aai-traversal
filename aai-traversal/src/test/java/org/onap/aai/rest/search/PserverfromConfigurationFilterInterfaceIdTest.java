@@ -53,6 +53,8 @@ public class PserverfromConfigurationFilterInterfaceIdTest extends QueryTest {
 				"in-maint", "true", "is-ip-unnumbered", "false", "interface-id", "interface-id1");
 		Vertex pnf1 = graph.addVertex(T.label, "pnf", T.id, "17", "aai-node-type", "pnf", "pnf-name", "pnf1name", "equip-vendor", "equip-vendor1", "equip-model",
 				"equip-model1");
+		
+		Vertex vserver1 = graph.addVertex(T.label, "vserver", T.id, "22", "aai-node-type", "vserver", "vserver-id", "vserver-id-1", "vserver-name", "vserver-name-1");
 
 		// Following are extra nodes that should not be picked up in
 		// expectedResults
@@ -69,7 +71,8 @@ public class PserverfromConfigurationFilterInterfaceIdTest extends QueryTest {
 		rules.addEdge(g, config1, loglink2);
 		rules.addEdge(g, lint1, loglink1);
 		rules.addEdge(g, lint2, loglink1);
-		rules.addEdge(g, loglink1, pserver1);
+		rules.addTreeEdge(g, vserver1,lint1);
+		rules.addEdge(g, vserver1, pserver1);
 		rules.addEdge(g, loglink1, gvnf1);
 		rules.addEdge(g, gvnf1, pnf1);
 
