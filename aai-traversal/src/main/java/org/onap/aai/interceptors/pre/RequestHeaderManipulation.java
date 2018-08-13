@@ -19,35 +19,25 @@
  */
 package org.onap.aai.interceptors.pre;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.interceptors.AAIHeaderProperties;
 
 import javax.annotation.Priority;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.MultivaluedMap;
-
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.interceptors.AAIHeaderProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Collections;
+import java.util.regex.Matcher;
 
 @PreMatching
 @Priority(AAIRequestFilterPriority.HEADER_MANIPULATION)
 public class RequestHeaderManipulation extends AAIContainerFilter implements ContainerRequestFilter {
 
-	@Autowired
-	private HttpServletRequest httpServletRequest;
-
-	private static final Pattern versionedEndpoint = Pattern.compile("^/aai/(v\\d+)");
-	
 	@Override
-	public void filter(ContainerRequestContext requestContext) throws IOException {
+	public void filter(ContainerRequestContext requestContext) {
 
-		String uri = httpServletRequest.getRequestURI();
+		String uri = requestContext.getUriInfo().getPath();
 		this.addRequestContext(uri, requestContext.getHeaders());
 
 	}
@@ -56,7 +46,7 @@ public class RequestHeaderManipulation extends AAIContainerFilter implements Con
 
 		String rc = "";
 
-        Matcher match = versionedEndpoint.matcher(uri);
+        Matcher match = VersionInterceptor.EXTRACT_VERSION_PATTERN.matcher(uri);
         if (match.find()) {
             rc = match.group(1);
         }

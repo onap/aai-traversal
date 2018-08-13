@@ -11,3 +11,5 @@ bundleconfig-local/etc/logback.xml
 **/.idea/
 */.idea
 *.iml
+**/oxm/**
+**/dbedgerules/**

@@ -23,20 +23,20 @@ import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import org.javatuples.Pair;
 import org.mockito.Mockito;
+import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
-import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
 import org.onap.aai.parsers.query.QueryParser;
 import org.onap.aai.parsers.uri.URIToObject;
 import org.onap.aai.rest.db.DBRequest;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
 
 import javax.ws.rs.core.*;
 import java.io.UnsupportedEncodingException;
@@ -64,8 +64,11 @@ public class HttpTestUtil extends RESTAPI {
     protected List<String> aaiRequestContextList;
     protected List<MediaType> outputMediaTypes;
 
+    private SchemaVersions schemaVersions;
+
     public void init(){
 
+        schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
         httpHeaders         = Mockito.mock(HttpHeaders.class);
         uriInfo             = Mockito.mock(UriInfo.class);
 
@@ -110,24 +113,26 @@ public class HttpTestUtil extends RESTAPI {
 
             String [] arr = uri.split("/");
 
-            Version version = null;
+            SchemaVersion version = null;
 
             if(arr != null && arr.length > 1){
                 if(arr[0].matches("^v\\d+")){
-                    version = Version.valueOf(arr[0]);
+                    version = new SchemaVersion(arr[0]);
                     uri = uri.replaceAll("^v\\d+", "");
                 }
             }
 
             if(version == null){
-                version = Version.getLatest();
+                version = schemaVersions.getDefaultVersion();
             }
             Mockito.when(uriInfo.getPath()).thenReturn(uri);
 
             DBConnectionType type = DBConnectionType.REALTIME;
-            HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
-            Loader loader         = httpEntry.getLoader();
-            dbEngine              = httpEntry.getDbEngine();
+            HttpEntry resourceHttpEntry = SpringContextAware.getBean("traversalHttpEntry", HttpEntry.class);
+            resourceHttpEntry.setHttpEntryProperties(version, type);
+           // HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
+            Loader loader         = resourceHttpEntry.getLoader();
+            dbEngine              = resourceHttpEntry.getDbEngine();
 
             URI uriObject = UriBuilder.fromPath(uri).build();
             URIToObject uriToObject = new URIToObject(loader, uriObject);
@@ -157,7 +162,7 @@ public class HttpTestUtil extends RESTAPI {
             List<DBRequest> dbRequestList = new ArrayList<>();
             dbRequestList.add(dbRequest);
 
-            Pair<Boolean, List<Pair<URI, Response>>> responsesTuple  = httpEntry.process(dbRequestList, "JUNIT");
+            Pair<Boolean, List<Pair<URI, Response>>> responsesTuple  = resourceHttpEntry.process(dbRequestList, "JUNIT");
             response = responsesTuple.getValue1().get(0).getValue1();
 
         } catch (AAIException e) {
@@ -202,23 +207,27 @@ public class HttpTestUtil extends RESTAPI {
 
             String [] arr = uri.split("/");
 
-            Version version = null;
+            SchemaVersion version = null;
 
             if(arr != null && arr.length > 1){
                 if(arr[0].matches("^v\\d+")){
-                    version = Version.valueOf(arr[0]);
+                    version = new SchemaVersion(arr[0]);
                     uri = uri.replaceAll("^v\\d+", "");
                 }
             }
 
             if(version == null){
-                version = Version.getLatest();
+                version = schemaVersions.getDefaultVersion();
             }
 
             DBConnectionType type = DBConnectionType.REALTIME;
-            HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
-            Loader loader         = httpEntry.getLoader();
-            dbEngine              = httpEntry.getDbEngine();
+            
+            //HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
+            HttpEntry resourceHttpEntry = SpringContextAware.getBean("traversalHttpEntry", HttpEntry.class);
+            resourceHttpEntry.setHttpEntryProperties(version, type);
+            
+            Loader loader         = resourceHttpEntry.getLoader();
+            dbEngine              = resourceHttpEntry.getDbEngine();
 
             URI uriObject = UriBuilder.fromPath(uri).build();
             URIToObject uriToObject = new URIToObject(loader, uriObject);
@@ -240,7 +249,7 @@ public class HttpTestUtil extends RESTAPI {
             List<DBRequest> dbRequestList = new ArrayList<>();
             dbRequestList.add(dbRequest);
 
-            Pair<Boolean, List<Pair<URI, Response>>> responsesTuple  = httpEntry.process(dbRequestList, "JUNIT");
+            Pair<Boolean, List<Pair<URI, Response>>> responsesTuple  = resourceHttpEntry.process(dbRequestList, "JUNIT");
             response = responsesTuple.getValue1().get(0).getValue1();
 
         } catch (AAIException e) {
@@ -283,11 +292,11 @@ public class HttpTestUtil extends RESTAPI {
 
             String [] arr = uri.split("/");
 
-            Version version = null;
+            SchemaVersion version = null;
 
             if(arr != null && arr.length > 1){
                 if(arr[0].matches("^v\\d+")){
-                    version = Version.valueOf(arr[0]);
+                    version = new SchemaVersion(arr[0]);
                     if(!uri.contains("relationship-list/relationship")){
                         uri = uri.replaceAll("^v\\d+", "");
                     }
@@ -295,14 +304,16 @@ public class HttpTestUtil extends RESTAPI {
             }
 
             if(version == null){
-                version = Version.getLatest();
+                version = schemaVersions.getDefaultVersion();
             }
 
             Mockito.when(uriInfo.getPath()).thenReturn(uri);
             DBConnectionType type = DBConnectionType.REALTIME;
-            HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
-            Loader loader         = httpEntry.getLoader();
-            dbEngine              = httpEntry.getDbEngine();
+            HttpEntry resourceHttpEntry = SpringContextAware.getBean("traversalHttpEntry", HttpEntry.class);
+            resourceHttpEntry.setHttpEntryProperties(version, type);
+           // HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
+            Loader loader         = resourceHttpEntry.getLoader();
+            dbEngine              = resourceHttpEntry.getDbEngine();
 
             URI uriObject = UriBuilder.fromPath(uri).build();
             URIToObject uriToObject = new URIToObject(loader, uriObject);
@@ -330,7 +341,7 @@ public class HttpTestUtil extends RESTAPI {
             List<DBRequest> dbRequestList = new ArrayList<>();
             dbRequestList.add(dbRequest);
 
-            Pair<Boolean, List<Pair<URI, Response>>> responsesTuple  = httpEntry.process(dbRequestList, "JUNIT");
+            Pair<Boolean, List<Pair<URI, Response>>> responsesTuple  = resourceHttpEntry.process(dbRequestList, "JUNIT");
             response = responsesTuple.getValue1().get(0).getValue1();
 
         } catch (AAIException e) {

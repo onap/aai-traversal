@@ -28,9 +28,6 @@ export CHEF_DATA_GIT_URL=${CHEF_DATA_GIT_URL:-$CHEF_GIT_URL};
 
 export SERVER_PORT=${SERVER_PORT:-8446};
 
-export RESOURCES_HOSTNAME=${RESOURCES_HOSTNAME:-aai-resources.api.simpledemo.onap.org};
-export RESOURCES_PORT=${RESOURCES_PORT:-8447};
-
 USER_ID=${LOCAL_USER_ID:-9001}
 GROUP_ID=${LOCAL_GROUP_ID:-9001}
 
@@ -52,7 +49,6 @@ if [ -f ${APP_HOME}/aai.sh ]; then
 
     gosu aaiadmin ln -s bin scripts
     gosu aaiadmin ln -s /opt/aai/logroot/AAI-GQ logs
-
     mv ${APP_HOME}/aai.sh /etc/profile.d/aai.sh
 
     chmod 755 /etc/profile.d/aai.sh
@@ -74,6 +70,7 @@ if [ -f ${APP_HOME}/aai.sh ]; then
 
         exit 0;
     fi;
+
 fi;
 
 if [ -z ${DISABLE_UPDATE_QUERY} ]; then
@@ -82,23 +79,30 @@ if [ -z ${DISABLE_UPDATE_QUERY} ]; then
     gosu aaiadmin touch ${UPDATE_QUERY_RAN_FILE};
 fi
 
+mkdir -p /opt/app/aai-traversal/logs/gc
+chown -R aaiadmin:aaiadmin /opt/app/aai-traversal/logs/gc
+
+if [ -f ${APP_HOME}/resources/aai-traversal-swm-vars.sh ]; then
+    source ${APP_HOME}/resources/aai-traversal-swm-vars.sh;
+fi;
+
+MIN_HEAP_SIZE=${MIN_HEAP_SIZE:-512m};
+MAX_HEAP_SIZE=${MAX_HEAP_SIZE:-1024m};
+MAX_PERM_SIZE=${MAX_PERM_SIZE:-512m};
+PERM_SIZE=${PERM_SIZE:-512m}
+
 JAVA_CMD="exec gosu aaiadmin java";
 
-JVM_OPTS="${PRE_JVM_OPTS} -XX:+UnlockDiagnosticVMOptions";
-JVM_OPTS="${JVM_OPTS} -XX:+UnsyncloadClass";
-JVM_OPTS="${JVM_OPTS} -XX:+UseConcMarkSweepGC";
-JVM_OPTS="${JVM_OPTS} -XX:+CMSParallelRemarkEnabled";
-JVM_OPTS="${JVM_OPTS} -XX:+UseCMSInitiatingOccupancyOnly";
-JVM_OPTS="${JVM_OPTS} -XX:CMSInitiatingOccupancyFraction=70";
-JVM_OPTS="${JVM_OPTS} -XX:+ScavengeBeforeFullGC";
-JVM_OPTS="${JVM_OPTS} -XX:+CMSScavengeBeforeRemark";
-JVM_OPTS="${JVM_OPTS} -XX:-HeapDumpOnOutOfMemoryError";
-JVM_OPTS="${JVM_OPTS} -XX:+UseParNewGC";
-JVM_OPTS="${JVM_OPTS} -verbose:gc";
+JVM_OPTS="${PRE_JVM_ARGS} -Xloggc:/opt/app/aai-traversal/logs/gc/aai_gc.log";
+JVM_OPTS="${JVM_OPTS} -XX:HeapDumpPath=/opt/app/aai-traversal/logs/ajsc-jetty/heap-dump";
+JVM_OPTS="${JVM_OPTS} -Xms${MIN_HEAP_SIZE}";
+JVM_OPTS="${JVM_OPTS} -Xmx${MAX_HEAP_SIZE}";
+
 JVM_OPTS="${JVM_OPTS} -XX:+PrintGCDetails";
 JVM_OPTS="${JVM_OPTS} -XX:+PrintGCTimeStamps";
-JVM_OPTS="${JVM_OPTS} -XX:MaxPermSize=512M";
-JVM_OPTS="${JVM_OPTS} -XX:PermSize=512M";
+JVM_OPTS="${JVM_OPTS} -XX:MaxPermSize=${MAX_PERM_SIZE}";
+JVM_OPTS="${JVM_OPTS} -XX:PermSize=${PERM_SIZE}";
+
 JVM_OPTS="${JVM_OPTS} -server";
 JVM_OPTS="${JVM_OPTS} -XX:NewSize=512m";
 JVM_OPTS="${JVM_OPTS} -XX:MaxNewSize=512m";
@@ -114,11 +118,9 @@ JVM_OPTS="${JVM_OPTS} -XX:ParallelGCThreads=4";
 JVM_OPTS="${JVM_OPTS} -XX:LargePageSizeInBytes=128m";
 JVM_OPTS="${JVM_OPTS} -XX:+PrintGCDetails";
 JVM_OPTS="${JVM_OPTS} -XX:+PrintGCTimeStamps";
-JVM_OPTS="${JVM_OPTS} -Xloggc:/opt/app/aai-traversal/logs/ajsc-jetty/gc/aai_gc.log";
 JVM_OPTS="${JVM_OPTS} -Dsun.net.inetaddr.ttl=180";
 JVM_OPTS="${JVM_OPTS} -XX:+HeapDumpOnOutOfMemoryError";
-JVM_OPTS="${JVM_OPTS} -XX:HeapDumpPath=/opt/app/aai-traversal/logs/ajsc-jetty/heap-dump";
-JVM_OPTS="${JVM_OPTS} ${POST_JVM_OPTS}";
+JVM_OPTS="${JVM_OPTS} ${POST_JVM_ARGS}";
 
 JAVA_OPTS="${PRE_JAVA_OPTS} -DAJSC_HOME=$APP_HOME";
 JAVA_OPTS="${JAVA_OPTS} -Dserver.port=${SERVER_PORT}";
@@ -127,9 +129,9 @@ JAVA_OPTS="${JAVA_OPTS} -Dserver.local.startpath=${RESOURCES_HOME}";
 JAVA_OPTS="${JAVA_OPTS} -DAAI_CHEF_ENV=${AAI_CHEF_ENV}";
 JAVA_OPTS="${JAVA_OPTS} -DSCLD_ENV=${SCLD_ENV}";
 JAVA_OPTS="${JAVA_OPTS} -DAFT_ENVIRONMENT=${AFT_ENVIRONMENT}";
-JAVA_OPTS="${JAVA_OPTS} -DlrmName=com.att.ajsc.traversal";
-JAVA_OPTS="${JAVA_OPTS} -DAAI_BUILD_NUMBER=${AAI_BUILD_NUMBER}";
+JAVA_OPTS="${JAVA_OPTS} -DAAI_BUILD_VERSION=${AAI_BUILD_VERSION}";
 JAVA_OPTS="${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom";
+JAVA_OPTS="${JAVA_OPTS} -Dlogback.configurationFile=./resources/logback.xml";
 JAVA_OPTS="${JAVA_OPTS} -Dloader.path=$APP_HOME/resources";
 JAVA_OPTS="${JAVA_OPTS} ${POST_JAVA_OPTS}";
 

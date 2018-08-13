@@ -27,13 +27,13 @@ import org.janusgraph.core.JanusGraphTransaction;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onap.aai.AAISetup;
 import org.onap.aai.HttpTestUtil;
 import org.onap.aai.PayloadUtil;
 import org.onap.aai.dbmap.AAIGraph;
-import org.onap.aai.introspection.Version;
+import org.onap.aai.setup.SchemaVersion;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
@@ -47,7 +47,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class GfpVserverDataStoredQueryTest {
+public class GfpVserverDataStoredQueryTest extends AAISetup{
 
     private static final EELFLogger logger = EELFManager.getInstance().getLogger(GfpVserverDataStoredQueryTest.class);
 
@@ -66,13 +66,17 @@ public class GfpVserverDataStoredQueryTest {
 
     private QueryConsumer queryConsumer;
 
-    private static final Version VERSION = Version.v11;
-    private static final String CLOUD_REGION_URI = "/aai/" + VERSION.toString()
-                                                 + "/cloud-infrastructure/cloud-regions/"
-                                                 + "cloud-region/testOwner1/testRegion1";
+    private SchemaVersion version;
+    private String cloudRegionUri;
 
     @Before
     public void setup() throws Exception {
+
+        version = schemaVersions.getDefaultVersion();
+
+        cloudRegionUri = "/aai/" + version.toString()
+                                   + "/cloud-infrastructure/cloud-regions/"
+                                   + "cloud-region/testOwner1/testRegion1";
         httpTestUtil = new HttpTestUtil();
 
         Map<String, String> templateValues = new HashMap<>();
@@ -91,14 +95,14 @@ public class GfpVserverDataStoredQueryTest {
         String cloudRegionPayload = PayloadUtil.
                 getTemplatePayload("cloud-region-with-linterface.json", templateValues);
 
-        Response response = httpTestUtil.doPut(CLOUD_REGION_URI, cloudRegionPayload);
+        Response response = httpTestUtil.doPut(cloudRegionUri, cloudRegionPayload);
         logger.info("Response status received {}", response.getEntity());
 
         assertNotNull("Expected the response to be not null", response);
         assertEquals("Expecting the cloud region to be created", 201, response.getStatus());
         logger.info("Successfully created the cloud region with linterface");
 
-        queryConsumer = new QueryConsumer();
+        queryConsumer = new QueryConsumer(traversalUriHttpEntry, schemaVersions, gremlinServerSingleton, basePath);
 
         httpHeaders         = mock(HttpHeaders.class);
 
@@ -128,14 +132,14 @@ public class GfpVserverDataStoredQueryTest {
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
     }
 
-    @Ignore("This is more of a performance test to ensure no failure when too many starting vertexes")
     @Test
     public void testStoredQueryVerifyDoesNotThrowMethodTooLargeWhenLargeNumberOfStartingVertexes() throws Exception {
 
         // Add hundred thousand vserver vertexes to properly
         // test the scenario where the application was
         // failing with method too large
-        addVservers(1000000);
+        String vservers = System.getProperty("perf.vservers.count", "1000");
+        addVservers(Integer.parseInt(vservers));
 
         Map<String, String> templateValues = new HashMap<>();
 
@@ -148,7 +152,7 @@ public class GfpVserverDataStoredQueryTest {
         templateValues.put("query", "gfp-vserver-data");
 
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", templateValues);
-        String query = String.format("/aai/%s/query?format=resource_and_url", VERSION.toString());
+        String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
         UriInfo uriInfo = Mockito.mock(UriInfo.class);
         HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
@@ -159,7 +163,7 @@ public class GfpVserverDataStoredQueryTest {
 
         Response response = queryConsumer.executeQuery(
             payload,
-            VERSION.toString(),
+            version.toString(),
             query,
             "resource_and_url", "" +
             "no_op",
@@ -185,7 +189,7 @@ public class GfpVserverDataStoredQueryTest {
         templateValues.put("query", "fake-query");
 
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", templateValues);
-        String query = String.format("/aai/%s/query?format=resource_and_url", VERSION.toString());
+        String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
         UriInfo uriInfo = Mockito.mock(UriInfo.class);
         HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
@@ -196,7 +200,7 @@ public class GfpVserverDataStoredQueryTest {
 
         Response response = queryConsumer.executeQuery(
                 payload,
-                VERSION.toString(),
+                version.toString(),
                 query,
                 "resource_and_url", "" +
                         "no_op",
@@ -223,7 +227,7 @@ public class GfpVserverDataStoredQueryTest {
         templateValues.put("query", "gfp-vserver-data");
 
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", templateValues);
-        String query = String.format("/aai/%s/query?format=resource_and_url", VERSION.toString());
+        String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
         UriInfo uriInfo = Mockito.mock(UriInfo.class);
         HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
@@ -234,7 +238,7 @@ public class GfpVserverDataStoredQueryTest {
 
         Response response = queryConsumer.executeQuery(
                 payload,
-                VERSION.toString(),
+                version.toString(),
                 query,
                 "resource_and_url", "" +
                         "no_op",
@@ -245,10 +249,10 @@ public class GfpVserverDataStoredQueryTest {
 
         String entity = response.getEntity().toString();
 
-        assertEquals("Expected the response to be 500 but got this returned: " + entity,
-                500, response.getStatus());
+        assertEquals("Expected the response to be 404 but got this returned: " + entity,
+                404, response.getStatus());
 
-        assertThat(entity, containsString("Internal Error:groovy.lang.MissingPropertyException"));
+        assertThat(entity, containsString("Start URI returned no vertexes, please check the start URI"));
     }
 
     @After

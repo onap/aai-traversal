@@ -30,8 +30,11 @@ import org.onap.aai.logging.LoggingContext;
 import org.onap.aai.logging.StopWatch;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
-import org.onap.aai.util.AAIApiVersion;
+import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.util.AAIConstants;
+import org.onap.aai.util.TraversalConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.onap.aai.concurrent.AaiCallable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -41,29 +44,35 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Implements the search subdomain in the REST API. All API calls must include
  * X-FromAppId and X-TransactionId in the header.
- * 
- 
  *
  */
-
 @Path("/search")
 public class ModelAndNamedQueryRestProvider extends RESTAPI {
-	
-	protected static String authPolicyFunctionName = "search";
-	
+
+	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(ModelAndNamedQueryRestProvider.class);
+
 	public static final String NAMED_QUERY = "/named-query";
 	
 	public static final String MODEL_QUERY = "/model";
 	
 	public static final String TARGET_ENTITY = "DB";
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(ModelAndNamedQueryRestProvider.class);
+
 	
+	private SearchGraph searchGraph;
+
+	private SchemaVersions schemaVersions;
+
+	@Autowired
+	public ModelAndNamedQueryRestProvider(SearchGraph searchGraph, SchemaVersions schemaVersions){
+		this.searchGraph    = searchGraph;
+		this.schemaVersions = schemaVersions;
+	}
+
 	/**
 	 * Gets the named query response.
 	 *
@@ -80,15 +89,15 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
                                           @Context HttpServletRequest req,
                                           String queryParameters,
                                           @Context UriInfo info) {
-		return runner(AAIConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
+		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
 				headers,
 				info,
 				HttpMethod.GET,
-				new Callable<Response>() {
+				new AaiCallable<Response>() {
 					@Override
-					public Response call() {
+					public Response process() {
 						return processNamedQueryResponse(headers, req, queryParameters);
 					}
 				}
@@ -117,12 +126,11 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			AAIExtensionMap aaiExtMap = new AAIExtensionMap();
 			aaiExtMap.setHttpHeaders(headers);
 			aaiExtMap.setServletRequest(req);
-			aaiExtMap.setApiVersion(AAIApiVersion.get());
+			aaiExtMap.setApiVersion(schemaVersions.getDefaultVersion().toString());
 			String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 			//only consider header value for search		
 			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 			
-			SearchGraph searchGraph = new SearchGraph();
 			LoggingContext.startTime();
 			StopWatch.conditionalStart();
 			
@@ -187,15 +195,15 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
                                           String inboundPayload,
                                           @QueryParam("action") String action,
                                           @Context UriInfo info) {
-		return runner(AAIConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
+		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
 				headers,
 				info,
 				HttpMethod.GET,
-				new Callable<Response>() {
+				new AaiCallable<Response>() {
 					@Override
-					public Response call() {
+					public Response process() {
 						return processModelQueryResponse(headers, req, inboundPayload, action);
 					}
 				}
@@ -226,7 +234,7 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			AAIExtensionMap aaiExtMap = new AAIExtensionMap();
 			aaiExtMap.setHttpHeaders(headers);
 			aaiExtMap.setServletRequest(req);
-			aaiExtMap.setApiVersion(AAIApiVersion.get());
+			aaiExtMap.setApiVersion(schemaVersions.getDefaultVersion().toString());
 			aaiExtMap.setFromAppId(fromAppId);
 			aaiExtMap.setTransId(transId);
 			
@@ -234,7 +242,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			//only consider header value for search		
 			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 			
-			SearchGraph searchGraph = new SearchGraph();
 			LoggingContext.startTime();
 			StopWatch.conditionalStart();
 			
