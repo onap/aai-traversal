@@ -19,19 +19,18 @@
  */
 package org.onap.aai.interceptors.pre;
 
-import java.io.IOException;
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.interceptors.AAIHeaderProperties;
+import org.onap.aai.logging.LoggingContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
-
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.interceptors.AAIHeaderProperties;
-import org.onap.aai.logging.LoggingContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import java.io.IOException;
 
 @PreMatching
 @Priority(AAIRequestFilterPriority.SET_LOGGING_CONTEXT)
@@ -64,6 +63,7 @@ public class SetLoggingContext extends AAIContainerFilter implements ContainerRe
 		LoggingContext.component(fromAppId);
 		LoggingContext.serviceName(httpMethod + " " + uri);
 		LoggingContext.targetServiceName(httpMethod + " " + uri);
+		LoggingContext.statusCode(LoggingContext.StatusCode.COMPLETE);
 	}
 	
 }

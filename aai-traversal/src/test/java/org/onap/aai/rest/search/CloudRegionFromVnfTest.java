@@ -51,17 +51,34 @@ public class CloudRegionFromVnfTest extends QueryTest {
 				"vserver-id", "vservId", "vserver-name", "vservName", "vserver-selflink", "me/self");
 		Vertex cr = graph.addVertex(T.id, "30", "aai-node-type", "cloud-region", "cloud-owner", "some guy", "cloud-region-id", "crId");
 		Vertex tenant = graph.addVertex(T.id, "40", "aai-node-type", "tenant", "tenant-id", "ten1", "tenant-name", "tenName");
+		Vertex pserv = graph.addVertex(T.id, "50", "aai-node-type", "pserver", "hostname", "hostname1", "in-maint", "false");
+		Vertex vserv2 = graph.addVertex(T.id, "60", "aai-node-type", "vserver",
+				"vserver-id", "vservId2", "vserver-name", "vservName2", "vserver-selflink", "me/self");
+		Vertex pserv2 = graph.addVertex(T.id, "70", "aai-node-type", "pserver", "hostname", "hostname2", "in-maint", "false");
+		Vertex tenant2 = graph.addVertex(T.id, "80", "aai-node-type", "tenant", "tenant-id", "ten2", "tenant-name", "tenName2");
+		Vertex cr2 = graph.addVertex(T.id, "90", "aai-node-type", "cloud-region", "cloud-owner", "some guy2", "cloud-region-id", "crId2");
 		
 		GraphTraversalSource g = graph.traversal();
 		rules.addEdge(g, gv, vnfc);
 		rules.addEdge(g, vnfc, vserv);
+		rules.addEdge(g, vserv, pserv);
 		rules.addTreeEdge(g, cr, tenant);
 		rules.addTreeEdge(g, tenant, vserv);
+		rules.addEdge(g, gv, vserv2);
+		rules.addEdge(g, vserv2, pserv2);
+		rules.addTreeEdge(g, vserv2, tenant2);
+		rules.addTreeEdge(g, tenant2, cr2);
 		
+		expectedResult.add(gv);
 		expectedResult.add(cr);
 		expectedResult.add(tenant);
 		expectedResult.add(vnfc);
 		expectedResult.add(vserv);
+		expectedResult.add(pserv);
+		expectedResult.add(cr2);
+		expectedResult.add(tenant2);
+		expectedResult.add(vserv2);
+		expectedResult.add(pserv2);
 	}
 
 	@Override

@@ -19,46 +19,48 @@
  */
 package org.onap.aai.rest.search;
 
+import com.google.gson.JsonObject;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.onap.aai.AAISetup;
+import org.onap.aai.dbmap.DBConnectionType;
+import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.introspection.Loader;
+import org.onap.aai.introspection.ModelType;
+import org.onap.aai.serialization.db.DBSerializer;
+
+import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
+import org.onap.aai.serialization.engines.JanusGraphDBEngine;
+import org.onap.aai.serialization.engines.QueryStyle;
+import org.onap.aai.serialization.engines.TransactionalGraphEngine;
+import org.onap.aai.serialization.queryformats.RawFormat;
+import org.onap.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
+import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
+import org.springframework.test.annotation.DirtiesContext;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+public class SimpleFormatTest extends AAISetup{
 
-import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.apache.tinkerpop.gremlin.structure.T;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.onap.aai.dbmap.DBConnectionType;
-import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.introspection.Loader;
-import org.onap.aai.introspection.LoaderFactory;
-import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
-import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.db.EdgeRules;
-import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
-import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.JanusGraphDBEngine;
-import org.onap.aai.serialization.engines.TransactionalGraphEngine;
-import org.onap.aai.serialization.queryformats.RawFormat;
-import org.onap.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
-import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
-
-import com.google.gson.JsonObject;
-
-public class SimpleFormatTest {
-
+	
 	protected Graph graph;
 	private TransactionalGraphEngine dbEngine;
 
 	protected final List<Vertex> expectedResult = new ArrayList<>();
-	protected final EdgeRules rules = EdgeRules.getInstance();
+
 	protected Loader loader;
 	private DBSerializer serializer;
 
@@ -68,16 +70,11 @@ public class SimpleFormatTest {
 
 	Vertex vfmodule = null;
 
-	public SimpleFormatTest() throws AAIException, NoEdgeRuleFoundException {
-		setUp();
-	}
-
+	@Before
 	public void setUp() throws AAIException, NoEdgeRuleFoundException {
-		System.setProperty("AJSC_HOME", ".");
-		System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
 		MockitoAnnotations.initMocks(this);
 		graph = TinkerGraph.open();
-		loader = LoaderFactory.createLoaderForVersion(ModelType.MOXY, Version.v10);
+		loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getRelatedLinkVersion());
 		vfmodule = graph.addVertex(T.label, "vf-module",
 				T.id, "5",
 				"aai-node-type", "vf-module",
@@ -96,7 +93,7 @@ public class SimpleFormatTest {
 				"contrail-service-instance-fqdn", "example-contrail-service-instance-fqdn-val-68205");
 
 		final ModelType factoryType = ModelType.MOXY;
-		Loader loader = LoaderFactory.createLoaderForVersion(factoryType, Version.v10);
+		Loader loader = loaderFactory.createLoaderForVersion(factoryType, schemaVersions.getRelatedLinkVersion());
 		dbEngine = spy(new JanusGraphDBEngine(
 				QueryStyle.TRAVERSAL,
 				DBConnectionType.CACHED,
@@ -106,7 +103,7 @@ public class SimpleFormatTest {
 		TransactionalGraphEngine.Admin spyAdmin = spy(dbEngine.asAdmin());
 		when(spyAdmin.getTraversalSource()).thenReturn(graph.traversal());
 		when(dbEngine.asAdmin()).thenReturn(spyAdmin);
-		serializer = new DBSerializer(Version.v10, dbEngine, factoryType, "Junit");
+		serializer = new DBSerializer(schemaVersions.getRelatedLinkVersion(), dbEngine, factoryType, "Junit");
 		_simpleFormat = new RawFormat.Builder(loader, serializer, urlBuilder).modelDriven().build();
 		dbEngine.startTransaction();
 	}
@@ -116,7 +113,7 @@ public class SimpleFormatTest {
 		assertNotNull(dbEngine.tx());
 		System.out.println(dbEngine.tx());
 		assertNotNull(graph.traversal());
-		JsonObject json = _simpleFormat.createPropertiesObject(vfmodule);
+		JsonObject json = _simpleFormat.createPropertiesObject(vfmodule).get();
 		json.entrySet().stream().forEach((System.out::println));
 		assertTrue(json.has("model-invariant-id"));
 

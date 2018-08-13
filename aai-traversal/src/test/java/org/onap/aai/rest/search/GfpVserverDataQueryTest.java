@@ -53,6 +53,7 @@ public class GfpVserverDataQueryTest extends QueryTest {
 		
 		GraphTraversalSource g = graph.traversal();
 	
+		
 		rules.addTreeEdge(g, tenant, cloudregion);
 		rules.addTreeEdge(g, vserver, tenant);
 		rules.addEdge(g, genericvnf, vserver);

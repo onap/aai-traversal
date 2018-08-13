@@ -19,19 +19,20 @@
  */
 package org.onap.aai.interceptors.post;
 
-import java.io.IOException;
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.interceptors.AAIHeaderProperties;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.interceptors.AAIHeaderProperties;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 
 @Priority(AAIResponseFilterPriority.HEADER_MANIPULATION)
 public class ResponseHeaderManipulation extends AAIContainerFilter implements ContainerResponseFilter {
 
+	private static final String DEFAULT_XML_TYPE = MediaType.APPLICATION_XML;
 
 	@Override
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
@@ -43,7 +44,21 @@ public class ResponseHeaderManipulation extends AAIContainerFilter implements Co
 
 	private void updateResponseHeaders(ContainerRequestContext requestContext,
 			ContainerResponseContext responseContext) {
+
 		responseContext.getHeaders().add(AAIHeaderProperties.AAI_TX_ID, requestContext.getProperty(AAIHeaderProperties.AAI_TX_ID));
+
+		String responseContentType = responseContext.getHeaderString("Content-Type");
+
+		if(responseContentType == null){
+			String acceptType = requestContext.getHeaderString("Accept");
+
+			if(acceptType == null || "*/*".equals(acceptType)){
+				responseContext.getHeaders().putSingle("Content-Type", DEFAULT_XML_TYPE);
+			} else {
+				responseContext.getHeaders().putSingle("Content-Type", acceptType);
+			}
+		}
+
 	}
 
 }

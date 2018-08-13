@@ -19,12 +19,7 @@
  */
 package org.onap.aai.interceptors.pre;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.onap.aai.interceptors.AAIContainerFilter;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -32,11 +27,15 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
-
-import org.onap.aai.interceptors.AAIContainerFilter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @PreMatching
-@Priority(AAIRequestFilterPriority.HEADER_VALIDATION)
+@Priority(AAIRequestFilterPriority.REQUEST_MODIFICATION)
 public class RequestModification extends AAIContainerFilter implements ContainerRequestFilter {
 
 	@Override
