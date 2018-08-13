@@ -2,7 +2,7 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+ * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============LICENSE_END=========================================================
- *
- * ECOMP is a trademark and service mark of AT&T Intellectual Property.
  */
 package org.onap.aai.rest.search;
 
@@ -28,16 +26,37 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.onap.aai.config.IntrospectionConfig;
+import org.onap.aai.config.SpringContextAware;
+import org.onap.aai.edges.EdgeIngestor;
+import org.onap.aai.edges.exceptions.AmbiguousRuleChoiceException;
+import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
+import org.onap.aai.nodes.NodeIngestor;
+import org.onap.aai.setup.AAIConfigTranslator;
+import org.onap.aai.setup.SchemaLocationsBean;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.rules.SpringClassRule;
+import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.onap.aai.query.builder.GremlinTraversal;
 import org.onap.aai.restcore.search.GremlinGroovyShellSingleton;
-import org.onap.aai.serialization.db.EdgeRules;
+import org.onap.aai.restcore.search.GroovyQueryBuilderSingleton;
+import org.onap.aai.serialization.db.EdgeSerializer;
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
@@ -49,38 +68,91 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+@RunWith(Parameterized.class)
+@ContextConfiguration(classes = {
+		SchemaLocationsBean.class,
+        SchemaVersions.class,
+		AAIConfigTranslator.class,
+        EdgeIngestor.class,
+        EdgeSerializer.class,
+        NodeIngestor.class,
+        SpringContextAware.class,
+		GremlinServerSingleton.class,
+        IntrospectionConfig.class
+})
+@TestPropertySource(properties = {
+	"schema.uri.base.path = /aai",
+    "schema.ingest.file = src/test/resources/application-test.properties"
+})
 public abstract class QueryTest {
+
+	@ClassRule
+    public static final SpringClassRule springClassRule = new SpringClassRule();
+
+    @Rule
+    public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 	protected EELFLogger logger;
 	protected Graph graph;
-	protected GremlinServerSingleton gremlinServerSingleton;
 	protected GremlinGroovyShellSingleton shell;
 	@Mock protected TransactionalGraphEngine dbEngine;
 	protected final List<Vertex> expectedResult = new ArrayList<>();
-	protected final EdgeRules rules = EdgeRules.getInstance();
+
+	@Autowired
+	protected EdgeIngestor edgeRules;
+
+	@Autowired
+	protected EdgeSerializer rules;
+
+	@Autowired
+	protected LoaderFactory loaderFactory;
+
+	@Autowired
+	protected SchemaVersions schemaVersions;
+
+	@Autowired
+	protected GremlinServerSingleton gremlinServerSingleton;
+
 	protected Loader loader;
 	protected GraphTraversalSource gts;
 
-	protected String query;
-	LinkedHashMap <String, Object> params;
+	@Parameterized.Parameter(value = 0)
+	public SchemaVersion version;
 
-	public QueryTest() throws AAIException, NoEdgeRuleFoundException {
-		setUp();
-		logger = EELFManager.getInstance().getLogger(getClass());
-		setUpQuery();
+	@Parameterized.Parameters(name = "Version.{0}")
+	public static Collection<Object[]> data() {
+		return Arrays.asList(new Object[][]{
+				{new SchemaVersion("v11")},
+				{new SchemaVersion("v12")},
+				{new SchemaVersion("v13")},
+				{new SchemaVersion("v14")}
+		});
 	}
 
-	protected void setUp() throws AAIException, NoEdgeRuleFoundException {
+	protected String query;
+
+	LinkedHashMap <String, Object> params;
+
+	@BeforeClass
+	public static void setupBundleconfig() {
+		System.setProperty("AJSC_HOME", "./");
+		System.setProperty("BUNDLECONFIG_DIR", "src/main/resources/");
+	}
+
+	@Before
+	public void setUp() throws AAIException, NoEdgeRuleFoundException, EdgeRuleNotFoundException, AmbiguousRuleChoiceException {
 		System.setProperty("AJSC_HOME", ".");
 		System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
+		logger = EELFManager.getInstance().getLogger(getClass());
 		MockitoAnnotations.initMocks(this);
 		graph = TinkerGraph.open();
 		gts = graph.traversal();
 		createGraph();
-		gremlinServerSingleton = GremlinServerSingleton.getInstance();
 		shell = GremlinGroovyShellSingleton.getInstance();
-		loader = LoaderFactory.createLoaderForVersion(ModelType.MOXY, Version.getLatest());
+		loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, version);
+		setUpQuery();
 	}
+
 
 	protected void setUpQuery() {
 		query = gremlinServerSingleton.getStoredQueryFromConfig(getQueryName());
@@ -128,12 +200,12 @@ public abstract class QueryTest {
 				.collect(Collectors.joining(","));
 	}
 
-	protected abstract void createGraph() throws AAIException, NoEdgeRuleFoundException;
-		
+	protected abstract void createGraph() throws AAIException, NoEdgeRuleFoundException, EdgeRuleNotFoundException, AmbiguousRuleChoiceException;
+
 	protected abstract String getQueryName();
-	
+
 	protected abstract void addStartNode(GraphTraversal<Vertex, Vertex> g);
-	
+
 	protected abstract void addParam(Map<String, Object> params);
 
 }

@@ -19,11 +19,10 @@
  */
 package org.onap.aai.interceptors.pre;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.interceptors.AAIHeaderProperties;
+import org.onap.aai.logging.ErrorLogHelper;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -31,11 +30,11 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.interceptors.AAIHeaderProperties;
-import org.onap.aai.logging.ErrorLogHelper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @PreMatching
 @Priority(AAIRequestFilterPriority.HEADER_VALIDATION)

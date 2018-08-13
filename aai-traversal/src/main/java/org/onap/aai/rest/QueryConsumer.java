@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -45,10 +44,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
 import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.parsers.query.QueryParser;
 import org.onap.aai.rest.db.HttpEntry;
@@ -69,18 +68,20 @@ import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import org.onap.aai.logging.LoggingContext;
-import org.onap.aai.logging.LoggingContext.StatusCode;
 import org.onap.aai.logging.StopWatch;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.util.AAIConstants;
+import org.onap.aai.util.TraversalConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
-@Path("{version: v9|v1[01234]}/query")
+@Path("{version: v[1-9][0-9]*|latest}/query")
 public class QueryConsumer extends RESTAPI {
-
-    private static final String DEPTH = "depth";
 	
 	/** The introspector factory type. */
 	private ModelType introspectorFactoryType = ModelType.MOXY;
@@ -91,20 +92,42 @@ public class QueryConsumer extends RESTAPI {
 	
 	private static final String TARGET_ENTITY = "DB";
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(QueryConsumer.class);
+
+	private HttpEntry traversalUriHttpEntry;
+
 	
+	private SchemaVersions schemaVersions;
+
+	private String basePath;
+
+	private GremlinServerSingleton gremlinServerSingleton;
+
+	@Autowired
+	public QueryConsumer(
+		HttpEntry traversalUriHttpEntry,
+		SchemaVersions schemaVersions,
+		GremlinServerSingleton gremlinServerSingleton,
+		@Value("${schema.uri.base.path}") String basePath
+	){
+	    this.traversalUriHttpEntry  = traversalUriHttpEntry;
+		this.schemaVersions         = schemaVersions;
+		this.gremlinServerSingleton = gremlinServerSingleton;
+		this.basePath               = basePath;
+	}
+
 	@PUT
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response executeQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req){
-		return runner(AAIConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				AAIConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
+		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
 				headers,
 				info,
 				HttpMethod.GET,
-				new Callable<Response>() {
+				new AaiCallable<Response>() {
 					@Override
-					public Response call() {
+					public Response process() {
 						return processExecuteQuery(content, versionParam, uri, queryFormat, subgraph, headers, info, req);
 					}
 				}
@@ -123,7 +146,7 @@ public class QueryConsumer extends RESTAPI {
 		try {
 			LoggingContext.save();
 			this.checkQueryParams(info.getQueryParameters());
-			Format format = Format.valueOf(queryFormat);
+			Format format = Format.getFormat(queryFormat);
 			if (queryProcessor != null) {
 				processorType = QueryProcessorType.valueOf(queryProcessor);
 			}
@@ -135,19 +158,17 @@ public class QueryConsumer extends RESTAPI {
 			JsonElement startElement = input.get("start");
 			JsonElement queryElement = input.get("query");
 			JsonElement gremlinElement = input.get("gremlin");
-			JsonElement dslElement = input.get("dsl");
 			List<URI> startURIs = new ArrayList<>();
 			String queryURI = "";
 			String gremlin = "";
-			String dsl = "";
 			
-			Version version = Version.valueOf(versionParam);
+			SchemaVersion version = new SchemaVersion(versionParam);
 			DBConnectionType type = this.determineConnectionType(sourceOfTruth, realTime);
-			HttpEntry httpEntry = new HttpEntry(version, introspectorFactoryType, queryStyle, type);
-			dbEngine = httpEntry.getDbEngine();
+			traversalUriHttpEntry.setHttpEntryProperties(version, type);
+			dbEngine = traversalUriHttpEntry.getDbEngine();
 
 			if (startElement != null) {
-	
+
 				if (startElement.isJsonArray()) {
 					for (JsonElement element : startElement.getAsJsonArray()) {
 						startURIs.add(new URI(element.getAsString()));
@@ -161,9 +182,6 @@ public class QueryConsumer extends RESTAPI {
 			}
 			if (gremlinElement != null) {
 				gremlin = gremlinElement.getAsString();
-			}
-			if (dslElement != null) {
-				dsl = dslElement.getAsString();
 			}
 			URI queryURIObj = new URI(queryURI);
 			
@@ -184,7 +202,7 @@ public class QueryConsumer extends RESTAPI {
 			LoggingContext.targetServiceName(methodName);
 			LoggingContext.startTime();
 			StopWatch.conditionalStart();
-			
+
 			if (!startURIs.isEmpty()) {
 				Set<Vertex> vertexSet = new LinkedHashSet<>();
 				QueryParser uriQuery;
@@ -195,19 +213,16 @@ public class QueryConsumer extends RESTAPI {
 					vertexSet.addAll(vertices);
 				}
 
-				processor = new GenericQueryProcessor.Builder(dbEngine)
+				
+				processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 						.startFrom(vertexSet).queryFrom(queryURIObj)
 						.processWith(processorType).create();
 			} else if (!queryURI.equals("")){
-				processor =  new GenericQueryProcessor.Builder(dbEngine)
+				processor =  new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 						.queryFrom(queryURIObj)
 						.processWith(processorType).create();
-			} else if(!dsl.equals("")){
-				processor =  new GenericQueryProcessor.Builder(dbEngine)
-						.queryFrom(dsl, "dsl")
-						.processWith(processorType).create();
-			}else {
-				processor =  new GenericQueryProcessor.Builder(dbEngine)
+			} else {
+				processor =  new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 						.queryFrom(gremlin, "gremlin")
 						.processWith(processorType).create();
 			}
@@ -215,7 +230,7 @@ public class QueryConsumer extends RESTAPI {
 			List<Object> vertices = processor.execute(subGraphStyle);
 		
 			DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
-			FormatFactory ff = new FormatFactory(httpEntry.getLoader(), serializer);
+			FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions, this.basePath);
 			
 			Formatter formater =  ff.get(format, info.getQueryParameters());
 		
@@ -250,8 +265,8 @@ public class QueryConsumer extends RESTAPI {
 	
 	public void checkQueryParams(MultivaluedMap<String, String> params) throws AAIException {
 		
-		if (params.containsKey(DEPTH) && params.getFirst(DEPTH).matches("\\d+")) {
-			String depth = params.getFirst(DEPTH);
+		if (params.containsKey("depth") && params.getFirst("depth").matches("\\d+")) {
+			String depth = params.getFirst("depth");
 			Integer i = Integer.parseInt(depth);
 			if (i > 1) {
 				throw new AAIException("AAI_3303");
@@ -274,7 +289,6 @@ public class QueryConsumer extends RESTAPI {
 	
 	private CustomQueryConfig getCustomQueryConfig(URI uriObj ) {
 		
-		GremlinServerSingleton gremlinServerSingleton;
 		CustomQueryConfig customQueryConfig;
 		String path = uriObj.getPath();
 
@@ -282,7 +296,6 @@ public class QueryConsumer extends RESTAPI {
 		boolean hasQuery = false;
 		for ( String part:parts ) {
 			if  ( hasQuery) {
-				gremlinServerSingleton = GremlinServerSingleton.getInstance();
 				return gremlinServerSingleton.getCustomQueryConfig(part);
 			}
 			if ( "query".equals(part)) {
@@ -303,11 +316,13 @@ public class QueryConsumer extends RESTAPI {
 			templateVars.add(missingRequiredQueryParams.toString());
 		}
 
-		return Response
+		Response response = Response
 				.status(e.getErrorObject().getHTTPResponseCode())
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
-	}
+
+		return response;
+	} 
 	
 	private Response createMessageInvalidQuerySection(String invalidQuery, HttpHeaders headers, UriInfo info, HttpServletRequest req) {
 		AAIException e = new AAIException("AAI_3014");
@@ -318,11 +333,13 @@ public class QueryConsumer extends RESTAPI {
 			templateVars.add(invalidQuery);
 		}
 
-		return Response
+		Response response = Response
 				.status(e.getErrorObject().getHTTPResponseCode())
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
-	}
+
+		return response;
+	} 
 
 
 }

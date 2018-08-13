@@ -24,15 +24,12 @@ import org.janusgraph.graphdb.types.system.EmptyVertex;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.onap.aai.dbgraphgen.ModelBasedProcessing;
+import org.onap.aai.AAISetup;
 import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.extensions.AAIExtensionMap;
@@ -43,27 +40,27 @@ import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
+import org.onap.aai.setup.SchemaVersion;
 
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
 import java.net.URI;
-import java.sql.ResultSet;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
 
-public class SearchGraphTest {
+public class SearchGraphTest extends AAISetup{
 
-    private SearchGraph searchGraph;
+	
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
     private static final Set<Integer> VALID_HTTP_STATUS_CODES = new HashSet<>();
 
-    private final static Version version = Version.getLatest();
+    private SchemaVersion version;
     private final static ModelType introspectorFactoryType = ModelType.MOXY;
     private final static QueryStyle queryStyle = QueryStyle.TRAVERSAL;
     private final static DBConnectionType type = DBConnectionType.REALTIME;
@@ -96,11 +93,7 @@ public class SearchGraphTest {
     @Before
     public void setup(){
 
-        System.setProperty("AJSC_HOME", ".");
-        System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
-
-        searchGraph = new SearchGraph();
-
+        version = schemaVersions.getDefaultVersion();
         httpHeaders         = mock(HttpHeaders.class);
         uriInfo             = mock(UriInfo.class);
 
@@ -134,24 +127,24 @@ public class SearchGraphTest {
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
-        loader = LoaderFactory.createLoaderForVersion(introspectorFactoryType, version);
+        loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
         dbEngine = new JanusGraphDBEngine(
                 queryStyle,
                 type,
                 loader);
     }
 
-@Test(expected = AAIException.class)
+    @Test(expected = AAIException.class)
     public void runNodesQuery() throws  AAIException{
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
         searchGraph.runNodesQuery(httpHeaders,"",null,
                 null,dbEngine,loader,urlBuilder);
     }
     @Test(expected = AAIException.class)
     public void runNodesQueryNull() throws  AAIException{
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
         searchGraph.runNodesQuery(httpHeaders,"nnn",null,
                 null,dbEngine,loader,urlBuilder);
     }
@@ -165,7 +158,7 @@ public class SearchGraphTest {
         includeStrings.add("cloud-region");
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
         Response response = searchGraph.runGenericQuery(httpHeaders, "service-instance", keys, includeStrings, 1, dbEngine, loader, urlBuilder);
         System.out.println(response);
     }
@@ -181,7 +174,7 @@ public class SearchGraphTest {
         includeStrings.add("cloud-region");
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
         Response response = searchGraph.runGenericQuery(httpHeaders, null, keys, includeStrings, 1, dbEngine, loader, urlBuilder);
         System.out.println(response);
     }
@@ -196,7 +189,7 @@ public class SearchGraphTest {
         includeStrings.add("cloud-region");
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
         Response response = searchGraph.runGenericQuery(httpHeaders, "", null, includeStrings, 1, dbEngine, loader, urlBuilder);
         System.out.println(response);
     }
@@ -211,7 +204,7 @@ public class SearchGraphTest {
         includeStrings.add("cloud-region");
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
+        UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
         Response response = searchGraph.runGenericQuery(httpHeaders, "", keys, null, 1, dbEngine, loader, urlBuilder);
         System.out.println(response);
     }

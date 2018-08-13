@@ -50,6 +50,7 @@ public class PendingTopologyDetailTest extends QueryTest {
 		Vertex servinst = graph.addVertex(T.label, "service-instance", T.id, "4", "aai-node-type", "service-instance", "service-instance-id", "servInstId0", "service-type", "servType0");
 		Vertex owningentity = graph.addVertex(T.label, "owning-entity", T.id, "5", "aai-node-type", "owning-entity", "owning-entity-id", "entityId0", "owning-entity-name", "entityName0");
 		Vertex project = graph.addVertex(T.label, "project", T.id, "6", "aai-node-type", "project", "project-name", "project0");
+	    Vertex vfmodule = graph.addVertex(T.label, "vf-module", T.id, "38", "aai-node-type", "vf-module", "vf-module-id", "1");
 		Vertex vnfc = graph.addVertex(T.label, "vnfc", T.id, "7", "aai-node-type", "vnfc", "vnfc-name", "vnfc0", "nfc-naming-code", "namingCode0", "nfc-function", "function0");
 		Vertex vserver = graph.addVertex(T.label, "vserver", T.id, "8", "aai-node-type", "vserver", "vserver-id", "vserverid0");
 		Vertex linterface = graph.addVertex(T.label, "l-interface", T.id, "9", "aai-node-type", "l-interface", "l-interface-id", "l-interface-id0", "l-interface-name", "l-interface-name0");
@@ -69,7 +70,8 @@ public class PendingTopologyDetailTest extends QueryTest {
 		 
 		Vertex genericvnf1 = graph.addVertex(T.label, "generic-vnf", T.id, "40", "aai-node-type", "generic-vnf", "vnf-id", "vnf-id-1", "vnf-name", "vnf-name-1");
 		Vertex platform1 = graph.addVertex(T.label, "platform", T.id, "41", "aai-node-type", "platform", "platform-name", "platform1");
-		
+
+        Vertex vfmodule2 = graph.addVertex(T.label, "vf-module", T.id, "39", "aai-node-type", "vf-module", "vf-module-id", "2");
 		Vertex genericvnf2 = graph.addVertex(T.label, "generic-vnf", T.id, "30", "aai-node-type", "generic-vnf", "vnf-id", "vnf-id-2", "vnf-name", "vnf-name2");
 		Vertex vnfc2 = graph.addVertex(T.label, "vnfc", T.id, "31", "aai-node-type", "vnfc", "vnfc-name", "vnfc2", "nfc-naming-code", "namingCode2", "nfc-function", "function2");
 		Vertex vipipv4addresslist2 = graph.addVertex(T.label, "vip-ipv4-address-list", T.id, "32", "aai-node-type", "vip-ipv4-address-list", "vip-ipv4-addres", "vip-ipv4-address2");
@@ -85,7 +87,9 @@ public class PendingTopologyDetailTest extends QueryTest {
 		rules.addEdge(g, genericvnf, servinst);
 		rules.addEdge(g, owningentity, servinst);
 		rules.addEdge(g, project, servinst);
-		rules.addEdge(g, genericvnf, vnfc);
+		rules.addTreeEdge(g, genericvnf, vfmodule);
+		rules.addEdge(g, vfmodule, vnfc);
+		//rules.addEdge(g, genericvnf, vnfc);
 		rules.addEdge(g, vnfc, vserver);
 		rules.addTreeEdge(g, vserver, tenant);
 		rules.addTreeEdge(g, tenant, cloudregion);
@@ -111,7 +115,8 @@ public class PendingTopologyDetailTest extends QueryTest {
 			
 		
 		// false
-		rules.addEdge(g, genericvnf2, vnfc2);
+		rules.addTreeEdge(g, genericvnf2, vfmodule2);
+        rules.addEdge(g, vfmodule2, vnfc2);
 		rules.addTreeEdge(g, vipipv4addresslist2, cloudregion);
 		rules.addTreeEdge(g, vipipv6addresslist2, cloudregion);
 		rules.addEdge(g, vnfc2, vipipv4addresslist2);
@@ -129,6 +134,7 @@ public class PendingTopologyDetailTest extends QueryTest {
 		expectedResult.add(lineofbusiness);
 		expectedResult.add(owningentity);
 		expectedResult.add(project);
+		expectedResult.add(vfmodule);
 		expectedResult.add(vnfc);
 		expectedResult.add(l3inter1ipv4addresslist);
 		expectedResult.add(subnet4);

@@ -25,17 +25,20 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
+import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.exceptions.AAIException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Ignore
 public class SearchGraphEdgeRuleTest {
 	@Rule
 	public ExpectedException expectedEx = ExpectedException.none();
 	
+	@Autowired
+	SearchGraph searchGraph;
 	@Test
-	public void getEdgeLabelTest() throws AAIException {
-		String[] label = SearchGraph.getEdgeLabel("customer", "service-subscription");
+	public void getEdgeLabelTest() throws AAIException, EdgeRuleNotFoundException {
+		String[] label = searchGraph.getEdgeLabel("customer", "service-subscription");
 		
 		assertEquals("subscribesTo", label[0]);
 	}
@@ -46,7 +49,7 @@ public class SearchGraphEdgeRuleTest {
 		String nodeTypeB = "service";
 		expectedEx.expect(AAIException.class);
 		expectedEx.expectMessage("No EdgeRule found for passed nodeTypes: complex, service.");
-	    SearchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);
+	    searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);
 	}
 	
 	@Test
@@ -55,6 +58,6 @@ public class SearchGraphEdgeRuleTest {
 		String nodeTypeB = "B";
 		expectedEx.expect(AAIException.class);
 	    expectedEx.expectMessage("No EdgeRule found for passed nodeTypes: A, B.");
-	    SearchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);    
+	    searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);    
 	}
 }

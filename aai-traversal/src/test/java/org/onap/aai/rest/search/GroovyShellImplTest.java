@@ -19,26 +19,20 @@
  */
 package org.onap.aai.rest.search;
 
-import org.janusgraph.core.JanusGraph;
 import groovy.lang.MissingPropertyException;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onap.aai.AAISetup;
 import org.onap.aai.dbmap.DBConnectionType;
-import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
-import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.Version;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
+import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
-import org.onap.aai.serialization.queryformats.SubGraphStyle;
+import org.onap.aai.setup.SchemaVersion;
 
 import javax.ws.rs.core.*;
 import java.net.URI;
@@ -48,7 +42,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class GroovyShellImplTest {
+public class GroovyShellImplTest extends AAISetup{
 
     GroovyShellImpl  groovyShellImpl ;
 
@@ -56,18 +50,19 @@ public class GroovyShellImplTest {
 
     private static final Set<Integer> VALID_HTTP_STATUS_CODES = new HashSet<>();
 
-    private final static Version version = Version.getLatest();
+    private SchemaVersion version;
+
     private final static ModelType introspectorFactoryType = ModelType.MOXY;
     private final static QueryStyle queryStyle = QueryStyle.TRAVERSAL;
     private final static DBConnectionType type = DBConnectionType.REALTIME;
 
+    
     static {
         VALID_HTTP_STATUS_CODES.add(200);
         VALID_HTTP_STATUS_CODES.add(201);
         VALID_HTTP_STATUS_CODES.add(204);
     }
 
-    private  GenericQueryProcessor genericQueryProcessor;
     private HttpHeaders httpHeaders;
 
     private UriInfo uriInfo;
@@ -80,18 +75,12 @@ public class GroovyShellImplTest {
     private List<MediaType> outputMediaTypes;
 
     private Loader loader;
-    private JanusGraph graph;
-
-    private Graph tx;
-
-    private GraphTraversalSource g;
     private TransactionalGraphEngine dbEngine;
 
+    @Before
+    public void setup() {
 
-
-@Before
-    public void  setup()throws AAIException{
-
+        version = schemaVersions.getDefaultVersion();
         httpHeaders         = mock(HttpHeaders.class);
         uriInfo             = mock(UriInfo.class);
 
@@ -125,31 +114,27 @@ public class GroovyShellImplTest {
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
-        loader = LoaderFactory.createLoaderForVersion(introspectorFactoryType, version);
+        loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
         dbEngine = new JanusGraphDBEngine(
                 queryStyle,
                 type,
                 loader);
-    GenericQueryProcessor.Builder builder=new GenericQueryProcessor.Builder(dbEngine);
-builder.queryFrom(URI.create("te"));
-builder.queryFrom("te", "gremlin");
-builder.create();
-builder.processWith(QueryProcessorType.GREMLIN_SERVER);
-    builder.processWith(QueryProcessorType.LOCAL_GROOVY);
+        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton);
+        builder.queryFrom(URI.create("te"));
+        builder.queryFrom("te", "gremlin");
+        builder.create();
+        builder.processWith(QueryProcessorType.GREMLIN_SERVER);
+        builder.processWith(QueryProcessorType.LOCAL_GROOVY);
 
-    groovyShellImpl= new GroovyShellImpl(builder);
+        groovyShellImpl = new GroovyShellImpl(builder);
     }
 
     @Test(expected = MissingPropertyException.class)
-    public void processSubGraphTest() throws Exception{
-        GraphTraversal<Vertex, Vertex> g=Mockito.mock(GraphTraversal.class);
+    public void processSubGraphTest() throws Exception {
+        GraphTraversal<Vertex, Vertex> g = Mockito.mock(GraphTraversal.class);
         g.has("cloud-region-id", "cloud-region-id-1");
         Map<String, Object> params = new HashMap<>();
-        groovyShellImpl.runQuery("vnfs-fromServiceInstance",params);
-}
-
-
-
-
+        groovyShellImpl.runQuery("vnfs-fromServiceInstance", params);
+    }
 
 }

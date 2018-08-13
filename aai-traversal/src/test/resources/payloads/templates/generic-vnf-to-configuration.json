@@ -1,0 +1,72 @@
+{
+  "vnf-id": "${vnf-id}",
+  "vnf-name": "vnf-name1",
+  "vnf-type": "vnf-type1",
+  "prov-status": "PROV",
+  "license-key": "1123456",
+  "equipment-role": "Test123-Eq-Role",
+  "in-maint": false,
+  "is-closed-loop-disabled": false,
+  "relationship-list": {
+    "relationship": [
+      {
+        "related-to": "configuration",
+        "relationship-label": "org.onap.relationships.inventory.Uses",
+        "related-link": "/aai/v13/network/configurations/configuration/${configuration-id}",
+        "relationship-data": [
+          {
+            "relationship-key": "configuration.configuration-id",
+            "relationship-value": "${configuration-id}"
+          }
+        ]
+      }
+    ]
+  },
+  "l-interfaces": {
+    "l-interface": [
+      {
+        "interface-name": "${interface-name}",
+        "interface-role": "ijWc",
+        "network-name": "network-name1",
+        "interface-description": "3W6lisag9rH",
+        "is-port-mirrored": false,
+        "in-maint": true,
+        "is-ip-unnumbered": false,
+        "relationship-list": {
+          "relationship": [
+            {
+              "related-to": "configuration",
+              "relationship-label": "org.onap.relationships.inventory.AppliesTo",
+              "related-link": "/aai/v13/network/configurations/configuration/${configuration-id}",
+              "relationship-data": [
+                {
+                  "relationship-key": "configuration.configuration-id",
+                  "relationship-value": "${configuration-id}"
+                }
+              ]
+            }
+          ]
+        },
+        "vlans": {
+          "vlan": [
+            {
+              "vlan-interface": "${vlan-interface}",
+              "in-maint": false,
+              "is-ip-unnumbered": false,
+              "l3-interface-ipv4-address-list": [
+                {
+                  "l3-interface-ipv4-address": "135.190.177.164"
+                }
+              ],
+              "l3-interface-ipv6-address-list": [
+                {
+                  "l3-interface-ipv6-address": "135.190.177.165"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

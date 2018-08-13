@@ -32,17 +32,22 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.onap.aai.db.DbMethHelper;
 import org.onap.aai.db.props.AAIProperties;
 import org.onap.aai.dbgen.PropertyLimitDesc;
+import org.onap.aai.edges.EdgeIngestor;
+import org.onap.aai.edges.EdgeRuleQuery;
+import org.onap.aai.edges.enums.EdgeType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
+import org.onap.aai.logging.LogFormatTools;
 import org.onap.aai.query.builder.QueryBuilder;
 import org.onap.aai.schema.enums.PropertyMetadata;
 import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.db.EdgeRules;
-import org.onap.aai.serialization.db.EdgeType;
+
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.util.AAIConfig;
+import org.onap.aai.concurrent.AaiCallable;
+import org.onap.aai.config.SpringContextAware;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -60,9 +65,9 @@ public class ModelBasedProcessing {
 	private Loader loader;
 	private DBSerializer serializer;
 	private DbMethHelper dbMethHelper;
-
+	
 	protected ModelBasedProcessing() {
-
+		
 	}
 	public ModelBasedProcessing(Loader loader, TransactionalGraphEngine engine, DBSerializer serializer) {
 		this.loader = loader;
@@ -85,25 +90,25 @@ public class ModelBasedProcessing {
 	 * @throws AAIException the AAI exception
 	 */
 	public Map<String,String> getStartNodesAndModVersionIds( String transId, String fromAppId,
-			String passedModelVersionId,
+			String passedModelVersionId, 
 			String passedModelInvId,
 			String passedModelName,
 			String passedTopNodeType,
-			List<Map<String,Object>> startNodeFilterArrayOfHashes,
-			String apiVer )
+			List<Map<String,Object>> startNodeFilterArrayOfHashes, 
+			String apiVer ) 
 					throws AAIException {
 		// ----------------------------------------------------------------------------------------------------
 		// Get a hash for all start-nodes (key = vtxId, val = modelVersionId that applies)
-		//     If no start-node-key info is passed, then use either the passed modelVersion or
+		//     If no start-node-key info is passed, then use either the passed modelVersion or 
 		//         the passed model-invariant-id or model-name to collect them.
-		//     If start-node-key info is given, use it instead to look for start-nodes.
-		//         Note: if ONLY start-node-key info is given, then it would have to map to nodes which
+		//     If start-node-key info is given, use it instead to look for start-nodes. 
+		//         Note: if ONLY start-node-key info is given, then it would have to map to nodes which 
 		//         have persona data.  Otherwise we'd have no way to know what model to collect data with.
 		// ----------------------------------------------------------------------------------------------------
 
 		Iterator<Vertex> startVerts = null;
 		Map<String, String> startVertInfo = new HashMap<>();
-
+		
 		if( startNodeFilterArrayOfHashes.isEmpty() ){
 			// Since they did not give any data to find start instances, we will have to find them
 			// using whatever model-info they provided so we can use it to map to persona-data in the db.
@@ -125,7 +130,7 @@ public class ModelBasedProcessing {
 					if( calcModId != null ){
 						startVerts = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(addDBAliasedSuffix("model-invariant-id"),calcModId).has(addDBAliasedSuffix("model-version-id"),passedModelVersionId);
 					}
-				}
+				}	
 				else if( passedModelInvId != null && !passedModelInvId.equals("") ){
 					// They gave us the model-invariant-id
 					startVerts = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(addDBAliasedSuffix("model-invariant-id"),passedModelInvId);
@@ -138,11 +143,11 @@ public class ModelBasedProcessing {
 						for( int i = 0; i < modelVerVtxList.size(); i++ ){
 							String calcModVerId = (modelVerVtxList.get(i)).<String>property("model-version-id").orElse(null);
 							Vertex modVtx = getModelGivenModelVer(modelVerVtxList.get(i),"");
-							String calcModInvId = modVtx.<String>property("model-invariant-id").orElse(null);
+							String calcModInvId = modVtx.<String>property("model-invariant-id").orElse(null);		
 							// Now we can look up instances that match this model's info
 							Iterator<Vertex> tmpStartIter = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(addDBAliasedSuffix("model-invariant-id"),calcModInvId).has(addDBAliasedSuffix("model-version-id"),calcModVerId);
 							while( tmpStartIter.hasNext() ){
-								Vertex tmpStartVert = tmpStartIter.next();
+								Vertex tmpStartVert = (Vertex) tmpStartIter.next();
 								startVtxList.add(tmpStartVert);
 							}
 						}
@@ -150,12 +155,12 @@ public class ModelBasedProcessing {
 					if( !startVtxList.isEmpty() ){
 						startVerts = startVtxList.iterator();
 					}
-				}
+				}	
 			}
-
-			if( startVerts != null ){
+			
+			if( startVerts != null ){ 
 				while( startVerts.hasNext() ){
-					Vertex tmpStartVert = startVerts.next();
+					Vertex tmpStartVert = (Vertex) startVerts.next();
 					String vid = tmpStartVert.id().toString();
 					String tmpModId =  tmpStartVert.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
 					String tmpModVerId =  tmpStartVert.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
@@ -164,12 +169,12 @@ public class ModelBasedProcessing {
 			}
 			if( startVertInfo.isEmpty() ){
 				throw new AAIException("AAI_6114", "Start Node(s) could not be found for model data passed.  " +
-						"(modelVersionId = [" + passedModelVersionId +
+						"(modelVersionId = [" + passedModelVersionId + 
 						"], modelInvariantId = [" + passedModelInvId +
 						"], modelName = [" + passedModelName +
 						"])");
 			}
-
+			
 			return startVertInfo;
 		}
 		else {
@@ -179,17 +184,17 @@ public class ModelBasedProcessing {
 			String modInfoStr = "";
 			if( passedModelVersionId != null && !passedModelVersionId.equals("") ){
 				modTopNodeType = getModelVerTopWidgetType( transId, fromAppId, passedModelVersionId, "", "" );
-				modInfoStr = "modelVersionId = (" + passedModelVersionId + ")";
+				modInfoStr = "modelVersionId = (" + passedModelVersionId + ")"; 
 			}
 			else if( passedModelInvId != null && !passedModelInvId.equals("") ){
 				modTopNodeType = getModelVerTopWidgetType( transId, fromAppId,"", passedModelInvId, "" );
-				modInfoStr = "modelId = (" + passedModelInvId + ")";
+				modInfoStr = "modelId = (" + passedModelInvId + ")"; 
 			}
 			else if( passedModelName != null && !passedModelName.equals("") ){
 				modTopNodeType = getModelVerTopWidgetType( transId, fromAppId,"", "", passedModelName );
-				modInfoStr = "modelName = (" + passedModelName + ")";
+				modInfoStr = "modelName = (" + passedModelName + ")"; 
 			}
-
+			
 			if( modTopNodeType.equals("") ){
 				if( (passedTopNodeType == null) || passedTopNodeType.equals("") ){
 					String msg = "Could not determine the top-node nodeType for this request. modelInfo: [" + modInfoStr + "]";
@@ -202,16 +207,16 @@ public class ModelBasedProcessing {
 				}
 			}
 			else {
-				// we did get a topNode type based on model info - make sure it doesn't contradict
+				// we did get a topNode type based on model info - make sure it doesn't contradict 
 				// the passsed-in one (if there is one)
-				if( passedTopNodeType != null && !passedTopNodeType.equals("")
+				if( passedTopNodeType != null && !passedTopNodeType.equals("") 
 						&& !passedTopNodeType.equals(modTopNodeType) ){
 					throw new AAIException("AAI_6120", "topNodeType passed in [" + passedTopNodeType
 							+ "] does not match nodeType derived for model info passed in: ["
-							+ modTopNodeType + "]");
+							+ modTopNodeType + "]"); 
 				}
 			}
-
+				
 			List<String> modelVersionIds2Check = new ArrayList<>();
 			if( (passedModelName != null && !passedModelName.equals("")) ){
 				// They passed a modelName, so find all the model UUIDs (model-version-id's) that map to this
@@ -231,7 +236,7 @@ public class ModelBasedProcessing {
 					modelVersionIds2Check.add(passedModelVersionId);
 				}
 			}
-
+			
 			// We should now be OK with our topNodeType for this request, so we can look for the actual startNodes
 			for( int i=0; i < startNodeFilterArrayOfHashes.size(); i++ ){
 				// Locate the starting node which will be used to look which corresponds to this set of filter data
@@ -244,42 +249,42 @@ public class ModelBasedProcessing {
 					startVtx = result.get();
 				}
 				catch( AAIException e ){
-					String msg = "Could not find startNode of type = [" + modTopNodeType +  "], given these params: "
+					String msg = "Could not find startNode of type = [" + modTopNodeType +  "], given these params: "  
 							+ startNodeFilterArrayOfHashes.get(i) + ". msg # from getUniqueNode() = " + e.getMessage();
 					throw new AAIException("AAI_6114", msg);
 				}
-
+			
 				String vid = startVtx.id().toString();
 				String personaModInvId = startVtx.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
 				String personaModVerId = startVtx.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
-
+					
 				// Either this start-node has persona info (which should not contradict any passed-in model info)
 				//    or they should have passed in the model to use - so we'd just use that.
 				if( personaModVerId != null && !personaModVerId.equals("") ){
 					// There is persona data in this start-node.  So make sure it doesn't contradict any "passed" stuff
-					if( modelVersionIds2Check.isEmpty()
+					if( modelVersionIds2Check.isEmpty()  
 							&& (passedModelInvId == null || passedModelInvId.equals("")) ){
 						// They didn't pass any model info, so use the persona one.
 						startVertInfo.put(vid, personaModVerId);
 					}
-					else if( modelVersionIds2Check.isEmpty()
+					else if( modelVersionIds2Check.isEmpty() 
 							&& (passedModelInvId != null && !passedModelInvId.equals("")) ){
 						// They passed in just the modelId - so check it
 						if( passedModelInvId.equals(personaModInvId) ){
 							startVertInfo.put(vid, personaModVerId);
 						}
 					}
-					else if( !modelVersionIds2Check.isEmpty()
+					else if( !modelVersionIds2Check.isEmpty() 
 							&& (passedModelInvId == null || passedModelInvId.equals("")) ){
 						// They passed in just modelVersionId - so check
 						if( modelVersionIds2Check.contains(personaModVerId) ){
 							startVertInfo.put(vid, personaModVerId);
 						}
-					}
-					else if( !modelVersionIds2Check.isEmpty()
+					}	
+					else if( !modelVersionIds2Check.isEmpty() 
 							&& (passedModelInvId != null && !passedModelInvId.equals("")) ){
-						// We have BOTH a modelVersionIds and a modelId to check
-						if( passedModelInvId.equals(personaModInvId)
+						// We have BOTH a modelVersionIds and a modelId to check 
+						if( passedModelInvId.equals(personaModInvId) 
 								&& modelVersionIds2Check.contains(personaModVerId) ){
 							startVertInfo.put(vid, personaModVerId);
 						}
@@ -293,14 +298,16 @@ public class ModelBasedProcessing {
 					}
 					else {
 						throw new AAIException("AAI_6118", "Found startNode but since it does not have persona data, the " +
-								" model-version-id is required. ");
+								" model-version-id is required. "); 
 					}
 				}
 			}
 		}
+		
 		return startVertInfo;
-	}
-
+		
+	}//end of  getStartNodesAndModVersionIds()
+		
 
 	/**
 	 * Query by model. (really model-ver)
@@ -324,16 +331,16 @@ public class ModelBasedProcessing {
                                         List<Map<String,Object>> startNodeFilterArrayOfHashes,
                                         String apiVer )
 					throws AAIException {
-
+	
 		final String transId_f = transId;
 		final String fromAppId_f = fromAppId;
 		final String modelVersionId_f = modelVersionId;
 		final String modelInvId_f = modelInvariantId;
 		final String modelName_f = modelName;
 		final String topNodeType_f = topNodeType;
-		final List<Map<String,Object>> startNodeFilterArrayOfHashes_f = startNodeFilterArrayOfHashes;
-		final String apiVer_f = apiVer;
-
+		final List<Map<String,Object>> startNodeFilterArrayOfHashes_f = startNodeFilterArrayOfHashes; 
+		final String apiVer_f = apiVer; 
+		
 		// Find out what our time-limit should be
 		int timeLimitSec = 0;
 		String timeLimitString = AAIConfig.get("aai.model.query.timeout.sec");
@@ -345,33 +352,34 @@ public class ModelBasedProcessing {
 				// Don't worry, we will leave the limit as zero - which tells us not to use it.
 			}
 		}
-
+		
 		if( timeLimitSec <= 0 ){
 			// We will NOT be using a timer
 			return queryByModel_Timed( transId, fromAppId,
-		  			modelVersionId,
+		  			modelVersionId, 
 		  			modelInvariantId,
 		  			modelName,
 		  			topNodeType,
-		  			startNodeFilterArrayOfHashes,
+		  			startNodeFilterArrayOfHashes, 
 		  			apiVer );
 		}
-
+		
 		List<ResultSet> resultList = new ArrayList<>();
 		TimeLimiter limiter = new SimpleTimeLimiter();
 		try {
-			resultList = limiter.callWithTimeout(new Callable <List<ResultSet>>() {
-			    public List<ResultSet> call() throws AAIException {
+
+			resultList = limiter.callWithTimeout(new AaiCallable <List<ResultSet>>() {
+			    public List<ResultSet> process() throws AAIException {
 			      return queryByModel_Timed( transId_f, fromAppId_f,
-			  			modelVersionId_f,
+			  			modelVersionId_f, 
 			  			modelInvId_f,
 			  			modelName_f,
 			  			topNodeType_f,
-			  			startNodeFilterArrayOfHashes_f,
+			  			startNodeFilterArrayOfHashes_f, 
 			  			apiVer_f );
 			    }
 			  }, timeLimitSec, TimeUnit.SECONDS, true);
-		}
+		} 
 		catch (AAIException ae) {
 			// Re-throw AAIException so we get can tell what happened internally
 			throw ae;
@@ -382,10 +390,11 @@ public class ModelBasedProcessing {
 		catch (Exception e) {
 			throw new AAIException("AAI_6128", "Unexpected exception in queryByModel(): " + e.getMessage() );
 		}
+
 		return resultList;
 	}
-
-
+	
+		
 	/**
 	 * Query by model (model-ver) timed.
 	 *
@@ -408,28 +417,28 @@ public class ModelBasedProcessing {
                                               List<Map<String,Object>> startNodeFilterArrayOfHashesVal,
                                               String apiVer )
 					throws AAIException {
-
+					
 		List<ResultSet> resultArray = new ArrayList<>();
-
+		
 		// NOTE: this method can be used for different styles of queries:
 		//   a) They could pass neither a modelVersionId or a modelInvariantId but just pass a set of data defining start-nodes.
 		//      Note - with no model info, we need them to pass the startNodeType for us to be able to use the
-		//      start-node-filter data.  We would look at each start node and ensure that each has persona-model info.
+		//      start-node-filter data.  We would look at each start node and ensure that each has persona-model info.  
 		//      Then use whatever model corresponds to each instance to pull that instance's data.
 		//   b) They could pass a modelInvariantId, but no modelVersionId and no startNode info.   In this case, we
-		//      Would look in the database for all nodes that have a model-invariant-id-local that matches what was
+		//      Would look in the database for all nodes that have a model-invariant-id-local that matches what was 
 		//      passed, and then for each of those instances, pull the data based on the corresponding model.
-		//   c) They could pass a model-version-id, but no startNode info. We'd make sure that if a
+		//   c) They could pass a model-version-id, but no startNode info. We'd make sure that if a 
 		//      model-invariant-id was also passed, that it does not conflict - but it really should be null if they
 		//      are passing a full model-version-id.   Like case -b-, we'd do a query for all nodes
-		//      that have persona info that corresponds to the model-version-id passed and then
+		//      that have persona info that corresponds to the model-version-id passed and then 
 		//      collect data for each one.
 		//   d) They could pass either modelVersionId or modelInvariantId AND startNodeFilter info.  In this case we
-		//      would look at the model info to figure out what the top-node-type is, then look at the
+		//      would look at the model info to figure out what the top-node-type is, then look at the 
 		//      top-node instances based on the startNodeFilter.   We'd only collect data for each instance if
 		//      it's persona model info matches what was passed in.
-
-
+		
+		
 		// Sorry to do this, but code that gets called with an empty hash as the first array element was causing errors
 		List<Map<String,Object>> startNodeFilterArrayOfHashes = new ArrayList <Map<String,Object>>();
 		if( !startNodeFilterArrayOfHashesVal.isEmpty() ){
@@ -440,21 +449,21 @@ public class ModelBasedProcessing {
 				}
 			}
 		}
-
+				
 		// ----------------------------------------------------------------------------------------------------------
-		// Get a Hash of all the start-nodes (top instance-data node for a model-ver where we will
-		// start collecting data) for startNode2ModelVerHash:
-		// 			key = vertex-id for the startNode,
-		//			value = model-version-id for the corresponding model-ver
+		// Get a Hash of all the start-nodes (top instance-data node for a model-ver where we will 
+		// start collecting data) for startNode2ModelVerHash:  
+		// 			key = vertex-id for the startNode, 
+		//			value = model-version-id for the corresponding model-ver   
 		// ----------------------------------------------------------------------------------------------------------
 		Map<String, String> startNode2ModelVerHash = getStartNodesAndModVersionIds( transId, fromAppId,
 				modelVersionId, modelInvariantId, modelName, topNodeType,
-				startNodeFilterArrayOfHashes, apiVer );
-
-		//System.out.println("\nDEBUG -- Here's a dump of the startnodes/model-vers: " + startNode2ModelVerHash.toString());
-
+				startNodeFilterArrayOfHashes, apiVer );	
+		
+		//System.out.println("\nDEBUG -- Here's a dump of the startnodes/model-vers: " + startNode2ModelVerHash.toString()); 
+		
 		// --------------------------------------------------------------------------------------------------------
-		// Figure out what-all models (model-ver nodes) we will be dealing with
+		// Figure out what-all models (model-ver nodes) we will be dealing with 
 		// Note - Instances must all use the same type of start-node, but do not have to all use the same model-ver.
 		// --------------------------------------------------------------------------------------------------------
 		Map<String, Vertex> distinctModelVersHash = new HashMap<>();
@@ -469,7 +478,7 @@ public class ModelBasedProcessing {
 		Set <String> snKeySet = startNode2ModelVerHash.keySet();
 		Iterator<String> startNodeIterator = snKeySet.iterator();
 		while( startNodeIterator.hasNext() ){
-			String modVerIdKey = startNodeIterator.next();
+			String modVerIdKey = (String) startNodeIterator.next();  
 			String modVerId = startNode2ModelVerHash.get(modVerIdKey);
 			if( !distinctModelVersHash.containsKey(modVerId) ){
 				// First time seeing this model-version-id
@@ -487,7 +496,7 @@ public class ModelBasedProcessing {
 					System.out.println(">>>  WARNING - will not collect model data for this vertex since " +
 							"it uses an inconsistant model-ver model.  Model-version-id = " + modVerId );
 				}
-
+				
 				if( tmpNodeType != null && !tmpNodeType.equals("") ){
 					if( startNodeType.equals("") ){
 						startNodeType = tmpNodeType;
@@ -501,12 +510,12 @@ public class ModelBasedProcessing {
 				}
 			}
 		}
-
+		
 		//System.out.println("\nDEBUG -- Here's a dump of the DISTINCT model-ver hash: " + distinctModelVersHash.toString() );
-
+	
 		// ------------------------------------------------------------------------------------------------------
 		// Get the "valid-next-step" hash for each distinct model-ver
-		// While we're at it, get a mapping of model-invariant-id|model-version to model-version-id for
+		// While we're at it, get a mapping of model-invariant-id|model-version to model-version-id for 
 		//     the model-vers being used
 		// ------------------------------------------------------------------------------------------------------
 		Map<String, Multimap<String, String>> validNextStepHash = new HashMap<>();
@@ -514,46 +523,46 @@ public class ModelBasedProcessing {
 		Set <String> keySet = distinctModelVersHash.keySet();
 		Iterator<String> modelVerIterator = keySet.iterator();
 		while( modelVerIterator.hasNext() ){
-			String modVerKey = modelVerIterator.next();
+			String modVerKey = (String) modelVerIterator.next();
 			if( ! skipModelVerIdList.contains(modVerKey) ){
-				Vertex modelVerVtx = distinctModelVersHash.get(modVerKey);
+				Vertex modelVerVtx = (Vertex)distinctModelVersHash.get(modVerKey);
 				Multimap<String, String> tmpTopoMap = genTopoMap4ModelVer( transId, fromAppId,
 						modelVerVtx, modVerKey);
 				validNextStepHash.put(modVerKey, tmpTopoMap);
 			}
-		}
-
+		} 
+				
 		// -------------------------------------------------------------------------------------------------
-		// Figure out what the "start-node" for each instance will be (plus the info we will use to
+		// Figure out what the "start-node" for each instance will be (plus the info we will use to 
 		//       represent that in our topology)
 		// -------------------------------------------------------------------------------------------------
 		List<String> failedPersonaCheckVids = new ArrayList<>();
-		Map<String, String> firstStepInfoHash = new HashMap<>();
+		Map<String, String> firstStepInfoHash = new HashMap<>(); 
 			// For firstStepInfoHash:   key = startNodeVtxId, val=topNodeType plus personaData if applicable
 			//                            ie. the value is what we'd use as the "first-step" for this model.
 		if( !nodeTypeSupportsPersona( startNodeType) ){
-			// This node type doesn't have persona info, so we just use startNodeType for the first-step-info
+			// This node type doesn't have persona info, so we just use startNodeType for the first-step-info 
 			snKeySet = startNode2ModelVerHash.keySet();
 			startNodeIterator = snKeySet.iterator();
 			while( startNodeIterator.hasNext() ){
-				String vtxKey = startNodeIterator.next();
+				String vtxKey = (String) startNodeIterator.next();
 				firstStepInfoHash.put(vtxKey,startNodeType);
 			}
 		}
-		else {
+		else { 
 			// Need to check that this node's persona data is good and if it is - use it for the first step info
 			snKeySet = startNode2ModelVerHash.keySet();
 			startNodeIterator = snKeySet.iterator();
 			while( startNodeIterator.hasNext() ){
-				String vtxKey = startNodeIterator.next();
+				String vtxKey = (String) startNodeIterator.next();
 				Iterator<Vertex> vtxIterator = this.engine.asAdmin().getReadOnlyTraversalSource().V(vtxKey);
-				Vertex tmpVtx = vtxIterator.next();
+				Vertex tmpVtx = (Vertex)vtxIterator.next();
 				String thisVtxModelVerId = startNode2ModelVerHash.get(vtxKey);
 				if( skipModelVerIdList.contains(thisVtxModelVerId) ){
 					// Skip this vertex because it uses a model-ver that is bad
 					continue;
 				}
-				Vertex modelVerVtx = distinctModelVersHash.get(thisVtxModelVerId);
+				Vertex modelVerVtx = (Vertex)distinctModelVersHash.get(thisVtxModelVerId);
 				Vertex modelVtx = getModelGivenModelVer( modelVerVtx, "" );
 				String modInvId = modelVtx.<String>property("model-invariant-id").orElse(null);
 				String personaModInvId = tmpVtx.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
@@ -562,21 +571,21 @@ public class ModelBasedProcessing {
 					String tmpPersonaInfoStr = startNodeType + "," + personaModInvId + "," + personaModVerId;
 					firstStepInfoHash.put(vtxKey, tmpPersonaInfoStr );
 				}
-				else {
+				else { 
 					// we won't use this start node below when we collect data because it should have
 					// had persona data that matched it's model - but it did not.
 					failedPersonaCheckVids.add(vtxKey);
 				}
-			}
-		}
+			}	
+		}	
 
 		//System.out.println("\nDEBUG -- Here's a dump of the firstStepInfoHash hash: " + firstStepInfoHash.toString() );
-
+		
 		// ------------------------------------------------------------------------------------------------
-		// Loop through each start-node, collect it's data using collectInstanceData() and put the
+		// Loop through each start-node, collect it's data using collectInstanceData() and put the 
 		//      resultSet onto the resultArray.
 		// ------------------------------------------------------------------------------------------------
-
+		
 		// Make sure they're not bringing back too much data
 		String maxString = AAIConfig.get("aai.model.query.resultset.maxcount");
 		if( maxString != null &&  !maxString.equals("") ){
@@ -587,17 +596,17 @@ public class ModelBasedProcessing {
 			catch ( Exception nfe ){
 				// Don't worry, we will leave the max as zero - which tells us not to use it.
 			}
-
+			
 			if( maxSets > 0 && (startNode2ModelVerHash.size() > maxSets) ){
 				String msg = " Query returns " + startNode2ModelVerHash.size() + " resultSets.  Max allowed is: " + maxSets;
 				throw new AAIException("AAI_6141", msg);
 			}
 		}
-
+		
 		snKeySet = startNode2ModelVerHash.keySet();
 		startNodeIterator = snKeySet.iterator();
 		while( startNodeIterator.hasNext() ){
-			String topNodeVtxId  = startNodeIterator.next();
+			String topNodeVtxId  = (String) startNodeIterator.next();
 			if( failedPersonaCheckVids.contains(topNodeVtxId) ){
 				// Skip this vertex because it failed it's persona-data check above
 				continue;
@@ -606,27 +615,29 @@ public class ModelBasedProcessing {
 				// Skip this vertex because it uses a model-ver that is bad
 				continue;
 			}
-
+			
 			Iterator<Vertex> vtxIterator = this.engine.asAdmin().getReadOnlyTraversalSource().V(topNodeVtxId);
-			Vertex tmpStartVtx = vtxIterator.next();
-			String elementLocationTrail = firstStepInfoHash.get(topNodeVtxId);
+			Vertex tmpStartVtx = (Vertex)vtxIterator.next();
+			String elementLocationTrail = firstStepInfoHash.get(topNodeVtxId); 
 			String modelVerId = startNode2ModelVerHash.get(topNodeVtxId);
 			Multimap<String, String> validNextStepMap = validNextStepHash.get(modelVerId);
-
+			
 			List<String> vidsTraversed = new ArrayList<>();
 			Map<String,String> emptyDelKeyHash = new HashMap<>();
 			Map<String,String> emptyNQElementHash = new HashMap<>();  // Only applies to Named Queries
 			ResultSet tmpResSet = collectInstanceData( transId, fromAppId,
-					tmpStartVtx, elementLocationTrail,
+					tmpStartVtx, elementLocationTrail, 
 					validNextStepMap, vidsTraversed, 0, emptyDelKeyHash, emptyNQElementHash, apiVer );
-
+			
 			resultArray.add(tmpResSet);
 		}
+		
 		return resultArray;
-	}
-
-
-
+		
+	}// queryByModel_Timed()
+	
+			
+	
 	/**
 	 * Run delete by model-ver.
 	 *
@@ -641,15 +652,15 @@ public class ModelBasedProcessing {
 	 * @throws AAIException the AAI exception
 	 */
 	public Map<String,String> runDeleteByModel( String transId, String fromAppId,
-			String modelVersionId, String topNodeTypeVal, Map<String,Object> startNodeFilterHash, String apiVer, String resVersion )
+			String modelVersionId, String topNodeTypeVal, Map<String,Object> startNodeFilterHash, String apiVer, String resVersion ) 
 					throws AAIException {
-
+		
 		Map<String,String> retHash = new HashMap<>();
-
-		// Locate the Model-ver node to be used
+				
+		// Locate the Model-ver node to be used 
 		Vertex modelVerVtx = null;
 		if( modelVersionId != null && !modelVersionId.equals("") ){
-			modelVerVtx = getNodeUsingUniqueId(transId, fromAppId, "model-ver",
+			modelVerVtx = getNodeUsingUniqueId(transId, fromAppId, "model-ver", 
 					"model-version-id", modelVersionId);
 		}
 		else {
@@ -658,28 +669,28 @@ public class ModelBasedProcessing {
 			if( topNodeTypeVal == null || topNodeTypeVal.equals("") ){
 				throw new AAIException("AAI_6118", "If no model info is passed, then topNodeType is required. ");
 			}
-
+			
 			Optional<Vertex> result = dbMethHelper.searchVertexByIdentityMap(topNodeTypeVal, startNodeFilterHash);
 			if (!result.isPresent()) {
 				throw new AAIException("AAI_6114", "No Node of type " + topNodeTypeVal + " found for properties");
 			}
 			Vertex startVtx = result.get();
-
+			
 			String startVertModVerId = startVtx.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
-			modelVerVtx = getNodeUsingUniqueId(transId, fromAppId, "model-ver",
+			modelVerVtx = getNodeUsingUniqueId(transId, fromAppId, "model-ver", 
 					"model-version-id", startVertModVerId);
 		}
-
+		
 		if( modelVerVtx == null ){
 			throw new AAIException("AAI_6114", "Could not determine the model-ver for the given input parameters. ");
 		}
 
 		String topNType = "unknown";
 		String modelType = getModelTypeFromModelVer( modelVerVtx, "" );
-
+		
 		if( modelType.equals("widget") ){
-			// If they want to delete using a widget-level model..  That is just a delete of the one
-			//  	instance of one of our nodes.
+			// If they want to delete using a widget-level model..  That is just a delete of the one 
+			//  	instance of one of our nodes.  
 			String widgModNodeType = modelVerVtx.<String>property("model-name").orElse(null);
 			if( (widgModNodeType == null) || widgModNodeType.equals("") ){
 				String msg = "Could not find model-name for the widget model  [" + modelVersionId + "].";
@@ -695,11 +706,11 @@ public class ModelBasedProcessing {
 			retHash.put(widgId, widgModNodeType);
 			return retHash;
 		}
-
+		
 		// ---------------------------------------------------------------------------------
 		// If we got to here, this must be either a service or resource model.
 		// So, we'll need to get a Hash of which parts of the model to delete.
-		//  NOTE- deleteByModel is deleting data based on one specific version of a model.
+		//  NOTE- deleteByModel is deleting data based on one specific version of a model.  
 		// ---------------------------------------------------------------------------------
 		String chkFirstNodePersonaModInvId = "";
 		String chkFirstNodePersonaModVerId = "";
@@ -716,18 +727,18 @@ public class ModelBasedProcessing {
 			chkFirstNodePersonaModVerId = modelVerVtx.<String>property("model-version-id").orElse(null);
 			personaData = "," + chkFirstNodePersonaModInvId + "," + chkFirstNodePersonaModVerId;
 		}
-
+		
 		// Get the deleteKeyHash for this model
 		String incomingTrail = "";
 		Map<String, String> currentHash = new HashMap<>();
 		Map<String, Vertex> modConHash = new HashMap<>();
 		ArrayList <String>  vidsTraversed = new ArrayList<>();
 		Map<String, String> delKeyHash = collectDeleteKeyHash( transId, fromAppId,
-				  firstModElementVertex, incomingTrail, currentHash, vidsTraversed,
-				  0, modConHash,
-				  chkFirstNodePersonaModInvId, chkFirstNodePersonaModVerId );
-
-
+				  firstModElementVertex, incomingTrail, currentHash, vidsTraversed, 
+				  0, modConHash, 
+				  chkFirstNodePersonaModInvId, chkFirstNodePersonaModVerId ); 
+	
+		
 		System.out.println("\n ----DEBUG -----:  Delete Hash for model: [" + modelVersionId + "] looks like: ");
 		for( Map.Entry<String, String> entry : delKeyHash.entrySet() ){
 			System.out.println("key = [" + entry.getKey() + "], val = [" + entry.getValue() + "]");
@@ -744,7 +755,7 @@ public class ModelBasedProcessing {
 			// 		we need to make sure that the start node matches the persona values.
 			String startVertPersonaModInvId = startVtx.<String>property(addDBAliasedSuffix("model-invariant-id")).orElse(null);
 			String startVertPersonaModVerId = startVtx.<String>property(addDBAliasedSuffix("model-version-id")).orElse(null);
-			if( !chkFirstNodePersonaModInvId.equals(startVertPersonaModInvId)
+			if( !chkFirstNodePersonaModInvId.equals(startVertPersonaModInvId) 
 					|| !chkFirstNodePersonaModVerId.equals(startVertPersonaModVerId) ){
 				String msg = "Persona-Model data mismatch for start node (" + topNType +  "), " +
 						startNodeFilterHash ;
@@ -752,34 +763,36 @@ public class ModelBasedProcessing {
 			}
 		}
 		String topVid = startVtx.id().toString();
-
+		
 		// Read the model-ver into a Map for processing
 		Multimap<String, String> validNextStepMap = genTopoMap4ModelVer(transId, fromAppId,
 				modelVerVtx, modelVersionId);
-
+			
 		// Collect the data
 		String elementLocationTrail = topNType + personaData;
 		vidsTraversed = new ArrayList<>();
-		Map<String,String> emptyHash = new HashMap<>();
-
+		Map<String,String> emptyHash = new HashMap<>();  
+		
 		// Pass emptyHash for the NQElement hash since that parameter only applies to Named Queries
 		ResultSet retResSet = collectInstanceData( transId, fromAppId,
-				startVtx, elementLocationTrail,
+				startVtx, elementLocationTrail, 
 				validNextStepMap, vidsTraversed, 0, delKeyHash, emptyHash, apiVer );
-
+		
 		// Note: the new ResultSet will have each element tagged with the del flag so we'll know if it
-		// 		should be deleted or not - so loop through the results in a try-block since some things
+		// 		should be deleted or not - so loop through the results in a try-block since some things 
 		//		will get auto-deleted by parents before we get to them --- and try to remove each one.
 		String vidToResCheck = topVid;
-
-		retHash = deleteAsNeededFromResultSet( transId, fromAppId, retResSet,
+		
+		retHash = deleteAsNeededFromResultSet( transId, fromAppId, retResSet, 
 				vidToResCheck, apiVer, resVersion, emptyHash );
 		//String msgStr = "processed deletes for these vids: (\n"+ retHash.keySet().toString() + ").";
+		
 		return retHash;
-	}
+		  
+	}// End of runDeleteByModel()
 
-
-
+				
+				
 	/**
 	 * Delete as needed from result set.
 	 *
@@ -800,26 +813,26 @@ public class ModelBasedProcessing {
 		Map<String,String> retHash = new HashMap<>();
 		retHash.putAll( hashSoFar );
 		Boolean deleteIt = false;
-
+		  	
 		if( resSet.getVert() == null ){
 			return retHash;
 		}
-
+		
 		Vertex thisVtx = resSet.getVert();
 		String thisGuyId = "";
 		String thisNT = "";
 		String thisGuyStr = "";
-
+		
 		Boolean gotVtxOK = false;
 		try {
 			if( thisVtx != null ){
 				thisGuyId = thisVtx.id().toString();
 				thisNT = thisVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 				thisGuyStr = thisGuyId + "[" + thisNT + " found at:" + resSet.getLocationInModelSubGraph() + "]";
-
-				// NOTE -- will try to set the NodeType to itself to see if the node has been deleted already in
-				//       this transaction. It lets you get properties from nodes being deleted where the
-				//       delete hasn't been committed yet.  This check used to be accomplished with a call to
+				
+				// NOTE -- will try to set the NodeType to itself to see if the node has been deleted already in 
+				//       this transaction. It lets you get properties from nodes being deleted where the 
+				//       delete hasn't been committed yet.  This check used to be accomplished with a call to 
 				//       "vtx.isRemoved()" but that was a Titan-only feature and is not available anymore since
 				//       we no longer use Titan vertices.
 				// If we don't do this check, we get errors later when we try to delete the node.
@@ -829,19 +842,19 @@ public class ModelBasedProcessing {
 		}
 		catch (Exception ex) {
 			// Sometimes things have already been deleted by the time we get to them - just log it.
-			LOGGER.warn("Exception when trying to delete: " + thisGuyStr + ".  msg = " + ex.getMessage(), ex);
+			LOGGER.warn("Exception when trying to delete: " + thisGuyStr + ".  msg = " + ex.getMessage() + LogFormatTools.getStackTop(ex));
 		}
-
+		
 		if( !gotVtxOK ){
 			// The vertex must have already been removed.   Just return.
-			// Note - We need to catch this because the DB sometimes can still have the vtx
+			// Note - We need to catch this because the DB sometimes can still have the vtx 
 			// and be able to get its ID but it is flagged internally as removed already.
 			return retHash;
 		}
 		else {
 			if( resSet.getNewDataDelFlag() != null && resSet.getNewDataDelFlag().equals("T") ){
 				LOGGER.info(">>  will try to delete this one >> " + thisGuyStr);
-
+				
 				try {
 					Boolean requireResourceVersion = false;
 					if( thisGuyId.equals(vidToResCheck) ){
@@ -859,48 +872,50 @@ public class ModelBasedProcessing {
 					else {
 						String errText = ae.getErrorObject().getErrorText();
 						String errDetail = ae.getMessage();
-						LOGGER.warn("Exception when deleting " + thisGuyStr + ".  ErrorCode = " + errorCode +
+						LOGGER.warn("Exception when deleting " + thisGuyStr + ".  ErrorCode = " + errorCode + 
 								", errorText = " + errText + ", details = " + errDetail);
 					}
 				}
 				catch( Exception e ){
-					// We'd expect to get a "node not found" here sometimes depending on the order that
+					// We'd expect to get a "node not found" here sometimes depending on the order that 
 					// the model has us finding / deleting nodes.
 					// Ignore the exception - but log it so we can see what happened.
-					LOGGER.warn("Exception when deleting " + thisGuyStr + e.getMessage(), e);
+					LOGGER.warn("Exception when deleting " + thisGuyStr + e.getMessage() + LogFormatTools.getStackTop(e));
 				}
-
+				
 				// We can't depend on a thrown exception to tell us if a node was deleted since it may
-				// have been auto=deleted before this removeAaiNode() call.
+				// have been auto=deleted before this removeAaiNode() call.  
 				// --- Not sure if we would want to check anything here -- because the graph.commit() is done outside of this call.
-
+				
 				deleteIt = true;
 			}
 			else {
-				// --- DEBUG ----
+				// --- DEBUG ---- 
 				System.out.println(">>>>>>> NOT DELETING THIS ONE >>>> " + thisGuyStr );
 				List<String> retArr = dbMethHelper.getVertexProperties(thisVtx);
 				for( String info : retArr ){ System.out.println(info); }
 				// --- DEBUG ----
 			}
 		}
-
+		
 		// Now call this routine for the sub-resultSets
 		List <ResultSet> subResultSetList = resSet.getSubResultSet();
 		Iterator <ResultSet> subResSetIter = subResultSetList.iterator();
 		while( subResSetIter.hasNext() ){
 			ResultSet tmpSubResSet = subResSetIter.next();
-			retHash = deleteAsNeededFromResultSet( transId, fromAppId, tmpSubResSet,
+			retHash = deleteAsNeededFromResultSet( transId, fromAppId, tmpSubResSet, 
 					vidToResCheck, apiVer, resVersion, retHash );
 		}
-
+		
 		if( deleteIt ){
 			retHash.put(thisGuyId, thisGuyStr);
 		}
+		
 		return retHash;
-	}
-
-
+				
+	}// deleteAsNeededFromResultSet()
+		
+	
 
 	/**
 	 * Query by named query (old version).
@@ -918,18 +933,18 @@ public class ModelBasedProcessing {
                                              ArrayList <Map<String,Object>> startNodeFilterArrayOfHashes,
                                              String apiVer )
 					throws AAIException {
-
+	
 		String dummyCutPoint = null;
 		Map<String,Object> dummySecondaryFilterHash = null;
-
+		
 		return queryByNamedQuery( transId, fromAppId,
-				namedQueryUuid,
-				startNodeFilterArrayOfHashes,
+				namedQueryUuid,  
+				startNodeFilterArrayOfHashes, 
 				apiVer,
 				dummyCutPoint,
-				dummySecondaryFilterHash );
+				dummySecondaryFilterHash ); 
 	}
-
+	
 
 	/**
 	 * Query by named query.
@@ -951,15 +966,15 @@ public class ModelBasedProcessing {
                                              String secondaryFilterCutPoint,
                                              Map<String,Object> secondaryFilterHash )
 					throws AAIException {
-
+	
 		final String transId_f = transId;
 		final String fromAppId_f = fromAppId;
 		final String namedQueryUuid_f = namedQueryUuid;
-		final List<Map<String,Object>> startNodeFilterArrayOfHashes_f = startNodeFilterArrayOfHashes;
-		final String apiVer_f = apiVer;
-		final String secondaryFilterCutPoint_f = secondaryFilterCutPoint;
-		final Map<String,Object> secondaryFilterHash_f = secondaryFilterHash;
-
+		final List<Map<String,Object>> startNodeFilterArrayOfHashes_f = startNodeFilterArrayOfHashes; 
+		final String apiVer_f = apiVer; 
+		final String secondaryFilterCutPoint_f = secondaryFilterCutPoint; 
+		final Map<String,Object> secondaryFilterHash_f = secondaryFilterHash; 	
+		
 		// Find out what our time-limit should be
 		int timeLimitSec = 0;
 		String timeLimitString = AAIConfig.get("aai.model.query.timeout.sec");
@@ -976,27 +991,27 @@ public class ModelBasedProcessing {
 			// We will NOT be using a timer
 			return queryByNamedQuery_Timed( transId, fromAppId,
 					namedQueryUuid,
-		  			startNodeFilterArrayOfHashes,
+		  			startNodeFilterArrayOfHashes, 
 		  			apiVer,
 		  			secondaryFilterCutPoint_f,
 		  			secondaryFilterHash_f );
 		}
-
+		
 		List<ResultSet> resultList = new ArrayList<>();
 		TimeLimiter limiter = new SimpleTimeLimiter();
 		try {
-			resultList = limiter.callWithTimeout(new Callable <List<ResultSet>>() {
-			    public List<ResultSet> call() throws AAIException {
+			resultList = limiter.callWithTimeout(new AaiCallable <List<ResultSet>>() {
+			    public List<ResultSet> process() throws AAIException {
 			      return queryByNamedQuery_Timed( transId_f, fromAppId_f,
 							namedQueryUuid_f,
-				  			startNodeFilterArrayOfHashes_f,
+				  			startNodeFilterArrayOfHashes_f, 
 				  			apiVer_f,
 				  			secondaryFilterCutPoint_f,
 				  			secondaryFilterHash_f );
 			    }
 			}, timeLimitSec, TimeUnit.SECONDS, true);
-
-		}
+			
+		} 
 		catch (AAIException ae) {
 			// Re-throw AAIException so we get can tell what happened internally
 			throw ae;
@@ -1007,20 +1022,21 @@ public class ModelBasedProcessing {
 		catch (Exception e) {
 			throw new AAIException("AAI_6128", "Unexpected exception in queryByNamedQuery(): " + e.getMessage() );
 		}
+
 		return resultList;
 	}
-
-
+	
+	
 	/**
 	 * Query by named query timed.
 	 *
 	 * @param transId the trans id
 	 * @param fromAppId the from app id
 	 * @param namedQueryUuid the named query uuid
-	 * @param startNodeFilterArrayOfHashes the start node filter array of hashes --used to locate the first nodes of instance data
+	 * @param startNodeFilterArrayOfHashes the start node filter array of hashes --used to locate the first nodes of instance data	
 	 * @param apiVer the api ver
 	 * @param secondaryFilterCutPoint the nodeType where we will parse for the secondary Filter
-	 * @param secondaryFilterHash the secondary filter hash
+	 * @param secondaryFilterHash the secondary filter hash 
 	 * @return resultSet
 	 * @throws AAIException the AAI exception
 	 */
@@ -1030,13 +1046,13 @@ public class ModelBasedProcessing {
                                                    String apiVer,
                                                    String secondaryFilterCutPoint,
                                                    Map<String,Object> secondaryFilterHash
-			)
+			) 
 					throws AAIException {
-
+		
 		// Locate the Query to be used
 		Vertex queryVtx = getNodeUsingUniqueId(transId, fromAppId, "named-query",
 				"named-query-uuid", namedQueryUuid);
-
+		
 		// Get the first/top named-query-element used by this query
 		Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, queryVtx, "named-query-element");
 		Vertex firstNqElementVert = null;
@@ -1047,7 +1063,7 @@ public class ModelBasedProcessing {
 			count++;
 			topNType = getNqElementWidgetType( transId, fromAppId,  firstNqElementVert, "" );
 		}
-
+		
 		if( count < 1 ){
 			// A named query must start with a single top element
 			throw new AAIException("AAI_6133", "No top-node defined for named-query-uuid = [" + namedQueryUuid + "]");
@@ -1060,7 +1076,7 @@ public class ModelBasedProcessing {
 			String msg = "Could not determine the top-node nodeType for Named Query: [" + namedQueryUuid + "]";
 			throw new AAIException("AAI_6133", msg);
 		}
-
+		
 		// Read the topology into a hash for processing
 		Multimap<String, String> validNextStepMap = genTopoMap4NamedQ(transId, fromAppId, queryVtx, namedQueryUuid);
 
@@ -1077,7 +1093,7 @@ public class ModelBasedProcessing {
 			boolean foundIndexedField = false;
 			int propertiesSet = 0;
 			while( propIter.hasNext() ){
-				String oldVtxKey = propIter.next();
+				String oldVtxKey = (String) propIter.next(); 
 				String newKey = oldVtxKey;
 				String [] parts = oldVtxKey.split("\\.");
 				if( parts.length == 2 ){
@@ -1121,7 +1137,7 @@ public class ModelBasedProcessing {
 				}
 			}
 		}
-
+		
 		if (startVertList.isEmpty()) {
 			throw new AAIException("AAI_6114", "No Node of type " + topNType + " found for properties");
 		}
@@ -1134,7 +1150,7 @@ public class ModelBasedProcessing {
 				throw new AAIException("AAI_6141", msg);
 			}
 		}
-
+		
 		// Loop through each start node and get its data
 		List<ResultSet> resSetList = new ArrayList<>();
 		for( int i = 0; i < startVertList.size(); i++ ){
@@ -1143,21 +1159,21 @@ public class ModelBasedProcessing {
 			String elementLocationTrail = topNType;
 			ArrayList <String>  vidsTraversed = new ArrayList<>();
 			Map<String,String> emptyDelKeyHash = new HashMap<>();  // Does not apply to Named Queries
-
+					
 			// Get the mapping of namedQuery elements to our widget topology for this namedQuery
 			String incomingTrail = "";
 			Map<String, String> currentHash = new HashMap<>();
-
+			
 			Map<String,String> namedQueryElementHash = collectNQElementHash( transId, fromAppId,
 					  firstNqElementVert, incomingTrail, currentHash, vidsTraversed, 0 );
-
+			
 			vidsTraversed = new ArrayList<>();
 			ResultSet tmpResSet = collectInstanceData( transId, fromAppId,
-					startVtx, elementLocationTrail,
+					startVtx, elementLocationTrail, 
 					validNextStepMap, vidsTraversed, 0, emptyDelKeyHash, namedQueryElementHash, apiVer );
 			resSetList.add(tmpResSet);
 		}
-
+		
 		// If a secondary filter was defined, we will prune the collected instance data result set(s) based on it.
 		List<ResultSet> prunedResSetList = new ArrayList<>();
 		if( resSetList != null && !resSetList.isEmpty() ){
@@ -1174,8 +1190,8 @@ public class ModelBasedProcessing {
 				}
 			}
 		}
-
-		// Since a NamedQuery can mark some nodes as "do-not-display", we need to collapse our resultSet so
+		
+		// Since a NamedQuery can mark some nodes as "do-not-display", we need to collapse our resultSet so 
 		// does not display those nodes.
 		List<ResultSet> collapsedResSetList = new ArrayList<>();
 		if( prunedResSetList != null && !prunedResSetList.isEmpty() ){
@@ -1184,7 +1200,7 @@ public class ModelBasedProcessing {
 				//    marked all the "top" node-elements as do-not-output.   Ie. the query may
 				//    have had a top-node of "generic-vnf" which joins down to different l-interfaces.
 				//    If they only want to see the l-interfaces, then a single result set
-				//    would be "collapsed" into many separate resultSets - each of which is
+				//    would be "collapsed" into many separate resultSets - each of which is 
 				//    just a single l-interface.
 				List<ResultSet> tmpResSetList = collapseForDoNotOutput(prunedResSetList.get(i));
 				if( tmpResSetList != null && !tmpResSetList.isEmpty() ){
@@ -1195,11 +1211,12 @@ public class ModelBasedProcessing {
 				}
 			}
 		}
-
+		
 		return collapsedResSetList;
-	}
+		
+	}// End of queryByNamedQuery()
 
-
+	
 	/**
 	 * Prune a result set as per a secondary filter.
 	 *
@@ -1211,13 +1228,13 @@ public class ModelBasedProcessing {
 	 */
 	public ResultSet pruneResultSet(ResultSet resSetVal, String cutPointType, Map<String,Object> secFilterHash )
 		throws AAIException {
-
-		// Given a ResultSet and some secondary filter info, do pruning as needed
+		
+		// Given a ResultSet and some secondary filter info, do pruning as needed 
 		ResultSet pResSet = new ResultSet();
-
-		// For this ResultSet, we will see if we are on a node of the type that is our cutPoint;
+				
+		// For this ResultSet, we will see if we are on a node of the type that is our cutPoint; 
 		//   then only keep it if we peek "below" and see a match for our filter.
-
+				
 		String nt = resSetVal.getVert().<String>property(AAIProperties.NODE_TYPE).orElse(null);
 		if( nt != null && nt.equals(cutPointType) ){
 			// We are on the type of node that may need to be "pruned" along with it's sub-results
@@ -1226,8 +1243,8 @@ public class ModelBasedProcessing {
 				return pResSet;
 			}
 		}
-
-		// If we made it to here, we will not be pruning at this level, so we will
+		
+		// If we made it to here, we will not be pruning at this level, so we will 
 		// be returning a copy of this resultSet that has it's subResults pruned (as needed).
 		pResSet.setVert(resSetVal.getVert());
 		pResSet.setDoNotOutputFlag(resSetVal.getDoNotOutputFlag());
@@ -1236,7 +1253,7 @@ public class ModelBasedProcessing {
 		pResSet.setNewDataDelFlag(resSetVal.getNewDataDelFlag());
 		pResSet.setPropertyLimitDesc(resSetVal.getPropertyLimitDesc());
 		pResSet.setPropertyOverRideHash(resSetVal.getPropertyOverRideHash());
-
+				
 		if( !resSetVal.getSubResultSet().isEmpty() ){
 			ListIterator<ResultSet> listItr = resSetVal.getSubResultSet().listIterator();
 			List<ResultSet> newSubSetList = new ArrayList<>();
@@ -1248,11 +1265,13 @@ public class ModelBasedProcessing {
 				}
 			}
 			pResSet.setSubResultSet(newSubSetList);
-		}
+		}   
+		
 		return pResSet;
-	}
-
-
+		
+	}// End pruneResultSet()
+	
+	
 	/**
   	 * Satisfies hash of filters.
   	 *
@@ -1263,18 +1282,18 @@ public class ModelBasedProcessing {
   	 */
   	public boolean satisfiesFilters(ResultSet resSet, Map<String,Object> filterHash )
   			throws AAIException {
-
+		  
 		  if( filterHash.isEmpty() ){
 			  // Nothing to look for, so no, we didn't find it.
 			  return false;
 		  }
-
+		  
 		  Iterator <?> it = filterHash.entrySet().iterator();
 		  while( it.hasNext() ){
 			  Map.Entry<?,?> filtEntry = (Map.Entry<?,?>) it.next();
 			  String propNodeTypeDotName = (filtEntry.getKey()).toString();
 			  String fpv = (filtEntry.getValue()).toString();
-
+			  
 			  int periodLoc = propNodeTypeDotName.indexOf(".");
 			  if( periodLoc <= 0 ){
 				  String emsg = "Bad filter param key passed in: [" + propNodeTypeDotName + "].  Expected format = [nodeName.paramName]\n";
@@ -1292,11 +1311,13 @@ public class ModelBasedProcessing {
 				  }
 			  }
 		  }
+		  
 		  // Made it through all the filters -- it found what we were looking for.
 		  return true;
-	  }
-
-
+		  
+	  }// end of satisfiesFilters()
+	
+	
 	/**
 	 * Filter met by this set.
 	 *
@@ -1309,7 +1330,7 @@ public class ModelBasedProcessing {
 	public boolean filterMetByThisSet(ResultSet resSet, String filtNodeType, String filtPropName, String filtPropVal ) {
         // Note - we are just looking for a positive match for one filter for this resultSet
 		// NOTE: we're expecting the filter to have a format like this: "nodeType.parameterName:parameterValue"
-
+		
 		  Vertex vert = resSet.getVert();
 		  if( vert == null ){
 			  return false;
@@ -1335,7 +1356,7 @@ public class ModelBasedProcessing {
 				  }
 			  }
 		  }
-
+			
 		  // Didn't find a match at the this level, so check the sets below it meet the criteria
 		  if( resSet.getSubResultSet() != null ){
 			  ListIterator<ResultSet> listItr = resSet.getSubResultSet().listIterator();
@@ -1345,11 +1366,13 @@ public class ModelBasedProcessing {
 				  }
 			  }
 		  }
+		  
 		  return false;
-	  }
+		  
+	  }// end of filterMetByThisSet()
+	  
 
-
-
+	
 	/**
 	 * Collapse for do not output.
 	 *
@@ -1359,14 +1382,14 @@ public class ModelBasedProcessing {
 	 */
 	public List<ResultSet> collapseForDoNotOutput(ResultSet resSetVal )
 		throws AAIException {
-
-		// Given a ResultSet -- if it is tagged to NOT be output, then replace it with
-		// it's sub-ResultSets if it has any.
+		
+		// Given a ResultSet -- if it is tagged to NOT be output, then replace it with 
+		// it's sub-ResultSets if it has any. 
 		List<ResultSet> colResultSet = new ArrayList<>();
-
+		
 		if( resSetVal.getDoNotOutputFlag().equals("true") ){
 			// This ResultSet isn't to be displayed, so replace it with it's sub-ResultSets
-			List<ResultSet> subResList = resSetVal.getSubResultSet();
+			List<ResultSet> subResList = (ArrayList<ResultSet>) resSetVal.getSubResultSet();
 			for( int k = 0; k < subResList.size(); k++ ){
 				List<ResultSet> newSubResList =  collapseForDoNotOutput(subResList.get(k));
 				colResultSet.addAll(newSubResList);
@@ -1376,11 +1399,11 @@ public class ModelBasedProcessing {
 			// This set will be displayed
 			colResultSet.add(resSetVal);
 		}
-
+		
 		// For each result set now at this level, call this same routine to collapse their sub-resultSets
 		for( int i = 0; i < colResultSet.size(); i++ ){
 			List<ResultSet> newSubSet = new ArrayList<>();
-			List<ResultSet> subResList = colResultSet.get(i).getSubResultSet();
+			List<ResultSet> subResList = (ArrayList<ResultSet>) colResultSet.get(i).getSubResultSet();
 			for( int n = 0; n < subResList.size(); n++ ){
 				List<ResultSet> newSubResList =  collapseForDoNotOutput(subResList.get(n));
 				newSubSet.addAll(newSubResList);
@@ -1388,18 +1411,19 @@ public class ModelBasedProcessing {
 			// Replace the old subResultSet with the collapsed set
 			colResultSet.get(i).setSubResultSet(newSubSet);
 		}
-
+		
 		return colResultSet;
-	}
-
-
-
+		
+	}// End collapseForDoNotOutput()
+	
+	
+    
 	/**
 	 * Collect instance data.
 	 *
 	 * @param transId the trans id
 	 * @param fromAppId the from app id
-	 * @param thisLevelElemVtx the element vtx at this level
+	 * @param thisLevelElemVtx the element vtx at this level 
 	 * @param thisVertsTrail the this verts trail
 	 * @param elementLocationTrail -- trail of nodeTypes that got us here (this element vertex) from the top
 	 * @param validNextStepMap the valid next step map -- hash of valid next steps (node types) for this model
@@ -1421,33 +1445,33 @@ public class ModelBasedProcessing {
                                          Map<String,String> namedQueryElementHash,  // only applies to named-query data collecting
                                          String apiVer
 		  )   throws AAIException {
-
+		
 	  levelCounter++;
-
+	  
 	  String thisElemVid = thisLevelElemVtx.id().toString();
-
+	   
 	  if( levelCounter > MAX_LEVELS ) {
 		  throw new AAIException("AAI_6125", "collectInstanceData() has looped across more levels than allowed: " + MAX_LEVELS + ". ");
 	  }
-
+	  
 	  ResultSet rs = new ResultSet();
 	  if( namedQueryElementHash.containsKey(thisVertsTrail) ){
 		  // We're collecting data for a named-query, so need to see if we need to do anything special
 		  String nqElUuid = namedQueryElementHash.get(thisVertsTrail);
 		  Vertex nqElementVtx = getNodeUsingUniqueId(transId, fromAppId, "named-query-element",
 					"named-query-element-uuid", nqElUuid);
-
+		 
 		  String tmpDoNotShow = nqElementVtx.<String>property("do-not-output").orElse(null);
 		  if( tmpDoNotShow != null && tmpDoNotShow.equals("true") ){
 			  rs.setDoNotOutputFlag("true");
 		  }
-
+		 		  
 		  if( namedQueryConstraintSaysStop(transId, fromAppId, nqElementVtx, thisLevelElemVtx, apiVer) ){
-			  // There was a property constraint which says they do not want to collect this vertex or whatever
+			  // There was a property constraint which says they do not want to collect this vertex or whatever 
 			  // might be below it.  Just return the empty rs here.
 			  return rs;
 		  }
-
+		  
 		  String propLimDesc = nqElementVtx.<String>property("property-limit-desc").orElse(null);
 		  if( (propLimDesc != null) && !propLimDesc.equals("") ){
 			  if (propLimDesc.equalsIgnoreCase("show-all")) {
@@ -1463,13 +1487,13 @@ public class ModelBasedProcessing {
 		  Map<String,Object> tmpPropertyOverRideHash = getNamedQueryPropOverRide(transId, fromAppId, nqElementVtx, thisLevelElemVtx, apiVer);
 		  //System.out.println(" DEBUG --- USING this propertyOverride data set on ResSet [" + tmpPropertyOverRideHash.toString() + "]");
 		  rs.setPropertyOverRideHash(tmpPropertyOverRideHash);
-
+		  
 		  // See if we need to look up any "unconnected" data that needs to be associated with this result set
 		  Map<String,Object> tmpExtraPropHash = getNamedQueryExtraDataLookup(transId, fromAppId, nqElementVtx, thisLevelElemVtx, apiVer);
 		  //System.out.println(" DEBUG --- ADDING this EXTRA Lookup data to the ResSet [" + tmpExtraPropHash.toString() + "]");
 		  rs.setExtraPropertyHash(tmpExtraPropHash);
 	  }
-
+	  
 	  rs.setVert(thisLevelElemVtx);
 	  rs.setLocationInModelSubGraph(thisVertsTrail);
 	  if( delKeyHash.containsKey(thisVertsTrail) && delKeyHash.get(thisVertsTrail).equals("T") ){
@@ -1478,10 +1502,10 @@ public class ModelBasedProcessing {
 	  else {
 		  rs.setNewDataDelFlag("F");
 	  }
-
+		
 	  // Use Gremlin-pipeline to just look for edges that go to a valid "next-steps"
 	  Collection <String> validNextStepColl = validNextStepMap.get(thisVertsTrail);
-
+	  
 	  // Because of how we process linkage-points, we may have duplicate node-types in our next-stepMap (for one step)
 	  // So, to keep from looking (and bringing back) the same data twice, we need to make sure our next-steps are unique
 	  Set<String> validNextStepHashSet = new HashSet<>();
@@ -1490,20 +1514,20 @@ public class ModelBasedProcessing {
 		  String targetStepStr = ntcItr.next();
 		  validNextStepHashSet.add(targetStepStr);
 	  }
-
+	  
 	  List<String> tmpVidsTraversedList = new ArrayList<>();
 	  tmpVidsTraversedList.addAll(vidsTraversed);
 	  tmpVidsTraversedList.add(thisElemVid);
-
+	  
 	  Iterator <String> ntItr = validNextStepHashSet.iterator();
 	  while( ntItr.hasNext() ){
 		  String targetStep = ntItr.next();
 		  // NOTE: NextSteps can either be just a nodeType, or can be a nodeType plus
-		  //     model-invariant-id-local and model-version-id-local (the two persona properties)
+		  //     model-invariant-id-local and model-version-id-local (the two persona properties) 
 		  // 	 if those need to be checked also.
 		  //     When the persona stuff is part of the step, it is a comma separated string.
 		  //     Ie.  "nodeType,model-inv-id-local,model-version-id-local" (the two "persona" props)
-		  //
+		  //     
 		  String targetNodeType = "";
 		  String pmid = "";
 		  String pmv = "";
@@ -1525,7 +1549,7 @@ public class ModelBasedProcessing {
 			  // It's just the nodeType with no other info
 			  targetNodeType = targetStep;
 		  }
-
+		  
 		  GraphTraversal<Vertex, Vertex> modPipe = null;
 		  if( stepIsJustNT ){
 			  modPipe = this.engine.asAdmin().getReadOnlyTraversalSource().V(thisLevelElemVtx).both().has(AAIProperties.NODE_TYPE, targetNodeType);
@@ -1533,29 +1557,31 @@ public class ModelBasedProcessing {
 		  else {
 			  modPipe = this.engine.asAdmin().getReadOnlyTraversalSource().V(thisLevelElemVtx).both().has(AAIProperties.NODE_TYPE, targetNodeType).has(addDBAliasedSuffix("model-invariant-id"),pmid).has(addDBAliasedSuffix("model-version-id"),pmv);
 		  }
-
+		  
 		  if( modPipe == null || !modPipe.hasNext() ){
 			 //System.out.println("DEBUG - didn't find any [" + targetStep + "] connected to this guy (which is ok)");
 		  }
 		  else {
 			  while( modPipe.hasNext() ){
-				  Vertex tmpVert = modPipe.next();
+				  Vertex tmpVert = (Vertex) modPipe.next();
 				  String tmpVid = tmpVert.id().toString();
 				  String tmpTrail = thisVertsTrail + "|" + targetStep;
 				  if( !vidsTraversed.contains(tmpVid) ){
-					  // This is one we would like to use - so we'll include the result set we get for it
+					  // This is one we would like to use - so we'll include the result set we get for it 
 					  ResultSet tmpResSet  = collectInstanceData( transId, fromAppId,
-								tmpVert, tmpTrail,
-								validNextStepMap, tmpVidsTraversedList,
+								tmpVert, tmpTrail, 
+								validNextStepMap, tmpVidsTraversedList, 
 								levelCounter, delKeyHash, namedQueryElementHash, apiVer );
-
+					  
 					  rs.getSubResultSet().add(tmpResSet);
 				  }
 			  }
 		  }
 	  }
+	
 	  return rs;
-	}
+	  
+	} // End of collectInstanceData()
 
 
 	/**
@@ -1572,17 +1598,17 @@ public class ModelBasedProcessing {
 	public Multimap<String, String> genTopoMap4ModelVer(String transId, String fromAppId,
                                                         Vertex modelVerVertex, String modelVerId)
 				  throws AAIException {
-
+	  
 		if( modelVerVertex == null ){
 			throw new AAIException("AAI_6114", "null modelVerVertex passed to genTopoMap4ModelVer()");
 		}
-
+		
 		Multimap<String, String> initialEmptyMap = ArrayListMultimap.create();
 		List<String> vidsTraversed = new ArrayList<>();
 		String modelType = getModelTypeFromModelVer( modelVerVertex, "" );
 		if( modelType.equals("widget") ){
 			// A widget model by itself does not have a topoplogy.  That is - it has no "model-elements" which
-			// define how it is connected to other things.   All it has is a name which ties it to
+			// define how it is connected to other things.   All it has is a name which ties it to 
 			// an aai-node-type
 			Iterator<Vertex> vertI= this.traverseIncidentEdges(EdgeType.TREE, modelVerVertex, "model-element");
 			if( vertI != null && vertI.hasNext() ){
@@ -1593,39 +1619,42 @@ public class ModelBasedProcessing {
 				return initialEmptyMap;
 			}
 		}
-
+		
 		String firstModelVerId = modelVerVertex.<String>property("model-version-id").orElse(null);
 		String firstModelVersion = modelVerVertex.<String>property("model-version").orElse(null);
 		if( firstModelVerId == null || firstModelVerId.equals("") || firstModelVersion == null || firstModelVersion.equals("") ){
 		 	throw new AAIException("AAI_6132", "Bad Model Definition: Bad model-version-id or model-version.  model-version-id = "
 				  + modelVerId);
 		}
-
+		
 		Vertex firstElementVertex = getTopElementForSvcOrResModelVer( modelVerVertex, "" );
 		Vertex firstEleModVerVtx = getModelVerThatElementRepresents( firstElementVertex, "" );
-		String firstElemModelType = getModelTypeFromModelVer( firstEleModVerVtx, "" );
+		String firstElemModelType = getModelTypeFromModelVer( firstEleModVerVtx, "" );	  
 		if( ! firstElemModelType.equals("widget") ){
 		 	throw new AAIException("AAI_6132", "Bad Model Definition: First element must correspond to a widget type model.  Model UUID = "
 				  + modelVerId);
 		}
-
+		
 		Vertex firstModVtx = getModelGivenModelVer( modelVerVertex, "" );
 	    String firstModelInvId = firstModVtx.<String>property("model-invariant-id").orElse(null);
 	    if( firstModelInvId == null || firstModelInvId.equals("") ){
 		 	throw new AAIException("AAI_6132", "Bad Model Definition: Could not find model.model-invariant-id given model-ver.model-version-id = "
 				  + modelVerId);
 		}
-
-		return collectTopology4ModelVer( transId, fromAppId,
+	    
+		 Multimap<String, String> collectedMap = collectTopology4ModelVer( transId, fromAppId,
 				firstElementVertex, "", initialEmptyMap, vidsTraversed, 0, null, firstModelInvId, firstModelVersion );
-	}
+		 
+		 return collectedMap;
+	  
+	} // End of genTopoMap4ModelVer()
 
 
 	public List<String> makeSureItsAnArrayList( String listStringVal ){
 		// We're sometimes getting a String back on db properties that should be ArrayList<String>
 		// Seems to be how they're defined in OXM - whether they use a "xml-wrapper" or not
 		// Need to translate them into ArrayLists sometimes...
-
+		
 		List<String> retArrList = new ArrayList<String>();
 		String listString = listStringVal;
 		listString = listString.replace(" ",  "");
@@ -1638,6 +1667,7 @@ public class ModelBasedProcessing {
 				retArrList.add(pieces[i]);
 			}
 		}
+			
 		return retArrList;
 	}
 
@@ -1652,33 +1682,33 @@ public class ModelBasedProcessing {
 	 */
 	public Map<String, Vertex> getModConstraintHash(Vertex modelElementVtx, Map<String, Vertex> currentHash )
 				  throws AAIException {
-
-		// For a given model-element vertex, look to see if there are any "model-constraint" elements that is has
+	
+		// For a given model-element vertex, look to see if there are any "model-constraint" elements that is has 
 		//   an OUT "uses" edge to.   If it does, then get any "constrained-element-set" nodes that are pointed to
 		//   by the "model-constraint".   That will be the replacement "constrained-element-set".  The UUID of the
 		//   "constrained-element-set" that it is supposed to replace is found in the property:
-		//   model-constraint.constrained-element-set-uuid-to-replace
+		//   model-constraint.constrained-element-set-uuid-to-replace   
 		//
-		//   For now, that is the only type of model-constraint allowed, so that is all we will look for.
-		//   Pass back any of these "constrained-element-set" nodes along with any that were passed in by
+		//   For now, that is the only type of model-constraint allowed, so that is all we will look for.  
+		//   Pass back any of these "constrained-element-set" nodes along with any that were passed in by 
 		//   the "currentHash" parameter.
-
+				
 		if( modelElementVtx == null ){
 			String msg = " null modelElementVtx passed to getModConstraintHash() ";
 			throw new AAIException("AAI_6114", msg);
 		}
-
+	  
 		String modelType = modelElementVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 		if( modelType == null || (!modelType.equals("model-element")) ){
 			String msg = " getModConstraintHash() called with wrong type model: [" + modelType + "]. ";
 			throw new AAIException("AAI_6114", msg);
 		}
-
+	  
 		Map<String, Vertex> thisHash = new HashMap<>();
 		if( currentHash != null ){
 			thisHash.putAll(currentHash);
 		}
-
+	 
 		int count = 0;
 		List<Vertex> modelConstraintArray = new ArrayList<>();
 		Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, modelElementVtx, "model-constraint");
@@ -1691,7 +1721,7 @@ public class ModelBasedProcessing {
 				count++;
 			}
 		}
-
+	  
 		if( count > 0 ) {
 			for( int i = 0; i < count; i++ ){
 				Vertex vtxOfModelConstraint = modelConstraintArray.get(i);
@@ -1700,7 +1730,7 @@ public class ModelBasedProcessing {
 				// constrained-element-set to use in its place
 				Iterator<Vertex> mvertI = this.traverseIncidentEdges(EdgeType.TREE, vtxOfModelConstraint, "constrained-element-set");
 				while( mvertI != null && mvertI.hasNext() ){
-					// There better only be one...
+					// There better only be one...  
 					Vertex tmpVert = mvertI.next();
 					String connectToType = tmpVert.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 					if( (connectToType != null) && connectToType.equals("constrained-element-set") ){
@@ -1715,9 +1745,10 @@ public class ModelBasedProcessing {
 			// Didn't find anything to add, so just return what they passed in.
 			return currentHash;
 		}
-	}
-
-
+	
+	} // End of getModConstraintHash()
+ 
+	
 	/**
 	 * Gets the top element vertex for service or resource model.
 	 *
@@ -1727,48 +1758,50 @@ public class ModelBasedProcessing {
 	 */
 	public Vertex getTopElementForSvcOrResModelVer(Vertex modelVerVtx, String trail )
 				  throws AAIException {
-
+	
 		  // For a "resource" or "service" type model, return the "top" element in that model
 		  if( modelVerVtx == null ){
 			  String msg = " null modelVertex passed to getTopoElementForSvcOrResModelVer() at [" + trail + "]. ";
 			  throw new AAIException("AAI_6114", msg);
 		  }
-
+		 
 		  String modelVerId = modelVerVtx.<String>property("model-version-id").orElse(null);
 		  if( modelVerId == null ){
 			  String nt = modelVerVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 			  if( nt != null && !nt.equals("model-ver") ){
-				  String msg = "Illegal model defined: model element pointing to nodeType: ["
+				  String msg = "Illegal model defined: model element pointing to nodeType: [" 
 						  + nt + "], should be pointing to: [model-ver] at [" + trail + "]. ";
 				  throw new AAIException("AAI_6132", msg);
 			  }
 		  }
-
+		  
 		  Vertex firstElementVertex = null;
-
+	
 		  Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, modelVerVtx, "model-element");
 		  int elCount = 0;
 		  while( vertI != null && vertI.hasNext() ){
 			  elCount++;
 			  firstElementVertex = vertI.next();
 		  }
-
+			
 		  if( elCount > 1 ){
-			  String msg = "Illegal model defined: More than one first element defined for model-ver-id = " +
+			  String msg = "Illegal model defined: More than one first element defined for model-ver-id = " + 
 					  modelVerId + " at [" + trail + "]. ";
 			  throw new AAIException("AAI_6132", msg);
 		  }
-
+		 	  
 		  if( firstElementVertex == null ){
-			  String msg = "Could not find first model element for model-ver-id = "
+			  String msg = "Could not find first model element for model-ver-id = " 
 					  + modelVerId + " at [" + trail + "]. ";
 			  throw new AAIException("AAI_6132", msg);
 		  }
+		  
 		  return firstElementVertex;
-	}
+	  
+	} // End of getTopElementForSvcOrResModelVer()
 
-
-
+	
+	 	 
 	/**
 	 * Gets the named query prop over ride.
 	 *
@@ -1783,32 +1816,34 @@ public class ModelBasedProcessing {
 	public Map<String,Object> getNamedQueryPropOverRide(String transId, String fromAppId,
                                                         Vertex namedQueryElementVertex, Vertex instanceVertex, String apiVer )
 				  throws AAIException {
-
+		
 		// If this model-element says that they want an alternative set of properties returned, then pull that
 		// data out of the instance vertex.
-
+		
 		Map<String,Object> altPropHash = new HashMap<>();
-
+			
 		if( namedQueryElementVertex == null ){
 			String msg = " null namedQueryElementVertex passed to getNamedQueryPropOverRide() ";
 			throw new AAIException("AAI_6114", msg);
 		}
-
+		
 		List<String> propCollectList = new ArrayList<>();
 		Iterator <VertexProperty<Object>> vpI = namedQueryElementVertex.properties("property-collect-list");
 		while( vpI.hasNext() ){
 			propCollectList.add((String)vpI.next().value());
 		}
-
+		
 		for( int i = 0; i < propCollectList.size(); i++ ){
 			String thisPropName = propCollectList.get(i);
 			Object instanceVal = instanceVertex.<Object>property(thisPropName).orElse(null);
 			altPropHash.put(thisPropName, instanceVal);
 		}
+			
 		return altPropHash;
-	}
+	  
+	} // End of getNamedQueryPropOverRide()
 
-
+	
 	/**
 	 * Named query constraint says stop.
 	 *
@@ -1823,11 +1858,11 @@ public class ModelBasedProcessing {
 	public Boolean namedQueryConstraintSaysStop(String transId, String fromAppId,
                                                 Vertex namedQueryElementVertex, Vertex instanceVertex, String apiVer )
 				  throws AAIException {
-
+		
 		// For each (if any) property-constraint defined for this named-query-element, we will evaluate if
 		// the constraint is met or not-met.  if there are constraints and any are not-met, then
 		// we return "true".
-
+		
 		if( namedQueryElementVertex == null ){
 			String msg = " null namedQueryElementVertex passed to namedQueryConstraintSaysStop() ";
 			throw new AAIException("AAI_6114", msg);
@@ -1836,15 +1871,15 @@ public class ModelBasedProcessing {
 			String msg = " null instanceVertex passed to namedQueryConstraintSaysStop() ";
 			throw new AAIException("AAI_6114", msg);
 		}
-
+				
 		Iterator<Vertex> constrPipe = this.traverseIncidentEdges(EdgeType.TREE, namedQueryElementVertex, "property-constraint");
 		if( constrPipe == null || !constrPipe.hasNext() ){
 			// There's no "property-constraint" defined for this named-query-element.   No problem.
 			return false;
 		}
-
+		
 		while( constrPipe.hasNext() ){
-			Vertex constrVtx = constrPipe.next();
+			Vertex constrVtx = (Vertex) constrPipe.next();
 			// We found a property constraint that we will need to check
 			String conType = constrVtx.<String>property("constraint-type").orElse(null);
 			if( (conType == null) || conType.equals("")){
@@ -1861,13 +1896,13 @@ public class ModelBasedProcessing {
 				String msg = " Bad property-constraint (propVal) found in Named Query definition. ";
 				throw new AAIException("AAI_6133", msg);
 			}
-
+			
 			// See if that constraint is met or not
 			String val = instanceVertex.<String>property(propName).orElse(null);
 			if( val == null ){
 				val = "";
 			}
-
+			
 			if( conType.equals("EQUALS") ){
 				if( !val.equals(propVal) ){
 					// This constraint was not met
@@ -1885,10 +1920,12 @@ public class ModelBasedProcessing {
 				throw new AAIException("AAI_6133", msg);
 			}
 		}
-		return false;
-	}
+		 
+	  	return false;
+	  
+	} // End of namedQueryConstraintSaysStop()
 
-
+	
 	/**
 	 * Gets the named query extra data lookup.
 	 *
@@ -1903,10 +1940,10 @@ public class ModelBasedProcessing {
 	public Map<String,Object> getNamedQueryExtraDataLookup(String transId, String fromAppId,
                                                            Vertex namedQueryElementVertex, Vertex instanceVertex, String apiVer )
 				  throws AAIException {
-
+		
 		// For each (if any) related-lookup defined for this named-query-element, we will go and
 		// and try to find it.  All the related-lookup data will get put in a hash and returned.
-
+		
 		if( namedQueryElementVertex == null ){
 			String msg = " null namedQueryElementVertex passed to getNamedQueryExtraDataLookup() ";
 			throw new AAIException("AAI_6114", msg);
@@ -1915,22 +1952,22 @@ public class ModelBasedProcessing {
 			String msg = " null instanceVertex passed to getNamedQueryExtraDataLookup() ";
 			throw new AAIException("AAI_6114", msg);
 		}
-
+		
 		Map<String,Object> retHash = new HashMap<>();
-
+		
 		Iterator<Vertex> lookPipe = this.traverseIncidentEdges(EdgeType.TREE, namedQueryElementVertex, "related-lookup");
 		if( lookPipe == null || !lookPipe.hasNext() ){
 			// There's no "related-lookup" defined for this named-query-element.   No problem.
 			return retHash;
 		}
-
+		
 		while( lookPipe.hasNext() ){
-			Vertex relLookupVtx = lookPipe.next();
+			Vertex relLookupVtx = (Vertex) lookPipe.next();
 			// We found a related-lookup record to try and use
 			String srcProp = relLookupVtx.<String>property("source-node-property").orElse(null);
 			String srcNodeType = relLookupVtx.<String>property("source-node-type").orElse(null);
 			srcProp = getPropNameWithAliasIfNeeded(srcNodeType, srcProp);
-
+			
 			if( (srcProp == null) || srcProp.equals("")){
 				String msg = " Bad related-lookup (source-node-property) found in Named Query definition. ";
 				throw new AAIException("AAI_6133", msg);
@@ -1942,38 +1979,38 @@ public class ModelBasedProcessing {
 			}
 			String targetProp = relLookupVtx.<String>property("target-node-property").orElse(null);
 			targetProp = getPropNameWithAliasIfNeeded(targetNodeType, targetProp);
-
+					
 			if( (targetProp == null) || targetProp.equals("")){
 				String msg = " Bad related-lookup (target-node-property) found in Named Query definition. ";
 				throw new AAIException("AAI_6133", msg);
 			}
-
+			
 			List<String> propCollectList = new ArrayList<>();
 			Iterator <VertexProperty<Object>> vpI = relLookupVtx.properties("property-collect-list");
 			while( vpI.hasNext() ){
 				propCollectList.add((String)vpI.next().value());
 			}
 
-			// Use the value from the source to see if we can find ONE target record using the
+			// Use the value from the source to see if we can find ONE target record using the 
 			//     value from the source
 			String valFromInstance = instanceVertex.<String>property(srcProp).orElse(null);
 			if( valFromInstance == null ){
 				// if there is no key to use to go look up something, we should end it here and just
-				// note what happened  - no need to try to look something up by an empty key
-				LOGGER.debug("WARNING - the instance data node of type [" + srcNodeType
-						+ "] did not have a value for property [" + srcProp
+				// note what happened  - no need to try to look something up by an empty key 
+				LOGGER.debug("WARNING - the instance data node of type [" + srcNodeType 
+						+ "] did not have a value for property [" + srcProp 
 						+ "], so related-lookup is being abandoned.");
 				return retHash;
 			}
-
+			
 			Map<String,Object> propHash = new HashMap<String,Object>();
 			propHash.put(targetProp, valFromInstance);
-
+			
 			Optional<Vertex> result = dbMethHelper.locateUniqueVertex(targetNodeType, propHash);
 			if (!result.isPresent()) {
 				// If it can't find the lookup node, don't fail, just log that it couldn't be found ---
-				LOGGER.debug("WARNING - Could not find lookup node that corresponds to nodeType ["
-						+ targetNodeType + "] propertyName = [" + srcProp
+				LOGGER.debug("WARNING - Could not find lookup node that corresponds to nodeType [" 
+						+ targetNodeType + "] propertyName = [" + srcProp 
 						+ "], propVal = [" + valFromInstance
 						+ "] so related-lookup is being abandoned.");
 				return retHash;
@@ -1987,20 +2024,21 @@ public class ModelBasedProcessing {
 				Object valObj = tmpVtx.<Object>property(tmpPropName).orElse(null);
 				String lookupKey = targetNodeType + "." + tmpPropName;
 				retHash.put(lookupKey, valObj);
-
+				
 			}
 		}
 		}
-
+		 
 	  	return retHash;
-	}
+	  
+	} // End of getNamedQueryExtraDataLookup()
 
 	/**
 	 * Collect NQ element hash.
 	 *
 	 * @param transId the trans id
 	 * @param fromAppId the from app id
-	 * @param thisLevelElemVtx the element verrtx for this level
+	 * @param thisLevelElemVtx the element verrtx for this level 
 	 * @param incomingTrail the incoming trail -- trail of nodeTypes that got us here (this nq-element vertex) from the top
 	 * @param currentHash the current hash
      * @param Map that got us to this point (that we will use as the base of the map we will return)
@@ -2013,21 +2051,21 @@ public class ModelBasedProcessing {
                                                     Vertex thisLevelElemVtx, String incomingTrail,
                                                     Map<String,String> currentHash, ArrayList <String> vidsTraversed,
                                                     int levelCounter )   throws AAIException {
-
+	
 	  levelCounter++;
 
 	  Map<String, String> thisHash = new HashMap<>();
 	  thisHash.putAll(currentHash);
-
+	 
 	  if( levelCounter > MAX_LEVELS ) {
 		  throw new AAIException("AAI_6125", "collectNQElementHash() has looped across more levels than allowed: " + MAX_LEVELS + ". ");
 	  }
 	  String thisGuysTrail = "";
 	  String thisElemVid = thisLevelElemVtx.id().toString();
-
+	 
 	  // Find out what widget (and thereby what aai-node-type) this element represents.
 	  String thisElementNodeType = getNqElementWidgetType( transId, fromAppId,  thisLevelElemVtx, incomingTrail );
-
+	  
 	  if( incomingTrail == null || incomingTrail.equals("") ){
 		  // This is the first one
 		  thisGuysTrail = thisElementNodeType;
@@ -2036,28 +2074,28 @@ public class ModelBasedProcessing {
 		  thisGuysTrail = incomingTrail + "|" + thisElementNodeType;
 	  }
 	  vidsTraversed.add(thisElemVid);
-
+	  
 	  String nqElementUuid = thisLevelElemVtx.<String>property("named-query-element-uuid").orElse(null);
 	  if( nqElementUuid == null || nqElementUuid.equals("") ){
 		  String msg = " named-query element UUID not found at trail = [" + incomingTrail + "].";
 		  throw new AAIException("AAI_6133", msg);
 	  }
-	  thisHash.put(thisGuysTrail, nqElementUuid );
-
+	  thisHash.put(thisGuysTrail, nqElementUuid ); 
+	  
 	  //  Now go "down" and look at the sub-elements pointed to so we can get their data.
 	  Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, thisLevelElemVtx, "named-query-element");
 	  while( vertI != null && vertI.hasNext() ){
 		  Vertex tmpVert = vertI.next();
 		  String vid = tmpVert.id().toString();
 		  Map<String,Object> elementHash = new HashMap<String, Object>();
-
+		  
 		  String connectToType = tmpVert.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 		  if( connectToType != null && connectToType.equals("named-query-element") ){
 			  // This is what we would expect
 			  elementHash.put(vid, tmpVert);
 		  }
 		  else {
-			  String msg = " named query element has [connectedTo] edge to improper nodeType= ["
+			  String msg = " named query element has [connectedTo] edge to improper nodeType= [" 
 					  + connectToType + "] trail = [" + incomingTrail + "].";
 			  throw new AAIException("AAI_6133", msg);
 		  }
@@ -2066,15 +2104,16 @@ public class ModelBasedProcessing {
 			  String tmpElVid = elVert.id().toString();
 			  if( !vidsTraversed.contains(tmpElVid) ){
 				  // This is one we would like to use - so we'll recursively get it's result set to add to ours
-				  Map<String, String> tmpHash = collectNQElementHash( transId, fromAppId,
+				  Map<String, String> tmpHash = collectNQElementHash( transId, fromAppId, 
 							elVert, thisGuysTrail, currentHash, vidsTraversed, levelCounter);
 				  thisHash.putAll(tmpHash);
 			  }
-		  }
+		  }		
 	  }
 	  return thisHash;
-	}
-
+	  
+	} // End of collectNQElementHash()
+	
 
 	/**
 	 * Collect delete key hash.
@@ -2100,47 +2139,47 @@ public class ModelBasedProcessing {
                                                     int levelCounter, Map<String, Vertex> modConstraintHash,
                                                     String overRideModelId, String overRideModelVersionId )
 				  throws AAIException {
-
+	
 	  levelCounter++;
 
 	  Map<String, String> thisHash = new HashMap<>();
 	  thisHash.putAll(currentHash);
-
+	 
 	  if( levelCounter > MAX_LEVELS ) {
 		  throw new AAIException("AAI_6125", "collectDeleteKeyHash() has looped across more levels than allowed: " + MAX_LEVELS + ". ");
 	  }
 	  String thisGuysTrail = "";
 	  String thisElemVid = thisLevelElemVtx.id().toString();
 	  Map<String, Vertex> modConstraintHash2Use = null;
-
-	  // If this element represents a resource or service model, then we will replace this element with
+	  
+	  // If this element represents a resource or service model, then we will replace this element with 
 	  // 	the "top" element of that resource or service model.  That model-element already points to its
-	  // 	topology, so it will graft in that model's topology.
+	  // 	topology, so it will graft in that model's topology.   
 	  // EXCEPT - if this element has "linkage-points" defined, then we need to do some extra
 	  //     processing for how we join to that model and will not try to go any "deeper".
 	  List<String> linkagePtList = new ArrayList<>();
 	  Iterator <VertexProperty<Object>> vpI = thisLevelElemVtx.properties("linkage-points");
 
-	  // I am not sure why, but since "linkage-points" is an xml-element-wrapper in the OXM definition,
+	  // I am not sure why, but since "linkage-points" is an xml-element-wrapper in the OXM definition, 
 	  // we get back the whole array of Strings in one String - but still use the "vtx.properties()" to
 	  // get it - but only look at the first thing returned by the iterator.
 	  if( vpI.hasNext() ){
 		  String tmpLinkageThing = (String)vpI.next().value();
 		  linkagePtList = makeSureItsAnArrayList( tmpLinkageThing );
-	  }
-
+	  }   
+	   	  
 	  if( linkagePtList != null && !linkagePtList.isEmpty() ){
 		  // Whatever this element is - we are connecting to it via a linkage-point
 		  // We will figure out what to do and then return without going any deeper
 		  String elemFlag = thisLevelElemVtx.<String>property("new-data-del-flag").orElse(null);
-
+		  
 		  Set<String> linkageConnectNodeTypes = getLinkageConnectNodeTypes( linkagePtList );
 		  Iterator <?> linkNtIter = linkageConnectNodeTypes.iterator();
 		  String incTrail = "";
 		  if( incomingTrail != null &&  !incomingTrail.equals("") ){
 			  incTrail = incomingTrail + "|";
 		  }
-
+		  
 		  while( linkNtIter.hasNext() ){
 			  // The 'trail' (or trails) for this element should just be the to the first-contact on the linkage point
 			  String linkTrail = incTrail + linkNtIter.next();
@@ -2161,14 +2200,14 @@ public class ModelBasedProcessing {
 		  }
 		  return thisHash;
 	  }
-
+  
 	  // ----------------------------------------------------------------------------
-	  // If we got to here, then this was not an element that used a linkage-point
+	  // If we got to here, then this was not an element that used a linkage-point 
 	  // ----------------------------------------------------------------------------
-
+	  
 	  // Find out what widget-model (and thereby what aai-node-type) this element represents.
 	  // Even if this element is pointing to a service or resource model, it must have a
-	  // first element which is a single widget-type model.
+	  // first element which is a single widget-type model.  
 	  String thisElementNodeType = getModElementWidgetType( thisLevelElemVtx, incomingTrail );
 	  String firstElementModelInfo = "";
 
@@ -2186,11 +2225,11 @@ public class ModelBasedProcessing {
 			  //    could be a resource or service model.
 			  firstElementModelInfo = "," + overRideModelId + "," + overRideModelVersionId;
 		  }
-	  }
+	  }	
 	  else if( nodeTypeSupportsPersona(thisElementNodeType) ){
 		  firstElementModelInfo = "," + subModelFirstModInvId + "," + subModelFirstVerId;
 	  }
-
+			  
 	  if( incomingTrail.equals("") ){
 		  // This is the first one
 		  thisGuysTrail = thisElementNodeType + firstElementModelInfo;
@@ -2198,27 +2237,27 @@ public class ModelBasedProcessing {
 	  else {
 		  thisGuysTrail = incomingTrail + "|" + thisElementNodeType  + firstElementModelInfo;
 	  }
-
+	  
 	  String tmpFlag = "F";
 	  Boolean stoppedByASvcOrResourceModelElement = false;
 	  if( modType.equals("widget") ){
 		  elementVtxForThisLevel = thisLevelElemVtx;
-		  // For the element-model for the widget at this level, record it's delete flag
+		  // For the element-model for the widget at this level, record it's delete flag 
 		  tmpFlag = elementVtxForThisLevel.<String>property("new-data-del-flag").orElse(null);
 	  }
 	  else {
-		  // For an element that is referring to a resource or service model, we replace
+		  // For an element that is referring to a resource or service model, we replace 
 	      // this element with the "top" element for that resource/service model so that the
 		  // topology of that resource/service model will be included in this topology.
 		  String modelVerId = thisElementsModelVerVtx.<String>property("model-version-id").orElse(null);
-		  if( subModelFirstModInvId == null || subModelFirstModInvId.equals("")
+		  if( subModelFirstModInvId == null || subModelFirstModInvId.equals("") 
 				  || subModelFirstVerId == null || subModelFirstVerId.equals("") ){
 			  throw new AAIException("AAI_6132", "Bad Model Definition: Bad model-invariant-id or model-version-id.  Model-version-id = " +
 				  modelVerId + ", at [" + incomingTrail + "]");
 		  }
-
-		  // BUT --  if the model-element HERE at the resource/service level does NOT have
-		  //    it's new-data-del-flag set to "T", then we do not need to go down into the
+		  
+		  // BUT --  if the model-element HERE at the resource/service level does NOT have 
+		  //    it's new-data-del-flag set to "T", then we do not need to go down into the 
 		  //    sub-model looking for delete-able things.
 
 		  tmpFlag = thisLevelElemVtx.<String>property("new-data-del-flag").orElse(null);
@@ -2229,10 +2268,10 @@ public class ModelBasedProcessing {
 		  else {
 			  stoppedByASvcOrResourceModelElement = true;
 		  }
-		  // For the element-model for the widget at this level, record it's delete flag
+		  // For the element-model for the widget at this level, record it's delete flag 
 		  tmpFlag = elementVtxForThisLevel.<String>property("new-data-del-flag").orElse(null);
 	  }
-
+	  
 	  String flag2Use = "F";  // by default we'll use "F" for the delete flag
 	  if( ! stoppedByASvcOrResourceModelElement ){
 		  // Since we haven't been stopped by a resource/service level "F", we can look at the lower level flag
@@ -2254,8 +2293,8 @@ public class ModelBasedProcessing {
 			  flag2Use = "T";
 		  }
 	  }
-
-	  thisHash.put(thisGuysTrail, flag2Use);
+	  
+	  thisHash.put(thisGuysTrail, flag2Use); 
 	  if( ! stoppedByASvcOrResourceModelElement ){
 		  // Since we haven't been stopped by a resource/service level "F", we will continue to
 		  //     go "down" and look at the elements pointed to so we can get their data.
@@ -2264,7 +2303,7 @@ public class ModelBasedProcessing {
 			  Vertex tmpVert = vertI.next();
 			  String vid = tmpVert.id().toString();
 			  Map<String,Object> elementHash = new HashMap<String, Object>();
-
+			  
 			  String connectToType = tmpVert.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 			  if( connectToType != null && connectToType.equals("model-element") ){
 				  // A nice, regular old model-element
@@ -2281,15 +2320,15 @@ public class ModelBasedProcessing {
 					  modConstraintHash.remove(constrainedElementSetUuid);
 				  }
 				  else {
-					  elementHash = getNextStepElementsFromSet( tmpVert );
+					  elementHash = getNextStepElementsFromSet( tmpVert );    
 				  }
 			  }
 			  else {
-				  String msg = " model-element has [connectedTo] edge to improper nodeType= ["
+				  String msg = " model-element has [connectedTo] edge to improper nodeType= [" 
 						  + connectToType + "] trail = [" + incomingTrail + "].";
 				  throw new AAIException("AAI_6132", msg);
 			  }
-
+			  
 			  for( Map.Entry<String, Object> entry : elementHash.entrySet() ){
 				  Vertex elVert = (Vertex)(entry.getValue());
 				  String tmpElVid = elVert.id().toString();
@@ -2297,19 +2336,20 @@ public class ModelBasedProcessing {
 				  check4EdgeRule(tmpElNT, thisElementNodeType);
 				  if( !vidsTraversed.contains(tmpElVid) ){
 					  // This is one we would like to use - so we'll recursively get it's result set to add to ours
-					  Map<String, String> tmpHash = collectDeleteKeyHash( transId, fromAppId,
-								elVert, thisGuysTrail,
+					  Map<String, String> tmpHash = collectDeleteKeyHash( transId, fromAppId, 
+								elVert, thisGuysTrail, 
 								currentHash, vidsTraversed, levelCounter, modConstraintHash2Use,
 								"", "" );
 					  thisHash.putAll(tmpHash);
 				  }
-			  }
+			  }		
 		  }
 	  }
 	  return thisHash;
-	}
-
-
+	  
+	} // End of collectDeleteKeyHash()
+	
+	
 	/**
 	 * Gets the linkage connect node types.
 	 *
@@ -2319,18 +2359,18 @@ public class ModelBasedProcessing {
 	 */
 	public Set<String> getLinkageConnectNodeTypes(List<String> linkagePtList )
 			  throws AAIException {
-		// linkage points are a path from the top of a model to where we link in.
-		// This method wants to just bring back a list of distinct last items.
+		// linkage points are a path from the top of a model to where we link in.  
+		// This method wants to just bring back a list of distinct last items.  
 		// Ie: for the input with these two:  "pserver|lag-link|l-interface" and "pserver|p-interface|l-interface"
 		//   it would just return a single item, "l-interface" since both linkage points end in that same node-type.
-
+		
 		Set<String> linkPtSet = new HashSet<>();
-
+		
 		if( linkagePtList == null ){
 			String detail = " Bad (null) linkagePtList passed to getLinkageConnectNodeTypes() ";
 			throw new AAIException("AAI_6125", detail);
 		}
-
+		
 		for( int i = 0; i < linkagePtList.size(); i++ ){
 			String [] trailSteps = linkagePtList.get(i).split("\\|");
 			if( trailSteps == null || trailSteps.length == 0 ){
@@ -2340,11 +2380,12 @@ public class ModelBasedProcessing {
 			String lastStepNT = trailSteps[trailSteps.length - 1];
 			linkPtSet.add(lastStepNT);
 		}
-
+		
 		return linkPtSet;
-	}
-
-
+	
+	}// End getLinkageConnectNodeTypes()
+	
+	
 	/**
 	 * Collect topology for model-ver.
 	 *
@@ -2368,34 +2409,34 @@ public class ModelBasedProcessing {
                                                              int levelCounter, Map<String, Vertex> modConstraintHash,
                                                              String overRideModelInvId, String overRideModelVersionId )
 				  throws AAIException {
-
+	
 	  levelCounter++;
 
 	  Multimap<String, String> thisMap = ArrayListMultimap.create();
 	  thisMap.putAll(currentMap);
-
+	 
 	  if( levelCounter > MAX_LEVELS ) {
 		  throw new AAIException("AAI_6125", "collectTopology4ModelVer() has looped across more levels than allowed: " + MAX_LEVELS + ". ");
 	  }
 	  String thisGuysTrail = "";
 	  String thisElemVid = thisLevelElemVtx.id().toString();
 	  Map<String, Vertex> modConstraintHash2Use = null;
-
-	  // If this element represents a resource or service model, then we will replace this element with
+ 
+	  // If this element represents a resource or service model, then we will replace this element with 
 	  // the "top" element of that resource or service model.  That model-element already points to its
-	  // topology, so it will graft in that model's topology.
+	  // topology, so it will graft in that model's topology.   
 	  // EXCEPT - if this element defines "linkage-points" defined, then we need to do some extra
 	  //     processing for how we join to that model.
-
+	
 	  // Find out what widget-model (and thereby what aai-node-type) this element represents.
 	  // Even if this element is pointing to a service or resource model, it must have a
-	  // first element which is a single widget-type model.
+	  // first element which is a single widget-type model. 
 	  String firstElementModelInfo = "";
 	  String thisElementNodeType = getModElementWidgetType( thisLevelElemVtx, incomingTrail );
 	  if( nodeTypeSupportsPersona(thisElementNodeType) && overRideModelInvId != null && !overRideModelInvId.equals("") ){
 		  firstElementModelInfo = "," + overRideModelInvId + "," + overRideModelVersionId;
 	  }
-
+	  
 	  Vertex elementVtxForThisLevel = null;
 	  Vertex thisElementsModelVerVtx = getModelVerThatElementRepresents( thisLevelElemVtx, incomingTrail );
 	  String subModelFirstModInvId = "";
@@ -2406,12 +2447,12 @@ public class ModelBasedProcessing {
 		  // For an element that is referring to a resource or service model, we replace this
 	      // this element with the "top" element for that resource/service model so that the
 		  // topology of that resource/service model gets included in this topology.
-		  // -- Note - since that top element of a service or resource model will point to a widget model,
+		  // -- Note - since that top element of a service or resource model will point to a widget model, 
 		  //    we have to track what modelId/version it really maps so we can make our recursive call
 		  Vertex thisElementsModelVtx = getModelGivenModelVer(thisElementsModelVerVtx, incomingTrail);
 		  subModelFirstModInvId = thisElementsModelVtx.<String>property("model-invariant-id").orElse(null);
 		  subModelFirstModVerId = thisElementsModelVerVtx.<String>property("model-version-id").orElse(null);
-
+		  
 		  if( nodeTypeSupportsPersona(thisElementNodeType) ){
 				modInfo4Trail = "," + subModelFirstModInvId + "," + subModelFirstModVerId;
 		  }
@@ -2420,13 +2461,13 @@ public class ModelBasedProcessing {
 			  throw new AAIException("AAI_6132", "Bad Model Definition: Bad model-invariant-id or model-version-id.  Model-ver-id = " + modelVerId);
 		  }
 
-		  elementVtxForThisLevel = getTopElementForSvcOrResModelVer(thisElementsModelVerVtx,  incomingTrail);
+		  elementVtxForThisLevel = getTopElementForSvcOrResModelVer(thisElementsModelVerVtx,  incomingTrail);  
 		  modConstraintHash2Use = getModConstraintHash( thisLevelElemVtx, modConstraintHash );
 	  }
 	  else {
 		  elementVtxForThisLevel = thisLevelElemVtx;
 	  }
-
+	  
 	  if( incomingTrail.equals("") ){
 		  // This is the first one
 		  thisGuysTrail = thisElementNodeType + firstElementModelInfo;
@@ -2434,7 +2475,7 @@ public class ModelBasedProcessing {
 	  else {
 		  thisGuysTrail = incomingTrail + "|" + thisElementNodeType + modInfo4Trail;
 	  }
-
+	  
 	  // We only want to ensure that a particular element does not repeat on a single "branch".
 	  // It could show up on other branches in the case where it is a sub-model which is being
 	  // used in more than one place.
@@ -2442,7 +2483,7 @@ public class ModelBasedProcessing {
 	  List<String> thisTrailsVidsTraversed = new ArrayList <String>();
 	  thisTrailsVidsTraversed.addAll(vidsTraversed);
 	  thisTrailsVidsTraversed.add(thisElemVid);
-
+	  
 	  // Look at the elements pointed to at this level and add on their data
 	  Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, elementVtxForThisLevel, "model-element", "constrained-element-set");
 
@@ -2466,35 +2507,35 @@ public class ModelBasedProcessing {
 				  modConstraintHash.remove(constrainedElementSetUuid);
 			  }
 			  else {
-				  elementHash = getNextStepElementsFromSet( tmpVert );
+				  elementHash = getNextStepElementsFromSet( tmpVert );    
 			  }
 		  }
 		  else {
-			  String msg = " model element has [connectedTo] edge to improper nodeType= ["
+			  String msg = " model element has [connectedTo] edge to improper nodeType= [" 
 					  + connectToType + "] trail = [" + incomingTrail + "].";
 			  throw new AAIException("AAI_6132", msg);
 		  }
-
+		  
 		  for( Map.Entry<String, Object> entry : elementHash.entrySet() ){
 			  Vertex elVert = (Vertex)(entry.getValue());
 			  String tmpElVid = elVert.id().toString();
 			  String tmpElNT = getModElementWidgetType( elVert, thisGuysTrail );
 			  String tmpElStepName = getModelElementStepName( elVert, thisGuysTrail);
-
+			  
 			  List<String> linkagePtList = new ArrayList <String>();
 			  Iterator <VertexProperty<Object>> vpI = elVert.properties("linkage-points");
-
-			  // I am not sure why, but since "linkage-points" is an xml-element-wrapper in the OXM definition,
+ 
+			  // I am not sure why, but since "linkage-points" is an xml-element-wrapper in the OXM definition, 
 			  // we get back the whole array of Strings in one String - but still use the "vtx.properties()" to
 			  // get it - but only look at the first thing returned by the iterator.
 			  if( vpI.hasNext() ){
 				  String tmpLinkageThing = (String)vpI.next().value();
 				  linkagePtList = makeSureItsAnArrayList( tmpLinkageThing );
-			  }
-
+			  } 
+		  
 			  if( linkagePtList != null && !linkagePtList.isEmpty() ){
-				  // This is as far as we can go, we will use the linkage point info to define the
-				  // rest of this "trail"
+				  // This is as far as we can go, we will use the linkage point info to define the 
+				  // rest of this "trail" 
 				  for( int i = 0; i < linkagePtList.size(); i++ ){
 					  Multimap<String, String> tmpMap = collectTopology4LinkagePoint( transId, fromAppId,
 								linkagePtList.get(i), thisGuysTrail, currentMap);
@@ -2507,8 +2548,8 @@ public class ModelBasedProcessing {
 				  if( !thisTrailsVidsTraversed.contains(tmpElVid) ){
 					  // This is one we would like to use - so we'll recursively get it's result set to add to ours
 					  Multimap<String, String> tmpMap = collectTopology4ModelVer( transId, fromAppId,
-								elVert, thisGuysTrail,
-								currentMap, thisTrailsVidsTraversed, levelCounter,
+								elVert, thisGuysTrail, 
+								currentMap, thisTrailsVidsTraversed, levelCounter, 
 								 modConstraintHash2Use, subModelFirstModInvId, subModelFirstModVerId );
 					  thisMap.putAll(tmpMap);
 				  }
@@ -2519,14 +2560,16 @@ public class ModelBasedProcessing {
 							  " on trail = [" + thisGuysTrail + "]. ";
 					  System.out.println( msg );
 					  throw new AAIException("AAI_6132", msg);
-				  }
-			  }
-		  }
+				  }	  
+			  }  
+		  }		
 	  }
+	   
 	  return thisMap;
-	}
-
-
+	  
+	} // End of collectTopology4ModelVer()
+	
+	
 	/**
 	 * Check 4 edge rule.
 	 *
@@ -2537,11 +2580,16 @@ public class ModelBasedProcessing {
 	 */
 	public void check4EdgeRule( String nodeTypeA, String nodeTypeB) throws AAIException {
 		// Throw an exception if there is no defined edge rule for this combination of nodeTypes in DbEdgeRules.
-
-		final EdgeRules edgeRules = EdgeRules.getInstance();
-
-		if( !edgeRules.hasEdgeRule(nodeTypeA, nodeTypeB)
-				&&  !edgeRules.hasEdgeRule(nodeTypeB, nodeTypeA) ){
+		
+		final EdgeIngestor edgeRules = SpringContextAware.getApplicationContext().getBean(EdgeIngestor.class);
+		//final EdgeRules edgeRules = EdgeRules.getInstance();
+		
+		EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(nodeTypeA, nodeTypeB);
+		if (!edgeRules.hasRule(baseQ.build())) {
+			
+	
+	/*	if( !edgeRules.hasEdgeRule(nodeTypeA, nodeTypeB)  
+				&&  !edgeRules.hasEdgeRule(nodeTypeB, nodeTypeA) ){*/
 			// There's no EdgeRule for this -- find out if one of the nodeTypes is invalid or if
 			// they are valid, but there's just no edgeRule for them.
 			try {
@@ -2556,14 +2604,16 @@ public class ModelBasedProcessing {
 				String emsg = " Unrecognized nodeType bb [" + nodeTypeB + "]\n";
 				throw new AAIException("AAI_6115", emsg);
 			}
-
-			String msg = " No Edge Rule found for this pair of nodeTypes (order does not matter) ["
+			
+			String msg = " No Edge Rule found for this pair of nodeTypes (order does not matter) [" 
 					  + nodeTypeA + "], [" + nodeTypeB + "].";
 			throw new AAIException("AAI_6120", msg);
 		}
+		
+		
 	}
-
-
+	
+    
 	/**
 	 * Collect topology 4 linkage point.
 	 *
@@ -2583,11 +2633,11 @@ public class ModelBasedProcessing {
 	  Multimap<String, String> thisMap = ArrayListMultimap.create();
 	  thisMap.putAll(currentMap);
 	  String thisGuysTrail = incomingTrail;
-
+	  
 	  // NOTE - "trails" can have multiple parts now since we track persona info for some.
 	  //      We just want to look at the node type info - which would be the piece
 	  //      before any commas (if there are any).
-
+	 
 	  String [] trailSteps = thisGuysTrail.split("\\|");
 	  if( trailSteps == null || trailSteps.length == 0 ){
 		  throw new AAIException("AAI_6125", "Bad incomingTrail passed to collectTopology4LinkagePoint(): [" + incomingTrail + "] ");
@@ -2595,23 +2645,23 @@ public class ModelBasedProcessing {
 	  String lastStepString = trailSteps[trailSteps.length - 1];
 	  String [] stepPieces = lastStepString.split(",");
 	  String lastStepNT = stepPieces[0];
-
+	  
 	  // It is assumed that the linkagePoint string will be a pipe-delimited string where each
 	  // piece is an AAIProperties.NODE_TYPE.  For now, the first thing to connect to is what is on the farthest right.
 	  // Example:  linkagePoint =  "pserver|p-interface|l-interface"   would mean that we're connecting to the l-interface
 	  //      but that after that, we connect to a p-interface followed by a pserver.
 	  // It might have been more clear to define it in the other direction, but for now, that is it. (16-07)
 	  String linkagePointStr = linkagePointStrVal;
-
-	  // We are getting these with more than linkage thing in one string.
+	 
+	  // We are getting these with more than linkage thing in one string.  
 	  //   Ie. "pserver|lag-interface|l-interface, pserver|p-interface|l-interface, vlan|l-interface"
 	  linkagePointStr = linkagePointStr.replace("[",  "");
 	  linkagePointStr = linkagePointStr.replace("]",  "");
 	  linkagePointStr = linkagePointStr.replace(" ",  "");
-
+	  
 	  String [] linkage = linkagePointStr.split("\\,");
 	  for( int x = 0; x < linkage.length; x++ ){
-		  lastStepNT = stepPieces[0];
+		  lastStepNT = stepPieces[0]; 
 		  String thisStepNT = "";
 		  String [] linkageSteps = linkage[x].split("\\|");
 		  if( linkageSteps == null || linkageSteps.length == 0 ){
@@ -2626,10 +2676,10 @@ public class ModelBasedProcessing {
 		  }
 	  }
 	  return thisMap;
-
-	}
-
-
+	  
+	} // End of collectTopology4LinkagePoint()
+	
+   
 	/**
 	 * Gets the next step elements from set.
 	 *
@@ -2641,21 +2691,21 @@ public class ModelBasedProcessing {
 				  throws AAIException {
 		// Take a constrained-element-set and figure out the total set of all the possible elements that it
 		// represents and return them as a Hash.
-
+	  
 		Map<String,Object> retElementHash = new HashMap<String, Object>();
-
+	
 		if( constrElemSetVtx == null ){
 			  String msg = " getNextStepElementsFromSet() called with null constrElemSetVtx ";
 			  throw new AAIException("AAI_6125", msg);
 		}
-
+	
 		String constrNodeType = constrElemSetVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 		String constrElemSetUuid = constrElemSetVtx.<String>property("constrained-element-set-uuid").orElse(null);
 		if( constrNodeType == null || !constrNodeType.equals("constrained-element-set") ){
 			  String msg = " getNextStepElementsFromSet() called with wrong type model: [" + constrNodeType + "]. ";
 			  throw new AAIException("AAI_6125", msg);
 		}
-
+		
 		ArrayList <Vertex>  choiceSetVertArray = new ArrayList<Vertex>();
 		Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, constrElemSetVtx, "element-choice-set");
 		int setCount = 0;
@@ -2667,12 +2717,12 @@ public class ModelBasedProcessing {
 				setCount++;
 			}
 		}
-
+			
 		if( setCount == 0 ){
 			  String msg = "No element-choice-set found under constrained-element-set-uuid = " + constrElemSetUuid;
 			  throw new AAIException("AAI_6132", msg);
 		}
-
+		
 		// Loop through each choice-set and grab the model-elements
 		for( int i = 0; i < setCount; i++ ){
 			Vertex choiceSetVert = choiceSetVertArray.get(i);
@@ -2688,24 +2738,24 @@ public class ModelBasedProcessing {
 				}
 				else {
 					// unsupported node type found for this choice-set
-					String msg = "Unsupported nodeType (" + elNodeType
+					String msg = "Unsupported nodeType (" + elNodeType 
 							+ ") found under choice-set under constrained-element-set-uuid = " + constrElemSetUuid;
 					throw new AAIException("AAI_6132", msg);
 				}
 			}
-
+				
 			if( elCount == 0 ){
 				  String msg = "No model-elements found in choice-set under constrained-element-set-uuid = " + constrElemSetUuid;
 				  throw new AAIException("AAI_6132", msg);
 			}
-
+			
 		}
 	  return retElementHash;
-
-	}
-
-
-
+	  
+	} // End of getNextStepElementsFromSet()
+	
+	
+	
 	/**
 	 * Gen topo map 4 named Q.
 	 *
@@ -2719,14 +2769,14 @@ public class ModelBasedProcessing {
 	public Multimap<String, String> genTopoMap4NamedQ(String transId, String fromAppId,
                                                       Vertex queryVertex, String namedQueryUuid )
 				  throws AAIException {
-
+	  
 	  if( queryVertex == null ){
 		  throw new AAIException("AAI_6125", "null queryVertex passed to genTopoMap4NamedQ()");
 	  }
-
+	  
 	  Multimap<String, String> initialEmptyMap = ArrayListMultimap.create();
 	  List<String> vidsTraversed = new ArrayList<>();
-
+	  
 	  Vertex firstElementVertex = null;
 	  Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, queryVertex, "named-query-element");
 	  int elCount = 0;
@@ -2734,29 +2784,32 @@ public class ModelBasedProcessing {
 		  elCount++;
 		  firstElementVertex = vertI.next();
 	  }
-
+		
 	  if( elCount > 1 ){
 		  throw new AAIException("AAI_6133", "Illegal query defined: More than one first element defined for = " + namedQueryUuid);
 	  }
-
+	  
 	  if( firstElementVertex == null ){
 		  throw new AAIException("AAI_6114", "Could not find first query element = " + namedQueryUuid);
 	  }
-
+	
 	  Vertex modVtx = getModelThatNqElementRepresents( firstElementVertex, "" );
-	  String modelType = getModelTypeFromModel( modVtx, "" );
+	  String modelType = getModelTypeFromModel( modVtx, "" );	  
 	  if( ! modelType.equals("widget") ){
 		  throw new AAIException("AAI_6133", "Bad Named Query Definition: First element must correspond to a widget type model.  Named Query UUID = "
 				  + namedQueryUuid);
 	  }
-
-	  return collectTopology4NamedQ( transId, fromAppId,
-				firstElementVertex, "",
+	  
+	  Multimap<String, String> collectedMap = collectTopology4NamedQ( transId, fromAppId,
+				firstElementVertex, "", 
 				initialEmptyMap, vidsTraversed, 0);
-	}
+	  
+	  return collectedMap;
+	  
+	} // End of genTopoMap4NamedQ()
 
-
-
+	
+    
 	/**
 	 * Collect topology 4 named Q.
 	 *
@@ -2771,21 +2824,21 @@ public class ModelBasedProcessing {
                                                            Vertex thisLevelElemVtx, String incomingTrail,
                                                            Multimap<String,String> currentMap, List<String> vidsTraversed, int levelCounter )
 				  throws AAIException {
-
+	
 	  levelCounter++;
 
 	  Multimap<String, String> thisMap = ArrayListMultimap.create();
 	  thisMap.putAll(currentMap);
-
+	 
 	  String thisElemVid = thisLevelElemVtx.id().toString();
 	  if( levelCounter > MAX_LEVELS ) {
 		  throw new AAIException("AAI_6125", "collectModelStructure() has looped across more levels than allowed: " + MAX_LEVELS + ". ");
 	  }
 	  String thisGuysTrail = "";
-
+	  
 	  // find out what widget (and thereby what aai-node-type) this element represents
 	  String thisElementNodeType = getNqElementWidgetType( transId, fromAppId, thisLevelElemVtx, incomingTrail );
-
+	  
 	  if( incomingTrail.equals("") ){
 		  // This is the first one
 		  thisGuysTrail = thisElementNodeType;
@@ -2793,9 +2846,9 @@ public class ModelBasedProcessing {
 	  else {
 		  thisGuysTrail = incomingTrail + "|" + thisElementNodeType;
 	  }
-
+	  
 	  vidsTraversed.add(thisElemVid);
-
+	  
 	  // Look at the elements pointed to at this level and add on their data
 	  Iterator<Vertex> vertI = this.traverseIncidentEdges(EdgeType.TREE, thisLevelElemVtx, "named-query-element");
 	  while( vertI != null && vertI.hasNext() ){
@@ -2806,15 +2859,15 @@ public class ModelBasedProcessing {
 		  if( !vidsTraversed.contains(tmpVid) ){
 			  // This is one we would like to use - so we'll recursively get it's result set to add to ours
 			  Multimap<String, String> tmpMap = collectTopology4NamedQ( transId, fromAppId,
-						tmpVert, thisGuysTrail,
+						tmpVert, thisGuysTrail, 
 						currentMap, vidsTraversed, levelCounter);
 			  thisMap.putAll(tmpMap);
 		  }
 	  }
-
+	  
 	  return thisMap;
-
-	}
+	  
+	} // End of collectTopology4NamedQ()
 
 
 	/**
@@ -2827,7 +2880,7 @@ public class ModelBasedProcessing {
 	 */
 	public Vertex getModelThatNqElementRepresents(Vertex elementVtx, String elementTrail )
 		throws AAIException {
-
+		
 		  // Get the model that a named-query element represents
 		  Vertex modVtx = null;
 		  Iterator<Vertex> mvertI = this.traverseIncidentEdges(EdgeType.COUSIN, elementVtx, "model");
@@ -2836,13 +2889,13 @@ public class ModelBasedProcessing {
 			  modCount++;
 			  modVtx = mvertI.next();
 		  }
-
+			
 		  if( modCount > 1 ){
 			  String msg = "Illegal element defined: More than one model pointed to by a single named-query-element at [" +
 					  elementTrail + "].";
 			  throw new AAIException("AAI_6125", msg);
 		  }
-
+		  
 		  if( modVtx == null ){
 			  String msg = "Bad named-query definition: Could not find model for element. ";
 			  if( !elementTrail.equals("") ){
@@ -2850,20 +2903,20 @@ public class ModelBasedProcessing {
 			  }
 			  throw new AAIException("AAI_6132", msg);
 		  }
-
+		  
 		  String nodeType = modVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 		  if( (nodeType != null) && nodeType.equals("model") ){
 			  return modVtx;
 		  }
 		  else {
-			  String msg = "Illegal Named Query element defined: expecting a 'model', but found 'isA' edge pointing to nodeType = " +
+			  String msg = "Illegal Named Query element defined: expecting a 'model', but found 'isA' edge pointing to nodeType = " + 
 					  nodeType + "] at [" +	  elementTrail + "].";
 			  throw new AAIException("AAI_6125", msg);
-		  }
-
-	}
-
-
+		  }	  
+		    
+	}// getModelThatNqElementRepresents()
+	
+	
 	/**
 	 * Gets the model-ver that element represents.
 	 *
@@ -2874,7 +2927,7 @@ public class ModelBasedProcessing {
 	 */
 	public Vertex getModelVerThatElementRepresents(Vertex elementVtx, String elementTrail )
 		throws AAIException {
-
+		
 		  // Get the model-ver that an element represents
 		  Vertex modVerVtx = null;
 		  Iterator<Vertex> mvertI = this.traverseIncidentEdges(EdgeType.COUSIN, elementVtx, "model-ver");
@@ -2883,13 +2936,13 @@ public class ModelBasedProcessing {
 			  modCount++;
 			  modVerVtx = mvertI.next();
 		  }
-
+			
 		  if( modCount > 1 ){
 			  String msg = "Illegal element defined: More than one model pointed to by a single element at [" +
 					  elementTrail + "].";
 			  throw new AAIException("AAI_6125", msg);
 		  }
-
+		  
 		  if( modVerVtx == null ){
 			  String msg = "Bad model definition: Could not find model-ver for model-element. ";
 			  if( !elementTrail.equals("") ){
@@ -2897,21 +2950,21 @@ public class ModelBasedProcessing {
 			  }
 			  throw new AAIException("AAI_6132", msg);
 		  }
-
+		  
 		  String nodeType = modVerVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);
 		  if( (nodeType != null) && nodeType.equals("model-ver") ){
 			  return modVerVtx;
 		  }
 		  else {
-			  String msg = "Illegal model-element defined: expecting a 'model-ver', but found 'isA' edge pointing to nodeType = " +
+			  String msg = "Illegal model-element defined: expecting a 'model-ver', but found 'isA' edge pointing to nodeType = " + 
 					  nodeType + "] at [" +	  elementTrail + "].";
 			  throw new AAIException("AAI_6125", msg);
 		  }
-
-	}
-
-
-
+		    
+	}// getModelVerThatElementRepresents()
+	
+	
+	
 	/**
 	 * Gets the model that is parent to model-ver node.
 	 *
@@ -2922,7 +2975,7 @@ public class ModelBasedProcessing {
 	 */
 	public Vertex getModelGivenModelVer(Vertex modVerVtx, String elementTrail )
 		throws AAIException {
-
+		
 		// Get the parent model for this "model-ver" node
 		  Vertex modVtx = null;
 		  Iterator<Vertex> mvertI = this.traverseIncidentEdges(EdgeType.TREE, modVerVtx, "model");
@@ -2931,13 +2984,13 @@ public class ModelBasedProcessing {
 			  modCount++;
 			  modVtx = mvertI.next();
 		  }
-
+			
 		  if( modCount > 1 ){
 			  String msg = "Illegal model-ver node defined: More than one model points to it with a 'has' edge [" +
 					  elementTrail + "].";
 			  throw new AAIException("AAI_6125", msg);
 		  }
-
+		  
 		  if( modVtx == null ){
 			  String msg = "Bad model-ver node: Could not find parent model. ";
 			  if( !elementTrail.equals("") ){
@@ -2945,7 +2998,7 @@ public class ModelBasedProcessing {
 			  }
 			  throw new AAIException("AAI_6132", msg);
 		  }
-
+		  
 		  String nodeType = modVtx.<String>property(AAIProperties.NODE_TYPE).orElse(null);;
 		  if( (nodeType != null) && nodeType.equals("model") ){
 			  // Found what we were looking for.
@@ -2957,12 +3010,12 @@ public class ModelBasedProcessing {
 					  elementTrail + "].";
 			  throw new AAIException("AAI_6125", msg);
 		  }
-
-
-	}
-
-
-
+		    
+		
+	}// getModelGivenModelVer()
+	
+	
+			
 	/**
 	 * Gets the model type.
 	 *
@@ -2973,30 +3026,30 @@ public class ModelBasedProcessing {
 	 */
 	public String getModelTypeFromModel(Vertex modelVtx, String elementTrail )
 		throws AAIException {
-
+		  
 		// Get the model-type from a model vertex
 		if( modelVtx == null ){
 			 String msg = " null modelVtx passed to getModelTypeFromModel() ";
 			 throw new AAIException("AAI_6114", msg);
-		}
-
+		}		  
+		 
 		String modelType = modelVtx.<String>property("model-type").orElse(null);
 		if( (modelType == null) || modelType.equals("") ){
 			String msg = "Could not find model-type for model encountered at [" + elementTrail + "].";
 			throw new AAIException("AAI_6132", msg);
 		}
-
+		
 		if( !modelType.equals("widget") && !modelType.equals("resource") && !modelType.equals("service") ){
 			String msg = "Unrecognized model-type, [" + modelType + "] for model pointed to by element at [" + elementTrail + "].";
 			throw new AAIException("AAI_6132", msg);
 		}
-
-		return modelType;
-
-	}
-
-
-
+		  
+		return modelType; 
+		
+	}// getModelTypeFromModel()
+	
+	
+		
 	/**
 	* Gets the model type given model-ver
 	*
@@ -3007,29 +3060,30 @@ public class ModelBasedProcessing {
 	*/
 	public String getModelTypeFromModelVer(Vertex modelVerVtx, String elementTrail )
 	throws AAIException {
-
+	  
 	// Get the model-type given a model-ver vertex
 	if( modelVerVtx == null ){
 		 String msg = " null modelVerVtx passed to getModelTypeFromModelVer() ";
 		 throw new AAIException("AAI_6114", msg);
-	}
-
+	}		  
+	 
 	Vertex modVtx = getModelGivenModelVer( modelVerVtx, elementTrail );
 	String modelType = modVtx.<String>property("model-type").orElse(null);
 	if( (modelType == null) || modelType.equals("") ){
 		String msg = "Could not find model-type for model encountered at [" + elementTrail + "].";
 		throw new AAIException("AAI_6132", msg);
 	}
-
+	
 	if( !modelType.equals("widget") && !modelType.equals("resource") && !modelType.equals("service") ){
 		String msg = "Unrecognized model-type, [" + modelType + "] for model pointed to by element at [" + elementTrail + "].";
 		throw new AAIException("AAI_6132", msg);
 	}
-
-	return modelType;
-	}
-
-
+	  
+	return modelType; 
+	
+	}// getModelTypeFromModelVer()
+		
+		
 
 	/**
 	 * Gets the model-element step name.
@@ -3042,8 +3096,8 @@ public class ModelBasedProcessing {
 	 */
 	public String getModelElementStepName(Vertex elementVtx, String elementTrail)
 		throws AAIException {
-
-		// Get the "step name"  for a model-element
+		
+		// Get the "step name"  for a model-element 
 		// Step names look like this for widget-models:   AAIProperties.NODE_TYPE
 		// Step names look like this for resource/service models: "aai-node-type,model-invariant-id,model-version-id"
 		// NOTE -- if the element points to a resource or service model, then we'll return the
@@ -3051,14 +3105,14 @@ public class ModelBasedProcessing {
 		String thisElementNodeType = "?";
 		Vertex modVerVtx = getModelVerThatElementRepresents( elementVtx, elementTrail );
 		String modelType = getModelTypeFromModelVer( modVerVtx, elementTrail );
-
+		
 		if( modelType == null ){
 			String msg = " could not determine modelType in getModelElementStepName().  elementTrail = [" + elementTrail + "].";
 			throw new AAIException("AAI_6132", msg);
 		}
-
+		  
 		if( modelType.equals("widget") ){
-			// NOTE: for models that have model-type = "widget", their "model-name" maps directly to aai-node-type
+			// NOTE: for models that have model-type = "widget", their "model-name" maps directly to aai-node-type 
 			thisElementNodeType = modVerVtx.<String>property("model-name").orElse(null);
 			if( (thisElementNodeType == null) || thisElementNodeType.equals("") ){
 				String msg = "Could not find model-name for the widget model pointed to by element at [" + elementTrail + "].";
@@ -3068,17 +3122,17 @@ public class ModelBasedProcessing {
 		}
 		else if( modelType.equals("resource") || modelType.equals("service") ){
 			Vertex modVtx = getModelGivenModelVer( modVerVtx, elementTrail );
-			String modInvId = modVtx.<String>property("model-invariant-id").orElse(null);
+			String modInvId = modVtx.<String>property("model-invariant-id").orElse(null); 
 			String modVerId = modVerVtx.<String>property("model-version-id").orElse(null);
 			Vertex relatedTopElementModelVtx = getTopElementForSvcOrResModelVer( modVerVtx, elementTrail );
 			Vertex relatedModelVtx = getModelVerThatElementRepresents( relatedTopElementModelVtx, elementTrail );
 			thisElementNodeType = relatedModelVtx.<String>property("model-name").orElse(null);
-
+			
 			if( (thisElementNodeType == null) || thisElementNodeType.equals("") ){
 				String msg = "Could not find model-name for the widget model pointed to by element at [" + elementTrail + "].";
 				throw new AAIException("AAI_6132", msg);
 			}
-
+			
 			String stepName = "";
 			if( nodeTypeSupportsPersona(thisElementNodeType) ){
 				// This nodeType that this resource or service model refers to does support persona-related fields, so
@@ -3094,10 +3148,11 @@ public class ModelBasedProcessing {
 			String msg = " Unrecognized model-type = [" + modelType + "] pointed to by element at [" + elementTrail + "].";
 			throw new AAIException("AAI_6132", msg);
 		}
-	}
-
-
-
+		  
+	}// getModelElementStepName()
+	
+	
+	
 	/**
 	 * Node type supports persona.
 	 *
@@ -3108,7 +3163,7 @@ public class ModelBasedProcessing {
 	 */
 	public Boolean nodeTypeSupportsPersona(String nodeType)
 			throws AAIException {
-
+		
 		if( nodeType == null || nodeType.equals("") ){
 			return false;
 		}
@@ -3119,13 +3174,18 @@ public class ModelBasedProcessing {
 			String emsg = " Unrecognized nodeType [" + nodeType + "]\n";
 			throw new AAIException("AAI_6115", emsg);
 		}
-
+		
 		Collection <String> props4ThisNT = loader.introspectorFromName(nodeType).getProperties();
-      return props4ThisNT.contains(addDBAliasedSuffix("model-invariant-id")) &&
-          props4ThisNT.contains(addDBAliasedSuffix("model-version-id"));
-  }
-
-
+		if( !props4ThisNT.contains(addDBAliasedSuffix("model-invariant-id")) || !props4ThisNT.contains(addDBAliasedSuffix("model-version-id")) ){
+			return false;
+		}
+		else {
+			return true;
+		}
+		
+	}// nodeTypeSupportsPersona()
+	
+	
 	/**
 	 * Gets a Named Query element's widget type.
 	 *
@@ -3137,16 +3197,16 @@ public class ModelBasedProcessing {
 	public String getNqElementWidgetType(String transId, String fromAppId,
                                          Vertex elementVtx, String elementTrail )
 		throws AAIException {
-
+		
 		String thisNqElementWidgetType = "";
 		// Get the associated node-type for the model pointed to by a named-query-element.
 		// NOTE -- if the element points to a resource or service model, then we'll return the
 		//        widget-type of the first element (crown widget) for that model.
 		Vertex modVtx = getModelThatNqElementRepresents( elementVtx, elementTrail );
 		String modelType = getModelTypeFromModel( modVtx, elementTrail );
-
+		
 		if( modelType == null || !modelType.equals("widget") ){
-			String emsg = " Model Type must be 'widget' for NamedQuery elements.  Found [" + modelType + "] at [" +
+			String emsg = " Model Type must be 'widget' for NamedQuery elements.  Found [" + modelType + "] at [" + 
 					elementTrail + "]\n";
 			throw new AAIException("AAI_6132", emsg);
 		}
@@ -3164,9 +3224,11 @@ public class ModelBasedProcessing {
 				return thisNqElementWidgetType;
 			}
 		}
-	}
-
-
+		
+		
+	}// End  getNqElementWidgetType()
+	
+	
 	/**
 	 * Gets a model-element's top widget type.
 	 *
@@ -3177,21 +3239,23 @@ public class ModelBasedProcessing {
 	 */
 	public String getModElementWidgetType(Vertex elementVtx, String elementTrail )
 		throws AAIException {
-
+		
 		// Get the associated node-type for the model-ver pointed to by a model-element.
 		// NOTE -- if the element points to a resource or service model, then we'll return the
 		//        widget-type of the first element (crown widget) for that model.
 		Vertex modVerVtx = getModelVerThatElementRepresents( elementVtx, elementTrail );
-		return  getModelVerTopWidgetType( modVerVtx, elementTrail );
-	}
-
-
+		String thisElementNodeType = getModelVerTopWidgetType( modVerVtx, elementTrail );
+		return thisElementNodeType;
+			
+	}// End  getModElementWidgetType()
+	
+	
 	/**
 	 * Gets the node using unique identifier
 	 *
 	 * @param transId the trans id
 	 * @param fromAppId the from app id
-	 * @param nodeType the nodeType
+	 * @param nodeType the nodeType 
 	 * @param idPropertyName the property name of the unique identifier
 	 * @param uniqueIdVal the UUID value
 	 * @return unique vertex found using UUID
@@ -3200,41 +3264,41 @@ public class ModelBasedProcessing {
 	public Vertex getNodeUsingUniqueId(String transId, String fromAppId,
                                        String nodeType, String idPropertyName, String uniqueIdVal )
 		throws AAIException {
-
-		// Given a unique identifier, get the Vertex
+		
+		// Given a unique identifier, get the Vertex 
 		if( uniqueIdVal == null || uniqueIdVal.equals("")  ){
-			String emsg = " Bad uniqueIdVal passed to getNodeUsingUniqueId(): ["
+			String emsg = " Bad uniqueIdVal passed to getNodeUsingUniqueId(): [" 
 					+ uniqueIdVal + "]\n";
 			throw new AAIException("AAI_6118", emsg);
 		}
-
+		
 		if( idPropertyName == null || idPropertyName.equals("")  ){
-			String emsg = " Bad idPropertyName passed to getNodeUsingUniqueId(): ["
+			String emsg = " Bad idPropertyName passed to getNodeUsingUniqueId(): [" 
 					+ idPropertyName + "]\n";
 			throw new AAIException("AAI_6118", emsg);
-		}
-
+		}		
+		
 		if( nodeType == null || nodeType.equals("")  ){
-			String emsg = " Bad nodeType passed to getNodeUsingUniqueId(): ["
+			String emsg = " Bad nodeType passed to getNodeUsingUniqueId(): [" 
 					+ nodeType + "]\n";
 			throw new AAIException("AAI_6118", emsg);
-		}
-
+		}		
+		
 		Vertex uniqVtx = null;
 		Iterable <?> uniqVerts = null;
 		uniqVerts = engine.asAdmin().getReadOnlyTraversalSource().V().has(AAIProperties.NODE_TYPE,nodeType).has(idPropertyName,uniqueIdVal).toList();
 		if( uniqVerts == null ){
-			String emsg = "Node could not be found for nodeType = [" + nodeType
-					+ "], propertyName = [" + idPropertyName
+			String emsg = "Node could not be found for nodeType = [" + nodeType 
+					+ "], propertyName = [" + idPropertyName  
 					+ "], propertyValue = [" + uniqueIdVal  + "]\n";
 			throw new AAIException("AAI_6114", emsg);
 		}
-		else {
+		else { 
 			int count = 0;
 			Iterator <?> uniqVertsIter = uniqVerts.iterator();
 			if( !uniqVertsIter.hasNext() ){
-				String emsg = "Node could not be found for nodeType = [" + nodeType
-						+ "], propertyName = [" + idPropertyName
+				String emsg = "Node could not be found for nodeType = [" + nodeType 
+						+ "], propertyName = [" + idPropertyName  
 						+ "], propertyValue = [" + uniqueIdVal  + "]\n";
 				throw new AAIException("AAI_6114", emsg);
 			}
@@ -3243,18 +3307,19 @@ public class ModelBasedProcessing {
 					count++;
 					uniqVtx = (Vertex) uniqVertsIter.next();
 					if( count > 1 ){
-						String emsg = "More than one node found for nodeType = [" + nodeType
-								+ "], propertyName = [" + idPropertyName
+						String emsg = "More than one node found for nodeType = [" + nodeType 
+								+ "], propertyName = [" + idPropertyName  
 								+ "], propertyValue = [" + uniqueIdVal  + "]\n";
 						throw new AAIException("AAI_6132", emsg);
 					}
 				}
 			}
 		}
+		
 		return uniqVtx;
-	}
-
-
+	}// End getNodeUsingUniqueId()
+	
+	
 	/**
 	 * Gets the model-ver nodes using name.
 	 *
@@ -3267,97 +3332,102 @@ public class ModelBasedProcessing {
 	public List<Vertex> getModelVersUsingName(String transId, String fromAppId,
                                               String modelName )
 		throws AAIException {
-
+		
 		// Given a "model-name", find the model-ver vertices that this maps to
 		if( modelName == null || modelName.equals("")  ){
-			String emsg = " Bad modelName passed to getModelVersUsingName(): ["
+			String emsg = " Bad modelName passed to getModelVersUsingName(): [" 
 					+ modelName + "]\n";
 			throw new AAIException("AAI_6118", emsg);
 		}
-
+		
 		List<Vertex> retVtxArr = new ArrayList<>();
 		Iterator<Vertex> modVertsIter = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(AAIProperties.NODE_TYPE,"model-ver").has("model-name",modelName);
 		if( !modVertsIter.hasNext() ){
-			String emsg = "Model-ver record(s) could not be found for model-ver data passed.  model-name = [" +
+			String emsg = "Model-ver record(s) could not be found for model-ver data passed.  model-name = [" + 
 					modelName + "]\n";
 			throw new AAIException("AAI_6132", emsg);
 		}
-		else {
+		else { 
 			while( modVertsIter.hasNext() ){
-				Vertex tmpModelVerVtx = modVertsIter.next();
+				Vertex tmpModelVerVtx = (Vertex) modVertsIter.next();
 				retVtxArr.add(tmpModelVerVtx);
 			}
 		}
+		
 		return retVtxArr;
-	}
-
-
+		
+	}// End getModelVersUsingName()
+	
+	
 	/**
 	 * Gets the model-ver nodes using model-invariant-id.
 	 *
 	 * @param transId the trans id
 	 * @param fromAppId the from app id
 	 * @param model-invariant-id (uniquely identifies a model)
-	 * @return the model-ver's defined for the corresponding model
+	 * @return the model-ver's defined for the corresponding model 
 	 * @throws AAIException the AAI exception
 	 */
 	public Iterator<Vertex> getModVersUsingModelInvId(String transId, String fromAppId,
                                                       String modelInvId )
 		throws AAIException {
-
+		
 		// Given a "model-invariant-id", find the model-ver nodes that this maps to
 		if( modelInvId == null || modelInvId.equals("")  ){
-			String emsg = " Bad model-invariant-id passed to getModVersUsingModelInvId(): ["
+			String emsg = " Bad model-invariant-id passed to getModVersUsingModelInvId(): [" 
 					+ modelInvId + "]\n";
 			throw new AAIException("AAI_6118", emsg);
 		}
-
+		
 		Vertex modVtx = getNodeUsingUniqueId(transId, fromAppId, "model", "model-invariant-id", modelInvId);
 		List<Vertex> retVtxArr =  getModVersUsingModel(transId, fromAppId, modVtx);
 		if( retVtxArr == null || retVtxArr.isEmpty() ){
-			String emsg = " Model-ver record(s) could not be found attached to model with model-invariant-id = [" +
+			String emsg = " Model-ver record(s) could not be found attached to model with model-invariant-id = [" + 
 					modelInvId + "]\n";
 			throw new AAIException("AAI_6132", emsg);
 		}
+		
 		return retVtxArr.iterator();
-	}
-
-
+	}// End getModVersUsingModelInvId()
+	
+	
 	/**
 	 * Gets the model-ver nodes using a model node.
 	 *
 	 * @param transId the trans id
 	 * @param fromAppId the from app id
 	 * @param  model vertex
-	 * @return the model-ver's defined for the corresponding model
+	 * @return the model-ver's defined for the corresponding model 
 	 * @throws AAIException the AAI exception
 	 */
 	public List<Vertex> getModVersUsingModel(String transId, String fromAppId,
                                              Vertex modVtx )
 		throws AAIException {
-
+		
 		if( modVtx == null ){
 			String emsg = " Null model vertex passed to getModVersUsingModel(): ";
 			throw new AAIException("AAI_6118", emsg);
 		}
-
+		
 		List<Vertex> retVtxArr = new ArrayList<>();
 		Iterator<Vertex> modVerVertsIter = this.traverseIncidentEdges(EdgeType.TREE, modVtx, "model-ver");
 		if(!modVerVertsIter.hasNext()){
 			String modelInvId = modVtx.<String>property("model-invariant-id").orElse(null);
-			String emsg = "Model-ver record(s) could not be found attached to model with model-invariant-id = [" +
+			String emsg = "Model-ver record(s) could not be found attached to model with model-invariant-id = [" + 
 					modelInvId + "]\n";
 			throw new AAIException("AAI_6132", emsg);
 		}
-		else {
+		else { 
 			while( modVerVertsIter.hasNext() ){
-				Vertex tmpModelVtx = modVerVertsIter.next();
+				Vertex tmpModelVtx = (Vertex) modVerVertsIter.next();
 				retVtxArr.add(tmpModelVtx);
 			}
 		}
+		
 		return retVtxArr;
-	}
-
+		
+	}// End getModVersUsingModel()
+	
 	/**
 	 * Gets the model-version-ids using model-name.
 	 *
@@ -3370,40 +3440,41 @@ public class ModelBasedProcessing {
 	public List<String> getModelVerIdsUsingName( String transId, String fromAppId,
 			String modelName )
 		throws AAIException {
-
+		
 		// Given a model-name find the model-ver nodes that it maps to
 		if( modelName == null || modelName.equals("")  ){
-			String emsg = " Bad modelName passed to getModelVerIdsUsingName(): ["
+			String emsg = " Bad modelName passed to getModelVerIdsUsingName(): [" 
 					+ modelName + "]\n";
 			throw new AAIException("AAI_6118", emsg);
 		}
-
+		
 		List<String> retArr = new ArrayList<>();
 		Iterator<Vertex> modVerVertsIter = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(AAIProperties.NODE_TYPE,"model-ver").has("model-name",modelName);
 		if( !modVerVertsIter.hasNext() ){
-			String emsg = " model-ver record(s) could not be found for model data passed.  model-name = [" +
+			String emsg = " model-ver record(s) could not be found for model data passed.  model-name = [" + 
 					modelName + "]\n";
 			throw new AAIException("AAI_6114", emsg);
 		}
-		else {
+		else { 
 			while( modVerVertsIter.hasNext() ){
-				Vertex modelVerVtx = modVerVertsIter.next();
+				Vertex modelVerVtx = (Vertex) modVerVertsIter.next();
 				String tmpUuid = modelVerVtx.<String>property("model-version-id").orElse(null);
 				if( (tmpUuid != null) && !tmpUuid.equals("") && !retArr.contains(tmpUuid) ){
 					retArr.add(tmpUuid);
 				}
 			}
 		}
-
+		
 		if( retArr.isEmpty() ){
-			String emsg = "No model-ver record found for model-name = ["
+			String emsg = "No model-ver record found for model-name = [" 
 					+ modelName + "]\n";
 			throw new AAIException("AAI_6132", emsg);
 		}
+		
 		return retArr;
-	}
-
-
+	}// End getModelVerIdsUsingName()
+	
+	
 	/**
 	 * Gets the model top widget type.
 	 *
@@ -3418,14 +3489,14 @@ public class ModelBasedProcessing {
 	public String getModelVerTopWidgetType( String transId, String fromAppId,
 			String modelVersionId, String modelInvId, String modelName )
 		throws AAIException {
-
+		
 		// Could be given a model-ver's key info (model-version-id), OR, just a (non-unique) model-name,
 		//     Or just a model-invariant-id (which could have multiple model-ver records under it).
-		//     In any case, they should only map to one single "top" node-type for the first element.
-
+		//     In any case, they should only map to one single "top" node-type for the first element. 
+		
 		String nodeType = "?";
 		Iterator<Vertex> modVerVertsIter;
-
+		
 		if( modelVersionId != null && !modelVersionId.equals("") ){
 			// this would be the best - we can just look up the model-ver records directly
 			modVerVertsIter = this.engine.asAdmin().getReadOnlyTraversalSource().V().has(AAIProperties.NODE_TYPE,"model-ver").has("model-version-id",modelVersionId);
@@ -3440,13 +3511,13 @@ public class ModelBasedProcessing {
 			String msg = "Neither modelVersionId, modelInvariantId, nor modelName passed to: getModelVerTopWidgetType() ";
 			throw new AAIException("AAI_6120", msg);
 		}
-
+		
 		if( !modVerVertsIter.hasNext() ){
 			String emsg = "model-ver record(s) could not be found for model data passed:  modelInvariantId = [" + modelInvId +
 					"], modeVersionId = [" + modelVersionId + "], modelName = [" + modelName + "]\n";
 			throw new AAIException("AAI_6114", emsg);
 		}
-		else {
+		else { 
 			String lastNT = "";
 			if( !modVerVertsIter.hasNext() ){
 				String emsg = "model-ver record(s) could not be found for model data passed:  modelInvariantId = [" + modelInvId +
@@ -3454,13 +3525,13 @@ public class ModelBasedProcessing {
 				throw new AAIException("AAI_6114", emsg);
 			}
 			while( modVerVertsIter.hasNext() ){
-				Vertex tmpModVerVtx = modVerVertsIter.next();
+				Vertex tmpModVerVtx = (Vertex) modVerVertsIter.next();
 				String tmpNT = getModelVerTopWidgetType( tmpModVerVtx, "" );
 				if( lastNT != null && !lastNT.equals("") ){
 					if( !lastNT.equals(tmpNT) ){
-						String emsg = "Different top-node-types (" + tmpNT + ", " + lastNT
+						String emsg = "Different top-node-types (" + tmpNT + ", " + lastNT 
 								+ ") found for model data passed.  (" +
-								" modelVersionId = [" + modelVersionId +
+								" modelVersionId = [" + modelVersionId + 
 								"], modelId = [" + modelInvId +
 								"], modelName = [" + modelName +
 								"])\n";
@@ -3471,10 +3542,12 @@ public class ModelBasedProcessing {
 				nodeType = tmpNT;
 			}
 		}
+		
 		return nodeType;
-	}
-
-
+		
+	}// End getModelVerTopWidgetType()
+	
+			
 	/**
 	 * Gets the widget type that this model-ver starts with.
 	 *
@@ -3493,7 +3566,7 @@ public class ModelBasedProcessing {
 			String msg = " Could not determine modelType in getModelVerTopWidgetType().  elementTrail = [" + elementTrail + "].";
 			throw new AAIException("AAI_6132", msg);
 		}
-
+		  
 		String thisElementNodeType = "?";
 		if( modelType.equals("widget") ){
 			// NOTE: for models that have model-type = "widget", their child model-ver nodes will
@@ -3518,11 +3591,12 @@ public class ModelBasedProcessing {
 			String msg = " Unrecognized model-type = [" + modelType + "] pointed to by element at [" + elementTrail + "].";
 			throw new AAIException("AAI_6132", msg);
 		}
-
+		 
 		return thisElementNodeType;
-	}
-
-
+		
+	}// getModelVerTopWidgetType()
+	
+	
 	/**
 	 * Validate model.
 	 *
@@ -3532,10 +3606,10 @@ public class ModelBasedProcessing {
 	 * @param apiVersion the api version
 	 * @throws AAIException the AAI exception
 	 */
-	public void validateModel(String transId, String fromAppId, String modelVersionIdVal, String apiVersion )
+	public void validateModel(String transId, String fromAppId, String modelVersionIdVal, String apiVersion ) 
 				throws AAIException {
-
-		// Note - this will throw an exception if the model either can't be found, or if
+	
+		// Note - this will throw an exception if the model either can't be found, or if 
 		//     we can't figure out its topology map.
 		Vertex modelVerVtx = getNodeUsingUniqueId(transId, fromAppId, "model-ver",
 				"model-version-id", modelVersionIdVal);
@@ -3550,9 +3624,10 @@ public class ModelBasedProcessing {
 			System.out.println("INFO --  " + msg );
 		}
 		return;
-	}
-
-
+		
+	}// End validateModel()
+	
+	
 	/**
 	 * Validate named query.
 	 *
@@ -3562,28 +3637,29 @@ public class ModelBasedProcessing {
 	 * @param apiVersion the api version
 	 * @throws AAIException the AAI exception
 	 */
-	public void validateNamedQuery(String transId, String fromAppId, String namedQueryUuid, String apiVersion )
+	public void validateNamedQuery(String transId, String fromAppId, String namedQueryUuid, String apiVersion ) 
 				throws AAIException {
-
-		// Note - this will throw an exception if the named query either can't be found, or if
+	
+		// Note - this will throw an exception if the named query either can't be found, or if 
 		//     we can't figure out its topology map.
 		Vertex nqVtx = getNodeUsingUniqueId(transId, fromAppId, "named-query",
 				"named-query-uuid", namedQueryUuid);
-
+		
 		if( nqVtx == null ){
 			String msg = " Could not find named-query with namedQueryUuid = [" + namedQueryUuid + "].";
 			throw new AAIException("AAI_6114", msg);
 		}
 		else {
-			//Multimap<String, String> topoMap = genTopoMap4NamedQ( "junkTransId", "junkFromAppId",
+			//Multimap<String, String> topoMap = genTopoMap4NamedQ( "junkTransId", "junkFromAppId", 
 				//	graph, nqVtx, namedQueryUuid );
 			//System.out.println("DEBUG -- for test only : --- ");
 			//System.out.println("DEBUG -- topomap = [" + topoMap + "]");
 		}
 		return;
-	}
-
-
+		
+	}// End validateNamedQuery()
+	
+	  
 	/**
 	 * Show result set.
 	 *
@@ -3591,7 +3667,7 @@ public class ModelBasedProcessing {
 	 * @param levelCount the level count
 	 */
 	public void showResultSet(ResultSet resSet, int levelCount ) {
-
+		
 		  levelCount++;
 		  String propsStr = "";
 		  for( int i= 1; i <= levelCount; i++ ){
@@ -3602,11 +3678,11 @@ public class ModelBasedProcessing {
 		  }
 		  String nt = resSet.getVert().<String>property(AAIProperties.NODE_TYPE).orElse(null);
 		  propsStr = propsStr +  "[" + nt + "] ";
-
+		 
 		  //propsStr = propsStr + " newDataDelFlag = " + resSet.getNewDataDelFlag() + ", trail = " + resSet.getLocationInModelSubGraph();
 		  //propsStr = propsStr + "limitDesc = [" + resSet.getPropertyLimitDesc() + "]";
 		  propsStr = propsStr + " trail = " + resSet.getLocationInModelSubGraph();
-
+		  
 		  Map<String,Object> overrideHash = resSet.getPropertyOverRideHash();
 		  if( overrideHash != null  &&  !overrideHash.isEmpty() ){
 			  for( Map.Entry<String, Object> entry : overrideHash.entrySet() ){
@@ -3619,7 +3695,7 @@ public class ModelBasedProcessing {
 			  Iterator<VertexProperty<Object>> pI = resSet.getVert().properties();
 			  while( pI.hasNext() ){
 				  	VertexProperty<Object> tp = pI.next();
-					if( ! tp.key().startsWith("aai")
+					if( ! tp.key().startsWith("aai") 
 							&& ! tp.key().equals("source-of-truth")
 							//&& ! tp.key().equals("resource-version")
 							&& ! tp.key().startsWith("last-mod")
@@ -3638,42 +3714,45 @@ public class ModelBasedProcessing {
 				  propsStr = propsStr + " [" + propName + " = " + propVal.toString() + "]";
 			  }
 		  }
-
+		  
 		  System.out.println( propsStr );
 		  LOGGER.info(propsStr);
-
+		  
 		  if( !resSet.getSubResultSet().isEmpty() ){
 			  ListIterator<ResultSet> listItr = resSet.getSubResultSet().listIterator();
 			  while( listItr.hasNext() ){
 				  showResultSet( listItr.next(), levelCount );
 			  }
 		  }
-	  }
-
-	private Iterator<Vertex> traverseIncidentEdges(EdgeType treeType, Vertex startV, String connectedNodeType) throws AAIException {
-		return this.engine.getQueryBuilder(startV).createEdgeTraversal(treeType, startV, loader.introspectorFromName(connectedNodeType));
+		  
+	  }// end of showResultSet()
+	
+	private Iterator<Vertex> traverseIncidentEdges(EdgeType treeType, Vertex startV, String connectedNodeType) throws AAIUnknownObjectException, AAIException {
+		QueryBuilder builder = this.engine.getQueryBuilder(startV).createEdgeTraversal(treeType, startV, loader.introspectorFromName(connectedNodeType));
+		return builder;
 	}
-
-	private Iterator<Vertex> traverseIncidentEdges(EdgeType treeType, Vertex startV, String... connectedNodeType) throws AAIException {
+	
+	private Iterator<Vertex> traverseIncidentEdges(EdgeType treeType, Vertex startV, String... connectedNodeType) throws AAIUnknownObjectException, AAIException {
 		QueryBuilder[] builders = new QueryBuilder[connectedNodeType.length];
 		for (int i = 0; i < connectedNodeType.length; i++) {
 			builders[i] = this.engine.getQueryBuilder(startV).createEdgeTraversal(EdgeType.TREE, startV, loader.introspectorFromName(connectedNodeType[i]));
 		}
-		return this.engine.getQueryBuilder(startV).union(builders);
+		QueryBuilder builder = this.engine.getQueryBuilder(startV).union(builders);
+		return builder;
 	}
 
 	private String addDBAliasedSuffix(String propName) {
 		return propName + AAIProperties.DB_ALIAS_SUFFIX;
 	}
-
+	
 	protected String getPropNameWithAliasIfNeeded(String nodeType, String propName) throws AAIUnknownObjectException {
-
+		
 		String retPropName = propName;
 		if( loader.introspectorFromName(nodeType).getPropertyMetadata(propName, PropertyMetadata.DB_ALIAS).isPresent() ){
 			return propName + AAIProperties.DB_ALIAS_SUFFIX;
 		}
 		return retPropName;
 	}
-
+		  
 }
 

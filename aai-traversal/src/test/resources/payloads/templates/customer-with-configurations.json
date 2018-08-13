@@ -1,0 +1,46 @@
+{
+  "global-customer-id": "${customer-id}",
+  "subscriber-name": "customer-subscriber-name",
+  "subscriber-type": "CUST",
+  "service-subscriptions": {
+    "service-subscription": [
+      {
+        "service-type": "VVIG",
+        "service-instances": {
+          "service-instance": [
+            {
+              "service-instance-id": "${service-instance-id}",
+              "service-instance-name": "${service-instance-name}",
+              "relationship-list": {
+                "relationship": [
+                  {
+                    "related-to": "configuration",
+                    "relationship-label": "org.onap.relationships.inventory.Uses",
+                    "related-link": "/aai/v13/network/configurations/configuration/${configuration-id1}",
+                    "relationship-data": [
+                      {
+                        "relationship-key": "configuration.configuration-id",
+                        "relationship-value": "${configuration-id1}"
+                      }
+                    ]
+                  },
+                  {
+                    "related-to": "configuration",
+                    "relationship-label": "org.onap.relationships.inventory.Uses",
+                    "related-link": "/aai/v13/network/configurations/configuration/${configuration-id2}",
+                    "relationship-data": [
+                      {
+                        "relationship-key": "configuration.configuration-id",
+                        "relationship-value": "${configuration-id2}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

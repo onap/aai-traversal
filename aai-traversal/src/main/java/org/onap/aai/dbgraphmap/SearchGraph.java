@@ -51,6 +51,10 @@ import org.onap.aai.dbgen.PropertyLimitDesc;
 import org.onap.aai.dbgraphgen.ModelBasedProcessing;
 import org.onap.aai.dbgraphgen.ResultSet;
 import org.onap.aai.dbmap.DBConnectionType;
+import org.onap.aai.edges.EdgeIngestor;
+import org.onap.aai.edges.EdgeRule;
+import org.onap.aai.edges.EdgeRuleQuery;
+import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.extensions.AAIExtensionMap;
 import org.onap.aai.introspection.Introspector;
@@ -64,20 +68,24 @@ import org.onap.aai.query.builder.QueryBuilder;
 import org.onap.aai.schema.enums.ObjectMetadata;
 import org.onap.aai.schema.enums.PropertyMetadata;
 import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.db.EdgeRule;
-import org.onap.aai.serialization.db.EdgeRules;
 import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
+import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.util.StoreNotificationEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import com.google.common.base.CaseFormat;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.jcabi.log.Logger;
 
 /**
  * Database Mapping class which acts as the middle man between the REST interface objects 
@@ -86,9 +94,20 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class SearchGraph {
 
-	private final String COMPONENT = "aaidbmap";
-	private AAIExtensionMap aaiExtMap;
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchGraph.class);
+	
+	private LoaderFactory loaderFactory;
+	
+	private EdgeIngestor edgeIngestor;
+
+	private SchemaVersions schemaVersions;
+
+	@Autowired
+	public SearchGraph(LoaderFactory loaderFactory, EdgeIngestor edgeIngestor, SchemaVersions schemaVersions){
+		this.loaderFactory  = loaderFactory;
+		this.edgeIngestor   = edgeIngestor;
+		this.schemaVersions = schemaVersions;
+	}
 	/**
 	 * Get the search result based on the includeNodeType and depth provided.
 	 *
@@ -227,7 +246,7 @@ public class SearchGraph {
 		return response;	
 	}	
 
-	private URI craftUriFromQueryParams(Loader loader, String startNodeType, List<String> startNodeKeyParams) throws UnsupportedEncodingException, AAIException {
+	private URI craftUriFromQueryParams(Loader loader, String startNodeType, List<String> startNodeKeyParams) throws UnsupportedEncodingException, IllegalArgumentException, UriBuilderException, AAIException {
 		Introspector relationship = loader.introspectorFromName("relationship");
 		
 		relationship.setValue("related-to", startNodeType);
@@ -491,10 +510,18 @@ public class SearchGraph {
 	 * @param nodeType the node type
 	 * @return the edge label
 	 * @throws AAIException the AAI exception
+	 * @throws EdgeRuleNotFoundException 
 	 */
-	public static String[] getEdgeLabel(String targetNodeType, String nodeType) {
-		Map<String, EdgeRule> rules = EdgeRules.getInstance().getEdgeRules(targetNodeType, nodeType);
-		return rules.keySet().toArray(new String[0]);
+	public String[] getEdgeLabel(String targetNodeType, String nodeType) throws AAIException, EdgeRuleNotFoundException{
+		
+		
+		EdgeRuleQuery query = new EdgeRuleQuery.Builder(targetNodeType, nodeType).build();
+		Multimap<String, EdgeRule> edgeRules = ArrayListMultimap.create();
+		edgeRules = edgeIngestor.getRules(query);
+		
+		//Map<String, EdgeRule> rules = EdgeRules.getInstance().getEdgeRules(targetNodeType, nodeType);
+		String[] results = edgeRules.keySet().toArray(new String[0]);
+		return results;
 	}
 
 
@@ -511,20 +538,20 @@ public class SearchGraph {
 	 */
 	public Response runNamedQuery(String fromAppId, String transId, String queryParameters,
 			DBConnectionType connectionType,
-			AAIExtensionMap aaiExtMap) throws AAIException {
+			AAIExtensionMap aaiExtMap) throws JAXBException, AAIException {
 
 		Introspector inventoryItems;
 		boolean success = true;
 		TransactionalGraphEngine dbEngine = null;
 		try {
 			
-			MoxyLoader loader = (MoxyLoader)LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
+			MoxyLoader loader = (MoxyLoader)loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getDefaultVersion());
 			DynamicJAXBContext jaxbContext = loader.getJAXBContext();
 			dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					connectionType,
 					loader);
-			DBSerializer serializer = new DBSerializer(AAIProperties.LATEST, dbEngine, ModelType.MOXY, fromAppId);
+			DBSerializer serializer = new DBSerializer(schemaVersions.getDefaultVersion(), dbEngine, ModelType.MOXY, fromAppId);
 			ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
 
 			dbEngine.startTransaction();
@@ -547,7 +574,7 @@ public class SearchGraph {
 			DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
 			String namedQueryUuid = null;
 			if ((qp != null) && qp.isSet("namedQuery")) {    
-				DynamicEntity namedQuery = qp.get("namedQuery");
+				DynamicEntity namedQuery = (DynamicEntity) qp.get("namedQuery");
 
 				if (namedQuery.isSet("namedQueryUuid")) { 
 					namedQueryUuid = namedQuery.get("namedQueryUuid");
@@ -632,19 +659,19 @@ public class SearchGraph {
 	public Response executeModelOperation(String fromAppId, String transId, String queryParameters,
 			DBConnectionType connectionType,
 			boolean isDelete,
-			AAIExtensionMap aaiExtMap) throws AAIException, UnsupportedEncodingException {
+			AAIExtensionMap aaiExtMap) throws JAXBException, AAIException, DynamicException, UnsupportedEncodingException {
 		Response response;
 		boolean success = true;
 		TransactionalGraphEngine dbEngine = null;
 		try {
 			
-			MoxyLoader loader = (MoxyLoader) LoaderFactory.createLoaderForVersion(ModelType.MOXY, AAIProperties.LATEST);
+			MoxyLoader loader = (MoxyLoader) loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getDefaultVersion());
 			DynamicJAXBContext jaxbContext = loader.getJAXBContext();
 			dbEngine = new JanusGraphDBEngine(
 					QueryStyle.TRAVERSAL,
 					connectionType,
 					loader);
-			DBSerializer serializer = new DBSerializer(AAIProperties.LATEST, dbEngine, ModelType.MOXY, fromAppId);
+			DBSerializer serializer = new DBSerializer(schemaVersions.getDefaultVersion(), dbEngine, ModelType.MOXY, fromAppId);
 			ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
 			dbEngine.startTransaction();
 
@@ -688,7 +715,7 @@ public class SearchGraph {
 				DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
 
 				if (qp.isSet("model")) { 
-					DynamicEntity model = qp.get("model");
+					DynamicEntity model = (DynamicEntity) qp.get("model");
 
 					// on an old-style model object, the following 4 attrs were all present
 					if (model.isSet("modelNameVersionId")) { 
@@ -713,7 +740,7 @@ public class SearchGraph {
 					if (model.isSet("modelVers")) {
 						// we know that this is new style, because modelVers was not an option
 						// before v9
-						DynamicEntity modelVers = model.get("modelVers");
+						DynamicEntity modelVers = (DynamicEntity) model.get("modelVers");
 						if (modelVers.isSet("modelVer")) {
 							List<DynamicEntity> modelVerList = modelVers.get("modelVer");
 							// if they send more than one, too bad, they get the first one
@@ -734,7 +761,7 @@ public class SearchGraph {
 			
 			List<Map<String,Object>> startNodeFilterHash = new ArrayList<>();
 
-			String resourceVersion = mapInstanceFilters(modelAndNamedQuerySearch.get("instanceFilters"),
+			String resourceVersion = mapInstanceFilters((DynamicEntity)modelAndNamedQuerySearch.get("instanceFilters"), 
 					startNodeFilterHash, jaxbContext);	
 
 			if (isDelete) {
@@ -749,13 +776,7 @@ public class SearchGraph {
 
 				Vertex firstVert = rs.getVert();
 				String restURI = serializer.getURIForVertex(firstVert).toString();
-				String notificationVersion = AAIProperties.LATEST.toString();
-				if (restURI.startsWith("/")) {
-					restURI = "/aai/" + notificationVersion + restURI;
-				} else {
-					restURI = "/aai/" + notificationVersion + "/" + restURI;
-				}
-				
+				String notificationVersion = schemaVersions.getDefaultVersion().toString();
 				Map<String,String> delResult = processor.runDeleteByModel( transId, fromAppId,
 						modelVersionId, topNodeType, startNodeFilterHash.get(0), aaiExtMap.getApiVersion(), resourceVersion );
 
@@ -836,7 +857,7 @@ public class SearchGraph {
 			return null;
 		}
 		@SuppressWarnings("unchecked")
-		List<DynamicEntity> instanceFilter = instanceFilters.get("instanceFilter");
+		List<DynamicEntity> instanceFilter = (ArrayList<DynamicEntity>)instanceFilters.get("instanceFilter");
 		String resourceVersion = null;
 
 		for (DynamicEntity instFilt : instanceFilter) { 
@@ -855,7 +876,7 @@ public class SearchGraph {
 					if (anyEnt.isSet(propName)) {
 						thisNodeFilterHash.put(nodeType + "." + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, propName), anyEnt.get(propName));
 						if (propName.equals("resourceVersion") && resourceVersion == null) { 
-							resourceVersion = anyEnt.get(propName);
+							resourceVersion = (String)anyEnt.get(propName);
 						}
 					}
 				}
@@ -879,7 +900,7 @@ public class SearchGraph {
 			return;
 		}
 		@SuppressWarnings("unchecked")
-		List<DynamicEntity> secondaryFilter = secondaryFilts.get("secondaryFilt");
+		List<DynamicEntity> secondaryFilter = (ArrayList<DynamicEntity>)secondaryFilts.get("secondaryFilt");
 		
 		for (DynamicEntity secondaryFilt : secondaryFilter) { 
 			List<DynamicEntity> any = secondaryFilt.get("any");
@@ -1061,8 +1082,8 @@ public class SearchGraph {
 					String modelName = null;
 					try { 
 						// Try to get the modelName if we can.  Otherwise, do not fail, just return what we have already.
-						String modelInvariantIdLocal = vert.<String>property("model-invariant-id-local").orElse(null); // this one points at a model
-						String modelVersionIdLocal = vert.<String>property("model-version-id-local").orElse(null); // this one points at a model-ver
+						String modelInvariantIdLocal = (String)vert.<String>property("model-invariant-id-local").orElse(null); // this one points at a model
+						String modelVersionIdLocal = (String)vert.<String>property("model-version-id-local").orElse(null); // this one points at a model-ver
 						
 						if ( (modelInvariantIdLocal != null && modelVersionIdLocal != null) 
 								&& (modelInvariantIdLocal.length() > 0 && modelVersionIdLocal.length() > 0) ) {

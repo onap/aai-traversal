@@ -22,10 +22,12 @@ package org.onap.aai;
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import org.onap.aai.config.PropertyPasswordConfiguration;
+import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.introspection.ModelInjestor;
 import org.onap.aai.logging.LoggingContext;
+import org.onap.aai.logging.LoggingContext.StatusCode;
+import org.onap.aai.nodes.NodeIngestor;
 import org.onap.aai.util.AAIConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -36,10 +38,12 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
+import org.slf4j.MDC;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.UUID;
+import java.util.Map;
 
 @SpringBootApplication
 // Component Scan provides a way to look for spring beans
@@ -49,11 +53,12 @@ import java.util.UUID;
 @ComponentScan(basePackages = {
 		"org.onap.aai.config",
 		"org.onap.aai.web",
+		"org.onap.aai.setup",
 		"org.onap.aai.tasks",
 		"org.onap.aai.service",
-		"org.onap.aai.rest",
-		"com.att.ajsc.common"
+		"org.onap.aai.rest"
 })
+
 @EnableAutoConfiguration(exclude = {
 		DataSourceAutoConfiguration.class,
 		DataSourceTransactionManagerAutoConfiguration.class,
@@ -64,10 +69,21 @@ public class TraversalApp {
 	private static final EELFLogger logger = EELFManager.getInstance().getLogger(TraversalApp.class.getName());
 
 	private static final String APP_NAME = "aai-traversal";
-
+	private static Map<String,String> contextMap;
+	
 	@Autowired
 	private Environment env;
 
+	@Autowired
+	private NodeIngestor nodeIngestor;
+	
+	@Autowired
+	private SpringContextAware context;
+	
+	@Autowired
+	private SpringContextAware loaderFactory;
+	
+	
 	@PostConstruct
 	private void init() throws AAIException {
 		System.setProperty("org.onap.aai.serverStarted", "false");
@@ -80,6 +96,8 @@ public class TraversalApp {
 		LoggingContext.requestId(UUID.randomUUID().toString());
 		LoggingContext.serviceName(APP_NAME);
 		LoggingContext.targetServiceName("contextInitialized");
+		LoggingContext.statusCode(StatusCode.COMPLETE);
+		contextMap = MDC.getCopyOfContextMap();
 
 		logger.info("AAI Server initialization started...");
 
@@ -87,14 +105,14 @@ public class TraversalApp {
 		// This is only needed for tomcat keeping this as temporary
 		System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
 
-	    logger.info("Starting AAIGraph connections and the ModelInjestor");
+	    logger.info("Starting AAIGraph connections and the NodeInjestor");
 
 	    if(env.acceptsProfiles(Profiles.TWO_WAY_SSL) && env.acceptsProfiles(Profiles.ONE_WAY_SSL)){
 	        logger.warn("You have seriously misconfigured your application");
 	    }
 
 		AAIConfig.init();
-		ModelInjestor.getInstance();
+		
 		AAIGraph.getInstance();
 	}
 
@@ -108,10 +126,11 @@ public class TraversalApp {
 
 	    setDefaultProps();
 		SpringApplication app = new SpringApplication(TraversalApp.class);
+		app.setLogStartupInfo(false);
 		app.setRegisterShutdownHook(true);
 		app.addInitializers(new PropertyPasswordConfiguration());
 		Environment env = app.run(args).getEnvironment();
-
+		MDC.setContextMap (contextMap);
 		logger.info(
 				"Application '{}' is running on {}!" ,
 				env.getProperty("spring.application.name"),

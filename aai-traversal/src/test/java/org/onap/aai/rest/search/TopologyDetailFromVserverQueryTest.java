@@ -61,28 +61,44 @@ public class TopologyDetailFromVserverQueryTest extends QueryTest {
 		Vertex pserver = graph.addVertex(T.label, "pserver", T.id, "17", "aai-node-type", "pserver", "hostname", "pservername1");
 		Vertex complex = graph.addVertex(T.label, "pserver", T.id, "18", "aai-node-type", "complex", "physical-location-id", "locationId", "physical-location-type", "locationType", "physical-location-id", "locationId", 
 				"city", "cityName", "state", "stateName", "postal-code", "zip", "country", "countryName");
-		
+		Vertex availabilityZone = graph.addVertex(T.label, "availability-zone", T.id, "19", "aai-node-type", "availability-zone", "availability-zone-name", "azName0", "hypervisor-type", "ht0");
+		Vertex virtualDataCenter = graph.addVertex(T.label, "virtual-data-center", T.id, "20", "aai-node-type", "virtual-data-center", "vdc-id", "vdcId0", "vdc-name", "vdcName0");
+		Vertex volumeGroup = graph.addVertex(T.label, "volume-group", T.id, "21", "aai-node-type", "volume-group", "volume-group-id", "vgId0", "volume-group-name", "vgName0", "vnf-type", "vnfType0");
+		Vertex image = graph.addVertex(T.label, "image", T.id, "22", "aai-node-type", "image", "image-id", "imageId0", "image-name", "imageName0", "image-os-distro", "imageOsDistro0", "image-os-version", "imageOsVersion0", "image-selflink", "imageSl0");
+		Vertex flavor = graph.addVertex(T.label, "flavor", T.id, "23", "aai-node-type", "flavor", "flavor-id", "flavorId0", "flavor-name", "flavorName0", "flavor-selflink", "flavorSl0");
+		Vertex vfModule = graph.addVertex(T.label, "vf-module", T.id, "24", "aai-node-type", "vf-module", "vf-module-id", "vfmId0", "is-base-vf-module", "true");
+		Vertex genericvnf2 = graph.addVertex(T.label, "generic-vnf", T.id, "25", "aai-node-type", "generic-vnf", "vnf-id", "vnfid1", "nf-type", "sample-nf-type");
+		Vertex vfModule2 = graph.addVertex(T.label, "vf-module", T.id, "26", "aai-node-type", "vf-module", "vf-module-id", "vfmId1", "is-base-vf-module", "true");
+
 		GraphTraversalSource g = graph.traversal();
 	
 		rules.addTreeEdge(g, tenant, cloudregion);
 		rules.addTreeEdge(g, vserver, tenant);
 		rules.addEdge(g, pserver, vserver);
 		rules.addEdge(g, complex, pserver);
+		rules.addEdge(g, availabilityZone, pserver);
 		rules.addEdge(g, genericvnf, vserver);
+		rules.addTreeEdge(g, genericvnf, vfModule); // related to the genericvnf only, not the vserver
 		rules.addEdge(g, genericvnf, platform);
 		rules.addEdge(g, genericvnf, lineofbusiness);
 		rules.addEdge(g, genericvnf, vnfc);
 		rules.addEdge(g, genericvnf, servinst);
+		rules.addEdge(g, virtualDataCenter, genericvnf);
+		rules.addEdge(g, volumeGroup, genericvnf);
 		rules.addEdge(g, owningentity, servinst);
 		rules.addEdge(g, project, servinst);
 		rules.addTreeEdge(g, linterface, vserver);
 		rules.addTreeEdge(g, l3inter1ipv4addresslist, linterface);
-        rules.addEdge(g, l3inter1ipv4addresslist, subnet4);
-        rules.addTreeEdge(g, l3network4, subnet4);
-        rules.addTreeEdge(g, l3inter1ipv6addresslist, linterface);
-        rules.addEdge(g, l3inter1ipv6addresslist, subnet6);
-        rules.addTreeEdge(g, l3network6, subnet6);
-				
+		rules.addEdge(g, l3inter1ipv4addresslist, subnet4);
+		rules.addTreeEdge(g, l3network4, subnet4);
+		rules.addTreeEdge(g, l3inter1ipv6addresslist, linterface);
+		rules.addEdge(g, l3inter1ipv6addresslist, subnet6);
+		rules.addTreeEdge(g, l3network6, subnet6);
+		rules.addEdge(g, image, vserver);
+		rules.addEdge(g, flavor, vserver);
+		rules.addTreeEdge(g, genericvnf2, vfModule2);
+		rules.addEdge(g, vserver, vfModule2);
+
 		expectedResult.add(vserver);
 		expectedResult.add(linterface);
 		expectedResult.add(l3inter1ipv4addresslist);
@@ -91,14 +107,23 @@ public class TopologyDetailFromVserverQueryTest extends QueryTest {
 		expectedResult.add(l3inter1ipv6addresslist);
 		expectedResult.add(subnet6);
 		expectedResult.add(l3network6);
+		expectedResult.add(tenant);
 		expectedResult.add(cloudregion);
+		expectedResult.add(pserver);
 		expectedResult.add(complex);
+		expectedResult.add(availabilityZone);
 		expectedResult.add(genericvnf);
+		expectedResult.add(vfModule); // related to the genericvnf only, not the vserver
 		expectedResult.add(platform);
 		expectedResult.add(lineofbusiness);
+		expectedResult.add(virtualDataCenter);
+		expectedResult.add(volumeGroup);
 		expectedResult.add(owningentity);
 		expectedResult.add(project);
 		expectedResult.add(vnfc);
+		expectedResult.add(image);
+		expectedResult.add(flavor);
+		expectedResult.add(vfModule2); // related to the vserver
 	}
 	@Override
 	protected String getQueryName() {
