@@ -1,0 +1,9 @@
+Code-Review+1: Pavel Paroulek <pavel.paroulek@orange.com>
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: William LaMont <wl2432@att.com>
+Code-Review+2: James Forsyth <jf2512@att.com>
+Submitted-by: James Forsyth <jf2512@att.com>
+Submitted-at: Wed, 22 Aug 2018 22:16:35 +0000
+Reviewed-on: https://gerrit.onap.org/r/61907
+Project: aai/traversal
+Branch: refs/heads/master
