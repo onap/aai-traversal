@@ -25,6 +25,7 @@ public final class Profiles {
     public static final String DME2         = "dme2";
 
     public static final String ONE_WAY_SSL  = "one-way-ssl";
+    public static final String AAF_AUTHENTICATION  = "aaf-auth";
     public static final String TWO_WAY_SSL  = "two-way-ssl";
 
     private Profiles(){}
