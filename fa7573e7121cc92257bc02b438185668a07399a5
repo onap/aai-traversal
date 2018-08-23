@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_e891fb52",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/config/AafFilter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2018-08-23T13:52:28Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be Accept instead of accept?",
+      "revId": "fa7573e7121cc92257bc02b438185668a07399a5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
