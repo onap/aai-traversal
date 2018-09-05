@@ -17,56 +17,23 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.config;
+package org.onap.aai.config.aaf;
 
-import org.onap.aaf.cadi.PropAccess;
-import org.onap.aaf.cadi.filter.CadiFilter;
-import org.onap.aai.Profiles;
-import org.onap.aai.TraversalApp;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.logging.ErrorLogHelper;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Properties;
 
-/**
- * AAF authentication filter
- */
-
-@Order(1)
-@Component
-@Profile(Profiles.AAF_AUTHENTICATION)
-public class AafFilter extends OncePerRequestFilter {
+class ResponseFormatter {
 
     private static final String ACCEPT_HEADER = "accept";
-    private final CadiFilter cadiFilter;
 
-    public AafFilter() throws IOException, ServletException {
-        Properties cadiProperties = new Properties();
-        cadiProperties.load(TraversalApp.class.getClassLoader().getResourceAsStream("cadi.properties"));
-        cadiFilter = new CadiFilter(new PropAccess(cadiProperties));
-    }
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        cadiFilter.doFilter(request, response, filterChain);
-        if(response.getStatus() >=400 && response.getStatus() < 500){
-                errorResponse(request, response);
-        }
-    }
-
-    private void errorResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    static void errorResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String accept = request.getHeader(ACCEPT_HEADER) == null ? MediaType.APPLICATION_XML : request.getHeader(ACCEPT_HEADER);
         AAIException aaie = new AAIException("AAI_3300");
         response.setStatus(aaie.getErrorObject().getHTTPResponseCode().getStatusCode());
@@ -74,4 +41,5 @@ public class AafFilter extends OncePerRequestFilter {
         response.getWriter().flush();
         response.getWriter().close();
     }
+
 }
