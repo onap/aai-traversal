@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
-import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
@@ -37,8 +36,13 @@ import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
+
 public class MakeNamedQuery {
 
+	private static EELFLogger logger=EELFManager.getInstance().getLogger(MakeNamedQuery.class);
+	
 	public static void main(String[] args) throws Exception {
 		String _apiVersion = AAIConfig.get(AAIConstants.AAI_DEFAULT_API_VERSION_PROP);
 		String widgetJsonDir = null;
@@ -185,10 +189,10 @@ public class MakeNamedQuery {
 		
 		} catch (AAIUnknownObjectException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("AAIUnknown object exception occured:"+e.getMessage());
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("IllegalArgument exception occured:"+e.getMessage());
 		}
 		return newNQElement;
 	}
@@ -211,10 +215,10 @@ public class MakeNamedQuery {
 			
 		} catch (AAIUnknownObjectException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("AAIUnknown object exception occured:"+e.getMessage());
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("IllegalArgument exception occured:"+e.getMessage());
 		}
 		return newNqElement;
 
@@ -243,10 +247,10 @@ public class MakeNamedQuery {
 			//newRelationshipData.add(newRelationshipDatum2.getUnderlyingObject());
 		} catch (AAIUnknownObjectException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("AAIUnknown object exception occured:"+e.getMessage());
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("IllegalArgument exception occured:"+e.getMessage());
 		}
 
 		return newRelationship;
