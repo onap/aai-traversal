@@ -59,6 +59,11 @@ public class AafAuthorizationFilter extends OrderedRequestContextFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+
+        if(request.getRequestURI().matches("^.*/util/echo$")){
+            filterChain.doFilter(request, response);
+        }
+
         boolean containsWordGremlin = request.getReader().lines().collect(Collectors.joining(System.lineSeparator())).contains("\"gremlin\"");
         //if the request contains the word "gremlin" it's an advanced query
         String queryType = containsWordGremlin ? ADVANCED : BASIC;
