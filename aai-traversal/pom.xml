@@ -69,14 +69,13 @@
         <scamper.encryption.version>1.8.20</scamper.encryption.version>
         <httpcomponents.httpmime.version>4.5.2</httpcomponents.httpmime.version>
         <scamper.version>1.8.36</scamper.version>
-        <dom4j.version>1.6.1</dom4j.version>
         <aaf.version>2.1.2-SNAPSHOT</aaf.version>
         <commons.lang.version>2.6</commons.lang.version>
         <eelf.core.version>1.0.0</eelf.core.version>
         <logback.version>1.2.3</logback.version>
         <hamcrest.junit.version>2.0.0.0</hamcrest.junit.version>
         <janino.version>2.7.8</janino.version>
-        <google.guava.version>16.0</google.guava.version>
+        <google.guava.version>19.0</google.guava.version>
         <janusgraph.version>0.2.0</janusgraph.version>
         <gremlin.version>3.2.2</gremlin.version>
         <smack.version>3.0.4</smack.version>
@@ -94,7 +93,7 @@
         <dmaap.client.version>0.2.12</dmaap.client.version>
         <httpcore.version>4.4</httpcore.version>
         <json.path.version>2.2.0</json.path.version>
-        <activemq.version>5.15.3</activemq.version>
+        <activemq.version>5.15.6</activemq.version>
         <httpclient.version>4.5.3</httpclient.version>
         <spring.jms.version>4.3.2.RELEASE</spring.jms.version>
         <spotify.docker.version>0.4.11</spotify.docker.version>
@@ -459,6 +458,10 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -469,6 +472,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
