@@ -21,11 +21,6 @@
 APP_HOME=$(pwd);
 RESOURCES_HOME=${APP_HOME}/resources/;
 
-export CHEF_CONFIG_REPO=${CHEF_CONFIG_REPO:-aai-config};
-export CHEF_GIT_URL=${CHEF_GIT_URL:-http://gerrit.onap.org/r/aai};
-export CHEF_CONFIG_GIT_URL=${CHEF_CONFIG_GIT_URL:-$CHEF_GIT_URL};
-export CHEF_DATA_GIT_URL=${CHEF_DATA_GIT_URL:-$CHEF_GIT_URL};
-
 export SERVER_PORT=${SERVER_PORT:-8446};
 
 USER_ID=${LOCAL_USER_ID:-9001}
@@ -42,7 +37,7 @@ if [ $(cat /etc/passwd | grep aaiadmin | wc -l) -eq 0 ]; then
 	}
 fi;
 
-chown -R aaiadmin:aaiadmin /opt/app /opt/aai/logroot /var/chef
+chown -R aaiadmin:aaiadmin /opt/app /opt/aai/logroot
 find /opt/app/ -name "*.sh" -exec chmod +x {} +
 
 if [ -f ${APP_HOME}/aai.sh ]; then
