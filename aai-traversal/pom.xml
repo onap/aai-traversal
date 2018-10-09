@@ -132,7 +132,7 @@
         <snapshot.path>/content/repositories/snapshots/</snapshot.path>
 
         <netty.handler.version>4.1.9.Final</netty.handler.version>
-        <netty.version>4.0.37.Final</netty.version>
+        <netty.version>4.0.56.Final</netty.version>
         <jackson.core.version>2.8.11.1</jackson.core.version>
 
         <spring.test.version>4.3.6.RELEASE</spring.test.version>
