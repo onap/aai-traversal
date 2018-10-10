@@ -59,7 +59,7 @@
       },
       "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'pnf').getVerticesByProperty('equip-vendor', equipVendor).getVerticesByProperty('equip-model', equipModel).store('x').cap('x').unfold().dedup()"
     }
-    },{
+  },{
     "pnf-fromModel-byRegion":{
       "query":{
         "required-properties":["equipVendor","equipModel","cloudRegionId"]
@@ -196,7 +196,7 @@
     }
   },{
     "topology-summary":{
-      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vnfc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vnfc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').store('x').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'image').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'flavor').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x').createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'complex').store('x'))).cap('x').unfold().dedup()"
+      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vnfc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'line-of-business').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'platform').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'service-instance').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'owning-entity').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'project').store('x')),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vnfc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').store('x').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'image').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'flavor').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x').createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'complex').store('x'))).cap('x').unfold().dedup()"
     }
   },{
     "topology-detail":{
@@ -250,8 +250,8 @@
       "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vnfc').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vip-ipv4-address-list').store('x').createEdgeTraversal(EdgeType.COUSIN, 'vip-ipv4-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vip-ipv6-address-list').store('x').createEdgeTraversal(EdgeType.COUSIN, 'vip-ipv6-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vnfc', 'l3-interface-ipv4-address-list').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv4-address-list', 'l3-network').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv4-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x') ), builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vnfc', 'l3-interface-ipv6-address-list').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv6-address-list', 'l3-network').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv6-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x') ) ), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.TREE,'vserver','tenant').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv4-address-list', 'l3-network').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv4-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x') ), builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list').store('x').union( builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv6-address-list', 'l3-network').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv6-address-list', 'subnet').store( 'x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x') ) ), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x') ), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'pserver').store('x').createEdgeTraversal(EdgeType.TREE, 'pserver', 'p-interface').store('x').createEdgeTraversal(EdgeType.COUSIN, 'p-interface', 'physical-link').store('x') ).cap('x').unfold().dedup()"
     }
   },{
-    "access-service-fromServiceInstance":{ 
-      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE, 'service-subscription', 'customer').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'forwarding-path').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarding-path', 'configuration').store('x').createEdgeTraversal(EdgeType.TREE, 'configuration', 'evc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'forwarding-path', 'forwarder').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarder', 'configuration').store('x').createEdgeTraversal(EdgeType.TREE, 'configuration', 'forwarder-evc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarder', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'p-interface', 'pnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarder', 'lag-interface').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'lag-interface', 'pnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'lag-interface', 'logical-link').getVerticesByProperty('link-type', 'LAG').store('x'))))).cap('x').unfold().dedup()"
+    "access-service-fromServiceInstance":{
+      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE, 'service-subscription', 'customer').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'forwarding-path').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarding-path', 'configuration').store('x').createEdgeTraversal(EdgeType.TREE, 'configuration', 'evc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'forwarding-path', 'forwarder').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarder', 'configuration').store('x').createEdgeTraversal(EdgeType.TREE, 'configuration', 'forwarder-evc').store('x').createEdgeTraversal(EdgeType.TREE, 'forwarder-evc', 'vlan-mapping').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarder', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'p-interface', 'pnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'forwarder', 'lag-interface').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'lag-interface', 'pnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'lag-interface', 'logical-link').getVerticesByProperty('link-type', 'LAG').store('x'))))).cap('x').unfold().dedup()"
     }
   },{
     "count-vnf-byVnfType":{
@@ -270,12 +270,12 @@
       "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE,   'l-interface', 'l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list').store('x'))),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'lag-interface').createEdgeTraversal(EdgeType.TREE, 'lag-interface', 'l-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list').store('x')),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vnf-image').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'network-profile').store('x')).cap('x').unfold().dedup()"
     }
   },{
-
     "related-to":{
       "query":{
-        "required-properties":["startingNodeType","relatedToNodeType"]
+        "required-properties":["startingNodeType","relatedToNodeType"],
+        "optional-properties":["edgeType"]
       },
-      "stored-query":"builder.createEdgeTraversal(startingNodeType, relatedToNodeType).store('x').cap('x').unfold().dedup()"
+      "stored-query":"builder.createEdgeTraversal(edgeType, startingNodeType, relatedToNodeType).store('x').cap('x').unfold().dedup()"
     }
   },{
     "gfp-vserver":{
@@ -283,71 +283,71 @@
     }
   },{
     "sriov-topology-fromVnf":{
-     "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').createEdgeTraversal(EdgeType.TREE, 'vserver',   'l-interface').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'sriov-vf').store('x').createEdgeTraversal(EdgeType.COUSIN, 'sriov-vf', 'sriov-pf').createEdgeTraversal(EdgeType.TREE, 'sriov-pf','p-interface').createEdgeTraversal(EdgeType.COUSIN, 'p-interface', 'physical-link').store('x').cap('x').unfold().dedup()"
-	}
+      "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').createEdgeTraversal(EdgeType.TREE, 'vserver',   'l-interface').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'sriov-vf').store('x').createEdgeTraversal(EdgeType.COUSIN, 'sriov-vf', 'sriov-pf').createEdgeTraversal(EdgeType.TREE, 'sriov-pf','p-interface').createEdgeTraversal(EdgeType.COUSIN, 'p-interface', 'physical-link').store('x').cap('x').unfold().dedup()"
+    }
   },{
     "vserver-l-interfaces-fromVnfc":{
-    "query":{
+      "query":{
         "optional-properties":["networkName"]
       },
-	  "stored-query":"builder.where(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vserver').createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').getVerticesByProperty('network-name',networkName)).createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vserver').store('x').createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').getVerticesByProperty('network-name',networkName).store('x').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').store('x').cap('x').unfold().dedup()"
-	 }
+      "stored-query":"builder.where(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vserver').createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').getVerticesByProperty('network-name',networkName)).createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vserver').store('x').createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').getVerticesByProperty('network-name',networkName).store('x').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').store('x').cap('x').unfold().dedup()"
+    }
   },{
     "vnfs-vlans-fromServiceInstance":{
       "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'configuration').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'configuration', 'generic-vnf').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'configuration', 'l-interface').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').store('x')).cap('x').unfold().dedup()"
-	  }
+    }
   },{
     "getClfiRoadmTailSummary":{
-      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'logical-link').store('x').createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'service-instance').store('x').createEdgeTraversal(EdgeType.TREE,'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE,'service-subscription', 'customer').store('x')).cap('x').unfold().dedup()"
+      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'logical-link').createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'service-instance').store('x').createEdgeTraversal(EdgeType.TREE,'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE,'service-subscription', 'customer').store('x')).cap('x').unfold().dedup()"
     }
   },{
     "getRouterRoadmTailSummary":{
-      "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.TREE,'pnf', 'p-interface').store('x').createEdgeTraversal(EdgeType.COUSIN,'p-interface', 'logical-link').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'logical-link').store('x').createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'service-instance').store('x').createEdgeTraversal(EdgeType.TREE,'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE,'service-subscription', 'customer').store('x')).cap('x').unfold().dedup()"
+      "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.TREE,'pnf', 'p-interface').store('x').createEdgeTraversal(EdgeType.COUSIN,'p-interface', 'logical-link').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'logical-link').createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'service-instance').store('x').createEdgeTraversal(EdgeType.TREE,'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE,'service-subscription', 'customer').store('x')).cap('x').unfold().dedup()"
     }
   },{
     "topology-summary-fromCloudRegion":{
       "stored-query": "builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'cloud-region', 'tenant').store('x').createEdgeTraversal(EdgeType.TREE, 'tenant', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vnfc').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'generic-vnf').store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vnfc').store('x')),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'cloud-region', 'pserver').store('x')).cap('x').unfold().dedup()"
     }
   }, {
-      "vservers-fromPserver-tree": {
-        "stored-query": "builder.createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'vserver').tree()"
-      }
-    },{
+    "vservers-fromPserver-tree": {
+      "stored-query": "builder.createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'vserver').tree()"
+    }
+  },{
     "cloud-region-and-source-FromConfiguration":{
-        "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'configuration','logical-link').createEdgeTraversalWithLabels(EdgeType.COUSIN, 'logical-link', 'l-interface',new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.Source'))).createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vf-module').createEdgeTraversal(EdgeType.TREE, 'vf-module', 'generic-vnf').store('x')).cap('x').unfold().dedup()"
-        }
+      "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'configuration','logical-link').createEdgeTraversalWithLabels(EdgeType.COUSIN, 'logical-link', 'l-interface',new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.Source'))).createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vf-module').createEdgeTraversal(EdgeType.TREE, 'vf-module', 'generic-vnf').store('x')).cap('x').unfold().dedup()"
+    }
   },{
     "destination-FromConfiguration":{
-        "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'configuration','logical-link').union(builder.newInstance().createEdgeTraversalWithLabels(EdgeType.COUSIN, 'logical-link', 'l-interface', new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.Destination'))).createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vserver').createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vf-module').createEdgeTraversal(EdgeType.TREE, 'vf-module', 'generic-vnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'logical-link', 'generic-vnf').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'pnf').store('x')).cap('x').unfold().dedup()"
+      "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'configuration','logical-link').union(builder.newInstance().createEdgeTraversalWithLabels(EdgeType.COUSIN, 'logical-link', 'l-interface', new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.Destination'))).createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vserver').createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vf-module').createEdgeTraversal(EdgeType.TREE, 'vf-module', 'generic-vnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'logical-link', 'generic-vnf').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'pnf').store('x')).cap('x').unfold().dedup()"
     }
   },{
-  	"topology-summary-fromTenant":{
-	"stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'tenant', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'generic-vnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x'))).cap('x').unfold().dedup()"
-	}
+    "topology-summary-fromTenant":{
+      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'tenant', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'generic-vnf').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x'))).cap('x').unfold().dedup()"
+    }
   },{
     "vfModule-fromServiceInstance":{
-        "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'service-instance','generic-vnf').createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'vf-module').store('x').cap('x').unfold().dedup()"
+      "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'service-instance','generic-vnf').createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'vf-module').store('x').cap('x').unfold().dedup()"
     }
   },{
-	"getComplexByPnfName":{
-		"stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN,'pnf', 'complex').store('x').cap('x').unfold().dedup()"
-	}
+    "getComplexByPnfName":{
+      "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN,'pnf', 'complex').store('x').cap('x').unfold().dedup()"
+    }
   },{
-	"getComplexFromHostname":{
-		"stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN,'pserver', 'complex').tree()"
-	}
+    "getComplexFromHostname":{
+      "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN,'pserver', 'complex').tree()"
+    }
   },{
-	"instance-groups-byCloudRegion":{
-		"query":{
-			"required-properties":["type","role","function"]
-			},
-		"stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'cloud-region', 'instance-group').getVerticesByProperty('instance-group-type', type).getVerticesByProperty('instance-group-role', role).getVerticesByProperty('instance-group-function', function).store('x').cap('x').unfold().dedup()"
-		}
+    "instance-groups-byCloudRegion":{
+      "query":{
+        "required-properties":["type","role","function"]
+      },
+      "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN, 'cloud-region', 'instance-group').getVerticesByProperty('instance-group-type', type).getVerticesByProperty('instance-group-role', role).getVerticesByProperty('instance-group-function', function).store('x').cap('x').unfold().dedup()"
+    }
   },{
     "network-collection-ByServiceInstance":{
-        "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'collection').store('x').createEdgeTraversal(EdgeType.COUSIN, 'collection', 'instance-group').store('x').createEdgeTraversal(EdgeType.COUSIN, 'instance-group', 'l3-network').store('x').cap('x').unfold().dedup()"
-      }
-    },{
+      "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'collection').store('x').createEdgeTraversal(EdgeType.COUSIN, 'collection', 'instance-group').store('x').createEdgeTraversal(EdgeType.COUSIN, 'instance-group', 'l3-network').store('x').cap('x').unfold().dedup()"
+    }
+  },{
     "containment-path":{
       "stored-query":"builder.until(builder.newInstance().not(builder.newInstance().getParentEdge())).repeat(builder.newInstance().getParentVertex()).path()"
     }
@@ -356,23 +356,23 @@
       "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'service-instance', 'service-subscription').store('x'),builder.newInstance().createPrivateEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'model-ver').store('x')).cap('x').unfold().dedup()"
     }
   },
-  	{
+    {
       "getLogicalLinkByCloudRegionId": {
         "stored-query": "builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region', 'logical-link').store('x').cap('x').unfold().dedup()"
       }
-   },{
-	"getPinterfacePhysicalLinkBySvcInstId":{ 
-      "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN,'service-instance', 'generic-vnf').store('x').createEdgeTraversal(EdgeType.COUSIN,'generic-vnf', 'vserver').store('x').createEdgeTraversal(EdgeType.COUSIN,'vserver', 'pserver').store('x').createEdgeTraversal(EdgeType.TREE,'pserver', 'p-interface').store('x').createEdgeTraversal(EdgeType.COUSIN,'p-interface', 'physical-link').store('x').cap('x').unfold().dedup()"
-       }  
-   },{ 
-    "topology-detail-fromVnf":{ 
-      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vnfc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').store('x').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x').createEdgeTraversal(EdgeType.TREE, 'cloud-region', 'availability-zone').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'image').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'flavor').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x').createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'complex').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface','l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list').store('x'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'service-instance').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'vf-module').createEdgeTraversal(EdgeType.COUSIN, 'vf-module', 'volume-group').store('x')).cap('x').unfold().dedup()"}
-   },{
-	"vnf-to-service-instance":{
-		"stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'service-instance').store('x').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').store('x').cap('x').unfold().dedup()"}
-	},{
-  	"getServiceTopology":{
-		"stored-query":"builder.union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'complex'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'allotted-resource').createEdgeTraversal(EdgeType.TREE, 'allotted-resource', 'service-instance').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list')))))).tree()"}
+    },{
+      "getPinterfacePhysicalLinkBySvcInstId":{
+        "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN,'service-instance', 'generic-vnf').store('x').createEdgeTraversal(EdgeType.COUSIN,'generic-vnf', 'vserver').store('x').createEdgeTraversal(EdgeType.COUSIN,'vserver', 'pserver').store('x').createEdgeTraversal(EdgeType.TREE,'pserver', 'p-interface').store('x').createEdgeTraversal(EdgeType.COUSIN,'p-interface', 'physical-link').store('x').cap('x').unfold().dedup()"
+      }
+    },{
+      "topology-detail-fromVnf":{
+        "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vnfc').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').store('x').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x').createEdgeTraversal(EdgeType.TREE, 'cloud-region', 'availability-zone').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'image').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'flavor').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').store('x').createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'complex').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface','l3-interface-ipv4-address-list').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list').store('x'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'service-instance').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'vf-module').createEdgeTraversal(EdgeType.COUSIN, 'vf-module', 'volume-group').store('x')).cap('x').unfold().dedup()"}
+    },{
+      "vnf-to-service-instance":{
+        "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'service-instance').store('x').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').store('x').cap('x').unfold().dedup()"}
+    },{
+      "getServiceTopology":{
+        "stored-query":"builder.union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'pserver').createEdgeTraversal(EdgeType.COUSIN, 'pserver', 'complex'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'allotted-resource').createEdgeTraversal(EdgeType.TREE, 'allotted-resource', 'service-instance').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'generic-vnf', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv6-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'vlan').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv4-address-list'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vlan', 'l3-interface-ipv6-address-list')))))).tree()"}
     },
     {
       "getL3networkCloudRegionByNetworkRole": {
@@ -385,53 +385,67 @@
     },
     {
       "pserver-fromHostnameFirstToken": {
-		"query":{
-        	"required-properties":["hostnameFirstToken","sourcesOfTruth"]
-    	},
-		"stored-query": "builder.getVerticesStartsWithProperty('hostname', hostnameFirstToken).getVerticesByProperty('source-of-truth', new ArrayList<>(Arrays.asList(sourcesOfTruth)))"
-	  }
-	},
-	{
+        "query":{
+          "required-properties":["hostnameFirstToken","sourcesOfTruth"]
+        },
+        "stored-query": "builder.getVerticesStartsWithProperty('hostname', hostnameFirstToken).getVerticesByProperty('source-of-truth', new ArrayList<>(Arrays.asList(sourcesOfTruth)))"
+      }
+    },
+    {
       "pserver-fromFqdnFirstToken": {
-		"query":{
-        	"required-properties":["fqdnFirstToken","sourcesOfTruth"]
-    	},
-		"stored-query": "builder.getVerticesStartsWithProperty('fqdn', fqdnFirstToken).getVerticesByProperty('source-of-truth', new ArrayList<>(Arrays.asList(sourcesOfTruth)))"
-	  }
-	},
-	{
+        "query":{
+          "required-properties":["fqdnFirstToken","sourcesOfTruth"]
+        },
+        "stored-query": "builder.getVerticesStartsWithProperty('fqdn', fqdnFirstToken).getVerticesByProperty('source-of-truth', new ArrayList<>(Arrays.asList(sourcesOfTruth)))"
+      }
+    },
+    {
+      "cloud-regions-by-generic-vnf-HG-pairs": {
+        "stored-query": "builder.createEdgeTraversal(EdgeType.TREE, 'service-subscription', 'service-instance').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'allotted-resource').createEdgeTraversal(EdgeType.TREE, 'allotted-resource', 'service-instance').createEdgeTraversal(EdgeType.TREE, 'service-instance', 'service-subscription').getVerticesByProperty('service-type', 'HNGATEWAY').createEdgeTraversal(EdgeType.TREE, 'service-subscription', 'service-instance').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'generic-vnf').getVerticesByProperty('vnf-type', 'HG').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').createEdgeTraversal(EdgeType.TREE, 'vserver', 'tenant').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x').cap('x').unfold().dedup()"
+      }
+    },
+    {
       "getLinterface-fromNewvce": {
         "query":{
-        	"required-properties":["interfaceRole1","interfaceRole2"]
-    	},
-		"stored-query": "builder.createEdgeTraversal(EdgeType.TREE, 'newvce', 'l-interface').getVerticesByProperty('interface-role', interfaceRole1).createEdgeTraversal(EdgeType.COUSIN, 'l-interface', 'logical-link').createEdgeTraversal(EdgeType.COUSIN, 'logical-link', 'l-interface').getVerticesByProperty('interface-role', interfaceRole2).store('x').cap('x').unfold().dedup()"
-	  }
-	},
-	{
-		"l-interface-to-CP": {
-			"query":{
-	        	"required-properties":["isProviderNetwork"]
-	    	},
-			"stored-query": "builder.union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vnfc', 'cp').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'cp', 'vlan-tag').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'cp', 'l3-network').getVerticesByBooleanProperty('is-provider-network', isProviderNetwork).store('x')),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').store('x'))).cap('x').unfold().dedup()"
-		}
-	},
-	{
-      "getNetworks": {
-		"query":{
-        	"required-properties":["networkRole","cloudRegionId"]
-    	},
-		"stored-query": "builder.createEdgeTraversal(EdgeType.COUSIN, 'owning-entity','service-instance').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'l3-network').getVerticesByProperty('network-role', networkRole).where(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-network', 'cloud-region').getVerticesByProperty('cloud-region-id', cloudRegionId)).store('x').cap('x').unfold().dedup()"
-	  }
-	},
-	{
-  	"fabric-information-fromVnf":{
-		"stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'sriov-vf').createEdgeTraversal(EdgeType.COUSIN, 'sriov-vf', 'sriov-pf').createEdgeTraversal(EdgeType.TREE, 'sriov-pf', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'p-interface', 'pserver').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vnfc').createEdgeTraversal(EdgeType.TREE, 'vnfc', 'cp').createEdgeTraversal(EdgeType.COUSIN, 'cp', 'vlan-tag').store('x')).cap('x').unfold().dedup()"
-		}
+          "required-properties":["interfaceRole1","interfaceRole2"]
+        },
+        "stored-query": "builder.createEdgeTraversal(EdgeType.TREE, 'newvce', 'l-interface').getVerticesByProperty('interface-role', interfaceRole1).createEdgeTraversal(EdgeType.COUSIN, 'l-interface', 'logical-link').createEdgeTraversal(EdgeType.COUSIN, 'logical-link', 'l-interface').getVerticesByProperty('interface-role', interfaceRole2).store('x').cap('x').unfold().dedup()"
+      }
     },
-	{
-		"getNetworksByServiceInstance": {
-			"stored-query": "builder.createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'l3-network').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-network',   'vlan-tag').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-network', 'l3-network').store('x').createEdgeTraversal(EdgeType.COUSIN, 'l3-network', 'vlan-tag').store('x')).cap('x').unfold().dedup()"
-		}
-	}
-   ]
+    {
+      "l-interface-to-CP": {
+        "query":{
+          "required-properties":["isProviderNetwork"]
+        },
+        "stored-query": "builder.union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vnfc', 'cp').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'cp', 'vlan-tag').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'cp', 'l3-network').getVerticesByBooleanProperty('is-provider-network', isProviderNetwork).store('x')),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vserver').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').store('x'))).cap('x').unfold().dedup()"
+      }
+    },
+    {
+      "getNetworks": {
+        "query":{
+          "required-properties":["networkRole","cloudRegionId"]
+        },
+        "stored-query": "builder.createEdgeTraversal(EdgeType.COUSIN, 'owning-entity','service-instance').createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'l3-network').getVerticesByProperty('network-role', networkRole).where(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-network', 'cloud-region').getVerticesByProperty('cloud-region-id', cloudRegionId)).store('x').cap('x').unfold().dedup()"
+      }
+    },{
+      "getTenantInfoAtSvcSubscription": {
+        "stored-query": "builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'service-subscription', 'tenant').store('x').createEdgeTraversal(EdgeType.TREE, 'tenant', 'cloud-region').store('x').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region', 'complex').store('x').cap('x').unfold().dedup()"
+      }
+    },
+    {
+      "fabric-information-fromVnf":{
+        "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver', 'l-interface').createEdgeTraversal(EdgeType.TREE, 'l-interface', 'sriov-vf').createEdgeTraversal(EdgeType.COUSIN, 'sriov-vf', 'sriov-pf').createEdgeTraversal(EdgeType.TREE, 'sriov-pf', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE, 'p-interface', 'pserver').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver', 'vnfc').store('x').createEdgeTraversal(EdgeType.TREE, 'vnfc', 'cp').createEdgeTraversal(EdgeType.COUSIN, 'cp', 'vlan-tag').store('x')).cap('x').unfold().dedup()"
+      }
+    },
+    {
+      "getNetworksByServiceInstance": {
+        "stored-query": "builder.createEdgeTraversal(EdgeType.COUSIN, 'service-instance', 'l3-network').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-network',   'vlan-tag').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-network', 'l3-network').store('x').createEdgeTraversal(EdgeType.COUSIN, 'l3-network', 'vlan-tag').store('x')).cap('x').unfold().dedup()"
+      }
+    },
+    {
+      "ips-networks-fromVnf": {
+        "stored-query": "builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vnfc').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc','vip-ipv4-address-list').store('x').createEdgeTraversal(EdgeType.COUSIN, 'vip-ipv4-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vnfc', 'vip-ipv6-address-list').store('x').createEdgeTraversal(EdgeType.COUSIN, 'vip-ipv6-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x')),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf', 'vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver','l-interface').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface', 'l3-interface-ipv4-address-list').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv4-address-list',   'l3-network').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv4-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x')),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'l-interface','l3-interface-ipv6-address-list').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv6-address-list',   'l3-network').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'l3-interface-ipv6-address-list', 'subnet').store('x').createEdgeTraversal(EdgeType.TREE, 'subnet', 'l3-network').store('x'))),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver','pserver').store('x').createEdgeTraversal(EdgeType.COUSIN, 'pserver','complex').store('x'))).cap('x').unfold().dedup()"
+      }
+    }
+  ]
 }
