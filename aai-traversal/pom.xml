@@ -69,7 +69,7 @@
         <scamper.encryption.version>1.8.20</scamper.encryption.version>
         <httpcomponents.httpmime.version>4.5.2</httpcomponents.httpmime.version>
         <scamper.version>1.8.36</scamper.version>
-        <aaf.version>2.1.4-SNAPSHOT</aaf.version>
+        <aaf.version>2.1.4</aaf.version>
         <commons.lang.version>2.6</commons.lang.version>
         <eelf.core.version>1.0.0</eelf.core.version>
         <logback.version>1.2.3</logback.version>
