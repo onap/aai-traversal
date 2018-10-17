@@ -119,9 +119,6 @@
         <aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
         <aai.docker.namespace>onap</aai.docker.namespace>
 
-        <aai.project.version>1.3.0</aai.project.version>
-        <aai.docker.version>1.3</aai.docker.version>
-
         <!--
             Nexus Proxy Properties and Snapshot Locations
             Ideally this can be overwritten at runtime per internal environment specific values at runtime
