@@ -25,6 +25,10 @@ PROGNAME=$(basename $0)
 PROJECT_HOME=/opt/app/aai-traversal
 OUTFILE=$PROJECT_HOME/logs/misc/${PROGNAME}.log.$(date +\%Y-\%m-\%d)
 
+if [ "$1" = "--debug" ]; then
+    set -x;
+fi;
+
 TS=$(date "+%Y-%m-%d %H:%M:%S")
 
 CHECK_USER="aaiadmin"
