@@ -25,6 +25,10 @@ PROGNAME=$(basename $0)
 PROJECT_HOME=/opt/app/aai-traversal
 OUTFILE=$PROJECT_HOME/logs/misc/${PROGNAME}.log.$(date +\%Y-\%m-\%d)
 
+if [ "$1" = "--debug" ]; then
+    set -x;
+fi;
+
 TS=$(date "+%Y-%m-%d %H:%M:%S")
 
 CHECK_USER="aaiadmin"
@@ -49,7 +53,11 @@ echo "Begin putTool for widget $filename" | tee -a $OUTFILE
 vers=`grep model-invariant-id $filepath|cut -d':' -f2|cut -d'"' -f2`
 # last parameter will skip put if it exists
 resource=service-design-and-creation/models/model/$vers
-$PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+if [ "$1" = "--debug" ]; then
+  bash -x $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+else 
+  $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+fi;
 echo "End putTool for widget $filename" | tee -a $OUTFILE
 done
 
@@ -62,7 +70,11 @@ echo "Begin putTool for named-query $filename" | tee -a $OUTFILE
 vers=`grep named-query-uuid $filepath|cut -d':' -f2|cut -d'"' -f2`
 # last parameter will skip put if it exists
 resource=service-design-and-creation/named-queries/named-query/$vers
-$PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+if [ "$1" = "--debug" ]; then
+  bash -x $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+else
+  $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+fi;
 echo "End putTool for named-query $filename" | tee -a $OUTFILE
 done
 
@@ -75,7 +87,11 @@ echo "Begin putTool for resource model $filename" | tee -a $OUTFILE
 vers=`grep model-invariant-id $filepath|cut -d':' -f2|cut -d'"' -f2`
 # last parameter will skip put if it exists
 resource=service-design-and-creation/models/model/$vers
-$PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+if [ "$1" = "--debug" ]; then
+  bash -x $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+else
+  $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+fi;
 echo "End putTool for resource model $filename" | tee -a $OUTFILE
 done
 
@@ -88,7 +104,11 @@ echo "Begin putTool for service model $filename" | tee -a $OUTFILE
 vers=`grep model-invariant-id $filepath|cut -d':' -f2|cut -d'"' -f2`
 # last parameter will skip put if it exists
 resource=service-design-and-creation/models/model/$vers
-$PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+if [ "$1" = "--debug" ]; then
+  bash -x $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+else
+  $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
+fi;
 echo "End putTool for service model $filename" | tee -a $OUTFILE
 done
 
