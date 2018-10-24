@@ -19,6 +19,7 @@
  */
 package org.onap.aai.config.aaf;
 
+import org.apache.commons.io.IOUtils;
 import org.onap.aai.Profiles;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.filter.OrderedRequestContextFilter;
@@ -31,7 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.stream.Collectors;
+import java.nio.charset.StandardCharsets;
 
 import static org.onap.aai.config.aaf.ResponseFormatter.errorResponse;
 
@@ -46,6 +47,7 @@ public class AafAuthorizationFilter extends OrderedRequestContextFilter {
 
     private static final String ADVANCED = "advanced";
     private static final String BASIC = "basic";
+    private static final String ECHO_ENDPOINT = "^.*/util/echo$";
 
     @Value("${permission.type}")
     String type;
@@ -58,13 +60,16 @@ public class AafAuthorizationFilter extends OrderedRequestContextFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        if(request.getRequestURI().matches("^.*/util/echo$")){
+        PayloadBufferingRequestWrapper request = new PayloadBufferingRequestWrapper(req);
+
+        if(request.getRequestURI().matches(ECHO_ENDPOINT)){
             filterChain.doFilter(request, response);
         }
 
-        boolean containsWordGremlin = request.getReader().lines().collect(Collectors.joining(System.lineSeparator())).contains("\"gremlin\"");
+        String payload = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8.name());
+        boolean containsWordGremlin = payload.contains("\"gremlin\"");
         //if the request contains the word "gremlin" it's an advanced query
         String queryType = containsWordGremlin ? ADVANCED : BASIC;
         String permission = String.format("%s|%s|%s", type, instance, queryType);

@@ -37,9 +37,8 @@ class ResponseFormatter {
         String accept = request.getHeader(ACCEPT_HEADER) == null ? MediaType.APPLICATION_XML : request.getHeader(ACCEPT_HEADER);
         AAIException aaie = new AAIException("AAI_3300");
         response.setStatus(aaie.getErrorObject().getHTTPResponseCode().getStatusCode());
-        response.getWriter().write(ErrorLogHelper.getRESTAPIErrorResponse(Collections.singletonList(MediaType.valueOf(accept)), aaie, new ArrayList<>()));
-        response.getWriter().flush();
-        response.getWriter().close();
+        response.resetBuffer();
+        response.getOutputStream().print(ErrorLogHelper.getRESTAPIErrorResponse(Collections.singletonList(MediaType.valueOf(accept)), aaie, new ArrayList<>()));
+        response.flushBuffer();
     }
-
 }
