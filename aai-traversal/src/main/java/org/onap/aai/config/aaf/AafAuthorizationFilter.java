@@ -19,6 +19,9 @@
  */
 package org.onap.aai.config.aaf;
 
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
+import org.apache.commons.io.IOUtils;
 import org.onap.aai.Profiles;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.filter.OrderedRequestContextFilter;
@@ -31,9 +34,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.stream.Collectors;
-
-import static org.onap.aai.config.aaf.ResponseFormatter.errorResponse;
+import java.nio.charset.StandardCharsets;
 
 /**
  * AAF authorization filter
@@ -44,8 +45,11 @@ import static org.onap.aai.config.aaf.ResponseFormatter.errorResponse;
 @PropertySource("file:${server.local.startpath}/aaf/permissions.properties")
 public class AafAuthorizationFilter extends OrderedRequestContextFilter {
 
+    private static final EELFLogger logger = EELFManager.getInstance().getLogger(AafAuthorizationFilter.class.getName());
+
     private static final String ADVANCED = "advanced";
     private static final String BASIC = "basic";
+    private static final String ECHO_ENDPOINT = "^.*/util/echo$";
 
     @Value("${permission.type}")
     String type;
@@ -58,19 +62,33 @@ public class AafAuthorizationFilter extends OrderedRequestContextFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        if(request.getRequestURI().matches("^.*/util/echo$")){
+        PayloadBufferingRequestWrapper request = new PayloadBufferingRequestWrapper(req);
+
+        if(request.getRequestURI().matches(ECHO_ENDPOINT)){
             filterChain.doFilter(request, response);
         }
 
-        boolean containsWordGremlin = request.getReader().lines().collect(Collectors.joining(System.lineSeparator())).contains("\"gremlin\"");
-        //if the request contains the word "gremlin" it's an advanced query
-        String queryType = containsWordGremlin ? ADVANCED : BASIC;
-        String permission = String.format("%s|%s|%s", type, instance, queryType);
+        String payload = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8.name());
+        boolean containsWordGremlin = payload.contains("\"gremlin\"");
 
-        if(!request.isUserInRole(permission)){
-            errorResponse(request, response);
+        //if the request contains the word "gremlin" it's an "advanced" query needing an "advanced" role
+        String permissionBasic = String.format("%s|%s|%s", type, instance, ADVANCED);
+        String permissionAdvanced = String.format("%s|%s|%s", type, instance, BASIC);
+
+        boolean isAuthorized;
+
+        if(containsWordGremlin){
+            isAuthorized = request.isUserInRole(permissionAdvanced);
+        }else{
+            isAuthorized = request.isUserInRole(permissionAdvanced) || request.isUserInRole(permissionBasic);
+        }
+
+        if(!isAuthorized){
+            String name = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "unknown";
+            logger.info("User " + name + " does not have a role for " + (containsWordGremlin ? "gremlin" : "non-gremlin") + " query" );
+            response.setStatus(403);
         }else{
             filterChain.doFilter(request,response);
         }
