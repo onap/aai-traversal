@@ -19,26 +19,31 @@
  */
 package org.onap.aai.config.aaf;
 
-import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.logging.ErrorLogHelper;
+import org.apache.commons.io.IOUtils;
+import org.onap.aaf.cadi.BufferedServletInputStream;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.servlet.http.HttpServletRequestWrapper;
+import java.io.*;
 
-class ResponseFormatter {
+/**
+ * This class buffers the payload of the servlet request. The reason is that we access the payload multiple times,
+ * which is not supported by the request per se.
+ */
 
-    private static final String ACCEPT_HEADER = "accept";
+class PayloadBufferingRequestWrapper extends HttpServletRequestWrapper {
 
-    static void errorResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String accept = request.getHeader(ACCEPT_HEADER) == null ? MediaType.APPLICATION_XML : request.getHeader(ACCEPT_HEADER);
-        AAIException aaie = new AAIException("AAI_3300");
-        response.setStatus(aaie.getErrorObject().getHTTPResponseCode().getStatusCode());
-        response.resetBuffer();
-        response.getOutputStream().print(ErrorLogHelper.getRESTAPIErrorResponse(Collections.singletonList(MediaType.valueOf(accept)), aaie, new ArrayList<>()));
-        response.flushBuffer();
+    private byte[] buffer;
+
+    PayloadBufferingRequestWrapper(HttpServletRequest req) throws IOException {
+        super(req);
+        this.buffer = IOUtils.toByteArray(req.getInputStream());
+    }
+
+    @Override
+    public ServletInputStream getInputStream() {
+        ByteArrayInputStream bais = new ByteArrayInputStream(this.buffer);
+        return new BufferedServletInputStream(bais);
     }
 }
