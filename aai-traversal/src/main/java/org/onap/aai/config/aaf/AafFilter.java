@@ -57,7 +57,7 @@ public class AafFilter extends OrderedRequestContextFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         if(!request.getRequestURI().matches("^.*/util/echo$")) {
             cadiFilter.doFilter(request, response, filterChain);
-            if (response.getStatus() >= 400 && response.getStatus() < 500) {
+            if (response.getStatus() == 401 || response.getStatus() == 403) {
                 errorResponse(request, response);
             }
         }

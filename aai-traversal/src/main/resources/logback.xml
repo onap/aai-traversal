@@ -281,6 +281,7 @@
 	<logger name="org.apache.commons" level="WARN" />
 	<logger name="org.apache.coyote" level="WARN" />
 	<logger name="org.apache.jasper" level="WARN" />
+    <logger name="org.onap.aaf" level="DEBUG" />
 
 	<!-- Camel Related Loggers (including restlet/servlet/jaxrs/cxf logging. 
 		May aid in troubleshooting) -->

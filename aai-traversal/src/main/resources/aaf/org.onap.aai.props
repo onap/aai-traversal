@@ -10,5 +10,5 @@ cadi_keystore_password=enc:383RDJRFA6yQz9AOxUxC1iIg3xTJXityw05MswnpnEtelRQy2D4r5
 cadi_alias=aai@aai.onap.org
 cadi_truststore=aai-traversal/src/main/resources/aaf/truststoreONAPall.jks
 cadi_truststore_password=enc:s77wlnZFoQ08NhnU3OSeWO6uKgRwC6sAK-wTvVubNz2
-cadi_loglevel=INFO
+cadi_loglevel=DEBUG
 cadi_bath_convert=aai-traversal/src/main/resources/aaf/bath_config.csv
