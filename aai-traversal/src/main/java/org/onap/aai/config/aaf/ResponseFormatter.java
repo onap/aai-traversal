@@ -34,6 +34,10 @@ class ResponseFormatter {
     private static final String ACCEPT_HEADER = "accept";
 
     static void errorResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (response.isCommitted()){
+            return;
+        }
+
         String accept = request.getHeader(ACCEPT_HEADER) == null ? MediaType.APPLICATION_XML : request.getHeader(ACCEPT_HEADER);
         AAIException aaie = new AAIException("AAI_3300");
         response.setStatus(aaie.getErrorObject().getHTTPResponseCode().getStatusCode());
