@@ -19,6 +19,8 @@
  */
 package org.onap.aai.config.aaf;
 
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
 import org.onap.aaf.cadi.PropAccess;
 import org.onap.aaf.cadi.filter.CadiFilter;
 import org.onap.aai.Profiles;
@@ -44,6 +46,8 @@ import static org.onap.aai.config.aaf.ResponseFormatter.errorResponse;
 @Profile(Profiles.AAF_AUTHENTICATION)
 public class AafFilter extends OrderedRequestContextFilter {
 
+    private static final EELFLogger log = EELFManager.getInstance().getLogger(AafFilter.class.getName());
+
     private final CadiFilter cadiFilter;
 
     public AafFilter() throws IOException, ServletException {
@@ -58,6 +62,7 @@ public class AafFilter extends OrderedRequestContextFilter {
         if(!request.getRequestURI().matches("^.*/util/echo$")) {
             cadiFilter.doFilter(request, response, filterChain);
             if (response.getStatus() == 401 || response.getStatus() == 403) {
+                log.info("User does not have permissions to run the query" );
                 errorResponse(request, response);
             }
         }

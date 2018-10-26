@@ -19,6 +19,8 @@
  */
 package org.onap.aai.config.aaf;
 
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
 import org.apache.commons.io.IOUtils;
 import org.onap.aai.Profiles;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +44,8 @@ import java.nio.charset.StandardCharsets;
 @Profile(Profiles.AAF_AUTHENTICATION)
 @PropertySource("file:${server.local.startpath}/aaf/permissions.properties")
 public class AafAuthorizationFilter extends OrderedRequestContextFilter {
+
+    private static final EELFLogger logger = EELFManager.getInstance().getLogger(AafAuthorizationFilter.class.getName());
 
     private static final String ADVANCED = "advanced";
     private static final String BASIC = "basic";
@@ -68,11 +72,22 @@ public class AafAuthorizationFilter extends OrderedRequestContextFilter {
 
         String payload = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8.name());
         boolean containsWordGremlin = payload.contains("\"gremlin\"");
-        //if the request contains the word "gremlin" it's an advanced query
-        String queryType = containsWordGremlin ? ADVANCED : BASIC;
-        String permission = String.format("%s|%s|%s", type, instance, queryType);
 
-        if(!request.isUserInRole(permission)){
+        //if the request contains the word "gremlin" it's an "advanced" query needing an "advanced" role
+        String permissionBasic = String.format("%s|%s|%s", type, instance, ADVANCED);
+        String permissionAdvanced = String.format("%s|%s|%s", type, instance, BASIC);
+
+        boolean isAuthorized;
+
+        if(containsWordGremlin){
+            isAuthorized = request.isUserInRole(permissionAdvanced);
+        }else{
+            isAuthorized = request.isUserInRole(permissionAdvanced) || request.isUserInRole(permissionBasic);
+        }
+
+        if(!isAuthorized){
+            String name = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "unknown";
+            logger.info("User " + name + " does not have a role for " + (containsWordGremlin ? "gremlin" : "non-gremlin") + " query" );
             response.setStatus(403);
         }else{
             filterChain.doFilter(request,response);
