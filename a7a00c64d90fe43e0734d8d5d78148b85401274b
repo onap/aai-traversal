@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Steven Blimkie <Steven.Blimkie@amdocs.com>
+Submitted-by: Steven Blimkie <Steven.Blimkie@amdocs.com>
+Submitted-at: Wed, 21 Nov 2018 19:58:21 +0000
+Reviewed-on: https://gerrit.onap.org/r/73286
+Project: aai/traversal
+Branch: refs/heads/casablanca
