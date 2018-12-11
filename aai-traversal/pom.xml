@@ -25,12 +25,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>aai-traversal</artifactId>
-    <version>1.3.3-SNAPSHOT</version>
+    <version>1.3.4-SNAPSHOT</version>
 
     <parent>
         <groupId>org.onap.aai.traversal</groupId>
         <artifactId>traversal</artifactId>
-        <version>1.3.3-SNAPSHOT</version>
+        <version>1.3.4-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -41,10 +41,10 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <aai.schema.version>1.3.3</aai.schema.version>
-        <aai.core.version>1.3.3</aai.core.version>
+        <aai.schema.version>1.3.4</aai.schema.version>
+        <aai.core.version>1.3.4</aai.core.version>
 
-        <spring.boot.version>1.5.15.RELEASE</spring.boot.version>
+        <spring.boot.version>1.5.18.RELEASE</spring.boot.version>
 
         <!-- Start of the jacoco plugin properties -->
         <sonar.language>java</sonar.language>
@@ -95,7 +95,7 @@
         <json.path.version>2.2.0</json.path.version>
         <activemq.version>5.15.6</activemq.version>
         <httpclient.version>4.5.3</httpclient.version>
-        <spring.jms.version>4.3.2.RELEASE</spring.jms.version>
+        <spring.jms.version>4.3.21.RELEASE</spring.jms.version>
         <spotify.docker.version>0.4.11</spotify.docker.version>
         <spring.security.version>1.0.3.RELEASE</spring.security.version>
 
@@ -135,7 +135,7 @@
         <netty.version>4.0.56.Final</netty.version>
         <jackson.core.version>2.8.11.1</jackson.core.version>
 
-        <spring.test.version>4.3.6.RELEASE</spring.test.version>
+        <spring.test.version>4.3.21.RELEASE</spring.test.version>
 
         <!-- This will be used for the docker images as the default format of maven build has issues -->
         <maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
