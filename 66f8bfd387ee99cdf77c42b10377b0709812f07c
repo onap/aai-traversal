@@ -1,0 +1,8 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: Keong Lim <keong.lim@huawei.com>
+Code-Review+2: Tian Lee <TianL@amdocs.com>
+Submitted-by: Tian Lee <TianL@amdocs.com>
+Submitted-at: Tue, 18 Dec 2018 14:04:59 +0000
+Reviewed-on: https://gerrit.onap.org/r/74744
+Project: aai/traversal
+Branch: refs/heads/master
