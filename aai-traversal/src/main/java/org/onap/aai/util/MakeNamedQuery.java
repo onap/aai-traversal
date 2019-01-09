@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
 import org.apache.commons.io.FileUtils;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.introspection.Introspector;
@@ -38,6 +40,8 @@ import org.onap.aai.setup.SchemaVersions;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class MakeNamedQuery {
+	
+	private static final EELFLogger logger = EELFManager.getInstance().getLogger(MakeNamedQuery.class.getName());
 
 	public static void main(String[] args) throws Exception {
 		String _apiVersion = AAIConfig.get(AAIConstants.AAI_DEFAULT_API_VERSION_PROP);
@@ -184,10 +188,10 @@ public class MakeNamedQuery {
 			nqElementList.add(newNQElement.getUnderlyingObject());
 		
 		} catch (AAIUnknownObjectException e) {
-			// TODO Auto-generated catch block
+			logger.info("AAIUnknownObjectException in MakeNamedQuery.setupNQElements() "+e);
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
+			logger.info("IllegalArgumentException in MakeNamedQuery.setupNQElements() "+e);
 			e.printStackTrace();
 		}
 		return newNQElement;
@@ -210,10 +214,10 @@ public class MakeNamedQuery {
 			}
 			
 		} catch (AAIUnknownObjectException e) {
-			// TODO Auto-generated catch block
+			logger.info("AAIUnknownObjectException in MakeNamedQuery.loadNQElement() "+e);
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
+			logger.info("IllegalArgumentException in MakeNamedQuery.loadNQElement() "+e);
 			e.printStackTrace();
 		}
 		return newNqElement;
@@ -242,10 +246,10 @@ public class MakeNamedQuery {
 			newRelationshipData.add(newRelationshipDatum1.getUnderlyingObject());
 			//newRelationshipData.add(newRelationshipDatum2.getUnderlyingObject());
 		} catch (AAIUnknownObjectException e) {
-			// TODO Auto-generated catch block
+			logger.info("AAIUnknownObjectException in MakeNamedQuery.makeWidgetRelationship() "+e);
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
+			logger.info("IllegalArgumentException in MakeNamedQuery.makeWidgetRelationship() "+e);
 			e.printStackTrace();
 		}
 
