@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9adffdf1_c9b38c4b",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/MakeNamedQuery.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-01-10T00:00:03Z",
+      "side": 1,
+      "message": "can remove auto-generated comment now",
+      "range": {
+        "startLine": 191,
+        "startChar": 3,
+        "endLine": 191,
+        "endChar": 37
+      },
+      "revId": "ce087e038a278b37fe18cbe3dda7ac3e9eccc309",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9adffdf1_a9b6483c",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/MakeNamedQuery.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-01-10T00:00:03Z",
+      "side": 1,
+      "message": "should be IllegalArgumentException in this block",
+      "range": {
+        "startLine": 195,
+        "startChar": 16,
+        "endLine": 195,
+        "endChar": 41
+      },
+      "revId": "ce087e038a278b37fe18cbe3dda7ac3e9eccc309",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9adffdf1_6984e05d",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/MakeNamedQuery.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-01-10T00:00:03Z",
+      "side": 1,
+      "message": "same comments as above",
+      "range": {
+        "startLine": 217,
+        "startChar": 3,
+        "endLine": 221,
+        "endChar": 41
+      },
+      "revId": "ce087e038a278b37fe18cbe3dda7ac3e9eccc309",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9adffdf1_89890477",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/MakeNamedQuery.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-01-10T00:00:03Z",
+      "side": 1,
+      "message": "and same comments again",
+      "range": {
+        "startLine": 249,
+        "startChar": 3,
+        "endLine": 253,
+        "endChar": 41
+      },
+      "revId": "ce087e038a278b37fe18cbe3dda7ac3e9eccc309",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
