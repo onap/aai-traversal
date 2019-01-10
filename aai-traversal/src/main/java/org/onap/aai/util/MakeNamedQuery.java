@@ -188,11 +188,9 @@ public class MakeNamedQuery {
 			nqElementList.add(newNQElement.getUnderlyingObject());
 		
 		} catch (AAIUnknownObjectException e) {
-			// TODO Auto-generated catch block
 			logger.info("AAIUnknownObjectException in MakeNamedQuery.setupNQElements() "+e);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			logger.info("AAIUnknownObjectException in MakeNamedQuery.setupNQElements() "+e);
+			logger.info("IllegalArgumentException in MakeNamedQuery.setupNQElements() "+e);
 		}
 		return newNQElement;
 	}
@@ -214,11 +212,9 @@ public class MakeNamedQuery {
 			}
 			
 		} catch (AAIUnknownObjectException e) {
-			// TODO Auto-generated catch block
 			logger.info("AAIUnknownObjectException in MakeNamedQuery.loadNQElement() "+e);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			logger.info("AAIUnknownObjectException in MakeNamedQuery.loadNQElement() "+e);
+			logger.info("IllegalArgumentException in MakeNamedQuery.loadNQElement() "+e);
 		}
 		return newNqElement;
 
@@ -246,11 +242,9 @@ public class MakeNamedQuery {
 			newRelationshipData.add(newRelationshipDatum1.getUnderlyingObject());
 			//newRelationshipData.add(newRelationshipDatum2.getUnderlyingObject());
 		} catch (AAIUnknownObjectException e) {
-			// TODO Auto-generated catch block
 			logger.info("AAIUnknownObjectException in MakeNamedQuery.makeWidgetRelationship() "+e);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			logger.info("AAIUnknownObjectException in MakeNamedQuery.makeWidgetRelationship() "+e);
+			logger.info("IllegalArgumentException in MakeNamedQuery.makeWidgetRelationship() "+e);
 		}
 
 		return newRelationship;
