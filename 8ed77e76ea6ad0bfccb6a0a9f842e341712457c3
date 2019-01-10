@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9adffdf1_f06510b5",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/MakeNamedQuery.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-01-10T12:44:00Z",
+      "side": 1,
+      "message": "this is a command-line utility, so this changes the output of the program. it should probably have both the original output and the logger. See comments on https://gerrit.onap.org/r/75564",
+      "range": {
+        "startLine": 46,
+        "startChar": 1,
+        "endLine": 46,
+        "endChar": 39
+      },
+      "revId": "8ed77e76ea6ad0bfccb6a0a9f842e341712457c3",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
