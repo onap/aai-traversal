@@ -41,8 +41,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <aai.schema.version>1.4.0</aai.schema.version>
-        <aai.core.version>1.4.0</aai.core.version>
+        <aai.schema.version>1.0.0-SNAPSHOT</aai.schema.version>
+        <aai.core.version>1.4.1-SNAPSHOT</aai.core.version>
 
         <spring.boot.version>1.5.18.RELEASE</spring.boot.version>
 
@@ -158,7 +158,7 @@
         <schema.version.namespace.change.start>v12</schema.version.namespace.change.start>
         <schema.version.edge.label.start>v12</schema.version.edge.label.start>
         <schema.version.api.default>v14</schema.version.api.default>
-        <schema.version.list>v8,v9,v10,v11,v12,v13,v14</schema.version.list>
+        <schema.version.list>v8,v9,v10,v11,v12,v13,v14,v15</schema.version.list>
         <schema.uri.base.path>/aai</schema.uri.base.path>
         <!-- End of Default ONAP Schema Properties -->
     </properties>
@@ -237,7 +237,7 @@
             <properties>
                 <schema.source.name>onap</schema.source.name>
                 <schema.version.namespace.change.start>v12</schema.version.namespace.change.start>
-                <schema.version.list>v8,v9,v10,v11,v12,v13,v14</schema.version.list>
+                <schema.version.list>v8,v9,v10,v11,v12,v13,v14,v15</schema.version.list>
             </properties>
         </profile>
         <!-- End of ONAP Profile -->
@@ -668,6 +668,11 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${httpclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.onap.aai.aai-common</groupId>
+            <artifactId>aai-rest</artifactId>
+            <version>1.4.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
@@ -1113,7 +1118,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.onap.aai.aai-common</groupId>
+                                    <groupId>org.onap.aai.schema-service</groupId>
                                     <artifactId>aai-schema</artifactId>
                                     <version>${aai.schema.version}</version>
                                     <outputDirectory>${project.basedir}/src/main/resources/schema/</outputDirectory>
@@ -1132,7 +1137,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.onap.aai.aai-common</groupId>
+                                    <groupId>org.onap.aai.schema-service</groupId>
                                     <artifactId>aai-schema</artifactId>
                                     <version>${aai.schema.version}</version>
                                     <outputDirectory>${project.basedir}/src/main/resources/schema/</outputDirectory>

@@ -21,10 +21,12 @@ package org.onap.aai;
 
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.logging.LoggingContext;
 import org.onap.aai.logging.LoggingContext.StatusCode;
 import org.onap.aai.nodes.NodeIngestor;
@@ -56,7 +58,8 @@ import java.util.Map;
 		"org.onap.aai.setup",
 		"org.onap.aai.tasks",
 		"org.onap.aai.service",
-		"org.onap.aai.rest"
+		"org.onap.aai.rest",
+		"org.onap.aai.rest-client"
 })
 
 @EnableAutoConfiguration(exclude = {
@@ -122,14 +125,40 @@ public class TraversalApp {
 		AAIGraph.getInstance().graphShutdown();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws AAIException{
 
-	    setDefaultProps();
-		SpringApplication app = new SpringApplication(TraversalApp.class);
-		app.setLogStartupInfo(false);
-		app.setRegisterShutdownHook(true);
-		app.addInitializers(new PropertyPasswordConfiguration());
-		Environment env = app.run(args).getEnvironment();
+		setDefaultProps();
+
+		LoggingContext.save();
+		LoggingContext.component("init");
+		LoggingContext.partnerName("NA");
+		LoggingContext.targetEntity(APP_NAME);
+		LoggingContext.requestId(UUID.randomUUID().toString());
+		LoggingContext.serviceName(APP_NAME);
+		LoggingContext.targetServiceName("contextInitialized");
+		LoggingContext.statusCode(StatusCode.COMPLETE);
+		Environment env =null;
+		AAIConfig.init();
+
+		try{
+			SpringApplication app = new SpringApplication(TraversalApp.class);
+			app.setLogStartupInfo(false);
+			app.setRegisterShutdownHook(true);
+			app.addInitializers(new PropertyPasswordConfiguration());
+			env = app.run(args).getEnvironment();
+		}
+		catch(Exception ex){
+			AAIException aai = schemaServiceExceptionTranslator(ex);
+			LoggingContext.statusCode(LoggingContext.StatusCode.ERROR);
+			LoggingContext.responseCode(LoggingContext.DATA_ERROR);
+			logger.error("Problems starting Traversal "+aai.getMessage());
+			ErrorLogHelper.logException(aai);
+			ErrorLogHelper.logError(aai.getCode(), ex.getMessage() + ", resolve and restart Traversal");
+			//ErrorLogHelper.logError(aai.getCode(), aai.getMessage() + aai.getCause().toString());
+			throw aai;
+		}
+
+
 		MDC.setContextMap (contextMap);
 		logger.info(
 				"Application '{}' is running on {}!" ,
@@ -165,5 +194,26 @@ public class TraversalApp {
 			}
 		}
 
+	}
+	private static AAIException schemaServiceExceptionTranslator(Exception ex) {
+		AAIException aai = null;
+		logger.info("Error Message is "+ ExceptionUtils.getRootCause(ex).toString() + " details - "+ExceptionUtils.getRootCause(ex).getMessage());
+		if(ExceptionUtils.getRootCause(ex).getMessage().contains("NodeIngestor")){
+			aai = new  AAIException("AAI_3026","Error reading OXM from SchemaService - Investigate");
+		}
+		else if(ExceptionUtils.getRootCause(ex).getMessage().contains("EdgeIngestor")){
+			aai = new  AAIException("AAI_3027","Error reading EdgeRules from SchemaService - Investigate");
+		}
+		else if(ExceptionUtils.getRootCause(ex).getMessage().contains("stored-queries")){
+			aai = new  AAIException("AAI_3027","Error reading EdgeRules from SchemaService - Investigate");
+		}
+		else if(ExceptionUtils.getRootCause(ex).getMessage().contains("Connection refused")){
+			aai = new  AAIException("AAI_3025","Error connecting to SchemaService - Investigate");
+		}
+		else {
+			aai = new  AAIException("AAI_3025","Error connecting to SchemaService - Please Investigate");
+		}
+
+		return aai;
 	}
 }

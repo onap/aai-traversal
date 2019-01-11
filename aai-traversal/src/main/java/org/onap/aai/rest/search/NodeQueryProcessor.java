@@ -28,7 +28,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.restcore.search.GroovyQueryBuilderSingleton;
+import org.onap.aai.restcore.search.GroovyQueryBuilder;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
 
@@ -49,7 +49,7 @@ public class NodeQueryProcessor extends GroovyShellImpl {
 	protected static Pattern p = Pattern.compile("query/(.*+)");
 	protected Optional<String> gremlin;
 	protected final TransactionalGraphEngine dbEngine;
-	protected static GroovyQueryBuilderSingleton queryBuilderSingleton = GroovyQueryBuilderSingleton.getInstance();;
+	protected GroovyQueryBuilder queryBuilder = new GroovyQueryBuilder();;
 
 	protected NodeQueryProcessor(Builder builder) {
 		super(builder);
@@ -82,7 +82,7 @@ public class NodeQueryProcessor extends GroovyShellImpl {
 		params.put("startTime", startTime);
 		params.put("nodeType", nodeType);
 		
-		query = queryBuilderSingleton.executeTraversal(dbEngine, query, params);
+		query = queryBuilder.executeTraversal(dbEngine, query, params);
 
 		String startPrefix = "g.V()";
 

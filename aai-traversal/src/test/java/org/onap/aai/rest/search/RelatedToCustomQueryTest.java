@@ -71,7 +71,7 @@ public class RelatedToCustomQueryTest extends QueryTest{
     protected void addParam(Map<String, Object> params) {
         params.put("startingNodeType", "generic-vnf");
         params.put("relatedToNodeType", "vserver");
-
+        params.put("edgeType", "COUSIN");
 
     }
 

@@ -17,25 +17,23 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.util;
+package org.onap.aai.rest.search;
 
-public final class TraversalConstants {
-	public static final int AAI_QUERY_PORT = 8446;
-	
-	public static final String AAI_TRAVERSAL_TIMEOUT_LIMIT = "aai.traversal.timeoutlimit";
-	public static final String AAI_TRAVERSAL_TIMEOUT_ENABLED = "aai.traversal.timeoutenabled";
-	public static final String AAI_TRAVERSAL_TIMEOUT_APP = "aai.traversal.timeout.appspecific";
-	
-	public static final String AAI_TRAVERSAL_DSL_TIMEOUT_LIMIT = "aai.traversal.dsl.timeoutlimit";
-	public static final String AAI_TRAVERSAL_DSL_TIMEOUT_ENABLED = "aai.traversal.dsl.timeoutenabled";
-	public static final String AAI_TRAVERSAL_DSL_TIMEOUT_APP = "aai.traversal.dsl.timeout.appspecific";
-	public static final String DSL_NOVALIDATION_CLIENTS = "aai.traversal.dsl.novalidation.clients";
-	public static final String DSL_OVERRIDE = "aai.dsl.override";
-	
-    public static final long HISTORY_MAX_HOURS = 192;
-	
-	private TraversalConstants() {
-		// prevent instantiation
+import org.onap.aai.exceptions.AAIException;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+
+public abstract class LinkedHashMapQueryTest extends QueryTest {
+
+	protected List<LinkedHashMap> hashMapList;
+
+	public LinkedHashMapQueryTest() throws AAIException {
+		super();
 	}
 
+	@Override
+	public void run() {
+		hashMapList = (List<LinkedHashMap>) shell.executeTraversal(query, params).toList();
+	}
 }

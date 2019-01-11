@@ -17,27 +17,6 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-/**
-* ============LICENSE_START=======================================================
-* org.onap.aai
-* ================================================================================
-* Copyright © 2017 AT&T Intellectual Property. All rights reserved.
-* ================================================================================
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-* ============LICENSE_END=========================================================
-*
-* ECOMP is a trademark and service mark of AT&T Intellectual Property.
-*/
 package org.onap.aai.rest.search;
 
 import static org.junit.Assert.*;
@@ -82,7 +61,8 @@ public class AccessServiceFromServiceInstanceTest extends QueryTest {
         Vertex wrongInterfaceOne = graph.addVertex(T.label, "l-interface", T.id, "14", "aai-node-type", "l-interface", "interface-name", "wrong-interface-1");                                                  
         Vertex wrongInterfaceTwo = graph.addVertex(T.label, "l-interface", T.id, "15", "aai-node-type", "l-interface", "interface-name", "wrong-interface-2");                                                  
         Vertex wrongInterfaceThree = graph.addVertex(T.label, "l-interface", T.id, "16", "aai-node-type", "l-interface", "interface-name", "wrong-interface-3");                                                  
-        Vertex wrongInterfaceFour = graph.addVertex(T.label, "l-interface", T.id, "17", "aai-node-type", "l-interface", "interface-name", "wrong-interface-4");                                                  
+        Vertex wrongInterfaceFour = graph.addVertex(T.label, "l-interface", T.id, "17", "aai-node-type", "l-interface", "interface-name", "wrong-interface-4");
+        Vertex vlanMapping = graph.addVertex(T.label, "vlan-mapping", T.id, "18", "aai-node-type", "vlan-mapping", "vlan-mapping-id", "vlan-mapping-1");
     			
         GraphTraversalSource g = graph.traversal();
                                 
@@ -93,7 +73,8 @@ public class AccessServiceFromServiceInstanceTest extends QueryTest {
         rules.addTreeEdge(g, configuration,evc);
         rules.addTreeEdge(g, forwardingPath,forwarder);             
         rules.addEdge(g, forwarder, configuration);
-        rules.addTreeEdge(g, configuration,forwarderEvc);                          
+        rules.addTreeEdge(g, configuration,forwarderEvc); 
+        rules.addTreeEdge(g, vlanMapping,forwarderEvc);  
         rules.addEdge(g, forwarder, pInterface);
         rules.addTreeEdge(g, pnf,pInterface);
         rules.addEdge(g, forwarder, lagInterface);
@@ -105,8 +86,7 @@ public class AccessServiceFromServiceInstanceTest extends QueryTest {
         rules.addEdge(g, configuration, wrongInterfaceOne);
         rules.addEdge(g, forwarder, wrongInterfaceTwo);
         rules.addTreeEdge(g, pInterface, wrongInterfaceThree);
-        rules.addTreeEdge(g, lagInterface, wrongInterfaceFour);
-                                                                
+        rules.addTreeEdge(g, lagInterface, wrongInterfaceFour);                                                                
                                 
         expectedResult.add(serviceInstance);
         expectedResult.add(serviceSubscription);
@@ -116,6 +96,7 @@ public class AccessServiceFromServiceInstanceTest extends QueryTest {
         expectedResult.add(evc);
         expectedResult.add(forwarder);
         expectedResult.add(forwarderEvc);
+        expectedResult.add(vlanMapping);
         expectedResult.add(pInterface);
         expectedResult.add(pnf);
         expectedResult.add(lagInterface);

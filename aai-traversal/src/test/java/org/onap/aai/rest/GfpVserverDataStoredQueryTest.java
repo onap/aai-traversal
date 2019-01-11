@@ -169,7 +169,9 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
             "no_op",
             httpHeaders,
             uriInfo,
-            httpServletRequest
+            httpServletRequest,
+            "-1",
+            "-1"
         );
 
         String entity = response.getEntity().toString();
@@ -206,7 +208,9 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
                         "no_op",
                 httpHeaders,
                 uriInfo,
-                httpServletRequest
+                httpServletRequest,
+                "-1",
+                "-1"
         );
 
         String entity = response.getEntity().toString();
@@ -244,7 +248,9 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
                         "no_op",
                 httpHeaders,
                 uriInfo,
-                httpServletRequest
+                httpServletRequest,
+                "-1",
+                "-1"
         );
 
         String entity = response.getEntity().toString();

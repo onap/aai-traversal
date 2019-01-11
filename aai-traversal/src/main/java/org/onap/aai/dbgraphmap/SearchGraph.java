@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -520,7 +521,7 @@ public class SearchGraph {
 		edgeRules = edgeIngestor.getRules(query);
 		
 		//Map<String, EdgeRule> rules = EdgeRules.getInstance().getEdgeRules(targetNodeType, nodeType);
-		String[] results = edgeRules.keySet().toArray(new String[0]);
+		String[] results = edgeRules.values().stream().map(rule -> rule.getLabel()).collect(Collectors.toList()).toArray(new String[0]);
 		return results;
 	}
 

@@ -40,6 +40,7 @@ import org.junit.Test;
 import org.onap.aai.PayloadUtil;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.util.AAIConfig;
+import org.onap.aai.util.TraversalConstants;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -107,6 +108,24 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 		httpEntity = new HttpEntity(payload, headers);
 		responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
 		assertEquals("Expected the response to be 400", HttpStatus.INTERNAL_SERVER_ERROR,
+				responseEntity.getStatusCode());
+	}
+	
+	@Test
+	public void testDslQueryOverride() throws Exception {
+		Map<String, String> dslQuerymap = new HashMap<>();
+		dslQuerymap.put("dsl-query", "pserver*");
+
+		String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQuerymap);
+
+		ResponseEntity responseEntity = null;
+
+		String endpoint = "/aai/v11/dsl?format=console";
+
+		headers.add("X-DslOverride", AAIConfig.get(TraversalConstants.DSL_OVERRIDE));
+		httpEntity = new HttpEntity(payload, headers);
+		responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+		assertEquals("Expected the response to be 404", HttpStatus.NOT_FOUND,
 				responseEntity.getStatusCode());
 	}
 

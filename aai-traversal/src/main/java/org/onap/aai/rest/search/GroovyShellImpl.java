@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 
-import org.onap.aai.restcore.search.GremlinGroovyShellSingleton;
+import org.onap.aai.restcore.search.GremlinGroovyShell;
 
 public class GroovyShellImpl extends GenericQueryProcessor {
 
@@ -36,7 +36,7 @@ public class GroovyShellImpl extends GenericQueryProcessor {
 
 		params.put("g", this.dbEngine.asAdmin().getTraversalSource());
 		
-		GremlinGroovyShellSingleton shell = GremlinGroovyShellSingleton.getInstance();
+		GremlinGroovyShell shell = new GremlinGroovyShell();
 		
 		return shell.executeTraversal(query, params);
 	}

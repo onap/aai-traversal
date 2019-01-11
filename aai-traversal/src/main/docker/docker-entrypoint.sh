@@ -65,7 +65,6 @@ if [ -f ${APP_HOME}/aai.sh ]; then
 
         exit 0;
     fi;
-
 fi;
 
 if [ -z ${DISABLE_UPDATE_QUERY} ]; then
@@ -83,8 +82,7 @@ fi;
 
 MIN_HEAP_SIZE=${MIN_HEAP_SIZE:-512m};
 MAX_HEAP_SIZE=${MAX_HEAP_SIZE:-1024m};
-MAX_PERM_SIZE=${MAX_PERM_SIZE:-512m};
-PERM_SIZE=${PERM_SIZE:-512m}
+MAX_METASPACE_SIZE=${MAX_METASPACE_SIZE:-512m};
 
 JAVA_CMD="exec gosu aaiadmin java";
 
@@ -95,8 +93,7 @@ JVM_OPTS="${JVM_OPTS} -Xmx${MAX_HEAP_SIZE}";
 
 JVM_OPTS="${JVM_OPTS} -XX:+PrintGCDetails";
 JVM_OPTS="${JVM_OPTS} -XX:+PrintGCTimeStamps";
-JVM_OPTS="${JVM_OPTS} -XX:MaxPermSize=${MAX_PERM_SIZE}";
-JVM_OPTS="${JVM_OPTS} -XX:PermSize=${PERM_SIZE}";
+JVM_OPTS="${JVM_OPTS} -XX:MaxMetaspaceSize=${MAX_METASPACE_SIZE}";
 
 JVM_OPTS="${JVM_OPTS} -server";
 JVM_OPTS="${JVM_OPTS} -XX:NewSize=512m";
@@ -128,6 +125,7 @@ JAVA_OPTS="${JAVA_OPTS} -DAAI_BUILD_VERSION=${AAI_BUILD_VERSION}";
 JAVA_OPTS="${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom";
 JAVA_OPTS="${JAVA_OPTS} -Dlogback.configurationFile=./resources/logback.xml";
 JAVA_OPTS="${JAVA_OPTS} -Dloader.path=$APP_HOME/resources";
+JAVA_OPTS="${JAVA_OPTS} -Dgroovy.use.classvalue=true";
 JAVA_OPTS="${JAVA_OPTS} ${POST_JAVA_OPTS}";
 
 JAVA_MAIN_JAR=$(ls lib/aai-traversal*.jar);

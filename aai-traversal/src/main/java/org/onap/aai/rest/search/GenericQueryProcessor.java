@@ -27,11 +27,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.javatuples.Pair;
-import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.query.builder.MissingOptionalParameter;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
-import org.onap.aai.restcore.search.GroovyQueryBuilderSingleton;
+import org.onap.aai.restcore.search.GroovyQueryBuilder;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
@@ -55,7 +54,7 @@ public abstract class GenericQueryProcessor {
 	protected Optional<String> gremlin;
 	protected final TransactionalGraphEngine dbEngine;
 	protected GremlinServerSingleton gremlinServerSingleton;
-	protected static GroovyQueryBuilderSingleton queryBuilderSingleton = GroovyQueryBuilderSingleton.getInstance();
+	protected GroovyQueryBuilder groovyQueryBuilder = new GroovyQueryBuilder();
 	protected final boolean isGremlin;
 	protected Optional<DslQueryProcessor> dslQueryProcessorOptional;
 	/* dsl parameters to store dsl query and to check
@@ -130,7 +129,7 @@ public abstract class GenericQueryProcessor {
 			String dslUserQuery = dsl.get();
 			 if(dslQueryProcessorOptional.isPresent()){
 				 String dslQuery = dslQueryProcessorOptional.get().parseAaiQuery(dslUserQuery);
-				 query = queryBuilderSingleton.executeTraversal(dbEngine, dslQuery, params);
+				 query = groovyQueryBuilder.executeTraversal(dbEngine, dslQuery, params);
 				 String startPrefix = "g.V()";
 				 query = startPrefix + query;
 			 }
@@ -179,7 +178,7 @@ public abstract class GenericQueryProcessor {
 				if (query == null) {
 					query = "";
 				} else {
-					query = queryBuilderSingleton.executeTraversal(dbEngine, query, params);
+					query = groovyQueryBuilder.executeTraversal(dbEngine, query, params);
 				}
 
 				String startPrefix = "g.V(startVertexes)";

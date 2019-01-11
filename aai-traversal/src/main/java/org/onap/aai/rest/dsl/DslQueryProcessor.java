@@ -30,7 +30,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import org.onap.aai.AAIDslLexer;
 import org.onap.aai.AAIDslParser;
-
+import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.rest.dsl.DslListener;
 import org.antlr.v4.runtime.Token;
 
@@ -46,13 +46,14 @@ public class DslQueryProcessor {
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(DslQueryProcessor.class);
 
 	private DslListener dslListener;
+	private boolean validationFlag = true;
 
 	@Autowired
-	public DslQueryProcessor(DslListener dslListener){
+	public DslQueryProcessor(DslListener dslListener) {
 		this.dslListener = dslListener;
 	}
 
-	public String parseAaiQuery(String aaiQuery) {
+	public String parseAaiQuery(String aaiQuery) throws AAIException {
 		try {
 			// Create a input stream that reads our string
 			InputStream stream = new ByteArrayInputStream(aaiQuery.getBytes(StandardCharsets.UTF_8));
@@ -63,10 +64,10 @@ public class DslQueryProcessor {
 			// Get a list of tokens pulled from the lexer
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-			
 			// Parser that feeds off of the tokens buffer
 			AAIDslParser parser = new AAIDslParser(tokens);
 
+			dslListener.setValidationFlag(isValidationFlag());
 			// Specify our entry point
 			ParseTree ptree = parser.aaiquery();
 			LOGGER.info("QUERY-interim" + ptree.toStringTree(parser));
@@ -82,9 +83,17 @@ public class DslQueryProcessor {
 			 * 
 			 */
 			return dslListener.getQuery();
+		} catch (AAIException e) {
+			throw new AAIException("AAI_6149", "Error while processing the query :" + e.getMessage());
 		} catch (Exception e) {
-			LOGGER.error("Error while processing the query"+e.getMessage());
+			throw new AAIException("AAI_6149","Error while processing the query :" + e.getMessage());
 		}
-		return "";
+	}
+	public boolean isValidationFlag() {
+		return validationFlag;
+	}
+
+	public void setValidationFlag(boolean validationFlag) {
+		this.validationFlag = validationFlag;
 	}
 }

@@ -25,16 +25,29 @@ import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.rest.dsl.DslListener;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
+import org.onap.aai.rest.search.CQConfig;
 import org.onap.aai.rest.search.GremlinServerSingleton;
+import org.onap.aai.rest.search.LocalCQConfig;
+import org.onap.aai.rest.search.SchemaServiceCQConfig;
 import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
+@PropertySource(value = "classpath:schema-ingest.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "file:${schema.ingest.file}", ignoreResourceNotFound = true)
+
 public class SearchConfiguration {
+
+	private static final String CONFIG_TRANSLATOR = "config";
+	private static final String SCHEMA_SERVICE_TRANSLATOR = "schema-service";
+
+	@Value("${schema.translator.list}")
+	private String translator;
 
 	@Bean
 	public SearchGraph searchGraph(LoaderFactory loaderFactory, EdgeIngestor edgeIngestor, SchemaVersions schemaVersions) {
@@ -44,7 +57,18 @@ public class SearchConfiguration {
 
 	@Bean
 	public GremlinServerSingleton gremlinServerSingleton(){
-		return new GremlinServerSingleton();
+		return new GremlinServerSingleton(getCustomQueryConfig());
 	}
+
+
+	@Bean
+	public CQConfig getCustomQueryConfig(){
+		if(translator.equals(SCHEMA_SERVICE_TRANSLATOR)) {
+			return new SchemaServiceCQConfig();
+		}
+		return new LocalCQConfig();
+	}
+
+
 
 }

@@ -83,9 +83,9 @@ import static org.mockito.Mockito.when;
 })
 @TestPropertySource(properties = {
 	"schema.uri.base.path = /aai",
-    "schema.ingest.file = src/test/resources/application-test.properties"
+    "schema.ingest.file = src/test/resources/application-onap-test.properties"
 })
-public abstract class QueryTest {
+public abstract class OnapQueryTest {
 
 	@ClassRule
     public static final SpringClassRule springClassRule = new SpringClassRule();

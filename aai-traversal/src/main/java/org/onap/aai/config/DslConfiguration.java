@@ -20,8 +20,10 @@
 package org.onap.aai.config;
 
 import org.onap.aai.edges.EdgeIngestor;
+import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.rest.dsl.DslListener;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
+import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +34,8 @@ public class DslConfiguration {
 
     @Bean
     @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public DslListener dslListener(EdgeIngestor edgeIngestor){
-        return new DslListener(edgeIngestor);
+    public DslListener dslListener(EdgeIngestor edgeIngestor, SchemaVersions schemaVersions, LoaderFactory loaderFactory){
+        return new DslListener(edgeIngestor, schemaVersions, loaderFactory);
     }
 
     @Bean
