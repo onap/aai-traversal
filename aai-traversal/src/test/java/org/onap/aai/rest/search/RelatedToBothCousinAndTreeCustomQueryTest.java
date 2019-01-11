@@ -24,6 +24,7 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
 import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.query.builder.MissingOptionalParameter;
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 
 import java.util.Map;
@@ -81,7 +82,7 @@ public class RelatedToBothCousinAndTreeCustomQueryTest extends QueryTest{
     protected void addParam(Map<String, Object> params) {
         params.put("startingNodeType", "lag-interface");
         params.put("relatedToNodeType", "l-interface");
-
+        params.put("edgeType", MissingOptionalParameter.getInstance());
 
     }
 

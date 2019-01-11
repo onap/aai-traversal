@@ -14,7 +14,7 @@ traverseStep: (TRAVERSE (  singleNodeStep | unionQueryStep));
 
 singleNodeStep: NODE STORE? (filterStep | filterTraverseStep)*;
 
-filterStep: NOT? (LPAREN KEY (COMMA KEY)* RPAREN);
+filterStep: NOT? (LPAREN KEY (COMMA (KEY | NODE))* RPAREN);
 filterTraverseStep: (LPAREN traverseStep* RPAREN);
 
 limitStep: LIMIT NODE;
@@ -47,13 +47,13 @@ RBRACKET: [\]];
 
 NOT: [!];
 
-VALUE: DIGIT;
+VALUE: [DIGIT]+;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z] ;
 fragment DIGIT      : [0-9] ;
 ID
-   : ( LOWERCASE | UPPERCASE | DIGIT) ( LOWERCASE | UPPERCASE | DIGIT | '-' |'.' |'_')*
+   : ( LOWERCASE | UPPERCASE | DIGIT) ( LOWERCASE | UPPERCASE | DIGIT | '-' | '.' | '_' | '/')*
    ;
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines

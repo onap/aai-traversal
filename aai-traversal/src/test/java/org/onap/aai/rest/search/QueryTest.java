@@ -35,6 +35,7 @@ import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.config.IntrospectionConfig;
+import org.onap.aai.config.SearchConfiguration;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.edges.exceptions.AmbiguousRuleChoiceException;
@@ -77,7 +78,7 @@ import static org.mockito.Mockito.when;
         EdgeSerializer.class,
         NodeIngestor.class,
         SpringContextAware.class,
-		GremlinServerSingleton.class,
+		SearchConfiguration.class,
         IntrospectionConfig.class
 })
 @TestPropertySource(properties = {

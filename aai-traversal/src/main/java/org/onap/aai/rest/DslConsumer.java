@@ -59,6 +59,7 @@ import org.onap.aai.serialization.queryformats.Formatter;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
+import org.onap.aai.util.AAIConfig;
 import org.onap.aai.util.TraversalConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,14 +105,14 @@ public class DslConsumer extends RESTAPI {
 	public Response executeQuery(String content, @PathParam("version") String versionParam,
 			@PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,
 			@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers,
-			@Context UriInfo info, @Context HttpServletRequest req) {
+			@Context UriInfo info, @Context HttpServletRequest req, @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex, @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
 		return runner(TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_ENABLED,
 				TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_APP, TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_LIMIT,
 				headers, info, HttpMethod.PUT, new AaiCallable<Response>() {
 					@Override
 					public Response process() {
 						return processExecuteQuery(content, versionParam, uri, queryFormat, subgraph, headers, info,
-								req);
+								req, resultIndex, resultSize);
 					}
 				});
 	}
@@ -119,10 +120,11 @@ public class DslConsumer extends RESTAPI {
 	public Response processExecuteQuery(String content, @PathParam("version") String versionParam,
 			@PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,
 			@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers,
-			@Context UriInfo info, @Context HttpServletRequest req) {
+			@Context UriInfo info, @Context HttpServletRequest req, @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex, @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
 
 		String methodName = "executeDslQuery";
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
+		String dslOverride = headers.getRequestHeaders().getFirst("X-DslOverride");
 		String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 		Response response;
 		SchemaVersion version = new SchemaVersion(versionParam);
@@ -132,6 +134,7 @@ public class DslConsumer extends RESTAPI {
 			LoggingContext.save();
 			DBConnectionType type = this.determineConnectionType(sourceOfTruth, realTime);
 			traversalUriHttpEntry.setHttpEntryProperties(version, type);
+			traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
 			dbEngine = traversalUriHttpEntry.getDbEngine();
 			JsonObject input = new JsonParser().parse(content).getAsJsonObject();
 			JsonElement dslElement = input.get("dsl");
@@ -145,29 +148,46 @@ public class DslConsumer extends RESTAPI {
 			LoggingContext.startTime();
 			StopWatch.conditionalStart();
 
+			boolean isDslOverride = dslOverride != null && !AAIConfig.get(TraversalConstants.DSL_OVERRIDE).equals("false")
+					&& dslOverride.equals(AAIConfig.get(TraversalConstants.DSL_OVERRIDE));
+			
+			if(isDslOverride)
+				dslQueryProcessor.setValidationFlag(false);
+			
 			GenericQueryProcessor processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 					.queryFrom(dsl, "dsl").queryProcessor(dslQueryProcessor).processWith(processorType).create();
-
+			
 			String result = "";
 			SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
-			List<Object> vertices = processor.execute(subGraphStyle);
-
+			List<Object> vertTemp = processor.execute(subGraphStyle);
+			List<Object> vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
 			DBSerializer serializer = new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
 			Format format = Format.getFormat(queryFormat);
 			FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions,
 					this.basePath);
-
+			
 			Formatter formater = ff.get(format, info.getQueryParameters());
 
 			result = formater.output(vertices).toString();
-
+			
 			double msecs = StopWatch.stopIfStarted();
 			LoggingContext.elapsedTime((long) msecs, TimeUnit.MILLISECONDS);
 			LoggingContext.successStatusFields();
 			LOGGER.info("Completed");
-
-			response = Response.status(Status.OK).type(MediaType.APPLICATION_JSON).entity(result).build();
-
+			
+			if(traversalUriHttpEntry.isPaginated()){
+				response = Response.status(Status.OK)
+						.type(MediaType.APPLICATION_JSON)
+						.header("total-results", traversalUriHttpEntry.getTotalVertices())
+						.header("total-pages", traversalUriHttpEntry.getTotalPaginationBuckets())
+						.entity(result)
+						.build();
+			}else {
+				response = Response.status(Status.OK)
+						.type(MediaType.APPLICATION_JSON)
+						.entity(result).build();
+			}
+			
 		} catch (AAIException e) {
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, e);
 		} catch (Exception e) {

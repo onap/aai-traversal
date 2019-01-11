@@ -21,6 +21,7 @@ package org.onap.aai.rest.dsl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -32,15 +33,24 @@ import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.edges.EdgeRuleQuery;
 import org.onap.aai.edges.enums.EdgeType;
 import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.introspection.Introspector;
+import org.onap.aai.introspection.Loader;
+import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
+
+import com.jcabi.log.Logger;
 
 public class DslQueryBuilder {
 
 	private StringBuilder query;
+	private StringBuilder queryException;
 	private final EdgeIngestor edgeRules;
+	private final Loader loader;
 
-	public DslQueryBuilder(EdgeIngestor edgeIngestor) {
+	public DslQueryBuilder(EdgeIngestor edgeIngestor, Loader loader) {
 		this.edgeRules = edgeIngestor;
+		this.loader = loader;
 		query = new StringBuilder();
+		queryException = new StringBuilder();
 	}
 
 	public StringBuilder getQuery() {
@@ -49,6 +59,14 @@ public class DslQueryBuilder {
 
 	public void setQuery(StringBuilder query) {
 		this.query = query;
+	}
+
+	public StringBuilder getQueryException() {
+		return queryException;
+	}
+
+	public void setQueryException(StringBuilder queryException) {
+		this.queryException = queryException;
 	}
 
 	public DslQueryBuilder start() {
@@ -68,6 +86,8 @@ public class DslQueryBuilder {
 
 	public DslQueryBuilder nodeQuery(DslContext context) {
 		query.append(".getVerticesByProperty('aai-node-type', '").append(context.getCurrentNode()).append("')");
+		if(context.isStartNode() && context.getStartNode().isEmpty())
+			context.setStartNode(context.getCurrentNode());
 		return this;
 	}
 
@@ -76,7 +96,7 @@ public class DslQueryBuilder {
 		String edgeType = "";
 		if (!edgeRules.hasRule(baseQ.build())) {
 			throw new AAIException("AAI_6120", "No EdgeRule found for passed nodeTypes: " + context.getPreviousNode()
-			+ ", " + context.getCurrentNode());
+					+ ", " + context.getCurrentNode());
 		} else if (edgeRules.hasRule(baseQ.edgeType(EdgeType.TREE).build())) {
 			edgeType = "EdgeType.TREE";
 		} else if (edgeRules.hasRule(baseQ.edgeType(EdgeType.COUSIN).build())) {
@@ -85,7 +105,7 @@ public class DslQueryBuilder {
 			edgeType = "EdgeType.COUSIN";
 
 		query.append(".createEdgeTraversal(").append(edgeType).append(", '").append(context.getPreviousNode())
-		.append("','").append(context.getCurrentNode()).append("')");
+				.append("','").append(context.getCurrentNode()).append("')");
 
 		return this;
 	}
@@ -142,21 +162,53 @@ public class DslQueryBuilder {
 
 	}
 
+	public DslQueryBuilder validateFilter(DslContext context) throws AAIException {
+		Introspector obj = loader.introspectorFromName(context.getStartNode());
+		if(context.getStartNodeKeys().isEmpty()){
+			queryException.append("No keys sent. Valid keys for " + context.getStartNode() + " are "
+					+ String.join(",", obj.getIndexedProperties()));
+			return this;
+		}
+		boolean notIndexed = context.getStartNodeKeys().stream()
+				.filter((prop) -> obj.getIndexedProperties().contains(prop)).collect(Collectors.toList()).isEmpty();
+		if (notIndexed)
+			queryException.append("Non indexed keys sent. Valid keys for " + context.getStartNode() + " "
+					+ String.join(",", obj.getIndexedProperties()));
+
+		return this;
+	}
+
 	public DslQueryBuilder filterPropertyKeys(DslContext context) {
 		AAIDslParser.FilterStepContext ctx = (AAIDslParser.FilterStepContext) context.getCtx();
 		final String key = ctx.KEY(0).getText();
-		
-		query.append(key);
+		/*
+		 * This key should be indexed if it is start node
+		 */
+		if (context.isStartNode() && context.getStartNodeKeys().isEmpty()) {
+			// check if key is not indexed, then throw exception
+			context.getStartNodeKeys().add(key.replaceAll("'", ""));
+		}
 
+		query.append(key);
 		List<TerminalNode> nodes = ctx.KEY();
+		List<TerminalNode> numberValues = ctx.NODE();
+		/*
+		 * Add all String values
+		 */
 		List<String> valuesArray = nodes.stream().filter((node) -> !key.equals(node.getText()))
-				                              .map((node) -> "'" + node.getText().replace("'", "").trim() + "'")
-		                                      .collect(Collectors.toList());
+				.map((node) -> "'" + node.getText().replace("'", "").trim() + "'").collect(Collectors.toList());
+
+		/*
+		 * Add all numeric values
+		 */
+		valuesArray.addAll(numberValues.stream().filter((node) -> !key.equals(node.getText()) )
+				.map((node) -> node.getText()).collect(Collectors.toList()));
+		
 		
 		/*
-		 * The whole point of doing this to separate P.within from key-value search
-		 * For a list of values QB uses P.within
-		 * For just a single value QB uses key,value check
+		 * The whole point of doing this to separate P.within from key-value
+		 * search For a list of values QB uses P.within For just a single value
+		 * QB uses key,value check
 		 */
 		if (nodes.size() > 2) {
 			String values = String.join(",", valuesArray);

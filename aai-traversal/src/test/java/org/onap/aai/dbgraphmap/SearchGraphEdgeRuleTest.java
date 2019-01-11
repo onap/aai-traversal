@@ -25,30 +25,30 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.onap.aai.AAISetup;
 import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.exceptions.AAIException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Ignore
-public class SearchGraphEdgeRuleTest {
+
+public class SearchGraphEdgeRuleTest extends AAISetup{
 	@Rule
 	public ExpectedException expectedEx = ExpectedException.none();
 	
-	@Autowired
-	SearchGraph searchGraph;
+	
 	@Test
 	public void getEdgeLabelTest() throws AAIException, EdgeRuleNotFoundException {
 		String[] label = searchGraph.getEdgeLabel("customer", "service-subscription");
 		
-		assertEquals("subscribesTo", label[0]);
+		assertEquals("org.onap.relationships.inventory.BelongsTo", label[0]);
 	}
 	
 	@Test
 	public void getEdgeLabelThrowsExceptionWhenNoRuleExists() throws Exception {
 		String nodeTypeA = "complex";
 		String nodeTypeB = "service";
-		expectedEx.expect(AAIException.class);
-		expectedEx.expectMessage("No EdgeRule found for passed nodeTypes: complex, service.");
+		expectedEx.expect(org.onap.aai.edges.exceptions.EdgeRuleNotFoundException.class);
+		expectedEx.expectMessage("No rules found for EdgeRuleQuery with filter params node type: complex, node type: service, type: any, isPrivate");
 	    searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);
 	}
 	
@@ -56,8 +56,8 @@ public class SearchGraphEdgeRuleTest {
 	public void getEdgeLabelThrowsExceptionWhenNodeTypesDoNotExist() throws Exception {
 		String nodeTypeA = "A";
 		String nodeTypeB = "B";
-		expectedEx.expect(AAIException.class);
-	    expectedEx.expectMessage("No EdgeRule found for passed nodeTypes: A, B.");
+		expectedEx.expect(org.onap.aai.edges.exceptions.EdgeRuleNotFoundException.class);
+		expectedEx.expectMessage("No rules found for EdgeRuleQuery with filter params node type: A, node type: B, type: any, isPrivate");
 	    searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);    
 	}
 }

@@ -23,8 +23,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -118,7 +120,7 @@ public class QueryConsumer extends RESTAPI {
 	@PUT
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response executeQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req){
+	public Response executeQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req, @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex, @DefaultValue("-1") @QueryParam("resultSize") String resultSize){
 		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
 				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
 				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
@@ -128,14 +130,13 @@ public class QueryConsumer extends RESTAPI {
 				new AaiCallable<Response>() {
 					@Override
 					public Response process() {
-						return processExecuteQuery(content, versionParam, uri, queryFormat, subgraph, headers, info, req);
+						return processExecuteQuery(content, versionParam, uri, queryFormat, subgraph, headers, info, req, resultIndex, resultSize);
 					}
 				}
 		);
 	}
 
-	public Response processExecuteQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req) {
-
+	public Response processExecuteQuery(String content, @PathParam("version")String versionParam, @PathParam("uri") @Encoded String uri, @DefaultValue("graphson") @QueryParam("format") String queryFormat,@DefaultValue("no_op") @QueryParam("subgraph") String subgraph, @Context HttpHeaders headers, @Context UriInfo info, @Context HttpServletRequest req, @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex, @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
 		String methodName = "executeQuery";
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String realTime = headers.getRequestHeaders().getFirst("Real-Time");
@@ -165,6 +166,11 @@ public class QueryConsumer extends RESTAPI {
 			SchemaVersion version = new SchemaVersion(versionParam);
 			DBConnectionType type = this.determineConnectionType(sourceOfTruth, realTime);
 			traversalUriHttpEntry.setHttpEntryProperties(version, type);
+			/*
+			 * Changes for Pagination
+			 */
+			
+			traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
 			dbEngine = traversalUriHttpEntry.getDbEngine();
 
 			if (startElement != null) {
@@ -188,9 +194,17 @@ public class QueryConsumer extends RESTAPI {
 			CustomQueryConfig customQueryConfig = getCustomQueryConfig(queryURIObj);
 			if ( customQueryConfig != null ) {
 				List<String> missingRequiredQueryParameters =  checkForMissingQueryParameters( customQueryConfig.getQueryRequiredProperties(), URITools.getQueryMap(queryURIObj));
+				
 				if ( !missingRequiredQueryParameters.isEmpty() ) {
 					return( createMessageMissingQueryRequiredParameters( missingRequiredQueryParameters, headers, info, req));
 				}
+				
+				List<String> invalidQueryParameters =  checkForInvalidQueryParameters( customQueryConfig, URITools.getQueryMap(queryURIObj));
+				
+				if ( !invalidQueryParameters.isEmpty() ) {
+					return( createMessageInvalidQueryParameters( invalidQueryParameters, headers, info, req));
+				}
+				
 			} else if ( queryElement != null ) {
 				return( createMessageInvalidQuerySection( queryURI, headers, info, req));
 			}
@@ -227,8 +241,9 @@ public class QueryConsumer extends RESTAPI {
 						.processWith(processorType).create();
 			}
 			String result = "";
-			List<Object> vertices = processor.execute(subGraphStyle);
-		
+			List<Object> vertTemp = processor.execute(subGraphStyle);
+			List<Object> vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
+			
 			DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
 			FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions, this.basePath);
 			
@@ -240,12 +255,19 @@ public class QueryConsumer extends RESTAPI {
 			LoggingContext.elapsedTime((long)msecs,TimeUnit.MILLISECONDS);
 			LoggingContext.successStatusFields();
 			LOGGER.info ("Completed");
-			
-			
-			response = Response.status(Status.OK)
-					.type(MediaType.APPLICATION_JSON)
-					.entity(result).build();
 		
+			if(traversalUriHttpEntry.isPaginated()){
+				response = Response.status(Status.OK)
+						.type(MediaType.APPLICATION_JSON)
+						.header("total-results", traversalUriHttpEntry.getTotalVertices())
+						.header("total-pages", traversalUriHttpEntry.getTotalPaginationBuckets())
+						.entity(result)
+						.build();
+			}else {
+				response = Response.status(Status.OK)
+						.type(MediaType.APPLICATION_JSON)
+						.entity(result).build();
+			}
 		} catch (AAIException e) {
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, e);
 		} catch (Exception e ) {
@@ -340,6 +362,44 @@ public class QueryConsumer extends RESTAPI {
 
 		return response;
 	} 
+	
+	
+	public List<String> checkForInvalidQueryParameters( CustomQueryConfig customQueryConfig,  MultivaluedMap<String, String> queryParams) {
+		
+		List<String> allParameters = new ArrayList<String>();
+		/*
+		 * Add potential Required and Optional to allParameters
+		 */
+		Optional.ofNullable(customQueryConfig.getQueryOptionalProperties()).ifPresent(allParameters::addAll);
+		Optional.ofNullable(customQueryConfig.getQueryRequiredProperties()).ifPresent(allParameters::addAll);
+		
+		if(queryParams.isEmpty())
+			return new ArrayList<>();
+		List<String> invalidParameters = queryParams.keySet().stream()
+				                                             .filter(param -> !allParameters.contains(param))
+				                                             .collect(Collectors.toList());
+		
+		return invalidParameters;
+		
+	}
+	
+	private Response createMessageInvalidQueryParameters(List<String> invalidQueryParams, HttpHeaders headers, UriInfo info, HttpServletRequest req) {
+		AAIException e = new AAIException("AAI_3022");
+		
+		ArrayList<String> templateVars = new ArrayList<>();
+
+		if (templateVars.isEmpty()) {
+			templateVars.add(invalidQueryParams.toString());
+		}
+
+		Response response = Response
+				.status(e.getErrorObject().getHTTPResponseCode())
+				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
+						templateVars)).build();	
+
+		return response;
+	} 
+	
 
 
 }

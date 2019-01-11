@@ -72,6 +72,7 @@ public class RelatedToTreeCustomQueryTest extends QueryTest {
     protected void addParam(Map<String, Object> params) {
         params.put("startingNodeType", "generic-vnf");
         params.put("relatedToNodeType", "entitlement");
+        params.put("edgeType", "TREE");
     }
 
 }

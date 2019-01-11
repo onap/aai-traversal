@@ -25,6 +25,7 @@ import org.onap.aai.util.FileWatcher;
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
@@ -47,11 +48,8 @@ public class GremlinServerSingleton {
     private boolean timerSet;
     private Timer timer;
 
-    private GetCustomQueryConfig queryConfig;
 
-    @Value("${schema.queries.location}")
-    private String storedQueriesLocation;
-
+    CQConfig customQueryInfo;
     /**
      * Initializes the gremlin server singleton
      * Loads the configuration of the gremlin server and creates a cluster
@@ -61,41 +59,9 @@ public class GremlinServerSingleton {
      * the properties object
      *
      */
-    @PostConstruct
-    public void init() {
-
-		try {
-			String filepath = storedQueriesLocation + AAIConstants.AAI_FILESEP + "stored-queries.json";
-			Path path = Paths.get(filepath);
-			String customQueryConfigJson = new String(Files.readAllBytes(path));
-			
-
-			queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
-		} catch (IOException e) {
-			logger.error("Error occurred during the processing of query json file: " + LogFormatTools.getStackTop(e));
-		}
-
-
-        TimerTask task = new FileWatcher(new File(storedQueriesLocation)) {
-            @Override
-            protected void onChange(File file) {
-        		try {
-        			String filepath = storedQueriesLocation;
-        			Path path = Paths.get(filepath);
-        			String customQueryConfigJson = new String(Files.readAllBytes(path));
-        			queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
-        		} catch (IOException e) {
-        			logger.error("Error occurred during the processing of query json file: " + LogFormatTools.getStackTop(e));
-        		}
-            }
-        };
-
-        if (!timerSet) {
-            timerSet = true;
-            timer = new Timer();
-            timer.schedule( task , new Date(), 10000 );
-        }
-
+    @Autowired
+    public GremlinServerSingleton(CQConfig customQueryInfo){
+         this.customQueryInfo = customQueryInfo;
     }
 
     /**
@@ -104,6 +70,8 @@ public class GremlinServerSingleton {
      * @return
      */
     public String getStoredQueryFromConfig(String key){
+        GetCustomQueryConfig queryConfig = customQueryInfo.getCustomQueryConfig();
+
     	CustomQueryConfig customQueryConfig = queryConfig.getStoredQuery(key);
     	if ( customQueryConfig == null ) {
     		return null;
@@ -112,6 +80,7 @@ public class GremlinServerSingleton {
     }
     
     public CustomQueryConfig getCustomQueryConfig(String key) {
+        GetCustomQueryConfig queryConfig = customQueryInfo.getCustomQueryConfig();
     	return queryConfig.getStoredQuery(key);
     }
 

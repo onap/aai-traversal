@@ -29,9 +29,17 @@ import java.util.List;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import org.onap.aai.AAIDslParser;
+import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.edges.EdgeRuleQuery;
 import org.onap.aai.edges.enums.EdgeType;
 import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.introspection.Introspector;
+import org.onap.aai.introspection.Loader;
+import org.onap.aai.introspection.LoaderFactory;
+import org.onap.aai.introspection.ModelType;
+import org.onap.aai.logging.LogFormatTools;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.onap.aai.AAIDslBaseListener;
 import org.onap.aai.edges.EdgeIngestor;
@@ -54,18 +62,32 @@ public class DslListener extends AAIDslBaseListener {
 	 * Instantiates a new DslListener.
 	 */
 	@Autowired
-	public DslListener(EdgeIngestor edgeIngestor) {
+	public DslListener(EdgeIngestor edgeIngestor, SchemaVersions schemaVersions, LoaderFactory loaderFactory) {
 		this.edgeRules = edgeIngestor;
 		context = new DslContext();
-		dslBuilder = new DslQueryBuilder(edgeIngestor);
+
+		Loader loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getDefaultVersion());
+		dslBuilder = new DslQueryBuilder(edgeIngestor, loader);
 	}
 
-	public String getQuery() {
+	public String getQuery() throws AAIException {
+		if (!getException().isEmpty()) {
+			LOGGER.error("Exception in the DSL Query" + getException());
+			throw new AAIException("AAI_6149", getException());
+		}
 		return dslBuilder.getQuery().toString();
+	}
+
+	public String getException() {
+		return dslBuilder.getQueryException().toString();
 	}
 
 	@Override
 	public void enterAaiquery(AAIDslParser.AaiqueryContext ctx) {
+		/*
+		 * This is my start-node, have some validations here
+		 */
+		context.setStartNodeFlag(true);
 		dslBuilder.start();
 	}
 
@@ -131,6 +153,14 @@ public class DslListener extends AAIDslBaseListener {
 
 	@Override
 	public void exitSingleNodeStep(AAIDslParser.SingleNodeStepContext ctx) {
+		if (context.isStartNode() && isValidationFlag()) {
+			try {
+				dslBuilder.validateFilter(context);
+			} catch (AAIException e) {
+				LOGGER.error("AAIException in DslListener" + LogFormatTools.getStackTop(e));
+			}
+		}
+		context.setStartNodeFlag(false);
 		context.setCtx(ctx);
 		dslBuilder.store(context);
 	}
@@ -186,6 +216,7 @@ public class DslListener extends AAIDslBaseListener {
 
 	@Override
 	public void enterFilterStep(AAIDslParser.FilterStepContext ctx) {
+
 		context.setCtx(ctx);
 		dslBuilder.filter(context);
 	}
@@ -210,4 +241,13 @@ public class DslListener extends AAIDslBaseListener {
 		context.setCtx(ctx);
 		dslBuilder.limit(context);
 	}
+	
+	public void setValidationFlag(boolean validationFlag) {
+		this.context.setValidationFlag(validationFlag);
+	}
+	
+	public boolean isValidationFlag() {
+		return this.context.isValidationFlag();
+	}
+
 }

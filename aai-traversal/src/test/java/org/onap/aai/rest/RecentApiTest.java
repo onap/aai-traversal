@@ -51,6 +51,32 @@ public class RecentApiTest extends AbstractSpringRestTest {
 	}
 
 	@Test
+	public void testRecentsHoursWrongNumber() {
+		String endpoint = "/aai/recents/v14/pserver";
+		httpEntity = new HttpEntity(headers);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint).queryParam("hours", "1900000000000000000000000000000000000000000000000");
+		ResponseEntity responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity,
+				String.class);
+
+		LOGGER.debug("Response for PUT request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+		assertNotNull("Response from /aai/recents/v14/pserver is null", responseEntity);
+		assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+	}
+	
+	@Test
+	public void testRecentsStartTimeWrongNumber() {
+		String endpoint = "/aai/recents/v14/pserver";
+		httpEntity = new HttpEntity(headers);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint).queryParam("date-time", "190000000000000000000000000000000000000000000");
+		ResponseEntity responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity,
+				String.class);
+
+		LOGGER.debug("Response for PUT request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+		assertNotNull("Response from /aai/recents/v14/pserver is null", responseEntity);
+		assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+	}
+	
+	@Test
 	public void testRecentsQueryException() {
 		String endpoint = "/aai/recents/v14/xserver";
 		httpEntity = new HttpEntity(headers);

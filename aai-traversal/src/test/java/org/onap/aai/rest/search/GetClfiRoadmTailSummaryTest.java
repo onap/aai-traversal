@@ -74,7 +74,7 @@ public class GetClfiRoadmTailSummaryTest extends QueryTest {
         
 		rules.addEdge(g, logicalLink1, lInterface1);//false
         
-        expectedResult.add(logicalLink1);
+        //expectedResult.add(logicalLink1);
         expectedResult.add(pInterface1);
         expectedResult.add(pnf1);
         expectedResult.add(pInterface2);
