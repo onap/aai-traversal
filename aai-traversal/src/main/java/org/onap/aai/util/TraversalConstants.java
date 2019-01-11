@@ -29,6 +29,8 @@ public final class TraversalConstants {
 	public static final String AAI_TRAVERSAL_DSL_TIMEOUT_LIMIT = "aai.traversal.dsl.timeoutlimit";
 	public static final String AAI_TRAVERSAL_DSL_TIMEOUT_ENABLED = "aai.traversal.dsl.timeoutenabled";
 	public static final String AAI_TRAVERSAL_DSL_TIMEOUT_APP = "aai.traversal.dsl.timeout.appspecific";
+	public static final String DSL_NOVALIDATION_CLIENTS = "aai.traversal.dsl.novalidation.clients";
+	public static final String DSL_OVERRIDE = "aai.dsl.override";
 	
     public static final long HISTORY_MAX_HOURS = 192;
 	

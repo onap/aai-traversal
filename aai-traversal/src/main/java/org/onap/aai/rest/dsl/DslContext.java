@@ -19,8 +19,10 @@
  */
 package org.onap.aai.rest.dsl;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -28,8 +30,12 @@ public class DslContext {
 
 	private ParserRuleContext ctx;
 
+	private boolean validationFlag = true;
+	private boolean isStartNode = false;
+	private String startNode = "";
+	private List<String> startNodeKeys = new ArrayList<String>();
+	
 	private String currentNode;
-
 	private String previousNode;
 
 	private boolean isTraversal = false;
@@ -38,7 +44,7 @@ public class DslContext {
 	private boolean isUnionStart = false;
 
 	private String whereStartNode = "";
-
+	
 	private Deque<String> unionStartNodes = new LinkedList<String>();
 
 	/*
@@ -55,6 +61,26 @@ public class DslContext {
 		this.ctx = ctx;
 	}
 
+	public boolean isStartNode() {
+		return isStartNode;
+	}
+
+	public void setStartNodeFlag(boolean isStartNode) {
+		this.isStartNode = isStartNode;
+	}
+	
+	public String getStartNode() {
+		return startNode;
+	}
+
+	public void setStartNode(String startNode) {
+		this.startNode = startNode;
+	}
+
+	public List<String> getStartNodeKeys() {
+		return startNodeKeys;
+	}
+	
 	public String getCurrentNode() {
 		return currentNode;
 	}
@@ -125,6 +151,14 @@ public class DslContext {
 
 	public void setLimitQuery(StringBuilder limitQuery) {
 		this.limitQuery = limitQuery;
+	}
+	
+	public boolean isValidationFlag() {
+		return validationFlag;
+	}
+
+	public void setValidationFlag(boolean validationFlag) {
+		this.validationFlag = validationFlag;
 	}
 
 }

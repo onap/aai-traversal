@@ -76,7 +76,7 @@ public class GetRouterRoadmTailSummaryTest extends QueryTest{
         
         expectedResult.add(pnf1);
         expectedResult.add(pInterface1);
-        expectedResult.add(logicalLink1);
+        //expectedResult.add(logicalLink1);
         expectedResult.add(pInterface2);
         expectedResult.add(pInterface3);
         expectedResult.add(pnf2);

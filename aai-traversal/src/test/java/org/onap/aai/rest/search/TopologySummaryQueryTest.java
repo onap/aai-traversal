@@ -55,6 +55,11 @@ public class TopologySummaryQueryTest extends QueryTest {
 		Vertex pserver = graph.addVertex(T.label, "pserver", T.id, "7", "aai-node-type", "pserver");
 		Vertex pserverint = graph.addVertex(T.label, "p-interface", T.id, "9", "aai-node-type", "p-interface", "interface-name", "xe0/0/0");
 		Vertex complex = graph.addVertex(T.label, "complex", T.id, "8", "aai-node-type", "complex");
+		Vertex lineofbusiness = graph.addVertex(T.label, "line-of-business", T.id, "12", "aai-node-type", "line-of-business");
+		Vertex platform = graph.addVertex(T.label, "platform", T.id, "13", "aai-node-type", "platform");
+		Vertex serviceinstance = graph.addVertex(T.label, "service-instance", T.id, "14", "aai-node-type", "service-instance");
+		Vertex owningentity = graph.addVertex(T.label, "owning-entity", T.id, "15", "aai-node-type", "owning-entity");
+		Vertex project = graph.addVertex(T.label, "project", T.id, "16", "aai-node-type", "project");
 		
 		GraphTraversalSource g = graph.traversal();
 		rules.addEdge(g, vnf, vnfc);
@@ -70,6 +75,11 @@ public class TopologySummaryQueryTest extends QueryTest {
 		rules.addTreeEdge(g, pserver, pserverint);
 		rules.addTreeEdge(g, vnf, vnfint);
 		rules.addTreeEdge(g, vserver, vserverint);
+		rules.addEdge(g, vnf, lineofbusiness);
+		rules.addEdge(g, vnf, platform);
+		rules.addEdge(g, vnf, serviceinstance);
+		rules.addEdge(g, serviceinstance, owningentity);
+		rules.addEdge(g, serviceinstance, project);
 		
 		expectedResult.add(vnf);
 		expectedResult.add(vnfc);
@@ -80,6 +90,10 @@ public class TopologySummaryQueryTest extends QueryTest {
 		expectedResult.add(flavor);
 		expectedResult.add(pserver);
 		expectedResult.add(complex);
+		expectedResult.add(lineofbusiness);
+		expectedResult.add(platform);
+		expectedResult.add(owningentity);
+		expectedResult.add(project);
 		
 	}
 

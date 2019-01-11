@@ -1,0 +1,19 @@
+{
+            "physical-location-id": "location-1111",
+            "physical-location-type": "type-111",
+            "street1": "street-11",
+            "city": "city-11",
+            "postal-code": "postal-11",
+            "country": "US",
+            "region": "region-11",
+            "dataCenterCode": "test-code-111",
+            "complex-name": "example-complex-name-val-55430",
+              "relationship-list": {
+                "relationship": [
+                  {
+                    "related-to": "cloud-region",
+                    "related-link": "${cloud-region-uri}"
+                  }
+                ]
+              }
+}

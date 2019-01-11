@@ -224,8 +224,13 @@ public class RecentAPIConsumer extends RESTAPI {
 		
 		if (params != null && params.containsKey("hours") && params.getFirst("hours").matches("-?\\d+")) {
 			isHoursParameter = true;
-			
-			Long hours = Long.parseLong(params.getFirst("hours"));
+			Long hours = 0L;
+			try{
+				hours = Long.parseLong(params.getFirst("hours"));
+			}
+			catch(NumberFormatException ex){
+				throw new AAIException("AAI_3021", " Invalid Hours. Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
+			}
 			if (hours < 1 || hours > AAIConstants.HISTORY_MAX_HOURS) {
 				throw new AAIException("AAI_3021", " Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
 			}
@@ -233,7 +238,13 @@ public class RecentAPIConsumer extends RESTAPI {
 		if (params != null && params.containsKey("date-time") && params.getFirst("date-time").matches("-?\\d+")) {
 			isDateTimeParameter = true;
 			Long minStartTime = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(AAIConstants.HISTORY_MAX_HOURS);
-			Long startTime = Long.parseLong(params.getFirst("date-time"));
+			Long startTime = 0L;
+			try{
+				startTime = Long.parseLong(params.getFirst("date-time"));
+			}
+			catch(NumberFormatException ex){
+				throw new AAIException("AAI_3021", " Invalid Data-time. Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
+			}
 			if (startTime < minStartTime) {
 				throw new AAIException("AAI_3021", " Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
 			}
