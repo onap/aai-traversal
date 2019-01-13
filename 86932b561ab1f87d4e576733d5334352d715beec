@@ -16,6 +16,23 @@
       "revId": "86932b561ab1f87d4e576733d5334352d715beec",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9adffdf1_478b00c3",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2019-01-13T17:57:15Z",
+      "side": 1,
+      "message": "Change this to org.onap.aai.aai-common as well",
+      "revId": "86932b561ab1f87d4e576733d5334352d715beec",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
