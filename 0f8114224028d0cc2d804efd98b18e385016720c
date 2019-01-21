@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9adffdf1_e011ab52",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/MakeNamedQuery.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-01-21T13:45:24Z",
+      "side": 1,
+      "message": "I doubt that this matters much because there is an implicit conversion from String to SchemaVersion object and there is no problem in the behaviour of the utility.\n\nBetter to update the SchemaVersions API to have a contains() call that accepts String parameter.",
+      "range": {
+        "startLine": 82,
+        "startChar": 2,
+        "endLine": 84,
+        "endChar": 58
+      },
+      "revId": "0f8114224028d0cc2d804efd98b18e385016720c",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
