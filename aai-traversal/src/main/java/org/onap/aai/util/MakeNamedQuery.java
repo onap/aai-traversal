@@ -79,8 +79,9 @@ public class MakeNamedQuery {
 
 		LoaderFactory loaderFactory   = ctx.getBean(LoaderFactory.class);
 		SchemaVersions schemaVersions = ctx.getBean(SchemaVersions.class);
+		SchemaVersion schemaVersion = new SchemaVersion(_apiVersion);
 
-		if(schemaVersions.getVersions().contains(_apiVersion)){
+		if(schemaVersions.getVersions().contains(schemaVersion)){
 
 			Loader loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, new SchemaVersion(_apiVersion));
 
