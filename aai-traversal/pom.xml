@@ -144,7 +144,6 @@
         <plexus.utils.version>3.1.0</plexus.utils.version>
 
         <snapshot.file>${project.basedir}/snapshots/data.graphson</snapshot.file>
-        <license.goal.type>check</license.goal.type>
         <jacoco.line.coverage.limit>0.67</jacoco.line.coverage.limit>
 
         <!-- Start of Default ONAP Schema Properties -->
@@ -893,15 +892,6 @@
                         <skipExistingHeaders>true</skipExistingHeaders>
                         <skip>false</skip>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <!-- Set goal to "format" to auto update license headers -->
-                                <goal>${license.goal.type}</goal>
-                            </goals>
-                            <phase>process-sources</phase>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.groovy.maven</groupId>
@@ -1163,15 +1153,6 @@
                     <skipExistingHeaders>false</skipExistingHeaders>
                     <skip>false</skip>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <!-- Set goal to "format" to auto update license headers -->
-                            <goal>${license.goal.type}</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
