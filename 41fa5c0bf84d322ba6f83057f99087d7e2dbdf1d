@@ -1,0 +1,8 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: Keong Lim <keong.lim@huawei.com>
+Code-Review+2: James Forsyth <jf2512@att.com>
+Submitted-by: James Forsyth <jf2512@att.com>
+Submitted-at: Tue, 19 Feb 2019 18:56:55 +0000
+Reviewed-on: https://gerrit.onap.org/r/78286
+Project: aai/traversal
+Branch: refs/heads/master
