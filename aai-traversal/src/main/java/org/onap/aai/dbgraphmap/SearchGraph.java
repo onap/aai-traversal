@@ -75,7 +75,7 @@ import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersions;
-import org.onap.aai.util.StoreNotificationEvent;
+import org.onap.aai.util.NodesQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.att.eelf.configuration.EELFLogger;
@@ -86,7 +86,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.jcabi.log.Logger;
+import org.onap.aai.util.GenericQueryBuilder;
 
 /**
  * Database Mapping class which acts as the middle man between the REST interface objects 
@@ -112,140 +112,130 @@ public class SearchGraph {
 	/**
 	 * Get the search result based on the includeNodeType and depth provided.
 	 *
-	 * @param fromAppId the from app id
-	 * @param transId the trans id
-	 * @param startNodeType the start node type
-	 * @param startNodeKeyParams the start node key params
-	 * @param includeNodeTypes the include node types
-	 * @param depth the depth
-	 * @param aaiExtMap the aai ext map
-	 * @return Response
-	 * @throws AAIException the AAI exception
+	 * @param genericQueryBuilder
 	 */
-	public Response runGenericQuery (
-			HttpHeaders headers,
-			String startNodeType,
-			List <String> startNodeKeyParams,
-			List <String> includeNodeTypes,
-			final int depth,
-			TransactionalGraphEngine dbEngine,
-			Loader loader,
-			UrlBuilder urlBuilder) throws AAIException {
-		Response response = null;
-		boolean success = true;
-		String result = "";
-		try {			
-			dbEngine.startTransaction();
+    public Response runGenericQuery(GenericQueryBuilder genericQueryBuilder) throws AAIException {
+        Response response = null;
+        boolean success = true;
+        String result = "";
+        try {
+            genericQueryBuilder.getDbEngine().startTransaction();
 
-			if( startNodeType == null ){
-				throw new AAIException("AAI_6120", "null start-node-type passed to the generic query"); 
-			}
+            if (genericQueryBuilder.getStartNodeType() == null) {
+                throw new AAIException("AAI_6120", "null start-node-type passed to the generic query");
+            }
 
-			if( startNodeKeyParams == null ){
-				throw new AAIException("AAI_6120", "no key param passed to the generic query"); 
-			}
+            if (genericQueryBuilder.getStartNodeKeyParams() == null) {
+                throw new AAIException("AAI_6120", "no key param passed to the generic query");
+            }
 
-			if( includeNodeTypes == null ){
-				throw new AAIException("AAI_6120", "no include params passed to the generic query"); 
-			}
+            if (genericQueryBuilder.getIncludeNodeTypes() == null) {
+                throw new AAIException("AAI_6120", "no include params passed to the generic query");
+            }
 
-			if (depth > 6) {
-				throw new AAIException("AAI_6120", "The maximum depth supported by the generic query is 6");
-			}
-			final QueryBuilder queryBuilder;
-			
-			// there is an issue with service-instance - it is a unique node but still dependent
-			// for now query it directly without attempting to craft a valid URI	
-			if (startNodeType.equalsIgnoreCase("service-instance") && startNodeKeyParams.size() == 1) {
-				Introspector obj = loader.introspectorFromName(startNodeType);
-				// Build a hash with keys to uniquely identify the start Node
-				String keyName = null;
-				String keyValue = null;
+            if (genericQueryBuilder.getDepth() > 6) {
+                throw new AAIException("AAI_6120", "The maximum depth supported by the generic query is 6");
+            }
+            final QueryBuilder queryBuilder;
 
-				QueryBuilder builder = dbEngine.getQueryBuilder().getVerticesByIndexedProperty(AAIProperties.NODE_TYPE, "service-instance");
-				for( String keyData : startNodeKeyParams ){ 
-					int colonIndex = keyData.indexOf(":");
-					if( colonIndex <= 0 ){
-						throw new AAIException("AAI_6120", "Bad key param passed in: [" + keyData + "]"); 
-					}
-					else {
-						keyName = keyData.substring(0, colonIndex).split("\\.")[1];
-						keyValue = keyData.substring(colonIndex + 1);
-						builder.getVerticesByProperty(keyName, keyValue);
-					}
-				}
-				
-				queryBuilder = builder;
-			} else {
-				URI uri = craftUriFromQueryParams(loader, startNodeType, startNodeKeyParams);
-				queryBuilder = dbEngine.getQueryBuilder().createQueryFromURI(uri).getQueryBuilder();
-			}
-			List<Vertex> results = queryBuilder.toList();
-			if( results.isEmpty()){
-				throw new AAIException("AAI_6114", "No Node of type " + 
-						startNodeType + 
-						" found for properties: " + 
-						startNodeKeyParams.toString()); 
-			} else if (results.size() > 1) {
-				String detail = "More than one Node found by getUniqueNode for params: " + startNodeKeyParams.toString() + "\n";
-				throw new AAIException("AAI_6112", detail); 
-			}
+            // there is an issue with service-instance - it is a unique node but still dependent
+            // for now query it directly without attempting to craft a valid URI
+            if (genericQueryBuilder.getStartNodeType().equalsIgnoreCase("service-instance")
+                    && genericQueryBuilder.getStartNodeKeyParams().size() == 1) {
+                Introspector obj =
+                        genericQueryBuilder.getLoader().introspectorFromName(genericQueryBuilder.getStartNodeType());
+                // Build a hash with keys to uniquely identify the start Node
+                String keyName = null;
+                String keyValue = null;
 
-			Vertex startNode = results.get(0);
+                QueryBuilder builder = genericQueryBuilder.getDbEngine().getQueryBuilder()
+                        .getVerticesByIndexedProperty(AAIProperties.NODE_TYPE, "service-instance");
+                for (String keyData : genericQueryBuilder.getStartNodeKeyParams()) {
+                    int colonIndex = keyData.indexOf(":");
+                    if (colonIndex <= 0) {
+                        throw new AAIException("AAI_6120", "Bad key param passed in: [" + keyData + "]");
+                    } else {
+                        keyName = keyData.substring(0, colonIndex).split("\\.")[1];
+                        keyValue = keyData.substring(colonIndex + 1);
+                        builder.getVerticesByProperty(keyName, keyValue);
+                    }
+                }
 
-			Collection <Vertex> ver = new HashSet <>();
-			List<Vertex> queryResults = new ArrayList<>();
-			GraphTraversalSource traversalSource = dbEngine.asAdmin().getReadOnlyTraversalSource();
-			GraphTraversal<Vertex, Vertex> traversal;
-			if (includeNodeTypes.contains(startNodeType) || depth == 0 || includeNodeTypes.contains("all") )
-				ver.add(startNode);
+                queryBuilder = builder;
+            } else {
+                URI uri = craftUriFromQueryParams(genericQueryBuilder.getLoader(),
+                        genericQueryBuilder.getStartNodeType(), genericQueryBuilder.getStartNodeKeyParams());
+                queryBuilder =
+                        genericQueryBuilder.getDbEngine().getQueryBuilder().createQueryFromURI(uri).getQueryBuilder();
+            }
+            List<Vertex> results = queryBuilder.toList();
+            if (results.isEmpty()) {
+                throw new AAIException("AAI_6114", "No Node of type " + genericQueryBuilder.getStartNodeType()
+                        + " found for properties: " + genericQueryBuilder.getStartNodeKeyParams().toString());
+            } else if (results.size() > 1) {
+                String detail = "More than one Node found by getUniqueNode for params: "
+                        + genericQueryBuilder.getStartNodeKeyParams().toString() + "\n";
+                throw new AAIException("AAI_6112", detail);
+            }
 
-			// Now look for a node of includeNodeType within a given depth
-			traversal = traversalSource.withSideEffect("x", ver).V(startNode)
-			.times(depth).repeat(__.both().store("x")).cap("x").unfold();
-			
-			if (!includeNodeTypes.contains("all")) {
-				traversal.where(__.has(AAIProperties.NODE_TYPE, P.within(includeNodeTypes)));
-			}
-			queryResults = traversal.toList();
-			
+            Vertex startNode = results.get(0);
 
-			if( queryResults.isEmpty()){
-				LOGGER.warn("No nodes found - apipe was null/empty");
-			}
-			else {			        		
-				
-				Introspector searchResults = createSearchResults(loader, urlBuilder, queryResults);
+            Collection<Vertex> ver = new HashSet<>();
+            List<Vertex> queryResults = new ArrayList<>();
+            GraphTraversalSource traversalSource =
+                    genericQueryBuilder.getDbEngine().asAdmin().getReadOnlyTraversalSource();
+            GraphTraversal<Vertex, Vertex> traversal;
+            if (genericQueryBuilder.getIncludeNodeTypes().contains(genericQueryBuilder.getStartNodeType())
+                    || genericQueryBuilder.getDepth() == 0 || genericQueryBuilder.getIncludeNodeTypes().contains("all"))
+                ver.add(startNode);
 
-				String outputMediaType = getMediaType(headers.getAcceptableMediaTypes());
-				org.onap.aai.introspection.MarshallerProperties properties = new org.onap.aai.introspection.MarshallerProperties.Builder(
-						org.onap.aai.restcore.MediaType.getEnum(outputMediaType)).build();
+            // Now look for a node of includeNodeType within a given depth
+            traversal = traversalSource.withSideEffect("x", ver).V(startNode).times(genericQueryBuilder.getDepth())
+                    .repeat(__.both().store("x")).cap("x").unfold();
 
-				result = searchResults.marshal(properties);
-				response = Response.ok().entity(result).build();
+            if (!genericQueryBuilder.getIncludeNodeTypes().contains("all")) {
+                traversal.where(__.has(AAIProperties.NODE_TYPE, P.within(genericQueryBuilder.getIncludeNodeTypes())));
+            }
+            queryResults = traversal.toList();
 
-				LOGGER.debug(ver.size() + " node(s) traversed, " + queryResults.size() + " found");
-			}
-			success = true;
-		} catch (AAIException e) { 
-			success = false;
-			throw e;
-		} catch (Exception e) {
-			success = false;
-			throw new AAIException("AAI_5105", e);
-		} finally {
-			if (dbEngine != null) {
-				if (success) {
-					dbEngine.commit();
-				} else {
-					dbEngine.rollback();
-				}
-			}
 
-		}
+            if (queryResults.isEmpty()) {
+                LOGGER.warn("No nodes found - apipe was null/empty");
+            } else {
 
-		return response;	
-	}	
+                Introspector searchResults = createSearchResults(genericQueryBuilder.getLoader(),
+                        genericQueryBuilder.getUrlBuilder(), queryResults);
+
+                String outputMediaType = getMediaType(genericQueryBuilder.getHeaders().getAcceptableMediaTypes());
+                org.onap.aai.introspection.MarshallerProperties properties =
+                        new org.onap.aai.introspection.MarshallerProperties.Builder(
+                                org.onap.aai.restcore.MediaType.getEnum(outputMediaType)).build();
+
+                result = searchResults.marshal(properties);
+                response = Response.ok().entity(result).build();
+
+                LOGGER.debug(ver.size() + " node(s) traversed, " + queryResults.size() + " found");
+            }
+            success = true;
+        } catch (AAIException e) {
+            success = false;
+            throw e;
+        } catch (Exception e) {
+            success = false;
+            throw new AAIException("AAI_5105", e);
+        } finally {
+            if (genericQueryBuilder.getDbEngine() != null) {
+                if (success) {
+                    genericQueryBuilder.getDbEngine().commit();
+                } else {
+                    genericQueryBuilder.getDbEngine().rollback();
+                }
+            }
+
+        }
+
+        return response;
+    }	
 
 	private URI craftUriFromQueryParams(Loader loader, String startNodeType, List<String> startNodeKeyParams) throws UnsupportedEncodingException, IllegalArgumentException, UriBuilderException, AAIException {
 		Introspector relationship = loader.introspectorFromName("relationship");
@@ -274,188 +264,174 @@ public class SearchGraph {
 	/**
 	 * Run nodes query.
 	 *
-	 * @param fromAppId the from app id
-	 * @param transId the trans id
-	 * @param targetNodeType the target node type
-	 * @param edgeFilterParams the edge filter params
-	 * @param filterParams the filter params
-	 * @param aaiExtMap the aai ext map
-	 * @return Response
+	 * @param nodesQuery
 	 * @throws AAIException the AAI exception
 	 */
-	public Response runNodesQuery (
-			HttpHeaders headers,
-			String targetNodeType,
-			List <String> edgeFilterParams,
-			List <String> filterParams,
-			TransactionalGraphEngine dbEngine,
-			Loader loader,
-			UrlBuilder urlBuilder) throws AAIException {
-		
-		Response response = null;
-		boolean success = true;
+    public Response runNodesQuery(NodesQueryBuilder nodesQuery) throws AAIException {
+
+        Response response = null;
+        boolean success = true;
         String result = "";
-		final String EQUALS = "EQUALS";
-		final String DOES_NOT_EQUAL = "DOES-NOT-EQUAL";
-		final String EXISTS = "EXISTS";
-		final String DOES_NOT_EXIST = "DOES-NOT-EXIST";
-		try {
-			
-			dbEngine.startTransaction();
-			
-			Introspector target;
-			
-			if( targetNodeType == null || targetNodeType == "" ){
-				throw new AAIException("AAI_6120", "null or empty target-node-type passed to the node query"); 
-			}
+        final String EQUALS = "EQUALS";
+        final String DOES_NOT_EQUAL = "DOES-NOT-EQUAL";
+        final String EXISTS = "EXISTS";
+        final String DOES_NOT_EXIST = "DOES-NOT-EXIST";
+        try {
 
-			try {
-				target = loader.introspectorFromName(targetNodeType);
-			} catch (AAIUnknownObjectException e) {
-				throw new AAIException("AAI_6115", "Unrecognized nodeType [" + targetNodeType + "] passed to node query."); 
-			}
-			
-			if( filterParams.isEmpty()  && edgeFilterParams.isEmpty()){
-				// For now, it's ok to pass no filter params.  We'll just return ALL the nodes of the requested type.
-				LOGGER.warn("No filters passed to the node query");
-			}
+            nodesQuery.getDbEngine().startTransaction();
 
-			StringBuilder queryStringForMsg = new StringBuilder();  
-			GraphTraversal<Vertex, Vertex> traversal  = dbEngine.asAdmin().getReadOnlyTraversalSource().V().has(AAIProperties.NODE_TYPE, targetNodeType);
-			queryStringForMsg.append("has(\"aai-node-type\"," + targetNodeType + ")");
-			
-			for( String filter : filterParams ) {
-				String [] pieces = filter.split(":");
-				if( pieces.length < 2 ){
-					throw new AAIException("AAI_6120", "bad filter passed to node query: [" + filter + "]"); 
-				}
-				else {
-					String propName = this.findDbPropName(target, pieces[0]);
-					String filterType = pieces[1];
-					if( filterType.equals(EQUALS)){
-						if( pieces.length < 3 ){ 
-							throw new AAIException("AAI_6120", "No value passed for filter: [" + filter + "]"); 
-						}
-						String value = "?";
-						if( pieces.length == 3 ){
-							value = pieces[2];
-						}
-						else if( pieces.length > 3 ){
-							// When a ipv6 address comes in as a value, it has colons in it which require us to 
-							// pull the "value" off the end of the filter differently
-							int startPos4Value = propName.length() + filterType.length() + 3;
-							value = filter.substring(startPos4Value);
-						}
-						queryStringForMsg.append(".has(" + propName + "," + value + ")");
-						traversal.has(propName,value);
-					}
-					else if( filterType.equals(DOES_NOT_EQUAL)){
-						if( pieces.length < 3 ){
-							throw new AAIException("AAI_6120", "No value passed for filter: [" + filter + "]"); 
-						}
-						String value = "?";
-						if( pieces.length == 3 ){
-							value = pieces[2];
-						}
-						else if( pieces.length > 3 ){
-							// When a ipv6 address comes in as a value, it has colons in it which require us to 
-							// pull the "value" off the end of the filter differently
-							int startPos4Value = propName.length() + filterType.length() + 3;
-							value = filter.substring(startPos4Value);
-						}
-						queryStringForMsg.append(".hasNot(" + propName + "," + value + ")");
-						traversal.not(__.has(propName,value));
-					}
-					else if( filterType.equals(EXISTS)){
-						queryStringForMsg.append(".has(" + propName + ")");
-						traversal.has(propName);
-					}
-					else if( filterType.equals(DOES_NOT_EXIST)){
-						queryStringForMsg.append(".hasNot(" + propName + ")");
-						traversal.hasNot(propName);
-					}
-					else {
-						throw new AAIException("AAI_6120", "bad filterType passed: [" + filterType + "]"); 
-					}
-				}
-			}
+            Introspector target;
 
-			if (!edgeFilterParams.isEmpty()) {
-				// edge-filter=pserver:EXISTS: OR pserver:EXISTS:hostname:XXX
-				// edge-filter=pserver:DOES-NOT-EXIST: OR pserver:DOES-NOT-EXIST:hostname:XXX
-				String filter = edgeFilterParams.get(0); // we process and allow only one edge filter for now
-				String [] pieces = filter.split(":");
-				if( pieces.length < 2 || pieces.length == 3 || pieces.length > 4){
-					throw new AAIException("AAI_6120", "bad edge-filter passed: [" + filter + "]"); 
-				} else {
-					String nodeType = pieces[0].toLowerCase();
-					String filterType = pieces[1].toUpperCase();
-					Introspector otherNode;
-					if (!filterType.equals(EXISTS) && !filterType.equals(DOES_NOT_EXIST)) {
-						throw new AAIException("AAI_6120", "bad filterType passed: [" + filterType + "]"); 
-					}
-					try {
-						otherNode = loader.introspectorFromName(nodeType);
-					} catch (AAIUnknownObjectException e) {
-						throw new AAIException("AAI_6115", "Unrecognized nodeType [" + nodeType + "] passed to node query."); 
-					}
-					String propName = null;
-					String propValue = null;
-					if ( pieces.length >= 3) {
-						propName = this.findDbPropName(otherNode, pieces[2].toLowerCase());
-						propValue = pieces[3];
-					}
-					String[] edgeLabels = getEdgeLabel(targetNodeType, nodeType);
-					
-					GraphTraversal<Vertex, Vertex> edgeSearch = __.start();
-					
-					edgeSearch.both(edgeLabels).has(AAIProperties.NODE_TYPE, nodeType);
-					if (propName != null) {
-						// check for matching property
-						if (propValue != null) {
-							edgeSearch.has(propName, propValue);
-						} else {
-							edgeSearch.has(propName);
-						}
-					}
-					
-					if( filterType.equals(DOES_NOT_EXIST)){
-						traversal.where(__.not(edgeSearch));
-					} else if (filterType.equals(EXISTS)) {
-						traversal.where(edgeSearch);
-					}
-				}
-			}
+            if (nodesQuery.getTargetNodeType() == null || nodesQuery.getTargetNodeType() == "") {
+                throw new AAIException("AAI_6120", "null or empty target-node-type passed to the node query");
+            }
 
-			List<Vertex> results = traversal.toList();
-			Introspector searchResults = createSearchResults(loader, urlBuilder, results);
+            try {
+                target = nodesQuery.getLoader().introspectorFromName(nodesQuery.getTargetNodeType());
+            } catch (AAIUnknownObjectException e) {
+                throw new AAIException("AAI_6115",
+                        "Unrecognized nodeType [" + nodesQuery.getTargetNodeType() + "] passed to node query.");
+            }
 
-			String outputMediaType = getMediaType(headers.getAcceptableMediaTypes());
-			org.onap.aai.introspection.MarshallerProperties properties = new org.onap.aai.introspection.MarshallerProperties.Builder(
-					org.onap.aai.restcore.MediaType.getEnum(outputMediaType)).build();
+            if (nodesQuery.getFilterParams().isEmpty() && nodesQuery.getEdgeFilterParams().isEmpty()) {
+                // For now, it's ok to pass no filter params. We'll just return ALL the nodes of the requested type.
+                LOGGER.warn("No filters passed to the node query");
+            }
 
-			result = searchResults.marshal(properties);
-			response = Response.ok().entity(result).build();
+            StringBuilder queryStringForMsg = new StringBuilder();
+            GraphTraversal<Vertex, Vertex> traversal = nodesQuery.getDbEngine().asAdmin().getReadOnlyTraversalSource()
+                    .V().has(AAIProperties.NODE_TYPE, nodesQuery.getTargetNodeType());
+            queryStringForMsg.append("has(\"aai-node-type\"," + nodesQuery.getTargetNodeType() + ")");
 
-			success = true;
-		} catch (AAIException e) { 
-			success = false;
-			throw e;
-		} catch (Exception e) {
-			success = false;
-			throw new AAIException("AAI_5105", e);
-		} finally {
-			if (dbEngine != null) {
-				if (success) {
-					dbEngine.commit();
-				} else {
-					dbEngine.rollback();
-				}
-			}
-		}
+            for (String filter : nodesQuery.getFilterParams()) {
+                String[] pieces = filter.split(":");
+                if (pieces.length < 2) {
+                    throw new AAIException("AAI_6120", "bad filter passed to node query: [" + filter + "]");
+                } else {
+                    String propName = this.findDbPropName(target, pieces[0]);
+                    String filterType = pieces[1];
+                    if (filterType.equals(EQUALS)) {
+                        if (pieces.length < 3) {
+                            throw new AAIException("AAI_6120", "No value passed for filter: [" + filter + "]");
+                        }
+                        String value = "?";
+                        if (pieces.length == 3) {
+                            value = pieces[2];
+                        } else if (pieces.length > 3) {
+                            // When a ipv6 address comes in as a value, it has colons in it which require us to
+                            // pull the "value" off the end of the filter differently
+                            int startPos4Value = propName.length() + filterType.length() + 3;
+                            value = filter.substring(startPos4Value);
+                        }
+                        queryStringForMsg.append(".has(" + propName + "," + value + ")");
+                        traversal.has(propName, value);
+                    } else if (filterType.equals(DOES_NOT_EQUAL)) {
+                        if (pieces.length < 3) {
+                            throw new AAIException("AAI_6120", "No value passed for filter: [" + filter + "]");
+                        }
+                        String value = "?";
+                        if (pieces.length == 3) {
+                            value = pieces[2];
+                        } else if (pieces.length > 3) {
+                            // When a ipv6 address comes in as a value, it has colons in it which require us to
+                            // pull the "value" off the end of the filter differently
+                            int startPos4Value = propName.length() + filterType.length() + 3;
+                            value = filter.substring(startPos4Value);
+                        }
+                        queryStringForMsg.append(".hasNot(" + propName + "," + value + ")");
+                        traversal.not(__.has(propName, value));
+                    } else if (filterType.equals(EXISTS)) {
+                        queryStringForMsg.append(".has(" + propName + ")");
+                        traversal.has(propName);
+                    } else if (filterType.equals(DOES_NOT_EXIST)) {
+                        queryStringForMsg.append(".hasNot(" + propName + ")");
+                        traversal.hasNot(propName);
+                    } else {
+                        throw new AAIException("AAI_6120", "bad filterType passed: [" + filterType + "]");
+                    }
+                }
+            }
 
-		return response;	
-	}
+            if (!nodesQuery.getEdgeFilterParams().isEmpty()) {
+                // edge-filter=pserver:EXISTS: OR pserver:EXISTS:hostname:XXX
+                // edge-filter=pserver:DOES-NOT-EXIST: OR pserver:DOES-NOT-EXIST:hostname:XXX
+                String filter = nodesQuery.getEdgeFilterParams().get(0); // we process and allow only one edge filter
+                                                                         // for now
+                String[] pieces = filter.split(":");
+                if (pieces.length < 2 || pieces.length == 3 || pieces.length > 4) {
+                    throw new AAIException("AAI_6120", "bad edge-filter passed: [" + filter + "]");
+                } else {
+                    String nodeType = pieces[0].toLowerCase();
+                    String filterType = pieces[1].toUpperCase();
+                    Introspector otherNode;
+                    if (!filterType.equals(EXISTS) && !filterType.equals(DOES_NOT_EXIST)) {
+                        throw new AAIException("AAI_6120", "bad filterType passed: [" + filterType + "]");
+                    }
+                    try {
+                        otherNode = nodesQuery.getLoader().introspectorFromName(nodeType);
+                    } catch (AAIUnknownObjectException e) {
+                        throw new AAIException("AAI_6115",
+                                "Unrecognized nodeType [" + nodeType + "] passed to node query.");
+                    }
+                    String propName = null;
+                    String propValue = null;
+                    if (pieces.length >= 3) {
+                        propName = this.findDbPropName(otherNode, pieces[2].toLowerCase());
+                        propValue = pieces[3];
+                    }
+                    String[] edgeLabels = getEdgeLabel(nodesQuery.getTargetNodeType(), nodeType);
+
+                    GraphTraversal<Vertex, Vertex> edgeSearch = __.start();
+
+                    edgeSearch.both(edgeLabels).has(AAIProperties.NODE_TYPE, nodeType);
+                    if (propName != null) {
+                        // check for matching property
+                        if (propValue != null) {
+                            edgeSearch.has(propName, propValue);
+                        } else {
+                            edgeSearch.has(propName);
+                        }
+                    }
+
+                    if (filterType.equals(DOES_NOT_EXIST)) {
+                        traversal.where(__.not(edgeSearch));
+                    } else if (filterType.equals(EXISTS)) {
+                        traversal.where(edgeSearch);
+                    }
+                }
+            }
+
+            List<Vertex> results = traversal.toList();
+            Introspector searchResults =
+                    createSearchResults(nodesQuery.getLoader(), nodesQuery.getUrlBuilder(), results);
+
+            String outputMediaType = getMediaType(nodesQuery.getHeaders().getAcceptableMediaTypes());
+            org.onap.aai.introspection.MarshallerProperties properties =
+                    new org.onap.aai.introspection.MarshallerProperties.Builder(
+                            org.onap.aai.restcore.MediaType.getEnum(outputMediaType)).build();
+
+            result = searchResults.marshal(properties);
+            response = Response.ok().entity(result).build();
+
+            success = true;
+        } catch (AAIException e) {
+            success = false;
+            throw e;
+        } catch (Exception e) {
+            success = false;
+            throw new AAIException("AAI_5105", e);
+        } finally {
+            if (nodesQuery.getDbEngine() != null) {
+                if (success) {
+                    nodesQuery.getDbEngine().commit();
+                } else {
+                    nodesQuery.getDbEngine().rollback();
+                }
+            }
+        }
+
+        return response;
+    }
 
 	protected Introspector createSearchResults(Loader loader, UrlBuilder urlBuilder, List<Vertex> results)
 			throws AAIUnknownObjectException {
