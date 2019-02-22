@@ -87,6 +87,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.jcabi.log.Logger;
+import org.onap.aai.util.RunGenericQueryBuilder;
 
 /**
  * Database Mapping class which acts as the middle man between the REST interface objects 
@@ -122,130 +123,128 @@ public class SearchGraph {
 	 * @return Response
 	 * @throws AAIException the AAI exception
 	 */
-	public Response runGenericQuery (
-			HttpHeaders headers,
-			String startNodeType,
-			List <String> startNodeKeyParams,
-			List <String> includeNodeTypes,
-			final int depth,
-			TransactionalGraphEngine dbEngine,
-			Loader loader,
-			UrlBuilder urlBuilder) throws AAIException {
-		Response response = null;
-		boolean success = true;
-		String result = "";
-		try {			
-			dbEngine.startTransaction();
+    public Response runGenericQuery(RunGenericQueryBuilder genericQueryBuilder) throws AAIException {
+        Response response = null;
+        boolean success = true;
+        String result = "";
+        try {
+            genericQueryBuilder.getDbEngine().startTransaction();
 
-			if( startNodeType == null ){
-				throw new AAIException("AAI_6120", "null start-node-type passed to the generic query"); 
-			}
+            if (genericQueryBuilder.getStartNodeType() == null) {
+                throw new AAIException("AAI_6120", "null start-node-type passed to the generic query");
+            }
 
-			if( startNodeKeyParams == null ){
-				throw new AAIException("AAI_6120", "no key param passed to the generic query"); 
-			}
+            if (genericQueryBuilder.getStartNodeKeyParams() == null) {
+                throw new AAIException("AAI_6120", "no key param passed to the generic query");
+            }
 
-			if( includeNodeTypes == null ){
-				throw new AAIException("AAI_6120", "no include params passed to the generic query"); 
-			}
+            if (genericQueryBuilder.getIncludeNodeTypes() == null) {
+                throw new AAIException("AAI_6120", "no include params passed to the generic query");
+            }
 
-			if (depth > 6) {
-				throw new AAIException("AAI_6120", "The maximum depth supported by the generic query is 6");
-			}
-			final QueryBuilder queryBuilder;
-			
-			// there is an issue with service-instance - it is a unique node but still dependent
-			// for now query it directly without attempting to craft a valid URI	
-			if (startNodeType.equalsIgnoreCase("service-instance") && startNodeKeyParams.size() == 1) {
-				Introspector obj = loader.introspectorFromName(startNodeType);
-				// Build a hash with keys to uniquely identify the start Node
-				String keyName = null;
-				String keyValue = null;
+            if (genericQueryBuilder.getDepth() > 6) {
+                throw new AAIException("AAI_6120", "The maximum depth supported by the generic query is 6");
+            }
+            final QueryBuilder queryBuilder;
 
-				QueryBuilder builder = dbEngine.getQueryBuilder().getVerticesByIndexedProperty(AAIProperties.NODE_TYPE, "service-instance");
-				for( String keyData : startNodeKeyParams ){ 
-					int colonIndex = keyData.indexOf(":");
-					if( colonIndex <= 0 ){
-						throw new AAIException("AAI_6120", "Bad key param passed in: [" + keyData + "]"); 
-					}
-					else {
-						keyName = keyData.substring(0, colonIndex).split("\\.")[1];
-						keyValue = keyData.substring(colonIndex + 1);
-						builder.getVerticesByProperty(keyName, keyValue);
-					}
-				}
-				
-				queryBuilder = builder;
-			} else {
-				URI uri = craftUriFromQueryParams(loader, startNodeType, startNodeKeyParams);
-				queryBuilder = dbEngine.getQueryBuilder().createQueryFromURI(uri).getQueryBuilder();
-			}
-			List<Vertex> results = queryBuilder.toList();
-			if( results.isEmpty()){
-				throw new AAIException("AAI_6114", "No Node of type " + 
-						startNodeType + 
-						" found for properties: " + 
-						startNodeKeyParams.toString()); 
-			} else if (results.size() > 1) {
-				String detail = "More than one Node found by getUniqueNode for params: " + startNodeKeyParams.toString() + "\n";
-				throw new AAIException("AAI_6112", detail); 
-			}
+            // there is an issue with service-instance - it is a unique node but still dependent
+            // for now query it directly without attempting to craft a valid URI
+            if (genericQueryBuilder.getStartNodeType().equalsIgnoreCase("service-instance")
+                    && genericQueryBuilder.getStartNodeKeyParams().size() == 1) {
+                Introspector obj =
+                        genericQueryBuilder.getLoader().introspectorFromName(genericQueryBuilder.getStartNodeType());
+                // Build a hash with keys to uniquely identify the start Node
+                String keyName = null;
+                String keyValue = null;
 
-			Vertex startNode = results.get(0);
+                QueryBuilder builder = genericQueryBuilder.getDbEngine().getQueryBuilder()
+                        .getVerticesByIndexedProperty(AAIProperties.NODE_TYPE, "service-instance");
+                for (String keyData : genericQueryBuilder.getStartNodeKeyParams()) {
+                    int colonIndex = keyData.indexOf(":");
+                    if (colonIndex <= 0) {
+                        throw new AAIException("AAI_6120", "Bad key param passed in: [" + keyData + "]");
+                    } else {
+                        keyName = keyData.substring(0, colonIndex).split("\\.")[1];
+                        keyValue = keyData.substring(colonIndex + 1);
+                        builder.getVerticesByProperty(keyName, keyValue);
+                    }
+                }
 
-			Collection <Vertex> ver = new HashSet <>();
-			List<Vertex> queryResults = new ArrayList<>();
-			GraphTraversalSource traversalSource = dbEngine.asAdmin().getReadOnlyTraversalSource();
-			GraphTraversal<Vertex, Vertex> traversal;
-			if (includeNodeTypes.contains(startNodeType) || depth == 0 || includeNodeTypes.contains("all") )
-				ver.add(startNode);
+                queryBuilder = builder;
+            } else {
+                URI uri = craftUriFromQueryParams(genericQueryBuilder.getLoader(),
+                        genericQueryBuilder.getStartNodeType(), genericQueryBuilder.getStartNodeKeyParams());
+                queryBuilder =
+                        genericQueryBuilder.getDbEngine().getQueryBuilder().createQueryFromURI(uri).getQueryBuilder();
+            }
+            List<Vertex> results = queryBuilder.toList();
+            if (results.isEmpty()) {
+                throw new AAIException("AAI_6114", "No Node of type " + genericQueryBuilder.getStartNodeType()
+                        + " found for properties: " + genericQueryBuilder.getStartNodeKeyParams().toString());
+            } else if (results.size() > 1) {
+                String detail = "More than one Node found by getUniqueNode for params: "
+                        + genericQueryBuilder.getStartNodeKeyParams().toString() + "\n";
+                throw new AAIException("AAI_6112", detail);
+            }
 
-			// Now look for a node of includeNodeType within a given depth
-			traversal = traversalSource.withSideEffect("x", ver).V(startNode)
-			.times(depth).repeat(__.both().store("x")).cap("x").unfold();
-			
-			if (!includeNodeTypes.contains("all")) {
-				traversal.where(__.has(AAIProperties.NODE_TYPE, P.within(includeNodeTypes)));
-			}
-			queryResults = traversal.toList();
-			
+            Vertex startNode = results.get(0);
 
-			if( queryResults.isEmpty()){
-				LOGGER.warn("No nodes found - apipe was null/empty");
-			}
-			else {			        		
-				
-				Introspector searchResults = createSearchResults(loader, urlBuilder, queryResults);
+            Collection<Vertex> ver = new HashSet<>();
+            List<Vertex> queryResults = new ArrayList<>();
+            GraphTraversalSource traversalSource =
+                    genericQueryBuilder.getDbEngine().asAdmin().getReadOnlyTraversalSource();
+            GraphTraversal<Vertex, Vertex> traversal;
+            if (genericQueryBuilder.getIncludeNodeTypes().contains(genericQueryBuilder.getStartNodeType())
+                    || genericQueryBuilder.getDepth() == 0 || genericQueryBuilder.getIncludeNodeTypes().contains("all"))
+                ver.add(startNode);
 
-				String outputMediaType = getMediaType(headers.getAcceptableMediaTypes());
-				org.onap.aai.introspection.MarshallerProperties properties = new org.onap.aai.introspection.MarshallerProperties.Builder(
-						org.onap.aai.restcore.MediaType.getEnum(outputMediaType)).build();
+            // Now look for a node of includeNodeType within a given depth
+            traversal = traversalSource.withSideEffect("x", ver).V(startNode).times(genericQueryBuilder.getDepth())
+                    .repeat(__.both().store("x")).cap("x").unfold();
 
-				result = searchResults.marshal(properties);
-				response = Response.ok().entity(result).build();
+            if (!genericQueryBuilder.getIncludeNodeTypes().contains("all")) {
+                traversal.where(__.has(AAIProperties.NODE_TYPE, P.within(genericQueryBuilder.getIncludeNodeTypes())));
+            }
+            queryResults = traversal.toList();
 
-				LOGGER.debug(ver.size() + " node(s) traversed, " + queryResults.size() + " found");
-			}
-			success = true;
-		} catch (AAIException e) { 
-			success = false;
-			throw e;
-		} catch (Exception e) {
-			success = false;
-			throw new AAIException("AAI_5105", e);
-		} finally {
-			if (dbEngine != null) {
-				if (success) {
-					dbEngine.commit();
-				} else {
-					dbEngine.rollback();
-				}
-			}
 
-		}
+            if (queryResults.isEmpty()) {
+                LOGGER.warn("No nodes found - apipe was null/empty");
+            } else {
 
-		return response;	
-	}	
+                Introspector searchResults = createSearchResults(genericQueryBuilder.getLoader(),
+                        genericQueryBuilder.getUrlBuilder(), queryResults);
+
+                String outputMediaType = getMediaType(genericQueryBuilder.getHeaders().getAcceptableMediaTypes());
+                org.onap.aai.introspection.MarshallerProperties properties =
+                        new org.onap.aai.introspection.MarshallerProperties.Builder(
+                                org.onap.aai.restcore.MediaType.getEnum(outputMediaType)).build();
+
+                result = searchResults.marshal(properties);
+                response = Response.ok().entity(result).build();
+
+                LOGGER.debug(ver.size() + " node(s) traversed, " + queryResults.size() + " found");
+            }
+            success = true;
+        } catch (AAIException e) {
+            success = false;
+            throw e;
+        } catch (Exception e) {
+            success = false;
+            throw new AAIException("AAI_5105", e);
+        } finally {
+            if (genericQueryBuilder.getDbEngine() != null) {
+                if (success) {
+                    genericQueryBuilder.getDbEngine().commit();
+                } else {
+                    genericQueryBuilder.getDbEngine().rollback();
+                }
+            }
+
+        }
+
+        return response;
+    }	
 
 	private URI craftUriFromQueryParams(Loader loader, String startNodeType, List<String> startNodeKeyParams) throws UnsupportedEncodingException, IllegalArgumentException, UriBuilderException, AAIException {
 		Introspector relationship = loader.introspectorFromName("relationship");

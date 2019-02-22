@@ -41,6 +41,7 @@ import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.util.RunGenericQueryBuilder;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -159,7 +160,15 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, "service-instance", keys, includeStrings, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new RunGenericQueryBuilder()
+                        .setHeaders(httpHeaders)
+                        .setStartNodeType("service-instance")
+                        .setStartNodeKeyParams(keys)
+                        .setIncludeNodeTypes(includeStrings)
+                        .setDepth(1)
+                        .setDbEngine(dbEngine)
+                        .setLoader(loader)
+                        .setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
@@ -175,7 +184,15 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, null, keys, includeStrings, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new RunGenericQueryBuilder()
+                .setHeaders(httpHeaders)
+                .setStartNodeType(null)
+                .setStartNodeKeyParams(keys)
+                .setIncludeNodeTypes(includeStrings)
+                .setDepth(1)
+                .setDbEngine(dbEngine)
+                .setLoader(loader)
+                .setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
@@ -190,7 +207,15 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, "", null, includeStrings, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new RunGenericQueryBuilder()
+                .setHeaders(httpHeaders)
+                .setStartNodeType("")
+                .setStartNodeKeyParams(null)
+                .setIncludeNodeTypes(includeStrings)
+                .setDepth(1)
+                .setDbEngine(dbEngine)
+                .setLoader(loader)
+                .setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
@@ -205,7 +230,15 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, "", keys, null, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new RunGenericQueryBuilder()
+                .setHeaders(httpHeaders)
+                .setStartNodeType("")
+                .setStartNodeKeyParams(keys)
+                .setIncludeNodeTypes(null)
+                .setDepth(1)
+                .setDbEngine(dbEngine)
+                .setLoader(loader)
+                .setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
