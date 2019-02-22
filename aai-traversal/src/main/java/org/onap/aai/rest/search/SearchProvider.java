@@ -22,7 +22,6 @@ package org.onap.aai.rest.search;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-
 import org.onap.aai.dbgraphmap.SearchGraph;
 import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
@@ -54,304 +52,262 @@ import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
-import org.onap.aai.util.AAIConstants;
+import org.onap.aai.util.GenericQueryBuilder;
+import org.onap.aai.util.NodesQueryBuilder;
 import org.onap.aai.util.TraversalConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.onap.aai.concurrent.AaiCallable;
-
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * Implements the search subdomain in the REST API. All API calls must include
- * X-FromAppId and X-TransactionId in the header.
+ * Implements the search subdomain in the REST API. All API calls must include X-FromAppId and
+ * X-TransactionId in the header.
  */
 @Path("/{version: v[1-9][0-9]*|latest}/search")
 public class SearchProvider extends RESTAPI {
 
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchProvider.class);
+    private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchProvider.class);
 
-	public static final String GENERIC_QUERY = "/generic-query";
+    public static final String GENERIC_QUERY = "/generic-query";
 
-	public static final String NODES_QUERY = "/nodes-query";
+    public static final String NODES_QUERY = "/nodes-query";
 
-	public static final String TARGET_ENTITY = "DB";
+    public static final String TARGET_ENTITY = "DB";
 
-	private SearchGraph searchGraph;
-	
-	private LoaderFactory loaderFactory;
+    private SearchGraph searchGraph;
 
-	private SchemaVersions schemaVersions;
+    private LoaderFactory loaderFactory;
 
-	private String basePath;
+    private SchemaVersions schemaVersions;
 
-	@Autowired
-	public SearchProvider(
-		LoaderFactory loaderFactory,
-		SearchGraph searchGraph,
-		SchemaVersions schemaVersions,
-		@Value("${schema.uri.base.path}") String basePath
-	){
-		this.loaderFactory  = loaderFactory;
-		this.searchGraph    = searchGraph;
-		this.schemaVersions = schemaVersions;
-		this.basePath       = basePath;
-	}
+    private String basePath;
 
-	/**
-	 * Gets the generic query response.
-	 *
-	 * @param headers the headers
-	 * @param req the req
-	 * @param startNodeType the start node type
-	 * @param startNodeKeyParams the start node key params
-	 * @param includeNodeTypes the include node types
-	 * @param depth the depth
-	 * @return the generic query response
-	 */
-	/* ---------------- Start Generic Query --------------------- */
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Path(GENERIC_QUERY)
-	public Response getGenericQueryResponse(@Context HttpHeaders headers,
-											@Context HttpServletRequest req,
-											@QueryParam("start-node-type") final String startNodeType,
-											@QueryParam("key") final List<String> startNodeKeyParams,
-											@QueryParam("include") final List<String> includeNodeTypes,
-											@QueryParam("depth") final int depth,
-											@PathParam("version")String versionParam,
-											@Context UriInfo info
-	) {
-		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
-				headers,
-				info,
-				HttpMethod.GET,
-				new AaiCallable<Response>() {
-					@Override
-					public Response process() {
-						return processGenericQueryResponse(headers, req, startNodeType, startNodeKeyParams, includeNodeTypes, depth, versionParam);
-					}
-				}
-		);
-	}
+    @Autowired
+    public SearchProvider(LoaderFactory loaderFactory, SearchGraph searchGraph, SchemaVersions schemaVersions,
+            @Value("${schema.uri.base.path}") String basePath) {
+        this.loaderFactory = loaderFactory;
+        this.searchGraph = searchGraph;
+        this.schemaVersions = schemaVersions;
+        this.basePath = basePath;
+    }
 
-	public Response processGenericQueryResponse(@Context HttpHeaders headers,
-												@Context HttpServletRequest req,
-												@QueryParam("start-node-type") final String startNodeType,
-												@QueryParam("key") final List<String> startNodeKeyParams,
-												@QueryParam("include") final List<String> includeNodeTypes,
-												@QueryParam("depth") final int depth,
-												@PathParam("version")String versionParam
-											) {
-		
-		String methodName = "getGenericQueryResponse";
-		AAIException ex = null;
-		Response searchResult = null;
-		String fromAppId = null;
-		String transId = null;
-		String rqstTm = genDate();
-		ArrayList<String> templateVars = new ArrayList<String>();
-		double dbTimeMsecs = 0;
-		try { 
-			LoggingContext.save();
-			LoggingContext.targetEntity(TARGET_ENTITY);
-			LoggingContext.targetServiceName(methodName);
-			
-			fromAppId = getFromAppId(headers);
-			transId = getTransId(headers);
-			String realTime = headers.getRequestHeaders().getFirst("Real-Time");
-			//only consider header value for search		
-			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
+    /**
+     * Gets the generic query response.
+     *
+     * @param headers the headers
+     * @param req the req
+     * @param startNodeType the start node type
+     * @param startNodeKeyParams the start node key params
+     * @param includeNodeTypes the include node types
+     * @param depth the depth
+     * @return the generic query response
+     */
+    /* ---------------- Start Generic Query --------------------- */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Path(GENERIC_QUERY)
+    public Response getGenericQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
+            @QueryParam("start-node-type") final String startNodeType,
+            @QueryParam("key") final List<String> startNodeKeyParams,
+            @QueryParam("include") final List<String> includeNodeTypes, @QueryParam("depth") final int depth,
+            @PathParam("version") String versionParam, @Context UriInfo info) {
+        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED, TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+                TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
+                new AaiCallable<Response>() {
+                    @Override
+                    public Response process() {
+                        return processGenericQueryResponse(headers, req, startNodeType, startNodeKeyParams,
+                                includeNodeTypes, depth, versionParam);
+                    }
+                });
+    }
 
-			final SchemaVersion version = new SchemaVersion(versionParam);
+    public Response processGenericQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
+            @QueryParam("start-node-type") final String startNodeType,
+            @QueryParam("key") final List<String> startNodeKeyParams,
+            @QueryParam("include") final List<String> includeNodeTypes, @QueryParam("depth") final int depth,
+            @PathParam("version") String versionParam) {
 
-			final ModelType factoryType = ModelType.MOXY;
-			Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
-			TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(
-					QueryStyle.TRAVERSAL,
-					type,
-					loader);
-			DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
-			UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
-			LoggingContext.startTime();
-			StopWatch.conditionalStart();
-			searchResult = searchGraph.runGenericQuery(
-													   headers,
-													   startNodeType,
-													   startNodeKeyParams,
-													   includeNodeTypes, 
-													   depth,
-													   dbEngine,
-													   loader,
-													   urlBuilder
-													   
-													   );
-			dbTimeMsecs += StopWatch.stopIfStarted();
-		
-			LoggingContext.successStatusFields();
-			LoggingContext.elapsedTime((long)dbTimeMsecs,TimeUnit.MILLISECONDS);
-			
-			LOGGER.info ("Completed");
-			LoggingContext.restoreIfPossible();
-			LoggingContext.successStatusFields();
-	
-			String respTm = genDate();
+        String methodName = "getGenericQueryResponse";
+        AAIException ex = null;
+        Response searchResult = null;
+        String fromAppId = null;
+        String transId = null;
+        String rqstTm = genDate();
+        ArrayList<String> templateVars = new ArrayList<String>();
+        double dbTimeMsecs = 0;
+        try {
+            LoggingContext.save();
+            LoggingContext.targetEntity(TARGET_ENTITY);
+            LoggingContext.targetServiceName(methodName);
 
-		} catch (AAIException e) { 
-			LoggingContext.restoreIfPossible();
-			// send error response
-			ex = e;
-			templateVars.add("GET Search");
-			templateVars.add("getGenericQueryResponse");
-			searchResult =  Response
-							.status(e.getErrorObject().getHTTPResponseCode())
-							.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-							.build();
-		} catch (Exception e) {
-			LoggingContext.restoreIfPossible();
-			// send error response
-			ex = new AAIException("AAI_4000", e);
-			templateVars.add("GET Search");
-			templateVars.add("getGenericQueryResponse");
-			searchResult = Response
-							.status(Status.INTERNAL_SERVER_ERROR)
-							.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-							.build();
-		} finally {
-			// log success or failure
-			if (ex != null){
-				ErrorLogHelper.logException(ex);
-			}
-		}
+            fromAppId = getFromAppId(headers);
+            transId = getTransId(headers);
+            String realTime = headers.getRequestHeaders().getFirst("Real-Time");
+            // only consider header value for search
+            DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 
-		return searchResult;
-	}
+            final SchemaVersion version = new SchemaVersion(versionParam);
 
-	/* ---------------- End Generic Query --------------------- */
+            final ModelType factoryType = ModelType.MOXY;
+            Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
+            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, type, loader);
+            DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
+            UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
+            LoggingContext.startTime();
+            StopWatch.conditionalStart();
+            searchResult = searchGraph
+                    .runGenericQuery(new GenericQueryBuilder().setHeaders(headers).setStartNodeType(startNodeType)
+                            .setStartNodeKeyParams(startNodeKeyParams).setIncludeNodeTypes(includeNodeTypes)
+                            .setDepth(depth).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+            dbTimeMsecs += StopWatch.stopIfStarted();
 
-	/**
-	 * Gets the nodes query response.
-	 *
-	 * @param headers the headers
-	 * @param req the req
-	 * @param searchNodeType the search node type
-	 * @param edgeFilterList the edge filter list
-	 * @param filterList the filter list
-	 * @return the nodes query response
-	 */
-	/* ---------------- Start Nodes Query --------------------- */
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Path(NODES_QUERY)
-	public Response getNodesQueryResponse(@Context HttpHeaders headers,
-										  @Context HttpServletRequest req,
-										  @QueryParam("search-node-type") final String searchNodeType,
-										  @QueryParam("edge-filter") final List<String> edgeFilterList,
-										  @QueryParam("filter") final List<String> filterList,
-										  @PathParam("version")String versionParam,
-										  @Context UriInfo info)
+            LoggingContext.successStatusFields();
+            LoggingContext.elapsedTime((long) dbTimeMsecs, TimeUnit.MILLISECONDS);
 
-	{
-		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
-				headers,
-				info,
-				HttpMethod.GET,
-				new AaiCallable<Response>() {
-					@Override
-					public Response process() {
-						return processNodesQueryResponse(headers, req, searchNodeType, edgeFilterList, filterList, versionParam);
-					}
-				}
-		);
-	}
-	public Response processNodesQueryResponse(@Context HttpHeaders headers,
-											  @Context HttpServletRequest req,
-											  @QueryParam("search-node-type") final String searchNodeType,
-											  @QueryParam("edge-filter") final List<String> edgeFilterList,
-											  @QueryParam("filter") final List<String> filterList,
-											  @PathParam("version")String versionParam) {
-		String methodName = "getNodesQueryResponse";
-		AAIException ex = null;
-		Response searchResult = null;
-		String fromAppId = null;
-		String transId = null;
-		String rqstTm = genDate();
-		ArrayList<String> templateVars = new ArrayList<String>();	
-		double dbTimeMsecs = 0;
-		try { 
-			LoggingContext.save();
-			LoggingContext.targetEntity(TARGET_ENTITY);
-			LoggingContext.targetServiceName(methodName);
-			
-			fromAppId = getFromAppId(headers);
-			transId = getTransId(headers);
-			String realTime = headers.getRequestHeaders().getFirst("Real-Time");
-			//only consider header value for search		
-			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
-			
-			final SchemaVersion version = new SchemaVersion(versionParam);
+            LOGGER.info("Completed");
+            LoggingContext.restoreIfPossible();
+            LoggingContext.successStatusFields();
 
-			final ModelType factoryType = ModelType.MOXY;
-			Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
-			TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(
-					QueryStyle.TRAVERSAL,
-					type,
-					loader);
-			DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
-			UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
-			
-			LoggingContext.startTime();
-			StopWatch.conditionalStart();
-			searchResult = searchGraph.runNodesQuery(headers,
-													searchNodeType,
-													edgeFilterList, 
-													filterList,
-													dbEngine,
-													loader,
-													urlBuilder);
-			dbTimeMsecs += StopWatch.stopIfStarted();
-			LoggingContext.elapsedTime((long)dbTimeMsecs,TimeUnit.MILLISECONDS);
-			LoggingContext.successStatusFields();
-			LOGGER.info ("Completed");
-			
-			LoggingContext.restoreIfPossible();
-			LoggingContext.successStatusFields();
-	
-			String respTm = genDate();
-		} catch (AAIException e) {
-			LoggingContext.restoreIfPossible();
-			// send error response
-			ex = e;
-			templateVars.add("GET Search");
-			templateVars.add("getNodesQueryResponse");
-			searchResult =  Response
-							.status(e.getErrorObject().getHTTPResponseCode())
-							.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-							.build();
-		} catch (Exception e) {
-			LoggingContext.restoreIfPossible();
-			// send error response
-			ex = new AAIException("AAI_4000", e);
-			templateVars.add("GET Search");
-			templateVars.add("getNodesQueryResponse");
-			searchResult = Response
-							.status(Status.INTERNAL_SERVER_ERROR)
-							.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-							.build();
-		} finally {
-			// log success or failure
-			if (ex != null){
-				ErrorLogHelper.logException(ex);
-			}
-		}
-		return searchResult;
-	}
+            String respTm = genDate();
+
+        } catch (AAIException e) {
+            LoggingContext.restoreIfPossible();
+            // send error response
+            ex = e;
+            templateVars.add("GET Search");
+            templateVars.add("getGenericQueryResponse");
+            searchResult = Response.status(e.getErrorObject().getHTTPResponseCode())
+                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
+                    .build();
+        } catch (Exception e) {
+            LoggingContext.restoreIfPossible();
+            // send error response
+            ex = new AAIException("AAI_4000", e);
+            templateVars.add("GET Search");
+            templateVars.add("getGenericQueryResponse");
+            searchResult = Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
+                    .build();
+        } finally {
+            // log success or failure
+            if (ex != null) {
+                ErrorLogHelper.logException(ex);
+            }
+        }
+
+        return searchResult;
+    }
+
+    /* ---------------- End Generic Query --------------------- */
+
+    /**
+     * Gets the nodes query response.
+     *
+     * @param headers the headers
+     * @param req the req
+     * @param searchNodeType the search node type
+     * @param edgeFilterList the edge filter list
+     * @param filterList the filter list
+     * @return the nodes query response
+     */
+    /* ---------------- Start Nodes Query --------------------- */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Path(NODES_QUERY)
+    public Response getNodesQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
+            @QueryParam("search-node-type") final String searchNodeType,
+            @QueryParam("edge-filter") final List<String> edgeFilterList,
+            @QueryParam("filter") final List<String> filterList, @PathParam("version") String versionParam,
+            @Context UriInfo info)
+
+    {
+        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED, TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+                TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
+                new AaiCallable<Response>() {
+                    @Override
+                    public Response process() {
+                        return processNodesQueryResponse(headers, req, searchNodeType, edgeFilterList, filterList,
+                                versionParam);
+                    }
+                });
+    }
+
+    public Response processNodesQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
+            @QueryParam("search-node-type") final String searchNodeType,
+            @QueryParam("edge-filter") final List<String> edgeFilterList,
+            @QueryParam("filter") final List<String> filterList, @PathParam("version") String versionParam) {
+        String methodName = "getNodesQueryResponse";
+        AAIException ex = null;
+        Response searchResult = null;
+        String fromAppId = null;
+        String transId = null;
+        String rqstTm = genDate();
+        ArrayList<String> templateVars = new ArrayList<String>();
+        double dbTimeMsecs = 0;
+        try {
+            LoggingContext.save();
+            LoggingContext.targetEntity(TARGET_ENTITY);
+            LoggingContext.targetServiceName(methodName);
+
+            fromAppId = getFromAppId(headers);
+            transId = getTransId(headers);
+            String realTime = headers.getRequestHeaders().getFirst("Real-Time");
+            // only consider header value for search
+            DBConnectionType type = this.determineConnectionType("force-cache", realTime);
+
+            final SchemaVersion version = new SchemaVersion(versionParam);
+
+            final ModelType factoryType = ModelType.MOXY;
+            Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
+            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, type, loader);
+            DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
+            UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
+
+            LoggingContext.startTime();
+            StopWatch.conditionalStart();
+            searchResult = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(headers)
+                    .setTargetNodeType(searchNodeType).setEdgeFilterParams(edgeFilterList).setFilterParams(filterList)
+                    .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+
+            dbTimeMsecs += StopWatch.stopIfStarted();
+            LoggingContext.elapsedTime((long) dbTimeMsecs, TimeUnit.MILLISECONDS);
+            LoggingContext.successStatusFields();
+            LOGGER.info("Completed");
+
+            LoggingContext.restoreIfPossible();
+            LoggingContext.successStatusFields();
+
+            String respTm = genDate();
+        } catch (AAIException e) {
+            LoggingContext.restoreIfPossible();
+            // send error response
+            ex = e;
+            templateVars.add("GET Search");
+            templateVars.add("getNodesQueryResponse");
+            searchResult = Response.status(e.getErrorObject().getHTTPResponseCode())
+                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
+                    .build();
+        } catch (Exception e) {
+            LoggingContext.restoreIfPossible();
+            // send error response
+            ex = new AAIException("AAI_4000", e);
+            templateVars.add("GET Search");
+            templateVars.add("getNodesQueryResponse");
+            searchResult = Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
+                    .build();
+        } finally {
+            // log success or failure
+            if (ex != null) {
+                ErrorLogHelper.logException(ex);
+            }
+        }
+        return searchResult;
+    }
 
 
-	
+
 }
