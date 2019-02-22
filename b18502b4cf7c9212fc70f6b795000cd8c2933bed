@@ -22,6 +22,23 @@
       "revId": "b18502b4cf7c9212fc70f6b795000cd8c2933bed",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df55276b_a6fc78a0",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/RunGenericQueryBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2019-02-22T19:43:21Z",
+      "side": 1,
+      "message": "Can you rename this class GenericQueryBuilder instead of RunGenericQueryBuilder?",
+      "revId": "b18502b4cf7c9212fc70f6b795000cd8c2933bed",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
