@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02c134a4_0dc63fec",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-02-22T07:46:01Z",
+      "side": 1,
+      "message": "the runNodesQuery seems similar to the runGenericQuery.\nthe sonar metric should be approx the same.\nwhile changes are being done in this area, perhaps it should also be included in this commit.",
+      "range": {
+        "startLine": 285,
+        "startChar": 1,
+        "endLine": 292,
+        "endChar": 47
+      },
+      "revId": "b18502b4cf7c9212fc70f6b795000cd8c2933bed",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
