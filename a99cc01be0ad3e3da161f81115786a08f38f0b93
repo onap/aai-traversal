@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e0938bd_d3224166",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 2381
+      },
+      "writtenOn": "2019-02-25T14:51:13Z",
+      "side": 1,
+      "message": "if possible remove extra space at end of line",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "113b1d6b_7ebc1e37",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 2381
+      },
+      "writtenOn": "2019-02-25T14:51:13Z",
+      "side": 1,
+      "message": "String.format method could be more readable than string concatenation",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dff242a1_9f8d6019",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 2381
+      },
+      "writtenOn": "2019-02-25T14:51:13Z",
+      "side": 1,
+      "message": "isBlank method from StringUtils (apache) could be more readable",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c96575e_de48d62e",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/GenericQueryBuilder.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 2381
+      },
+      "writtenOn": "2019-02-25T14:51:13Z",
+      "side": 1,
+      "message": "Javadoc what the class represents would be useful",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e310ca8a_df62d76b",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/GenericQueryBuilder.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 2381
+      },
+      "writtenOn": "2019-02-25T14:51:13Z",
+      "side": 1,
+      "message": "some fields are private some are not but there are getters for all fields",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb0d4edd_9117cb1a",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/NodesQueryBuilder.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 2381
+      },
+      "writtenOn": "2019-02-25T14:51:13Z",
+      "side": 1,
+      "message": "Javadoc what the class represents would be useful",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
