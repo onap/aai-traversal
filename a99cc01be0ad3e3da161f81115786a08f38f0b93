@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "959d0311_330b8330",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 2571
+      },
+      "writtenOn": "2019-02-26T06:15:19Z",
+      "side": 1,
+      "message": "Will format using google code formatter",
+      "parentUuid": "0e0938bd_d3224166",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "113b1d6b_7ebc1e37",
         "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2019-02-25T14:51:13Z",
       "side": 1,
       "message": "String.format method could be more readable than string concatenation",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a92b001_23001137",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 2571
+      },
+      "writtenOn": "2019-02-26T06:15:19Z",
+      "side": 1,
+      "message": "Comment incorporated",
+      "parentUuid": "113b1d6b_7ebc1e37",
       "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "b6fdd56c_da320b52",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/dbgraphmap/SearchGraph.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 2571
+      },
+      "writtenOn": "2019-02-26T06:15:19Z",
+      "side": 1,
+      "message": "Comment incorporated",
+      "parentUuid": "dff242a1_9f8d6019",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c96575e_de48d62e",
         "filename": "aai-traversal/src/main/java/org/onap/aai/util/GenericQueryBuilder.java",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2019-02-25T14:51:13Z",
       "side": 1,
       "message": "Javadoc what the class represents would be useful",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2fb4c6e_42ad856f",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/GenericQueryBuilder.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 2571
+      },
+      "writtenOn": "2019-02-26T06:15:19Z",
+      "side": 1,
+      "message": "Added javadoc",
+      "parentUuid": "1c96575e_de48d62e",
       "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "b8074d63_746dd6c6",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/GenericQueryBuilder.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 2571
+      },
+      "writtenOn": "2019-02-26T06:15:19Z",
+      "side": 1,
+      "message": "Made changes.",
+      "parentUuid": "e310ca8a_df62d76b",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb0d4edd_9117cb1a",
         "filename": "aai-traversal/src/main/java/org/onap/aai/util/NodesQueryBuilder.java",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2019-02-25T14:51:13Z",
       "side": 1,
       "message": "Javadoc what the class represents would be useful",
+      "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91b6a8a_f39236f4",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/util/NodesQueryBuilder.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 2571
+      },
+      "writtenOn": "2019-02-26T06:15:19Z",
+      "side": 1,
+      "message": "Added javadoc",
+      "parentUuid": "bb0d4edd_9117cb1a",
       "revId": "a99cc01be0ad3e3da161f81115786a08f38f0b93",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
