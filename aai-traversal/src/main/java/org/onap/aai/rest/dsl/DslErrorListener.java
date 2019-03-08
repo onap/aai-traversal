@@ -2,7 +2,7 @@
  * ============LICENSE_START=======================================================
  * org.onap.aai
  * ================================================================================
- * Copyright © 2019 IBM.
+ * Copyright © 2017-2019 AT&T Intellectual Property. All rights reserved.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,20 @@
  * ============LICENSE_END=========================================================
  */
 
-package org.onap.aai.rest.dsl; 
+package org.onap.aai.rest.dsl;
 
-import static org.junit.Assert.assertNull;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
-import org.junit.Before;
-import org.junit.Test;
+public class DslErrorListener extends BaseErrorListener {
 
-public class DslContextTest {
-    DslContext dslContext;
+	public static final DslErrorListener INSTANCE = new DslErrorListener();
 
-    @Before
-    public void setUp()
-    {
-        dslContext= new DslContext();
-    }
-    
-    @Test
-    public void testUnionStartNodes()
-    {
-        dslContext.setUnionStartNodes(null);
-        assertNull(dslContext.getUnionStartNodes());
-    }
+	@Override
+	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
+			throws ParseCancellationException {
+		throw new ParseCancellationException("line " + line + ":" + charPositionInLine + " " + msg );
+	}
 }

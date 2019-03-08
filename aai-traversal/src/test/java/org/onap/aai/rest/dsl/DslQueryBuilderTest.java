@@ -38,7 +38,7 @@ public class DslQueryBuilderTest {
     public void setUp()
     {
         EdgeIngestor edgeIngestor= new EdgeIngestor(new HashSet<>());
-        dslQueryBuilder= new DslQueryBuilder(edgeIngestor, null);
+        dslQueryBuilder= new DslQueryBuilder(edgeIngestor);
     }
     
     @Test
@@ -47,13 +47,5 @@ public class DslQueryBuilderTest {
         StringBuilder query= new StringBuilder();
         dslQueryBuilder.setQuery(query);
         assertSame(query, dslQueryBuilder.getQuery());
-    }
-    
-    @Test
-    public void testQueryException()
-    {
-        StringBuilder queryException= new StringBuilder();
-        dslQueryBuilder.setQueryException(queryException);
-        assertSame(queryException, dslQueryBuilder.getQueryException());
     }
 }

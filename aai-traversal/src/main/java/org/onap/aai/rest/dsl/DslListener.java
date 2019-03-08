@@ -19,30 +19,24 @@
  */
 package org.onap.aai.rest.dsl;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
+import org.onap.aai.AAIDslBaseListener;
 import org.onap.aai.AAIDslParser;
-import org.onap.aai.config.SpringContextAware;
-import org.onap.aai.edges.EdgeRuleQuery;
-import org.onap.aai.edges.enums.EdgeType;
+import org.onap.aai.AAIDslParser.UnionQueryContext;
+import org.onap.aai.AAIDslParser.WhereContext;
+import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.logging.LogFormatTools;
-import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.onap.aai.AAIDslBaseListener;
-import org.onap.aai.edges.EdgeIngestor;
+
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 
@@ -53,201 +47,170 @@ public class DslListener extends AAIDslBaseListener {
 
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(DslQueryProcessor.class);
 
-	private final EdgeIngestor edgeRules;
+	private DslQueryBuilder dslBuilder = null;
+	
+	private Deque<String> traversedNodeNames = new ArrayDeque<>();
 
-	DslContext context = null;
-	DslQueryBuilder dslBuilder = null;
-
+	private boolean validate = false;
+	
+	private final Loader loader;
+	
+	private boolean hasReturnValue = false;
+	
 	/**
 	 * Instantiates a new DslListener.
 	 */
 	@Autowired
 	public DslListener(EdgeIngestor edgeIngestor, SchemaVersions schemaVersions, LoaderFactory loaderFactory) {
-		this.edgeRules = edgeIngestor;
-		context = new DslContext();
 
-		Loader loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getDefaultVersion());
-		dslBuilder = new DslQueryBuilder(edgeIngestor, loader);
+		loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getDefaultVersion());
+		dslBuilder = new DslQueryBuilder(edgeIngestor);
 	}
 
 	public String getQuery() throws AAIException {
-		if (!getException().isEmpty()) {
-			LOGGER.error("Exception in the DSL Query" + getException());
-			throw new AAIException("AAI_6149", getException());
-		}
 		return dslBuilder.getQuery().toString();
-	}
-
-	public String getException() {
-		return dslBuilder.getQueryException().toString();
 	}
 
 	@Override
 	public void enterAaiquery(AAIDslParser.AaiqueryContext ctx) {
-		/*
-		 * This is my start-node, have some validations here
-		 */
-		context.setStartNodeFlag(true);
+
 		dslBuilder.start();
 	}
 
 	@Override
 	public void exitAaiquery(AAIDslParser.AaiqueryContext ctx) {
-		dslBuilder.end(context);
+		if (!hasReturnValue) {
+			throw new RuntimeException(new AAIException("AAI_6149", "No nodes marked for output"));
+		}
+	}
+	
+	@Override
+	public void enterStartStatement(AAIDslParser.StartStatementContext ctx) {
+
+	}
+	
+	public void validateFilter(String nodeName, List<String> propKeys) throws AAIException {
+		Introspector obj = loader.introspectorFromName(nodeName);
+		if(propKeys.isEmpty()){
+			throw new AAIException("AAI_6149", "No keys sent. Valid keys for " + nodeName + " are "
+					+ String.join(",", obj.getIndexedProperties()));
+		}
+		boolean notIndexed = propKeys.stream()
+				.filter((prop) -> obj.getIndexedProperties().contains(removeSingleQuotes(prop))).collect(Collectors.toList()).isEmpty();
+		if (notIndexed)
+			throw new AAIException("AAI_6149", "Non indexed keys sent. Valid keys for " + nodeName+ " "
+					+ String.join(",", obj.getIndexedProperties()));
+
+	}
+	
+	protected String removeSingleQuotes(String value) {
+		return value.replaceFirst("^'(.*)'$", "$1");
+	}
+	
+	@Override
+	public void exitStartStatement(AAIDslParser.StartStatementContext ctx) {
+		
+		dslBuilder.end();
 	}
 
 	@Override
 	public void enterDslStatement(AAIDslParser.DslStatementContext ctx) {
-		if (context.isUnionStart()) {
-			dslBuilder.startUnion();
+		if (ctx.getParent() instanceof UnionQueryContext || ctx.getParent() instanceof WhereContext) {
+			dslBuilder.identity();
 		}
 	}
-
+	
 	@Override
 	public void exitDslStatement(AAIDslParser.DslStatementContext ctx) {
-		if (context.isUnionQuery()) {
-			dslBuilder.comma(context);
-			context.setUnionStart(true);
+		if (ctx.getParent() instanceof UnionQueryContext && ((UnionQueryContext)ctx.getParent()).dslStatement().size() > 1) {
+			
+			dslBuilder.comma();
 		}
 	}
 
 	@Override
-	public void enterSingleNodeStep(AAIDslParser.SingleNodeStepContext ctx) {
+	public void enterNodeStep(AAIDslParser.NodeStepContext ctx) {
 		try {
-			/*
-			 * Set the previous Node to current node and get the new current
-			 * node
-			 */
-			context.setPreviousNode(context.getCurrentNode());
-			context.setCurrentNode(ctx.NODE().getText());
 
-			if (context.isUnionQuery() || context.isTraversal() || context.isWhereQuery()) {
-				String oldPreviousNode = context.getPreviousNode();
-
-				if (context.isUnionStart()) {
-					String previousNode = context.getUnionStartNodes().peek();
-					context.setPreviousNode(previousNode);
-
-					context.setUnionStart(false);
+			if (!traversedNodeNames.isEmpty()) {
+				dslBuilder.edgeQuery(traversedNodeNames.peekFirst(), ctx.node().getText());
+			} else {
+				if (validate) {
+					String nodeName = ctx.node().getText();
+					List<String> propKeys = ctx.storableStep().propertyFilter().stream().map(item -> item.key().getText()).collect(Collectors.toList());
+					validateFilter(nodeName, propKeys);
 				}
-
-				dslBuilder.edgeQuery(context);
-
-				/*
-				 * Reset is required bcos for union queries im changing the
-				 * context
-				 */
-				context.setPreviousNode(oldPreviousNode);
-
+				dslBuilder.nodeQuery(ctx.node().getText());
 			}
-
-			else {
-				dslBuilder.nodeQuery(context);
-			}
-
 		} catch (AAIException e) {
-			LOGGER.info("AAIException in DslListener" + e.getMessage());
+			LOGGER.info("AAIException in DslListener " + e.getMessage());
+			throw new RuntimeException(e);
 		}
-
+		traversedNodeNames.addFirst(ctx.node().getText());
 	}
-
+	
 	@Override
-	public void exitSingleNodeStep(AAIDslParser.SingleNodeStepContext ctx) {
-		if (context.isStartNode() && isValidationFlag()) {
-			try {
-				dslBuilder.validateFilter(context);
-			} catch (AAIException e) {
-				LOGGER.error("AAIException in DslListener" + LogFormatTools.getStackTop(e));
-			}
+	public void exitNodeStep(AAIDslParser.NodeStepContext ctx) {
+		traversedNodeNames.removeFirst();
+	}
+	
+	@Override
+	public void enterPropertyFilter(AAIDslParser.PropertyFilterContext ctx) {
+		final String key = ctx.key().getText();
+		List<String> values = ctx.value().stream().map(item -> item.getText()).collect(Collectors.toList());
+		dslBuilder.filterPropertyStart(ctx.not() != null);
+		dslBuilder.filterPropertyKeys(key, values);
+	}
+	
+	@Override
+	public void exitPropertyFilter(AAIDslParser.PropertyFilterContext ctx) {
+		dslBuilder.filterPropertyEnd();
+	}
+	
+	@Override
+	public void enterStorableStep(AAIDslParser.StorableStepContext ctx) {
+	}
+	
+	@Override
+	public void exitStorableStep(AAIDslParser.StorableStepContext ctx) {
+		if (ctx.store() != null) {
+			dslBuilder.store();
+			hasReturnValue = true;
 		}
-		context.setStartNodeFlag(false);
-		context.setCtx(ctx);
-		dslBuilder.store(context);
-	}
-
-	private void generateExitStep() {
-
 	}
 
 	@Override
-	public void enterUnionQueryStep(AAIDslParser.UnionQueryStepContext ctx) {
-
-		Deque<String> unionStartNodes = context.getUnionStartNodes();
-		unionStartNodes.add(context.getCurrentNode());
-
-		context.setUnionStart(true);
-		/*
-		 * I may not need this
-		 */
-		context.setUnionQuery(true);
-		dslBuilder.union(context);
-
+	public void enterUnionQuery(AAIDslParser.UnionQueryContext ctx) {
+		
+		dslBuilder.union();
 	}
 
 	@Override
-	public void exitUnionQueryStep(AAIDslParser.UnionQueryStepContext ctx) {
-		context.setUnionStart(false);
-		context.setUnionQuery(false);
-		Deque<String> unionStartNodes = context.getUnionStartNodes();
-		if (unionStartNodes.peek() != null) {
-			unionStartNodes.pop();
-		}
-
-		dslBuilder.endUnion(context);
-
+	public void exitUnionQuery(AAIDslParser.UnionQueryContext ctx) {
+		
+		dslBuilder.endUnion();
 	}
 
 	@Override
-	public void enterFilterTraverseStep(AAIDslParser.FilterTraverseStepContext ctx) {
-		context.setWhereQuery(true);
-		context.setWhereStartNode(context.getCurrentNode());
-		dslBuilder.where(context);
-
+	public void enterWhere(AAIDslParser.WhereContext ctx) {
+		
+		dslBuilder.where();
 	}
 
 	@Override
-	public void exitFilterTraverseStep(AAIDslParser.FilterTraverseStepContext ctx) {
-		context.setWhereQuery(false);
-		context.setCurrentNode(context.getWhereStartNode());
+	public void exitWhere(AAIDslParser.WhereContext ctx) {
 
-		dslBuilder.endWhere(context);
-
+		dslBuilder.endWhere();
+		
 	}
-
+	
 	@Override
-	public void enterFilterStep(AAIDslParser.FilterStepContext ctx) {
-
-		context.setCtx(ctx);
-		dslBuilder.filter(context);
-	}
-
-	@Override
-	public void exitFilterStep(AAIDslParser.FilterStepContext ctx) {
-		// For now do nothing
-	}
-
-	@Override
-	public void enterTraverseStep(AAIDslParser.TraverseStepContext ctx) {
-		context.setTraversal(true);
-	}
-
-	@Override
-	public void exitTraverseStep(AAIDslParser.TraverseStepContext ctx) {
-		context.setTraversal(false);
-	}
-
-	@Override
-	public void enterLimitStep(AAIDslParser.LimitStepContext ctx) {
-		context.setCtx(ctx);
-		dslBuilder.limit(context);
+	public void exitLimitStep(AAIDslParser.LimitStepContext ctx) {
+		
+		dslBuilder.limit(ctx.numericValue().getText());
 	}
 	
 	public void setValidationFlag(boolean validationFlag) {
-		this.context.setValidationFlag(validationFlag);
+		this.validate = validationFlag;
 	}
-	
-	public boolean isValidationFlag() {
-		return this.context.isValidationFlag();
-	}
-
 }

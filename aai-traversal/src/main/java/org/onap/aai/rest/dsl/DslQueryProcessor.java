@@ -61,12 +61,13 @@ public class DslQueryProcessor {
 			// Create a lexer from the input CharStream
 			AAIDslLexer lexer = new AAIDslLexer(CharStreams.fromStream(stream, StandardCharsets.UTF_8));
 
+			lexer.addErrorListener(DslErrorListener.INSTANCE);
 			// Get a list of tokens pulled from the lexer
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
 			// Parser that feeds off of the tokens buffer
 			AAIDslParser parser = new AAIDslParser(tokens);
-
+			parser.addErrorListener(DslErrorListener.INSTANCE);
 			dslListener.setValidationFlag(isValidationFlag());
 			// Specify our entry point
 			ParseTree ptree = parser.aaiquery();
@@ -75,6 +76,7 @@ public class DslQueryProcessor {
 			// Walk it and attach our listener
 			ParseTreeWalker walker = new ParseTreeWalker();
 			walker.walk(dslListener, ptree);
+
 			LOGGER.info("Final QUERY" + dslListener.getQuery());
 
 			/*
@@ -83,9 +85,8 @@ public class DslQueryProcessor {
 			 * 
 			 */
 			return dslListener.getQuery();
-		} catch (AAIException e) {
-			throw new AAIException("AAI_6149", "Error while processing the query :" + e.getMessage());
 		} catch (Exception e) {
+			LOGGER.error("Error while processing the query", e);
 			throw new AAIException("AAI_6149","Error while processing the query :" + e.getMessage());
 		}
 	}
