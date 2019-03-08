@@ -22,6 +22,30 @@
       "revId": "151c5d9016e23234bed3d25e32138b9c9d71073a",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7db67ee0_10d01154",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/DslConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-08T14:42:14Z",
+      "side": 1,
+      "message": "I was confused here because the text said \"expects 400\" but then the test was looking for a 500. I\u0027ll look again about where that 500 was coming from in the code. I couldn\u0027t find it before. The exceptions thrown by the DSL section all see to resolve to 404 on the HTTP side.\n\nI removed the exception I threw and this is what is in the log,\n\n Reloading config from ./\\src/main/resources/\\etc\\appprops\\aaiconfig.properties\n A\u0026AI Server Node Name \u003d aai.config.nodename\n QUERY-interim(aaiquery (dslStatement (singleNodeStep (node xserver))))\n AAIException in DslListener Unrecognized AAI object xserver\n Final QUERYbuilder.cap(\u0027x\u0027).unfold().dedup()\n Converted to gremlin query\n g.V().cap(\u0027x\u0027).unfold().dedup()\n Query requires iterating over all vertices [()]. For better performance, use indexes\nMethodName- next\nMethodName- next\n 500\n\n\nI modified the DslListener to exit when there was an exception  which prevents this full graph traversal. That\u0027s why this test was changed.",
+      "parentUuid": "f958db17_7ab68518",
+      "range": {
+        "startLine": 110,
+        "startChar": 2,
+        "endLine": 110,
+        "endChar": 70
+      },
+      "revId": "151c5d9016e23234bed3d25e32138b9c9d71073a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
