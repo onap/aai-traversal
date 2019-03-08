@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f958db17_7ab68518",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/DslConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-03-08T07:11:07Z",
+      "side": 1,
+      "message": "shouldn\u0027t there still be a test for invalid characters which triggers INTERNAL_SERVER_ERROR?",
+      "range": {
+        "startLine": 110,
+        "startChar": 2,
+        "endLine": 110,
+        "endChar": 70
+      },
+      "revId": "151c5d9016e23234bed3d25e32138b9c9d71073a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
