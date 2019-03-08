@@ -107,7 +107,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
 		httpEntity = new HttpEntity(payload, headers);
 		responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-		assertEquals("Expected the response to be 400", HttpStatus.INTERNAL_SERVER_ERROR,
+		assertEquals("Expected the response to be 404", HttpStatus.NOT_FOUND,
 				responseEntity.getStatusCode());
 	}
 	
