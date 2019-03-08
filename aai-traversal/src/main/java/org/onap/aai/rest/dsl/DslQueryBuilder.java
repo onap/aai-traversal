@@ -19,25 +19,21 @@
  */
 package org.onap.aai.rest.dsl;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.onap.aai.AAIDslBaseListener;
 import org.onap.aai.AAIDslParser;
+import org.onap.aai.AAIDslParser.FilterStepContext;
+import org.onap.aai.AAIDslParser.NodeContext;
+import org.onap.aai.AAIDslParser.SingleNodeStepContext;
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.edges.EdgeRuleQuery;
 import org.onap.aai.edges.enums.EdgeType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
-import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
 
-import com.jcabi.log.Logger;
+import com.google.common.base.Joiner;
 
 public class DslQueryBuilder {
 
@@ -45,6 +41,9 @@ public class DslQueryBuilder {
 	private StringBuilder queryException;
 	private final EdgeIngestor edgeRules;
 	private final Loader loader;
+	private boolean started = false;
+	private boolean isEnded = false;
+	private boolean validationFlag;
 
 	public DslQueryBuilder(EdgeIngestor edgeIngestor, Loader loader) {
 		this.edgeRules = edgeIngestor;
@@ -53,6 +52,9 @@ public class DslQueryBuilder {
 		queryException = new StringBuilder();
 	}
 
+	public boolean isEmpty() {
+		return query.length() == 0;
+	}
 	public StringBuilder getQuery() {
 		return query;
 	}
@@ -74,29 +76,55 @@ public class DslQueryBuilder {
 		return this;
 	}
 
+	public DslQueryBuilder identity() {
+		query.append("builder.newInstance()");
+		return this;
+	}
+	
 	public DslQueryBuilder startUnion() {
 		query.append("builder.newInstance()");
 		return this;
 	}
 
-	public DslQueryBuilder end(DslContext context) {
-		query.append(".cap('x').unfold().dedup()").append(context.getLimitQuery());
+	public DslQueryBuilder end() {
+		if (!isEnded) {
+			query.append(".cap('x').unfold().dedup()");
+			isEnded = true;
+		}
 		return this;
 	}
 
-	public DslQueryBuilder nodeQuery(DslContext context) {
-		query.append(".getVerticesByProperty('aai-node-type', '").append(context.getCurrentNode()).append("')");
-		if(context.isStartNode() && context.getStartNode().isEmpty())
-			context.setStartNode(context.getCurrentNode());
+	public DslQueryBuilder createNode(AAIDslParser.SingleNodeStepContext ctx) throws AAIException {
+		
+		NodeContext nodeContext = ctx.node();
+		List<FilterStepContext> filterStepContexts = ctx.filterStep();
+		
+		if (!started) {
+			if (validationFlag) {
+				validateFilter(ctx);
+			}
+			this.nodeQuery(nodeContext);
+			started = true;
+		}
+		
+
+		for (FilterStepContext filter : filterStepContexts) {
+			this.filter(filter);
+		}
 		return this;
 	}
 
-	public DslQueryBuilder edgeQuery(DslContext context) throws AAIException {
-		EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(context.getPreviousNode(), context.getCurrentNode());
+	public DslQueryBuilder nodeQuery(NodeContext context) {
+		query.append(".getVerticesByProperty('aai-node-type', '").append(context.getText()).append("')");
+		return this;
+	}
+
+	public DslQueryBuilder edgeQuery(String previousNode, String currentNode) throws AAIException {
+		EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(previousNode, currentNode);
 		String edgeType = "";
 		if (!edgeRules.hasRule(baseQ.build())) {
-			throw new AAIException("AAI_6120", "No EdgeRule found for passed nodeTypes: " + context.getPreviousNode()
-					+ ", " + context.getCurrentNode());
+			throw new AAIException("AAI_6120", "No EdgeRule found for passed nodeTypes: " + previousNode
+					+ ", " + currentNode);
 		} else if (edgeRules.hasRule(baseQ.edgeType(EdgeType.TREE).build())) {
 			edgeType = "EdgeType.TREE";
 		} else if (edgeRules.hasRule(baseQ.edgeType(EdgeType.COUSIN).build())) {
@@ -104,23 +132,23 @@ public class DslQueryBuilder {
 		} else
 			edgeType = "EdgeType.COUSIN";
 
-		query.append(".createEdgeTraversal(").append(edgeType).append(", '").append(context.getPreviousNode())
-				.append("','").append(context.getCurrentNode()).append("')");
+		query.append(".createEdgeTraversal(").append(edgeType).append(", '").append(previousNode)
+				.append("','").append(currentNode).append("')");
 
 		return this;
 	}
 
-	public DslQueryBuilder where(DslContext context) {
+	public DslQueryBuilder where() {
 		query.append(".where(builder.newInstance()");
 		return this;
 	}
 
-	public DslQueryBuilder endWhere(DslContext context) {
+	public DslQueryBuilder endWhere() {
 		query.append(")");
 		return this;
 	}
 
-	public DslQueryBuilder endUnion(DslContext context) {
+	public DslQueryBuilder endUnion() {
 		/*
 		 * Need to delete the last comma
 		 */
@@ -131,23 +159,21 @@ public class DslQueryBuilder {
 		return this;
 	}
 
-	public DslQueryBuilder limit(DslContext context) {
+	public DslQueryBuilder limit(AAIDslParser.LimitStepContext ctx) {
 		/*
 		 * limit queries are strange - You have to append in the end
 		 */
-		AAIDslParser.LimitStepContext ctx = (AAIDslParser.LimitStepContext) context.getCtx();
-		context.setLimitQuery(new StringBuilder(".limit(").append(ctx.NODE().getText()).append(")"));
+		query.append(new StringBuilder(".limit(").append(ctx.numericValue().getText()).append(")"));
 		return this;
 	}
 
-	public DslQueryBuilder filter(DslContext context) {
+	public DslQueryBuilder filter(FilterStepContext context) {
 		return this.filterPropertyStart(context).filterPropertyKeys(context).filterPropertyEnd();
 
 	}
 
-	public DslQueryBuilder filterPropertyStart(DslContext context) {
-		AAIDslParser.FilterStepContext ctx = (AAIDslParser.FilterStepContext) context.getCtx();
-		if (ctx.NOT() != null && ctx.NOT().getText().equals("!"))
+	public DslQueryBuilder filterPropertyStart(FilterStepContext ctx) {
+		if (ctx.not() != null)
 			query.append(".getVerticesExcludeByProperty(");
 		else
 			query.append(".getVerticesByProperty(");
@@ -162,81 +188,65 @@ public class DslQueryBuilder {
 
 	}
 
-	public DslQueryBuilder validateFilter(DslContext context) throws AAIException {
-		Introspector obj = loader.introspectorFromName(context.getStartNode());
-		if(context.getStartNodeKeys().isEmpty()){
-			queryException.append("No keys sent. Valid keys for " + context.getStartNode() + " are "
+	public DslQueryBuilder validateFilter(AAIDslParser.SingleNodeStepContext ctx) throws AAIException {
+		Introspector obj = loader.introspectorFromName(ctx.node().getText());
+		if(ctx.filterStep().isEmpty()){
+			queryException.append("No keys sent. Valid keys for " + ctx.node().getText() + " are "
 					+ String.join(",", obj.getIndexedProperties()));
 			return this;
 		}
-		boolean notIndexed = context.getStartNodeKeys().stream()
-				.filter((prop) -> obj.getIndexedProperties().contains(prop)).collect(Collectors.toList()).isEmpty();
+		boolean notIndexed = ctx.filterStep().stream()
+				.filter((prop) -> obj.getIndexedProperties().contains(removeSingleQuotes(prop.key().getText()))).collect(Collectors.toList()).isEmpty();
 		if (notIndexed)
-			queryException.append("Non indexed keys sent. Valid keys for " + context.getStartNode() + " "
+			queryException.append("Non indexed keys sent. Valid keys for " + ctx.node().getText()+ " "
 					+ String.join(",", obj.getIndexedProperties()));
 
 		return this;
 	}
 
-	public DslQueryBuilder filterPropertyKeys(DslContext context) {
-		AAIDslParser.FilterStepContext ctx = (AAIDslParser.FilterStepContext) context.getCtx();
-		final String key = ctx.KEY(0).getText();
-		/*
-		 * This key should be indexed if it is start node
-		 */
-		if (context.isStartNode() && context.getStartNodeKeys().isEmpty()) {
-			// check if key is not indexed, then throw exception
-			context.getStartNodeKeys().add(key.replaceAll("'", ""));
-		}
-
+	protected String removeSingleQuotes(String value) {
+		return value.replaceFirst("^'(.*)'$", "$1");
+	}
+	public DslQueryBuilder filterPropertyKeys(FilterStepContext context) {
+		final String key = context.key().getText();
 		query.append(key);
-		List<TerminalNode> nodes = ctx.KEY();
-		List<TerminalNode> numberValues = ctx.NODE();
-		/*
-		 * Add all String values
-		 */
-		List<String> valuesArray = nodes.stream().filter((node) -> !key.equals(node.getText()))
-				.map((node) -> "'" + node.getText().replace("'", "").trim() + "'").collect(Collectors.toList());
-
-		/*
-		 * Add all numeric values
-		 */
-		valuesArray.addAll(numberValues.stream().filter((node) -> !key.equals(node.getText()) )
-				.map((node) -> node.getText()).collect(Collectors.toList()));
-		
+		List<String> valueContext = context.value().stream().map(item -> item.getText()).collect(Collectors.toList());
 		
 		/*
 		 * The whole point of doing this to separate P.within from key-value
 		 * search For a list of values QB uses P.within For just a single value
 		 * QB uses key,value check
 		 */
-		if (nodes.size() > 2) {
-			String values = String.join(",", valuesArray);
-			query.append(",").append(" new ArrayList<>(Arrays.asList(" + values.toString() + "))");
+		if (valueContext.size() > 1) {
+			String values = Joiner.on(",").join(valueContext);
+			query.append(",").append(" new ArrayList<>(Arrays.asList(" + values + "))");
 		} else {
-			if (!valuesArray.isEmpty())
-				query.append(",").append(valuesArray.get(0).toString());
+			if (!valueContext.isEmpty())
+				query.append(",").append(valueContext.get(0).toString());
 		}
 		return this;
 	}
 
-	public DslQueryBuilder union(DslContext context) {
+	public DslQueryBuilder union() {
 		query.append(".union(");
 		return this;
 	}
 
-	public DslQueryBuilder store(DslContext context) {
-		AAIDslParser.SingleNodeStepContext ctx = (AAIDslParser.SingleNodeStepContext) context.getCtx();
-		if (ctx.STORE() != null && ctx.STORE().getText().equals("*")) {
+	public DslQueryBuilder store(SingleNodeStepContext context) {
+		if (context.store() != null) {
 			query.append(".store('x')");
 		}
 		return this;
 
 	}
 
-	public DslQueryBuilder comma(DslContext context) {
+	public DslQueryBuilder comma() {
 		query.append(",");
 		return this;
 
+	}
+	
+	public void setValidationFlag(boolean validationFlag) {
+		this.validationFlag = validationFlag;
 	}
 }

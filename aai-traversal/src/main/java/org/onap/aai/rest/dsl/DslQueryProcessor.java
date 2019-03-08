@@ -83,9 +83,8 @@ public class DslQueryProcessor {
 			 * 
 			 */
 			return dslListener.getQuery();
-		} catch (AAIException e) {
-			throw new AAIException("AAI_6149", "Error while processing the query :" + e.getMessage());
 		} catch (Exception e) {
+			LOGGER.error("Error while processing the query", e);
 			throw new AAIException("AAI_6149","Error while processing the query :" + e.getMessage());
 		}
 	}
