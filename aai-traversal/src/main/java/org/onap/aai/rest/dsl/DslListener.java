@@ -19,30 +19,23 @@
  */
 package org.onap.aai.rest.dsl;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.List;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
+import org.onap.aai.AAIDslBaseListener;
 import org.onap.aai.AAIDslParser;
-import org.onap.aai.config.SpringContextAware;
-import org.onap.aai.edges.EdgeRuleQuery;
-import org.onap.aai.edges.enums.EdgeType;
+import org.onap.aai.AAIDslParser.AaiqueryContext;
+import org.onap.aai.AAIDslParser.SingleNodeStepContext;
+import org.onap.aai.AAIDslParser.UnionQueryStepContext;
+import org.onap.aai.AAIDslParser.WhereStepContext;
+import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.logging.LogFormatTools;
-import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.onap.aai.AAIDslBaseListener;
-import org.onap.aai.edges.EdgeIngestor;
+
 import com.att.eelf.configuration.EELFLogger;
 import com.att.eelf.configuration.EELFManager;
 
@@ -53,18 +46,15 @@ public class DslListener extends AAIDslBaseListener {
 
 	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(DslQueryProcessor.class);
 
-	private final EdgeIngestor edgeRules;
-
-	DslContext context = null;
-	DslQueryBuilder dslBuilder = null;
+	private DslQueryBuilder dslBuilder = null;
+	
+	private Deque<String> traversedNodeNames = new ArrayDeque<>();
 
 	/**
 	 * Instantiates a new DslListener.
 	 */
 	@Autowired
 	public DslListener(EdgeIngestor edgeIngestor, SchemaVersions schemaVersions, LoaderFactory loaderFactory) {
-		this.edgeRules = edgeIngestor;
-		context = new DslContext();
 
 		Loader loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getDefaultVersion());
 		dslBuilder = new DslQueryBuilder(edgeIngestor, loader);
@@ -84,170 +74,108 @@ public class DslListener extends AAIDslBaseListener {
 
 	@Override
 	public void enterAaiquery(AAIDslParser.AaiqueryContext ctx) {
-		/*
-		 * This is my start-node, have some validations here
-		 */
-		context.setStartNodeFlag(true);
+
 		dslBuilder.start();
 	}
 
 	@Override
 	public void exitAaiquery(AAIDslParser.AaiqueryContext ctx) {
-		dslBuilder.end(context);
-	}
 
-	@Override
-	public void enterDslStatement(AAIDslParser.DslStatementContext ctx) {
-		if (context.isUnionStart()) {
-			dslBuilder.startUnion();
+		dslBuilder.end();
+		if (ctx.limitStep() != null) {
+			dslBuilder.limit(ctx.limitStep());
 		}
 	}
 
 	@Override
+	public void enterDslStatement(AAIDslParser.DslStatementContext ctx) {
+		if (!(ctx.getParent() instanceof AaiqueryContext)) {
+			dslBuilder.identity();
+		}
+	}
+	
+	@Override
 	public void exitDslStatement(AAIDslParser.DslStatementContext ctx) {
-		if (context.isUnionQuery()) {
-			dslBuilder.comma(context);
-			context.setUnionStart(true);
+		if (ctx.getParent() instanceof UnionQueryStepContext && ((UnionQueryStepContext)ctx.getParent()).dslStatement().size() > 1) {
+			
+			dslBuilder.comma();
 		}
 	}
 
 	@Override
 	public void enterSingleNodeStep(AAIDslParser.SingleNodeStepContext ctx) {
 		try {
-			/*
-			 * Set the previous Node to current node and get the new current
-			 * node
-			 */
-			context.setPreviousNode(context.getCurrentNode());
-			context.setCurrentNode(ctx.NODE().getText());
-
-			if (context.isUnionQuery() || context.isTraversal() || context.isWhereQuery()) {
-				String oldPreviousNode = context.getPreviousNode();
-
-				if (context.isUnionStart()) {
-					String previousNode = context.getUnionStartNodes().peek();
-					context.setPreviousNode(previousNode);
-
-					context.setUnionStart(false);
-				}
-
-				dslBuilder.edgeQuery(context);
-
-				/*
-				 * Reset is required bcos for union queries im changing the
-				 * context
-				 */
-				context.setPreviousNode(oldPreviousNode);
-
+			
+			//if in a union, start with a traversal
+			if (ctx.getParent() != null && ctx.getParent().getParent() instanceof UnionQueryStepContext) {
+				dslBuilder.edgeQuery(traversedNodeNames.peekFirst(), ctx.node().getText());
 			}
-
-			else {
-				dslBuilder.nodeQuery(context);
+			if (ctx.filterStep() != null) {
+				dslBuilder.createNode(ctx);
+			} 
+			
+			//store goes after where queries, only add it if we don't have one
+			if (!(ctx.getChild(WhereStepContext.class,0) instanceof WhereStepContext)) {
+				dslBuilder.store(ctx);
 			}
-
+			
+			//push the node name on to our stack
+			traversedNodeNames.addFirst(ctx.node().getText());
 		} catch (AAIException e) {
-			LOGGER.info("AAIException in DslListener" + e.getMessage());
+			LOGGER.info("AAIException in DslListener " + e.getMessage());
+			throw new RuntimeException(e);
 		}
 
 	}
 
 	@Override
 	public void exitSingleNodeStep(AAIDslParser.SingleNodeStepContext ctx) {
-		if (context.isStartNode() && isValidationFlag()) {
-			try {
-				dslBuilder.validateFilter(context);
-			} catch (AAIException e) {
-				LOGGER.error("AAIException in DslListener" + LogFormatTools.getStackTop(e));
-			}
+		if (!traversedNodeNames.isEmpty()) {
+			traversedNodeNames.removeFirst();
 		}
-		context.setStartNodeFlag(false);
-		context.setCtx(ctx);
-		dslBuilder.store(context);
-	}
-
-	private void generateExitStep() {
-
 	}
 
 	@Override
 	public void enterUnionQueryStep(AAIDslParser.UnionQueryStepContext ctx) {
-
-		Deque<String> unionStartNodes = context.getUnionStartNodes();
-		unionStartNodes.add(context.getCurrentNode());
-
-		context.setUnionStart(true);
-		/*
-		 * I may not need this
-		 */
-		context.setUnionQuery(true);
-		dslBuilder.union(context);
-
+		
+		dslBuilder.union();
 	}
 
 	@Override
 	public void exitUnionQueryStep(AAIDslParser.UnionQueryStepContext ctx) {
-		context.setUnionStart(false);
-		context.setUnionQuery(false);
-		Deque<String> unionStartNodes = context.getUnionStartNodes();
-		if (unionStartNodes.peek() != null) {
-			unionStartNodes.pop();
+		
+		dslBuilder.endUnion();
+	}
+
+	@Override
+	public void enterWhereStep(AAIDslParser.WhereStepContext ctx) {
+		
+		dslBuilder.where();
+	}
+
+	@Override
+	public void exitWhereStep(AAIDslParser.WhereStepContext ctx) {
+
+		dslBuilder.endWhere();
+		if (ctx.getParent() instanceof SingleNodeStepContext) {
+			dslBuilder.store(((SingleNodeStepContext)ctx.getParent()));
 		}
-
-		dslBuilder.endUnion(context);
-
 	}
 
-	@Override
-	public void enterFilterTraverseStep(AAIDslParser.FilterTraverseStepContext ctx) {
-		context.setWhereQuery(true);
-		context.setWhereStartNode(context.getCurrentNode());
-		dslBuilder.where(context);
-
-	}
-
-	@Override
-	public void exitFilterTraverseStep(AAIDslParser.FilterTraverseStepContext ctx) {
-		context.setWhereQuery(false);
-		context.setCurrentNode(context.getWhereStartNode());
-
-		dslBuilder.endWhere(context);
-
-	}
-
-	@Override
-	public void enterFilterStep(AAIDslParser.FilterStepContext ctx) {
-
-		context.setCtx(ctx);
-		dslBuilder.filter(context);
-	}
-
-	@Override
-	public void exitFilterStep(AAIDslParser.FilterStepContext ctx) {
-		// For now do nothing
-	}
 
 	@Override
 	public void enterTraverseStep(AAIDslParser.TraverseStepContext ctx) {
-		context.setTraversal(true);
-	}
-
-	@Override
-	public void exitTraverseStep(AAIDslParser.TraverseStepContext ctx) {
-		context.setTraversal(false);
-	}
-
-	@Override
-	public void enterLimitStep(AAIDslParser.LimitStepContext ctx) {
-		context.setCtx(ctx);
-		dslBuilder.limit(context);
+		
+		try {
+			if (ctx.singleNodeStep() != null) {
+				dslBuilder.edgeQuery(traversedNodeNames.peekFirst(), ctx.singleNodeStep().node().getText());
+			}
+		} catch (AAIException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 	
 	public void setValidationFlag(boolean validationFlag) {
-		this.context.setValidationFlag(validationFlag);
+		this.dslBuilder.setValidationFlag(validationFlag);
 	}
-	
-	public boolean isValidationFlag() {
-		return this.context.isValidationFlag();
-	}
-
 }
