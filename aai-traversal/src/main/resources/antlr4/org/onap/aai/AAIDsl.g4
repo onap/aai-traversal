@@ -4,58 +4,42 @@
 grammar AAIDsl;
 
 
-aaiquery: dslStatement;
+aaiquery: dslStatement limitStep?;
 
-dslStatement: (singleNodeStep ) (traverseStep )* limitStep*;
+dslStatement: (singleNodeStep );
 
-unionQueryStep: LBRACKET dslStatement ( COMMA (dslStatement))* RBRACKET;
+unionQueryStep: '[' dslStatement ( ',' (dslStatement))* ']';
 
-traverseStep: (TRAVERSE (  singleNodeStep | unionQueryStep));
+singleNodeStep: node store? (filterStep | whereStep)* traverseStep*;
 
-singleNodeStep: NODE STORE? (filterStep | filterTraverseStep)*;
+traverseStep: ('>' (  singleNodeStep | unionQueryStep));
 
-filterStep: NOT? (LPAREN KEY (COMMA (KEY | NODE))* RPAREN);
-filterTraverseStep: (LPAREN traverseStep* RPAREN);
+filterStep: not? ('(' key (',' value)+ ')');
 
-limitStep: LIMIT NODE;
+whereStep: ('(' traverseStep+ ')');
+
+limitStep: 'LIMIT' numericValue;
+
+numericValue: NUM;
+
+node: NODE;
+
+key: KEY;
+
+value: KEY | NUM;
+
+store: '*';
+
+not: '!';
+
+fragment ESC: '\\' '\'' ;	
 
 LIMIT: 'LIMIT';
-NODE: ID;
 
-KEY: ['] (ID | ' ')* ['] ;
+NODE: [a-z_-]+;
 
+KEY: '\'' ( ESC | ~['\r\n])+ '\'';
 
-AND: [&];
-
-STORE: [*];
-
-OR: [|];
-
-TRAVERSE: [>] ;
-
-LPAREN: [(];
-	
-RPAREN: [)];
-
-COMMA: [,] ;
-
-EQUAL: [=];
-
-LBRACKET: [[];
-	
-RBRACKET: [\]];
-
-NOT: [!];
-
-VALUE: [DIGIT]+;
-
-fragment LOWERCASE  : [a-z] ;
-fragment UPPERCASE  : [A-Z] ;
-fragment DIGIT      : [0-9] ;
-ID
-   : ( LOWERCASE | UPPERCASE | DIGIT) ( LOWERCASE | UPPERCASE | DIGIT | '-' | '.' | '_' | '/')*
-   ;
+NUM : '0' | [1-9] [0-9]*;
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
-
-
