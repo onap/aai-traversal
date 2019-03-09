@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fda9fedc_c1e84ae5",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "You can see my other comments to gain more insight into why I think this class is flawed. The structure of the antlr grammar and the Listener it creates are what should be used for determining state. That\u0027s the benefit of using antlr. Correctly creating a parse tree with it provides all the state indicators you need. This class cannot maintain node states through recursive nesting of where and union queries because it uses single a boolean to determine \"am I in a where\", \"am I in a union\".\n\nTry running my existing overlyNestedQueryTest or this query against the current implementation:\nInput:\n\"generic-vnf*(\u0027vnf-id\u0027,\u0027vnfId\u0027) (\u003e [pserver(\u0027hostname\u0027,\u0027hostname1\u0027),vserver (\u003e [pserver(\u0027hostname\u0027,\u0027hostname1\u0027), pserver(\u0027hostname\u0027,\u0027hostname1\u0027)])]) \u003e vserver\"\n\nExpected Output:\n\"builder.getVerticesByProperty(\u0027aai-node-type\u0027, \u0027generic-vnf\u0027).getVerticesByProperty(\u0027vnf-id\u0027,\u0027vnfId\u0027).where(builder.newInstance().union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, \u0027generic-vnf\u0027,\u0027pserver\u0027).getVerticesByProperty(\u0027hostname\u0027,\u0027hostname1\u0027),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, \u0027generic-vnf\u0027,\u0027vserver\u0027).where(builder.newInstance().union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, \u0027vserver\u0027,\u0027pserver\u0027).getVerticesByProperty(\u0027hostname\u0027,\u0027hostname1\u0027),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, \u0027vserver\u0027,\u0027pserver\u0027).getVerticesByProperty(\u0027hostname\u0027,\u0027hostname1\u0027))))).store(\u0027x\u0027).createEdgeTraversal(EdgeType.COUSIN, \u0027generic-vnf\u0027,\u0027vserver\u0027).cap(\u0027x\u0027).unfold().dedup()\"",
+      "parentUuid": "7848f84b_50984e70",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "901d7749_6c66e2d2",
         "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslErrorListener.java",
         "patchSetId": 5
@@ -87,6 +105,24 @@
     },
     {
       "key": {
+        "uuid": "fd7bcafa_eca2f968",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "Why? The DslQueryBuilder should be independent of DslListener it should be able to be toggled into a validation mode by itself if you wanted to call it somewhere else. What if someone made another grammar that used it? They would then have to reimplement validation?\n\nThe DslListener exists to track state, not control features of the DslQueryBuilder.",
+      "parentUuid": "909280ab_5ed1f8c3",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "33633736_2faabac0",
         "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslQueryBuilder.java",
         "patchSetId": 5
@@ -98,6 +134,24 @@
       "writtenOn": "2019-03-09T14:15:46Z",
       "side": 1,
       "message": "1. Overall, When I designed DSLQueryBuilder I wanted this class to not use Antlr generated classes but that was not possible in some scenarios\n\n2. I don\u0027t like the idea of passing Antlr generated context classes in the method definitions.\n\n3. For example createNode does not have to be tied to the SingleNodeStep. Thats why the DSLContext is useful.\n\nDSLListener populates the DSLContext with all the contexts it needs for that step and calls queryBuilder with the DSLContext\n\n4. In your changes you have made start, end part of DSLQueryBuilder. That should not be part of DSLQueryBuilder in my opinion. It should be in the DSLContext class.",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ced7195_fda41fdf",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslQueryBuilder.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "started and ended are there because the grammar is still not 100% correct. Any states should be completely handled by how the antlr grammar builds the parse tree and not by some other class.",
+      "parentUuid": "33633736_2faabac0",
       "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
@@ -121,6 +175,24 @@
     },
     {
       "key": {
+        "uuid": "77c61d63_3a1bfef9",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslQueryBuilder.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "I don\u0027t see a technical reason why another class would be required to store this information. The builder was \"toggled\" into validation mode by reading this boolean from DslContext anyway.",
+      "parentUuid": "f19e22e5_4dcfbd3e",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "52b3febc_4cd32c94",
         "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
         "patchSetId": 5
@@ -132,6 +204,24 @@
       "writtenOn": "2019-03-09T14:15:46Z",
       "side": 1,
       "message": "I would love the limit to be allowed for every singleNodeStep  and then you could limit each vertex that you store (only for store), however I do not know if that is allowed in gremlin",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "248b7f77_1ea5be8f",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "That is outside the scope of this change. I can investigate that in another code review.",
+      "parentUuid": "52b3febc_4cd32c94",
       "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
@@ -155,6 +245,24 @@
     },
     {
       "key": {
+        "uuid": "f3837de6_0ae253e8",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "I can re-enable this functionality. I did not see a unit test for this case.",
+      "parentUuid": "9df14bca_a7f08ae5",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a811471f_8061f8b0",
         "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
         "patchSetId": 5
@@ -166,6 +274,24 @@
       "writtenOn": "2019-03-09T14:15:46Z",
       "side": 1,
       "message": "I believe you got the concept of singleNodeStep wrong. Examples of a singleNodeStep would be the below\na) customer\nb) customer(\u0027subscriber-name\u0027,\u0027abc\u0027)\nc) customer(\u003e service-subscription(\u0027service-type\u0027,\u0027xyz\u0027))\n\nA dslStatement on the other hand is a set of subqueries which could be just a singleNodeQuery or a traversal query (to another singleNode or a unioon of queries)\na) customer \u003e service-subscription\nb) customer \u003e [service-subscription, vpn-binding]\n\nI don\u0027t understand the reason why you changed the definition of the singleNodeStep",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3683b649_f1f1def3",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "The single node step was changed to allow for infinite storage of the \"previous\" node type. By tracking the entry and exit of a \"singeNodeStepContext\" we know when to push and pop a node, even through multiple union and where nestings.\n\nWith the previous implementation DslContext could only support single nesting of where and unions because of how it stored boundary information in booleans. The idea behind the restructure of the parser tokens was to make antlr do the heavy lifting of determining entry and exit of states rather than constructing a custom solution to perform the same task.\n\nIf there are additional cases which have now been missed, I can only say that I\u0027ve supported all cases demonstrated in the unit tests. If there are additional cases you\u0027d like covered I can add them to the unit test.\n\nIf I added extra an extra feature which you would not like, such as being able to start from a node type with no filters, I can modify the grammar to prevent this.",
+      "parentUuid": "a811471f_8061f8b0",
       "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
@@ -189,6 +315,24 @@
     },
     {
       "key": {
+        "uuid": "a3d931c5_d87b43de",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "I would agree for a more complicated grammar, but in this case I preferred the less verbose symbols. Only those symbols which require logic on the builder side have been converted to parsaeble elements (not and store).",
+      "parentUuid": "8b3b5141_9fe0e620",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b5b288e3_2c702b96",
         "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
         "patchSetId": 5
@@ -200,6 +344,24 @@
       "writtenOn": "2019-03-09T14:15:46Z",
       "side": 1,
       "message": "NODE in your rule only takes lowercase and no digits. Is that the documented convention for aai-node-types in ONAP?",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ee7fa58_3ed9346a",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 97
+      },
+      "writtenOn": "2019-03-09T17:03:39Z",
+      "side": 1,
+      "message": "I can add numbers here. I was not aware of any code types which include numbers in their names.",
+      "parentUuid": "b5b288e3_2c702b96",
       "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
