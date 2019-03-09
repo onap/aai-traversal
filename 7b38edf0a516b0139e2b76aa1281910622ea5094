@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7848f84b_50984e70",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "1)This class is required in my opinion (More explanation in DSLQueryBuilder comments)\n\n2) DSLQueryBuilder\u0027s job is to translate every clause, every subquery  and it would use the DSLContext to determine certain rules\n\n3) DSLContext would store the state of the query like start, end (startUnion, endUnion if needed)\n\n4)DSlContext should have certain enable/disable flags like validation. Again imo that does not belong in DSLQueryBuilder",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "901d7749_6c66e2d2",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslErrorListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "I\u0027m glad that you incorporated ErrorListener interface. I did have plans for using the BaseErrorListener for redirecting the error messages.",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3213cd0_f0820bad",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "I like the fact that you used the getParent() to identify the start of a Union query. However if the grammar rule changes to make the union query part of the start-node or any other rule, this will have to be changed.\nAs opposed to having the union query logic and union start logic localised within the enterUnionQuery() method.",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80a43b35_fcfb8f84",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "You have store logic at 2 places. In the exitWhere() and here. You should have it in the exitSingleNodeQuery() .That is where it belongs.",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "909280ab_5ed1f8c3",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "For the current validation and any in the future the question is which class should include the logic to invoke validation?  In the DslQueryBuilder or DslListener. I believe it should be in the DslListener. Any feature enable/disable should be here and not in the querybuilder.",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33633736_2faabac0",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslQueryBuilder.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "1. Overall, When I designed DSLQueryBuilder I wanted this class to not use Antlr generated classes but that was not possible in some scenarios\n\n2. I don\u0027t like the idea of passing Antlr generated context classes in the method definitions.\n\n3. For example createNode does not have to be tied to the SingleNodeStep. Thats why the DSLContext is useful.\n\nDSLListener populates the DSLContext with all the contexts it needs for that step and calls queryBuilder with the DSLContext\n\n4. In your changes you have made start, end part of DSLQueryBuilder. That should not be part of DSLQueryBuilder in my opinion. It should be in the DSLContext class.",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f19e22e5_4dcfbd3e",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/dsl/DslQueryBuilder.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "I don\u0027t believe the ValidationFlag should be set part of the DSLQueryBuilder. That was one of the reasons having DSLContext class - That would store all context in terms of the entire query.",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52b3febc_4cd32c94",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "I would love the limit to be allowed for every singleNodeStep  and then you could limit each vertex that you store (only for store), however I do not know if that is allowed in gremlin",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9df14bca_a7f08ae5",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "Please see my comments below(Line13) on why I would prefer the original definition of dslStatement\nIn the future I would like the startnode to be a union-query as well .\n\ndslStatement: (singleNode|unionQuery) (traverseStep )* limitStep*\n\nExample:\n[ pserver(\u0027hostname\u0027, \u0027abc\u0027),  \n  pserver(\u0027hostname\u0027, \u0027xyz\u0027)] \u003e vserver*",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a811471f_8061f8b0",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "I believe you got the concept of singleNodeStep wrong. Examples of a singleNodeStep would be the below\na) customer\nb) customer(\u0027subscriber-name\u0027,\u0027abc\u0027)\nc) customer(\u003e service-subscription(\u0027service-type\u0027,\u0027xyz\u0027))\n\nA dslStatement on the other hand is a set of subqueries which could be just a singleNodeQuery or a traversal query (to another singleNode or a unioon of queries)\na) customer \u003e service-subscription\nb) customer \u003e [service-subscription, vpn-binding]\n\nI don\u0027t understand the reason why you changed the definition of the singleNodeStep",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b3b5141_9fe0e620",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "I do not understand why you changed the lexer tokens .\nI actually would like splitting the Lexer and Parsers in 2 different files. But having LPAREN, COMMA , TRAVERSE(\u003e) is more readable in my opinion.\nI like the below antlr grammar written for cassandra cql3 where lexer and parsers are split\nhttps://github.com/antlr/grammars-v4/tree/master/cql3",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5b288e3_2c702b96",
+        "filename": "aai-traversal/src/main/resources/antlr4/org/onap/aai/AAIDsl.g4",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-03-09T14:15:46Z",
+      "side": 1,
+      "message": "NODE in your rule only takes lowercase and no digits. Is that the documented convention for aai-node-types in ONAP?",
+      "revId": "7b38edf0a516b0139e2b76aa1281910622ea5094",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
