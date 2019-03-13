@@ -41,8 +41,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <aai.schema.version>1.0.1-SNAPSHOT</aai.schema.version>
-        <aai.core.version>1.4.1-SNAPSHOT</aai.core.version>
+        <aai.schema.version>1.0.1</aai.schema.version>
+        <aai.core.version>1.4.1</aai.core.version>
 
         <spring.boot.version>1.5.18.RELEASE</spring.boot.version>
 
@@ -671,7 +671,7 @@
         <dependency>
             <groupId>org.onap.aai.aai-common</groupId>
             <artifactId>aai-rest</artifactId>
-            <version>1.4.1-SNAPSHOT</version>
+            <version>1.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
