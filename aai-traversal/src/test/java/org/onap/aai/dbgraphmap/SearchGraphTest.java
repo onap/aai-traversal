@@ -41,6 +41,8 @@ import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.util.GenericQueryBuilder;
+import org.onap.aai.util.NodesQueryBuilder;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -91,14 +93,14 @@ public class SearchGraphTest extends AAISetup{
     private TransactionalGraphEngine dbEngine;
 
     @Before
-    public void setup(){
+    public void setup() {
 
         version = schemaVersions.getDefaultVersion();
-        httpHeaders         = mock(HttpHeaders.class);
-        uriInfo             = mock(UriInfo.class);
+        httpHeaders = mock(HttpHeaders.class);
+        uriInfo = mock(UriInfo.class);
 
-        headersMultiMap     = new MultivaluedHashMap<>();
-        queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
+        headersMultiMap = new MultivaluedHashMap<>();
+        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -128,25 +130,24 @@ public class SearchGraphTest extends AAISetup{
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new JanusGraphDBEngine(
-                queryStyle,
-                type,
-                loader);
+        dbEngine = new JanusGraphDBEngine(queryStyle, type, loader);
     }
 
     @Test(expected = AAIException.class)
     public void runNodesQuery() throws  AAIException{
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        searchGraph.runNodesQuery(httpHeaders,"",null,
-                null,dbEngine,loader,urlBuilder);
+        searchGraph.runNodesQuery(
+                new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("").setEdgeFilterParams(null)
+                        .setFilterParams(null).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
     @Test(expected = AAIException.class)
     public void runNodesQueryNull() throws  AAIException{
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        searchGraph.runNodesQuery(httpHeaders,"nnn",null,
-                null,dbEngine,loader,urlBuilder);
+        searchGraph.runNodesQuery(
+                new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("nnn").setEdgeFilterParams(null)
+                        .setFilterParams(null).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
     @Test(expected = AAIException.class)
     public void testRunGenericQueryFailWhenInvalidRelationshipList() throws AAIException {
@@ -159,7 +160,9 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, "service-instance", keys, includeStrings, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new GenericQueryBuilder().setHeaders(httpHeaders)
+                .setStartNodeType("service-instance").setStartNodeKeyParams(keys).setIncludeNodeTypes(includeStrings)
+                .setDepth(1).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
@@ -175,7 +178,9 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, null, keys, includeStrings, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new GenericQueryBuilder().setHeaders(httpHeaders)
+                .setStartNodeType(null).setStartNodeKeyParams(keys).setIncludeNodeTypes(includeStrings).setDepth(1)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
@@ -190,7 +195,9 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, "", null, includeStrings, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new GenericQueryBuilder().setHeaders(httpHeaders)
+                .setStartNodeType("").setStartNodeKeyParams(null).setIncludeNodeTypes(includeStrings).setDepth(1)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
@@ -205,7 +212,9 @@ public class SearchGraphTest extends AAISetup{
 
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
-        Response response = searchGraph.runGenericQuery(httpHeaders, "", keys, null, 1, dbEngine, loader, urlBuilder);
+        Response response = searchGraph.runGenericQuery(new GenericQueryBuilder().setHeaders(httpHeaders)
+                .setStartNodeType("").setStartNodeKeyParams(keys).setIncludeNodeTypes(null).setDepth(1)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
         System.out.println(response);
     }
 
@@ -310,8 +319,8 @@ public class SearchGraphTest extends AAISetup{
         filter.add("model:EQUALS:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter=new ArrayList<String>();
         edgeFilter.add("model:DOES-NOT-EXIST:DOES-NOT-EXIST:AAI");
-      Response response=  searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
-                filter,dbEngine,loader,urlBuilder);
+      Response response=  searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
+              .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
         Assert.assertNotNull(response);
     }
 
@@ -322,8 +331,8 @@ public class SearchGraphTest extends AAISetup{
         filter.add("model:EQUALS:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter=new ArrayList<String>();
         edgeFilter.add("model:EXISTS:DOES-NOT-EXIST:AAI");
-        Response response=  searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
-                filter,dbEngine,loader,urlBuilder);
+        Response response=  searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
+                .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
         Assert.assertNotNull(response);
     }
 
@@ -333,8 +342,8 @@ public class SearchGraphTest extends AAISetup{
         List<String> filter=new ArrayList<String>();
         filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST");
         List<String> edgeFilter=new ArrayList<String>();
-        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
-                filter,dbEngine,loader,urlBuilder);
+        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
+                .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
 
     @Test
@@ -343,8 +352,8 @@ public class SearchGraphTest extends AAISetup{
         List<String> filter=new ArrayList<String>();
         filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter=new ArrayList<String>();
-        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
-                filter,dbEngine,loader,urlBuilder);
+        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
+                .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
 
     @Test
@@ -353,8 +362,8 @@ public class SearchGraphTest extends AAISetup{
         List<String> filter=new ArrayList<String>();
         filter.add("model:EXISTS:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter=new ArrayList<String>();
-        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
-                filter,dbEngine,loader,urlBuilder);
+        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
+                .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
 
     @Test(expected = AAIException.class)
@@ -363,7 +372,7 @@ public class SearchGraphTest extends AAISetup{
         List<String> filter=new ArrayList<String>();
         filter.add("model:DOES_NOT_EXIST:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter=new ArrayList<String>();
-        searchGraph.runNodesQuery(httpHeaders,"model-ver",edgeFilter,
-                filter,dbEngine,loader,urlBuilder);
+        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
+                        .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
 }
