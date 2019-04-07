@@ -39,6 +39,7 @@ import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 
 import javax.ws.rs.core.*;
+import javax.xml.validation.Schema;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.*;
@@ -68,7 +69,7 @@ public class HttpTestUtil extends RESTAPI {
 
     public void init(){
 
-        schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
+        schemaVersions = (SchemaVersions) SpringContextAware.getBean("schemaVersions");
         httpHeaders         = Mockito.mock(HttpHeaders.class);
         uriInfo             = Mockito.mock(UriInfo.class);
 
