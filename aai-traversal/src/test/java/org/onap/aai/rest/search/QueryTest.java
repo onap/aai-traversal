@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.onap.aai.config.ConfigConfiguration;
 import org.onap.aai.config.IntrospectionConfig;
 import org.onap.aai.config.SearchConfiguration;
 import org.onap.aai.config.SpringContextAware;
@@ -48,7 +49,7 @@ import org.onap.aai.nodes.NodeIngestor;
 import org.onap.aai.setup.AAIConfigTranslator;
 import org.onap.aai.setup.SchemaLocationsBean;
 import org.onap.aai.setup.SchemaVersion;
-import org.onap.aai.setup.SchemaVersions;
+import org.onap.aai.setup.SchemaConfigVersions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -71,8 +72,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
 @ContextConfiguration(classes = {
-		SchemaLocationsBean.class,
-        SchemaVersions.class,
+		ConfigConfiguration.class,
 		AAIConfigTranslator.class,
         EdgeIngestor.class,
         EdgeSerializer.class,
@@ -109,7 +109,7 @@ public abstract class QueryTest {
 	protected LoaderFactory loaderFactory;
 
 	@Autowired
-	protected SchemaVersions schemaVersions;
+	protected SchemaConfigVersions schemaVersions;
 
 	@Autowired
 	protected GremlinServerSingleton gremlinServerSingleton;

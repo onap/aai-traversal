@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.onap.aai.config.ConfigConfiguration;
 import org.onap.aai.config.IntrospectionConfig;
 import org.onap.aai.config.SearchConfiguration;
 import org.onap.aai.config.SpringContextAware;
@@ -71,8 +72,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
 @ContextConfiguration(classes = {
-		SchemaLocationsBean.class,
-        SchemaVersions.class,
+		ConfigConfiguration.class,
 		AAIConfigTranslator.class,
         EdgeIngestor.class,
         EdgeSerializer.class,
