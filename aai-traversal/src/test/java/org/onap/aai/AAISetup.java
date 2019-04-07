@@ -51,8 +51,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 @ContextConfiguration(classes = {
-		SchemaLocationsBean.class,
-        SchemaVersions.class,
+		ConfigConfiguration.class,
 		AAIConfigTranslator.class,
         EdgeIngestor.class,
         EdgeSerializer.class,
