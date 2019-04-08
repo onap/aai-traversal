@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "21bfd8c7_f0ab4021",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-08T06:27:39Z",
+      "side": 1,
+      "message": "copy-pasta error on XML tag",
+      "range": {
+        "startLine": 46,
+        "startChar": 31,
+        "endLine": 46,
+        "endChar": 50
+      },
+      "revId": "6f270b2e999eff2f2d655f27ebf1be015641657b",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39278966_1f01ec8b",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-08T06:27:39Z",
+      "side": 1,
+      "message": "needs the aai-common version to be released first before it can work?",
+      "range": {
+        "startLine": 46,
+        "startChar": 26,
+        "endLine": 46,
+        "endChar": 31
+      },
+      "revId": "6f270b2e999eff2f2d655f27ebf1be015641657b",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
