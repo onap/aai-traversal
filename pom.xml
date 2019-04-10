@@ -24,6 +24,7 @@
         <site.path>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
         <release.path>/content/repositories/releases/</release.path>
         <snapshot.path>/content/repositories/snapshots/</snapshot.path>
+        <staging.path>/content/repositories/staging/</staging.path>
         <!-- GMaven plugin uses this property to figure out the name of the docker tag -->
         <aai.project.version>${project.version}</aai.project.version>
     </properties>
@@ -153,4 +154,21 @@
             <url>dav:${nexusproxy}${site.path}</url>
         </site>
     </distributionManagement>
+    <repositories>
+        <repository>
+            <id>ecomp-releases</id>
+            <name>ECOMP Release Repository</name>
+	    <url>${nexusproxy}${release.path}</url>
+        </repository>
+        <repository>
+            <id>ecomp-staging</id>
+            <name>ECOMP Staging Repository</name>
+	    <url>${nexusproxy}${staging.path}</url>
+        </repository>
+        <repository>
+            <id>ecomp-snapshots</id>
+            <name>ECOMP Snapshot Repository</name>
+	    <url>${nexusproxy}${snapshot.path}</url>
+        </repository>
+    </repositories>
 </project>
