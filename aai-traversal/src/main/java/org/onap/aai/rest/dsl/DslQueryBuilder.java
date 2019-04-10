@@ -19,224 +19,247 @@
  */
 package org.onap.aai.rest.dsl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.onap.aai.AAIDslBaseListener;
-import org.onap.aai.AAIDslParser;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.onap.aai.edges.EdgeIngestor;
+import org.onap.aai.edges.EdgeRule;
 import org.onap.aai.edges.EdgeRuleQuery;
 import org.onap.aai.edges.enums.EdgeType;
-import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
+import org.onap.aai.schema.enums.PropertyMetadata;
 
-import com.jcabi.log.Logger;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DslQueryBuilder {
 
-	private StringBuilder query;
-	private StringBuilder queryException;
-	private final EdgeIngestor edgeRules;
-	private final Loader loader;
+    private final EdgeIngestor edgeRules;
+    private final Loader loader;
+    private StringBuilder query;
+    private StringBuilder queryException;
 
-	public DslQueryBuilder(EdgeIngestor edgeIngestor, Loader loader) {
-		this.edgeRules = edgeIngestor;
-		this.loader = loader;
-		query = new StringBuilder();
-		queryException = new StringBuilder();
-	}
+    public DslQueryBuilder(EdgeIngestor edgeIngestor, Loader loader) {
+        this.edgeRules = edgeIngestor;
+        this.loader = loader;
+        query = new StringBuilder();
+        queryException = new StringBuilder();
+    }
 
-	public StringBuilder getQuery() {
-		return query;
-	}
+    public StringBuilder getQuery() {
+        return query;
+    }
 
-	public void setQuery(StringBuilder query) {
-		this.query = query;
-	}
+    public void setQuery(StringBuilder query) {
+        this.query = query;
+    }
 
-	public StringBuilder getQueryException() {
-		return queryException;
-	}
+    public StringBuilder getQueryException() {
+        return queryException;
+    }
 
-	public void setQueryException(StringBuilder queryException) {
-		this.queryException = queryException;
-	}
+    public void setQueryException(StringBuilder queryException) {
+        this.queryException = queryException;
+    }
 
-	public DslQueryBuilder start() {
-		query.append("builder");
-		return this;
-	}
+    public DslQueryBuilder start() {
+        query.append("builder");
+        return this;
+    }
 
-	public DslQueryBuilder startUnion() {
-		query.append("builder.newInstance()");
-		return this;
-	}
+    /*
+     * DSL always dedupes the results
+     */
+    public DslQueryBuilder end() {
+        query.append(".cap('x').unfold().dedup()");
+        return this;
+    }
 
-	public DslQueryBuilder end(DslContext context) {
-		query.append(".cap('x').unfold().dedup()").append(context.getLimitQuery());
-		return this;
-	}
+    public DslQueryBuilder nodeQuery(String node) {
+        query.append(".getVerticesByProperty('aai-node-type', '").append(node).append("')");
+        return this;
+    }
 
-	public DslQueryBuilder nodeQuery(DslContext context) {
-		query.append(".getVerticesByProperty('aai-node-type', '").append(context.getCurrentNode()).append("')");
-		if(context.isStartNode() && context.getStartNode().isEmpty())
-			context.setStartNode(context.getCurrentNode());
-		return this;
-	}
+    public DslQueryBuilder edgeQuery(List<String> edgeLabels, String aNode, String bNode) {
+        //TODO : change this for fuzzy search.
 
-	public DslQueryBuilder edgeQuery(DslContext context) throws AAIException {
-		EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(context.getPreviousNode(), context.getCurrentNode());
-		String edgeType = "";
-		if (!edgeRules.hasRule(baseQ.build())) {
-			throw new AAIException("AAI_6120", "No EdgeRule found for passed nodeTypes: " + context.getPreviousNode()
-					+ ", " + context.getCurrentNode());
-		} else if (edgeRules.hasRule(baseQ.edgeType(EdgeType.TREE).build())) {
-			edgeType = "EdgeType.TREE";
-		} else if (edgeRules.hasRule(baseQ.edgeType(EdgeType.COUSIN).build())) {
-			edgeType = "EdgeType.COUSIN";
-		} else
-			edgeType = "EdgeType.COUSIN";
+        String edgeType = "";
+        String edgeLabelsClause = "";
+        String edgeTraversalClause = ".createEdgeTraversal(";
 
-		query.append(".createEdgeTraversal(").append(edgeType).append(", '").append(context.getPreviousNode())
-				.append("','").append(context.getCurrentNode()).append("')");
 
-		return this;
-	}
+        if (!edgeLabels.isEmpty()) {
+            edgeTraversalClause = ".createEdgeTraversalWithLabels(";
+            edgeLabelsClause = String.join("", ", new ArrayList<>(Arrays.asList(", Joiner.on(",").join(edgeLabels), "))");
+        }
 
-	public DslQueryBuilder where(DslContext context) {
-		query.append(".where(builder.newInstance()");
-		return this;
-	}
+        EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(aNode, bNode);
+        Multimap<String, EdgeRule> rules = ArrayListMultimap.create();
+        try {
+            //TODO chnage this - ugly
+            if (edgeLabels.isEmpty()) {
+                rules.putAll(edgeRules.getRules(baseQ.build()));
+            } else {
+                edgeLabels.stream().forEach(label -> {
+                    try {
+                        rules.putAll(edgeRules.getRules(baseQ.label(label).build()));
+                    } catch (EdgeRuleNotFoundException e) {
+                        queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
+                                + ", " + bNode + label);
 
-	public DslQueryBuilder endWhere(DslContext context) {
-		query.append(")");
-		return this;
-	}
+                    }
+                });
 
-	public DslQueryBuilder endUnion(DslContext context) {
-		/*
-		 * Need to delete the last comma
-		 */
-		if (query.toString().endsWith(",")) {
-			query.deleteCharAt(query.length() - 1);
-		}
-		query.append(")");
-		return this;
-	}
+            }
+        } catch (EdgeRuleNotFoundException e) {
+            if (!edgeLabels.isEmpty()) {
+                queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
+                        + ", " + bNode + edgeLabels.stream().toString());
+            }
+            else {
+                queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
+                        + ", " + bNode);
+            }
+            return this;
+        }
 
-	public DslQueryBuilder limit(DslContext context) {
-		/*
-		 * limit queries are strange - You have to append in the end
-		 */
-		AAIDslParser.LimitStepContext ctx = (AAIDslParser.LimitStepContext) context.getCtx();
-		context.setLimitQuery(new StringBuilder(".limit(").append(ctx.NODE().getText()).append(")"));
-		return this;
-	}
+        if (rules.isEmpty() || rules.keys().isEmpty()) {
+            queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
+                    + ", " + bNode);
+        } else {
+            if (edgeLabels.isEmpty()) {
+                if (edgeRules.hasRule(baseQ.edgeType(EdgeType.TREE).build())) {
+                    edgeType = "EdgeType.TREE" + ",";
+                }
+                if (edgeRules.hasRule(baseQ.edgeType(EdgeType.COUSIN).build())) {
+                    if (edgeType.isEmpty()) {
+                        edgeType = "EdgeType.COUSIN" + ",";
+                    } else {
+                        edgeType = "";
+                    }
+                }
+            }
+        }
 
-	public DslQueryBuilder filter(DslContext context) {
-		return this.filterPropertyStart(context).filterPropertyKeys(context).filterPropertyEnd();
+        query.append(edgeTraversalClause).append(edgeType).append(" '").append(aNode)
+                .append("','").append(bNode).append("'").append(edgeLabelsClause).append(")");
 
-	}
+        return this;
+    }
 
-	public DslQueryBuilder filterPropertyStart(DslContext context) {
-		AAIDslParser.FilterStepContext ctx = (AAIDslParser.FilterStepContext) context.getCtx();
-		if (ctx.NOT() != null && ctx.NOT().getText().equals("!"))
-			query.append(".getVerticesExcludeByProperty(");
-		else
-			query.append(".getVerticesByProperty(");
 
-		return this;
+    public DslQueryBuilder where() {
+        query.append(".where(");
+        return this;
+    }
 
-	}
+    public DslQueryBuilder endWhere() {
+        query.append(")");
+        return this;
+    }
 
-	public DslQueryBuilder filterPropertyEnd() {
-		query.append(")");
-		return this;
+    public DslQueryBuilder limit(String limit) {
+        query.append(".limit(").append(limit).append(")");
+        return this;
+    }
 
-	}
+    public DslQueryBuilder filter(boolean isNot, String node, String key, List<String> values) {
+        return this.filterPropertyStart(isNot).filterPropertyKeys(node, key, values).filterPropertyEnd();
+    }
 
-	public DslQueryBuilder validateFilter(DslContext context) throws AAIException {
-		Introspector obj = loader.introspectorFromName(context.getStartNode());
-		if(context.getStartNodeKeys().isEmpty()){
-			queryException.append("No keys sent. Valid keys for " + context.getStartNode() + " are "
-					+ String.join(",", obj.getIndexedProperties()));
-			return this;
-		}
-		boolean notIndexed = context.getStartNodeKeys().stream()
-				.filter((prop) -> obj.getIndexedProperties().contains(prop)).collect(Collectors.toList()).isEmpty();
-		if (notIndexed)
-			queryException.append("Non indexed keys sent. Valid keys for " + context.getStartNode() + " "
-					+ String.join(",", obj.getIndexedProperties()));
+    public DslQueryBuilder filterPropertyStart(boolean isNot) {
+        if (isNot) {
+            query.append(".getVerticesExcludeByProperty(");
+        } else {
+            query.append(".getVerticesByProperty(");
+        }
+        return this;
+    }
 
-		return this;
-	}
+    public DslQueryBuilder filterPropertyEnd() {
+        query.append(")");
+        return this;
+    }
 
-	public DslQueryBuilder filterPropertyKeys(DslContext context) {
-		AAIDslParser.FilterStepContext ctx = (AAIDslParser.FilterStepContext) context.getCtx();
-		final String key = ctx.KEY(0).getText();
-		/*
-		 * This key should be indexed if it is start node
-		 */
-		if (context.isStartNode() && context.getStartNodeKeys().isEmpty()) {
-			// check if key is not indexed, then throw exception
-			context.getStartNodeKeys().add(key.replaceAll("'", ""));
-		}
+    public DslQueryBuilder validateFilter(String node, List<String> keys) {
+        try {
+            Introspector obj = loader.introspectorFromName(node);
+            if (keys.isEmpty()) {
+                queryException.append("No keys sent. Valid keys for " + node + " are "
+                        + String.join(",", obj.getIndexedProperties()));
+                return this;
+            }
 
-		query.append(key);
-		List<TerminalNode> nodes = ctx.KEY();
-		List<TerminalNode> numberValues = ctx.NODE();
-		/*
-		 * Add all String values
-		 */
-		List<String> valuesArray = nodes.stream().filter((node) -> !key.equals(node.getText()))
-				.map((node) -> "'" + node.getText().replace("'", "").trim() + "'").collect(Collectors.toList());
+            boolean notIndexed = keys.stream()
+                    .filter(prop -> obj.getIndexedProperties().contains(prop)).collect(Collectors.toList()).isEmpty();
 
-		/*
-		 * Add all numeric values
-		 */
-		valuesArray.addAll(numberValues.stream().filter((node) -> !key.equals(node.getText()) )
-				.map((node) -> node.getText()).collect(Collectors.toList()));
-		
-		
-		/*
-		 * The whole point of doing this to separate P.within from key-value
-		 * search For a list of values QB uses P.within For just a single value
-		 * QB uses key,value check
-		 */
-		if (nodes.size() > 2) {
-			String values = String.join(",", valuesArray);
-			query.append(",").append(" new ArrayList<>(Arrays.asList(" + values.toString() + "))");
-		} else {
-			if (!valuesArray.isEmpty())
-				query.append(",").append(valuesArray.get(0).toString());
-		}
-		return this;
-	}
+            if (notIndexed) {
+                queryException.append("Non indexed keys sent. Valid keys for " + node + " "
+                        + String.join(",", obj.getIndexedProperties()));
+            }
+        } catch (AAIUnknownObjectException e) {
+            queryException.append("Unknown Object being referenced by the query" + node);
+        }
+        return this;
 
-	public DslQueryBuilder union(DslContext context) {
-		query.append(".union(");
-		return this;
-	}
+    }
 
-	public DslQueryBuilder store(DslContext context) {
-		AAIDslParser.SingleNodeStepContext ctx = (AAIDslParser.SingleNodeStepContext) context.getCtx();
-		if (ctx.STORE() != null && ctx.STORE().getText().equals("*")) {
-			query.append(".store('x')");
-		}
-		return this;
+    public DslQueryBuilder filterPropertyKeys(String node, String key, List<String> values) {
+        try {
+            Introspector obj = loader.introspectorFromName(node);
 
-	}
+            Optional<String> alias = obj.getPropertyMetadata(key, PropertyMetadata.DB_ALIAS);
+            if (alias.isPresent()) {
+                key = alias.get();
+            }
+            query.append(key);
 
-	public DslQueryBuilder comma(DslContext context) {
-		query.append(",");
-		return this;
+            if (!values.isEmpty()) {
+                if (values.size() > 1) {
+                    String valuesArray = String.join(",", values);
+                    query.append(",").append(" new ArrayList<>(Arrays.asList(" + valuesArray + "))");
+                } else {
+                    query.append(",").append(values.get(0));
+                }
+            }
+        } catch (AAIUnknownObjectException e) {
+            queryException.append("Unknown Object being referenced by the query" + node);
+        }
+        return this;
+    }
 
-	}
+    public DslQueryBuilder union() {
+        query.append(".union(");
+        return this;
+    }
+
+    public DslQueryBuilder endUnion() {
+        query.append(")");
+        return this;
+    }
+
+    public DslQueryBuilder store() {
+        query.append(".store('x')");
+        return this;
+    }
+
+    public DslQueryBuilder startInstance() {
+        query.append("builder.newInstance()");
+        return this;
+    }
+
+    public DslQueryBuilder endInstance() {
+        return this;
+    }
+
+    public DslQueryBuilder comma() {
+        query.append(",");
+        return this;
+    }
+
+
 }

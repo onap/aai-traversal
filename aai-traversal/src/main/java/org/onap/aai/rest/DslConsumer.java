@@ -19,25 +19,11 @@
  */
 package org.onap.aai.rest;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.Encoded;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.Status;
-
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
@@ -64,11 +50,12 @@ import org.onap.aai.util.TraversalConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Path("{version: v[1-9][0-9]*|latest}/dsl")
 public class DslConsumer extends RESTAPI {
@@ -90,8 +77,8 @@ public class DslConsumer extends RESTAPI {
 
 	@Autowired
 	public DslConsumer(HttpEntry traversalUriHttpEntry, DslQueryProcessor dslQueryProcessor,
-			SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
-			@Value("${schema.uri.base.path}") String basePath) {
+                       SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
+                       @Value("${schema.uri.base.path}") String basePath) {
 		this.traversalUriHttpEntry = traversalUriHttpEntry;
 		this.dslQueryProcessor = dslQueryProcessor;
 		this.schemaVersions = schemaVersions;

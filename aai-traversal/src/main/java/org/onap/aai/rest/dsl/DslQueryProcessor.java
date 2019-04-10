@@ -19,24 +19,22 @@
  */
 package org.onap.aai.rest.dsl;
 
+import com.att.eelf.configuration.EELFLogger;
+import com.att.eelf.configuration.EELFManager;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.onap.aai.AAIDslLexer;
+import org.onap.aai.AAIDslParser;
+import org.onap.aai.exceptions.AAIException;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-
-import org.onap.aai.AAIDslLexer;
-import org.onap.aai.AAIDslParser;
-import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.rest.dsl.DslListener;
-import org.antlr.v4.runtime.Token;
-
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The Class DslQueryProcessor.
@@ -60,17 +58,22 @@ public class DslQueryProcessor {
 
 			// Create a lexer from the input CharStream
 			AAIDslLexer lexer = new AAIDslLexer(CharStreams.fromStream(stream, StandardCharsets.UTF_8));
+			lexer.removeErrorListeners();
+			lexer.addErrorListener(new AAIDslErrorListener());
 
 			// Get a list of tokens pulled from the lexer
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
 			// Parser that feeds off of the tokens buffer
 			AAIDslParser parser = new AAIDslParser(tokens);
+			parser.removeErrorListeners(); // remove ConsoleErrorListener
+			parser.addErrorListener(new AAIDslErrorListener());
 
 			dslListener.setValidationFlag(isValidationFlag());
 			// Specify our entry point
 			ParseTree ptree = parser.aaiquery();
 			LOGGER.info("QUERY-interim" + ptree.toStringTree(parser));
+
 
 			// Walk it and attach our listener
 			ParseTreeWalker walker = new ParseTreeWalker();
@@ -83,8 +86,10 @@ public class DslQueryProcessor {
 			 * 
 			 */
 			return dslListener.getQuery();
-		} catch (AAIException e) {
-			throw new AAIException("AAI_6149", "Error while processing the query :" + e.getMessage());
+		} catch(ParseCancellationException e){
+			throw new AAIException("AAI_6149", "DSL Syntax Error while processing the query :" + e.getMessage());
+		} catch(AAIException e) {
+			throw new AAIException("AAI_6149", "DSL Syntax Error  while processing the query :" + e.getMessage());
 		} catch (Exception e) {
 			throw new AAIException("AAI_6149","Error while processing the query :" + e.getMessage());
 		}

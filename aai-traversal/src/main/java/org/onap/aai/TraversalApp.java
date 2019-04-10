@@ -179,6 +179,7 @@ public class TraversalApp {
 		}
 
 		String currentDirectory = System.getProperty("user.dir");
+		System.setProperty("aai.service.name", TraversalApp.class.getSimpleName());
 
 		if (System.getProperty("AJSC_HOME") == null) {
 			System.setProperty("AJSC_HOME", ".");
