@@ -62,7 +62,7 @@ public class VersionInterceptor extends AAIContainerFilter implements ContainerR
 
         String uri = requestContext.getUriInfo().getPath();
 
-        if (uri.startsWith("search") || uri.startsWith("util/echo") || uri.startsWith("tools") || uri.startsWith("recents")) {
+        if (uri.startsWith("search") || uri.startsWith("util/echo") || uri.startsWith("tools") || uri.startsWith("recents")|| uri.startsWith("cq2gremlin")|| uri.startsWith("cq2gremlintest")) {
             return;
 		}
 

@@ -1,29 +1,41 @@
 /**
- * Define a grammar called AAIDsl
+ * Define a parser grammar called AAIDsl
  */
 grammar AAIDsl;
 
+aaiquery: startStatement limit?;
 
-aaiquery: dslStatement;
+startStatement: (vertex ) (traversal)* ;
+nestedStatement: (vertex|unionVertex ) (traversal)* ;
 
-dslStatement: (singleNodeStep ) (traverseStep )* limitStep*;
+vertex: label store? (filter)?;
 
-unionQueryStep: LBRACKET dslStatement ( COMMA (dslStatement))* RBRACKET;
+traversal:  (edge (vertex|unionVertex));
 
-traverseStep: (TRAVERSE (  singleNodeStep | unionQueryStep));
+filter:  (propertyFilter)* whereFilter?;
+propertyFilter: (not? '(' key (',' (key | num))* ')');
 
-singleNodeStep: NODE STORE? (filterStep | filterTraverseStep)*;
+whereFilter: (not? '(' edge nestedStatement ')' );
 
-filterStep: NOT? (LPAREN KEY (COMMA (KEY | NODE))* RPAREN);
-filterTraverseStep: (LPAREN traverseStep* RPAREN);
+unionVertex: '[' ( (edgeFilter)* nestedStatement ( comma ( (edgeFilter)* nestedStatement))*) ']';
 
-limitStep: LIMIT NODE;
+comma: ',';
+edge: TRAVERSE (edgeFilter)*;
+edgeFilter: '(' key (',' key )* ')';
 
-LIMIT: 'LIMIT';
-NODE: ID;
+num: NUM;
+limit: LIMIT num;
+label: (ID | NUM )+;
+key: KEY;
 
-KEY: ['] (ID | ' ')* ['] ;
+store: STORE;
+not: NOT;
 
+LIMIT: 'LIMIT'|'limit';
+NUM: (DIGIT)+;
+
+/*NODE: (ID | NUM )+;*/
+KEY : '\'' ( ~['\r\n] )*? '\'';
 
 AND: [&];
 
@@ -33,29 +45,18 @@ OR: [|];
 
 TRAVERSE: [>] ;
 
-LPAREN: [(];
-	
-RPAREN: [)];
-
-COMMA: [,] ;
-
 EQUAL: [=];
 
-LBRACKET: [[];
-	
-RBRACKET: [\]];
-
 NOT: [!];
-
-VALUE: [DIGIT]+;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z] ;
 fragment DIGIT      : [0-9] ;
+fragment  ESC : '\\' . ;
+fragment ID_SPECIALS: [-:_];
+
 ID
-   : ( LOWERCASE | UPPERCASE | DIGIT) ( LOWERCASE | UPPERCASE | DIGIT | '-' | '.' | '_' | '/')*
+   :  ( LOWERCASE | UPPERCASE  | DIGIT | ID_SPECIALS)
    ;
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
-
-

@@ -22,6 +22,8 @@ package org.onap.aai.web;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletProperties;
+import org.onap.aai.rest.CQ2Gremlin;
+import org.onap.aai.rest.CQ2GremlinTest;
 import org.onap.aai.rest.DslConsumer;
 import org.onap.aai.rest.QueryConsumer;
 import org.onap.aai.rest.RecentAPIConsumer;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseFilter;
+
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -60,6 +63,8 @@ public class JerseyConfiguration extends ResourceConfig {
         register(RecentAPIConsumer.class);
         register(DslConsumer.class);
         register(EchoResponse.class);
+        register(CQ2Gremlin.class);
+        register(CQ2GremlinTest.class);
 
         //Request Filters
         registerFiltersForRequests();
