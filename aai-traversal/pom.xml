@@ -42,8 +42,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <aai.schema.version>1.0.1</aai.schema.version>
-        <aai.core.version>1.4.2</aai.core.version>
-        <aai.rest.version>1.4.2</aai.rest.version>
+        <aai.core.version>1.4.3</aai.core.version>
+        <aai.rest.version>1.4.3</aai.rest.version>
 
         <spring.boot.version>1.5.20.RELEASE</spring.boot.version>
 
