@@ -138,7 +138,7 @@ public class AAIGremlinQueryTest {
         String authorization = Base64.getEncoder().encodeToString("AAI:AAI".getBytes("UTF-8"));
         headers.add("Authorization", "Basic " + authorization);
 
-        baseUrl = "https://localhost:" + randomPort;
+        baseUrl = "http://localhost:" + randomPort;
     }
 
     @Test
