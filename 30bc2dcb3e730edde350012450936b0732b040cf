@@ -207,6 +207,30 @@
       "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad4f136b_6d588bbf",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/QueryConsumerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-04-11T13:55:26Z",
+      "side": 1,
+      "message": "We decided to use http with junits because with https there is a dependency on the certificates being up-todate in the junits.\nWhen the certs expire we have to update the test-resources to use the latest certs.",
+      "parentUuid": "365d2534_c4988109",
+      "range": {
+        "startLine": 99,
+        "startChar": 2,
+        "endLine": 99,
+        "endChar": 45
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
