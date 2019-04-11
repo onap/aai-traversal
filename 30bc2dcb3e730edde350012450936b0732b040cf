@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ff1210c_8e99ad7d",
+        "filename": "aai-traversal/src/main/resources/retired.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "this regex pattern contains a + so it means v22, .., v29, v32, .., v39, etc are also \"retired\"?",
+      "range": {
+        "startLine": 3,
+        "startChar": 2,
+        "endLine": 3,
+        "endChar": 20
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1adfa25d_5c03b40e",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/AAIGremlinQueryTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "there should be test cases for both http and https",
+      "range": {
+        "startLine": 141,
+        "startChar": 8,
+        "endLine": 141,
+        "endChar": 51
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a057acb_32170768",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/QueryParameterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "there should be test cases for both http and https",
+      "range": {
+        "startLine": 166,
+        "startChar": 8,
+        "endLine": 166,
+        "endChar": 51
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a89858f_2bd8c985",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/SubgraphPruneTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "there should be test cases for both http and https",
+      "range": {
+        "startLine": 109,
+        "startChar": 8,
+        "endLine": 109,
+        "endChar": 51
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ae9a047_54b5d0f4",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/AbstractSpringRestTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "there should be test cases for both http and https",
+      "range": {
+        "startLine": 102,
+        "startChar": 8,
+        "endLine": 102,
+        "endChar": 51
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faea167d_2fe497a0",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/BadQueryFormatTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "there should be test cases for both http and https",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 87,
+        "endChar": 51
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2d3dbc5_b78c868e",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/DslConsumerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "this is effectively a breaking API change.\nerror 400 means the URL is used to mean it not valid.\nerror 404 means the URL is used to mean it is valid but there is no data.\n\nthis difference is used in the robot csit test cases for AAI.",
+      "range": {
+        "startLine": 110,
+        "startChar": 2,
+        "endLine": 110,
+        "endChar": 71
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "365d2534_c4988109",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/QueryConsumerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:47:31Z",
+      "side": 1,
+      "message": "there should be test cases for both http and https",
+      "range": {
+        "startLine": 99,
+        "startChar": 2,
+        "endLine": 99,
+        "endChar": 45
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
