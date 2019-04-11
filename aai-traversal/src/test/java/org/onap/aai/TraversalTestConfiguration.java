@@ -58,30 +58,35 @@ public class TraversalTestConfiguration {
     @Bean
     RestTemplate restTemplate(RestTemplateBuilder builder) throws Exception {
 
-        char[] trustStorePassword = env.getProperty("server.ssl.trust-store-password").toCharArray();
-        char[] keyStorePassword   = env.getProperty("server.ssl.key-store-password").toCharArray();
+        RestTemplate restTemplate = null;
 
-        String keyStore = env.getProperty("server.ssl.key-store");
-        String trustStore = env.getProperty("server.ssl.trust-store");
+        if(env.acceptsProfiles("one-way-ssl", "two-way-ssl")) {
+            char[] trustStorePassword = env.getProperty("server.ssl.trust-store-password").toCharArray();
+            char[] keyStorePassword = env.getProperty("server.ssl.key-store-password").toCharArray();
 
-        SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
+            String keyStore = env.getProperty("server.ssl.key-store");
+            String trustStore = env.getProperty("server.ssl.trust-store");
+            SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
 
-        if(env.acceptsProfiles("two-way-ssl")){
-            sslContextBuilder = sslContextBuilder.loadKeyMaterial(loadPfx(keyStore, keyStorePassword), keyStorePassword);
+            if (env.acceptsProfiles("two-way-ssl")) {
+                sslContextBuilder = sslContextBuilder.loadKeyMaterial(loadPfx(keyStore, keyStorePassword), keyStorePassword);
+            }
+
+            SSLContext sslContext = sslContextBuilder
+                    .loadTrustMaterial(ResourceUtils.getFile(trustStore), trustStorePassword)
+                    .build();
+
+            HttpClient client = HttpClients.custom()
+                    .setSSLContext(sslContext)
+                    .setSSLHostnameVerifier((s, sslSession) -> true)
+                    .build();
+
+            restTemplate = builder
+                    .requestFactory(new HttpComponentsClientHttpRequestFactory(client))
+                    .build();
+        }else {
+            restTemplate = builder.build();
         }
-
-        SSLContext sslContext = sslContextBuilder
-                .loadTrustMaterial(ResourceUtils.getFile(trustStore), trustStorePassword)
-                .build();
-
-        HttpClient client = HttpClients.custom()
-                .setSSLContext(sslContext)
-                .setSSLHostnameVerifier((s, sslSession) -> true)
-                .build();
-
-        RestTemplate restTemplate =  builder
-                .requestFactory(new HttpComponentsClientHttpRequestFactory(client))
-                .build();
 
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override
