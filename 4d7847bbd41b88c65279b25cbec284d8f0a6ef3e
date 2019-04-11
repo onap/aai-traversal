@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c6206c5_f8477fa0",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T06:50:31Z",
+      "side": 1,
+      "message": "should this include a schema version bump too?",
+      "range": {
+        "startLine": 44,
+        "startChar": 8,
+        "endLine": 44,
+        "endChar": 54
+      },
+      "revId": "4d7847bbd41b88c65279b25cbec284d8f0a6ef3e",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
