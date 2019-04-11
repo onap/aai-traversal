@@ -163,6 +163,30 @@
     },
     {
       "key": {
+        "uuid": "5078aca3_e0208058",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/DslConsumerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 3799
+      },
+      "writtenOn": "2019-04-11T13:44:49Z",
+      "side": 1,
+      "message": "Here the URL is valid. But the dsl query is trying to query \"xserver\" which is not valid data. Not a valid nodetype, so no data in the DB.\nIs there a robot test for this specific case?",
+      "parentUuid": "a2d3dbc5_b78c868e",
+      "range": {
+        "startLine": 110,
+        "startChar": 2,
+        "endLine": 110,
+        "endChar": 71
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "365d2534_c4988109",
         "filename": "aai-traversal/src/test/java/org/onap/aai/rest/QueryConsumerTest.java",
         "patchSetId": 1
