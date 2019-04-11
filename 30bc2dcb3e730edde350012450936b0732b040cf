@@ -211,6 +211,30 @@
     },
     {
       "key": {
+        "uuid": "1ce7f395_c29f3bbb",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/DslConsumerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-04-11T14:40:42Z",
+      "side": 1,
+      "message": "so using \"xserver\" as data in traversal DSL gives a 404, but using \"xserver\" as a URL in resources query would give a 400?\n\nfor this specific URL in traversal, I don\u0027t have a robot test case.\nfor the difference between 400 and 404, there are several robot test cases on the resources API that make this precise distinction.\nI don\u0027t know about other clients.\n\nI hope this is documented somewhere for reference.",
+      "parentUuid": "5078aca3_e0208058",
+      "range": {
+        "startLine": 110,
+        "startChar": 2,
+        "endLine": 110,
+        "endChar": 71
+      },
+      "revId": "30bc2dcb3e730edde350012450936b0732b040cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "365d2534_c4988109",
         "filename": "aai-traversal/src/test/java/org/onap/aai/rest/QueryConsumerTest.java",
         "patchSetId": 1
