@@ -78,6 +78,7 @@
         <janino.version>2.7.8</janino.version>
         <google.guava.version>19.0</google.guava.version>
         <janusgraph.version>0.2.3</janusgraph.version>
+        <jnr.ffi.version>2.1.9</jnr.ffi.version>
         <gremlin.version>3.2.2</gremlin.version>
         <smack.version>3.0.4</smack.version>
         <json.simple.version>1.1.1</json.simple.version>
@@ -106,7 +107,7 @@
 
         <eclipse.jetty.version>9.4.1.v20170120</eclipse.jetty.version>
 
-        <docker.fabric.version>0.23.0</docker.fabric.version>
+        <docker.fabric.version>0.28.0</docker.fabric.version>
         <!-- Default docker registry that maven fabric plugin will try to pull from -->
         <docker.registry>docker.io</docker.registry>
         <!-- Specifying the docker push registry where the image should be pushed -->
@@ -120,6 +121,7 @@
         -->
         <aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
         <aai.docker.namespace>onap</aai.docker.namespace>
+        <aai.base.image>alpine</aai.base.image>
 
         <!--
             Nexus Proxy Properties and Snapshot Locations
@@ -169,6 +171,33 @@
             <id>docker</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.groovy.maven</groupId>
+                        <artifactId>gmaven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <source>
+                                        def userAaiBaseImage = session.userProperties['aai.base.image'];
+                                        def userAaiDockerVersion = session.userProperties['aai.docker.version'];
+                                        if (userAaiDockerVersion != null) {
+                                            project.properties['aai.docker.version'] = userAaiDockerVersion;
+                                        }
+                                        if (userAaiBaseImage != null) {
+                                            project.properties['aai.base.image'] = userAaiBaseImage;
+                                        }
+                                        log.info 'Base image flavour: ' + project.properties['aai.base.image'];
+                                        log.info 'Base image version: ' + project.properties['aai.docker.version'];
+                                    </source>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
@@ -493,6 +522,16 @@
                     <artifactId>dom4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!--
+            indirect janusgraph-cassandra dependency
+            need to be newer than default one
+            in order to support multiple cpu archs
+        -->
+        <dependency>
+            <groupId>com.github.jnr</groupId>
+            <artifactId>jnr-ffi</artifactId>
+            <version>${jnr.ffi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>
