@@ -106,7 +106,7 @@
 
         <eclipse.jetty.version>9.4.1.v20170120</eclipse.jetty.version>
 
-        <docker.fabric.version>0.23.0</docker.fabric.version>
+        <docker.fabric.version>0.28.0</docker.fabric.version>
         <!-- Default docker registry that maven fabric plugin will try to pull from -->
         <docker.registry>docker.io</docker.registry>
         <!-- Specifying the docker push registry where the image should be pushed -->
