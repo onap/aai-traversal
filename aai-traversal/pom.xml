@@ -41,7 +41,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <aai.schema.version>1.0.2</aai.schema.version>
+        <aai.schema.version>1.0.3</aai.schema.version>
         <aai.core.version>1.4.3</aai.core.version>
         <aai.rest.version>1.4.3</aai.rest.version>
 
