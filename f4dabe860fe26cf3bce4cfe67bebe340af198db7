@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "33c27d53_ad62fb17",
+        "filename": "aai-traversal/src/main/docker/Dockerfile",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 4341
+      },
+      "writtenOn": "2019-05-01T01:54:47Z",
+      "side": 1,
+      "message": "why the \"GQ\" in the name? Was \"traversal\" previously called \"GraphQuery\" or something like that?\ncurrently inconsistent with the naming in other AAI Dockerfiles in this series.",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 30
+      },
+      "revId": "f4dabe860fe26cf3bce4cfe67bebe340af198db7",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3392375_9b09f5e3",
         "filename": "aai-traversal/src/main/docker/Dockerfile",
         "patchSetId": 3
