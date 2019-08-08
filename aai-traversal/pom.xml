@@ -42,10 +42,10 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <aai.schema.version>1.5.0</aai.schema.version>
-        <aai.core.version>1.5.1</aai.core.version>
-        <aai.rest.version>1.5.1</aai.rest.version>
+        <aai.core.version>1.5.3</aai.core.version>
+        <aai.rest.version>1.5.3</aai.rest.version>
 
-        <spring.boot.version>1.5.20.RELEASE</spring.boot.version>
+        <spring.boot.version>1.5.21.RELEASE</spring.boot.version>
 
         <!-- Start of the jacoco plugin properties -->
         <sonar.language>java</sonar.language>
@@ -77,7 +77,7 @@
         <hamcrest.junit.version>2.0.0.0</hamcrest.junit.version>
         <janino.version>2.7.8</janino.version>
         <google.guava.version>19.0</google.guava.version>
-        <janusgraph.version>0.2.0</janusgraph.version>
+        <janusgraph.version>0.2.3</janusgraph.version>
         <gremlin.version>3.2.2</gremlin.version>
         <smack.version>3.0.4</smack.version>
         <json.simple.version>1.1.1</json.simple.version>
