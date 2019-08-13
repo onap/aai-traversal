@@ -1,0 +1,4 @@
+distribution_type: 'maven'
+version: '1.5.0'
+project: 'aai-traversal'
+log_dir: 'aai-traversal-maven-stage-elalto/28'
