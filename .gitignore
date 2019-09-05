@@ -13,3 +13,4 @@ bundleconfig-local/etc/logback.xml
 *.iml
 **/oxm/**
 **/dbedgerules/**
+aai-traversal/src/main/resources/schema/**
