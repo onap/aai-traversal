@@ -1138,6 +1138,25 @@
                             <!-- other configurations here -->
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-query</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.onap.aai.schema-service</groupId>
+                                    <artifactId>aai-queries</artifactId>
+                                    <version>${aai.schema.version}</version>
+                                    <outputDirectory>${project.basedir}/src/main/resources/</outputDirectory>
+                                    <includes>**/**/query/stored-queries.json</includes>
+                                </artifactItem>
+                            </artifactItems>
+                            <!-- other configurations here -->
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
