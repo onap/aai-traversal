@@ -19,28 +19,23 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.JanusGraphDBEngine;
-import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.setup.SchemaVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.*;
 import java.util.*;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,10 +49,8 @@ public class SearchProviderTest extends AAISetup{
     private SchemaVersion version;
     private static final ModelType introspectorFactoryType = ModelType.MOXY;
     private static final QueryStyle queryStyle = QueryStyle.TRAVERSAL;
-    private static final DBConnectionType type = DBConnectionType.REALTIME;
 
     private Loader loader;
-    private TransactionalGraphEngine dbEngine;
 
     static {
         VALID_HTTP_STATUS_CODES.add(200);
@@ -78,7 +71,7 @@ public class SearchProviderTest extends AAISetup{
 
     private List<MediaType> outputMediaTypes;
 
-    private static final EELFLogger logger = EELFManager.getInstance().getLogger(SearchProviderTest.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(SearchProviderTest.class.getName());
 
     @Before
     public void setup(){
@@ -108,8 +101,8 @@ public class SearchProviderTest extends AAISetup{
 
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Arrays.asList("JUNIT"));
-        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Arrays.asList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Collections.singletonList("JUNIT"));
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
@@ -122,10 +115,6 @@ public class SearchProviderTest extends AAISetup{
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new JanusGraphDBEngine(
-                queryStyle,
-                type,
-                loader);
     }
 
     @Test

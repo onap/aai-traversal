@@ -19,7 +19,8 @@
  */
 package org.onap.aai;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -46,7 +47,7 @@ import java.security.KeyStore;
 @TestConfiguration
 public class TraversalTestConfiguration {
 
-    private static final EELFLogger logger = EELFManager.getInstance().getLogger(TraversalTestConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(TraversalTestConfiguration.class);
 
     @Autowired
     private Environment env;

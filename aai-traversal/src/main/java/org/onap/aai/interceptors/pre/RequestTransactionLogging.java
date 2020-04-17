@@ -37,6 +37,8 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,6 +60,8 @@ public class RequestTransactionLogging extends AAIContainerFilter implements Con
 	private static final String CONTENT_TYPE = "Content-Type";
 	private static final String ACCEPT = "Accept";
 	private static final String TEXT_PLAIN = "text/plain";
+	private static final String WILDCARD = "*/*";
+	private static final String APPLICATION_JSON = "application/json";
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -83,8 +87,18 @@ public class RequestTransactionLogging extends AAIContainerFilter implements Con
 			requestContext.getHeaders().putSingle(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
 		}
 
-		if(StringUtils.isEmpty(acceptType) || acceptType.contains(TEXT_PLAIN)){
-			requestContext.getHeaders().putSingle(ACCEPT, DEFAULT_RESPONSE_TYPE);
+		if(WILDCARD.equals(acceptType) || StringUtils.isEmpty(acceptType) || acceptType.contains(TEXT_PLAIN)){
+			UriInfo uriInfo = requestContext.getUriInfo();
+			if(uriInfo != null){
+				String path = uriInfo.getPath();
+				if(path.endsWith("/dsl") || path.endsWith("/query") || path.contains("/recents/")){
+					requestContext.getHeaders().putSingle(ACCEPT, APPLICATION_JSON);
+				} else {
+					requestContext.getHeaders().putSingle(ACCEPT, DEFAULT_RESPONSE_TYPE);
+				}
+			} else {
+				requestContext.getHeaders().putSingle(ACCEPT, DEFAULT_RESPONSE_TYPE);
+			}
 		}
 	}
 

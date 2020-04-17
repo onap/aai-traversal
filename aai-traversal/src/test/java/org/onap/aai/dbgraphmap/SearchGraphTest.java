@@ -19,31 +19,28 @@
  */
 package org.onap.aai.dbgraphmap;
 
-import org.janusgraph.core.JanusGraph;
-import org.janusgraph.graphdb.types.system.EmptyVertex;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.persistence.dynamic.DynamicEntity;
+import org.janusgraph.graphdb.types.system.EmptyVertex;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.extensions.AAIExtensionMap;
-import org.onap.aai.introspection.*;
+import org.onap.aai.introspection.Introspector;
+import org.onap.aai.introspection.Loader;
+import org.onap.aai.introspection.ModelType;
 import org.onap.aai.parsers.relationship.RelationshipToURI;
+import org.onap.aai.rest.util.AAIExtensionMap;
 import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
+import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.util.GenericQueryBuilder;
 import org.onap.aai.util.NodesQueryBuilder;
-
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
@@ -52,7 +49,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SearchGraphTest extends AAISetup{
 
@@ -65,7 +63,6 @@ public class SearchGraphTest extends AAISetup{
     private SchemaVersion version;
     private final static ModelType introspectorFactoryType = ModelType.MOXY;
     private final static QueryStyle queryStyle = QueryStyle.TRAVERSAL;
-    private final static DBConnectionType type = DBConnectionType.REALTIME;
 
     static {
         VALID_HTTP_STATUS_CODES.add(200);
@@ -85,11 +82,7 @@ public class SearchGraphTest extends AAISetup{
     private List<MediaType> outputMediaTypes;
 
     private Loader loader;
-    private JanusGraph graph;
 
-    private Graph tx;
-
-    private GraphTraversalSource g;
     private TransactionalGraphEngine dbEngine;
 
     @Before
@@ -116,8 +109,8 @@ public class SearchGraphTest extends AAISetup{
 
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Arrays.asList("JUNIT"));
-        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Arrays.asList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Collections.singletonList("JUNIT"));
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
@@ -130,7 +123,7 @@ public class SearchGraphTest extends AAISetup{
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new JanusGraphDBEngine(queryStyle, type, loader);
+        dbEngine = new JanusGraphDBEngine(queryStyle, loader);
     }
 
     @Test(expected = AAIException.class)
@@ -187,9 +180,6 @@ public class SearchGraphTest extends AAISetup{
     @Test(expected = AAIException.class)
     public void testRunGenericQueryFailWhenInvalidRelationshipList2() throws AAIException {
 
-        List<String> keys = new ArrayList<>();
-        keys.add("cloud-region.cloud-owner:test-aic");
-
         List<String> includeStrings = new ArrayList<>();
         includeStrings.add("cloud-region");
 
@@ -207,9 +197,6 @@ public class SearchGraphTest extends AAISetup{
         List<String> keys = new ArrayList<>();
         keys.add("cloud-region.cloud-owner:test-aic");
 
-        List<String> includeStrings = new ArrayList<>();
-        includeStrings.add("cloud-region");
-
         DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
         UrlBuilder urlBuilder = new UrlBuilder(version, serializer, schemaVersions, basePath);
         Response response = searchGraph.runGenericQuery(new GenericQueryBuilder().setHeaders(httpHeaders)
@@ -218,43 +205,21 @@ public class SearchGraphTest extends AAISetup{
         System.out.println(response);
     }
 
-
-    /*@Test(expected = NullPointerException.class)
-    public void createSearchResults() throws AAIException {
-
-        List<Vertex> keys = new ArrayList<>();
-        Vertex vertex=new EmptyVertex();
-        keys.add(vertex);
-
-
-
-        List<String> includeStrings = new ArrayList<>();
-        includeStrings.add("cloud-region");
-
-        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
-        Introspector response = searchGraph.createSearchResults(loader, urlBuilder, keys);
-        System.out.println(response);
-    }*/
     @Test
     public void createSearchResults1() throws Exception {
 
         List<Vertex> keys = new ArrayList<>();
         Vertex vertex=new EmptyVertex();
         keys.add(vertex);
-         DBSerializer ds=mock(DBSerializer.class);
           UrlBuilder urlBuilder=mock(UrlBuilder.class);
           when(urlBuilder.pathed(vertex)).thenReturn("cloud-region");
         Stream<Vertex> stream=mock(Stream.class);
         when(stream.isParallel()).thenReturn(true);
-        List<String> includeStrings = new ArrayList<>();
-        includeStrings.add("cloud-region");
+
         RelationshipToURI relationshipToURI=mock(RelationshipToURI.class);
         URI uri =new URI("");
         when(relationshipToURI.getUri()).thenReturn(uri);
 
-        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-     //   UrlBuilder urlBuilder = new UrlBuilder(version, serializer);
         Introspector response = searchGraph.createSearchResults(loader, urlBuilder, keys);
         System.out.println(response);
     }
@@ -262,13 +227,6 @@ public class SearchGraphTest extends AAISetup{
     public void executeModelOperationTest() throws  Exception{
         Vertex vertex=new EmptyVertex();
         vertex.property("model-name");
-        Map<String,Object> mapObj=new HashMap<String,Object>();
-        mapObj.put("modle-version",vertex);
-        List<Map<String,Object>> startNodeFilterArrayOfHashes=new ArrayList<>();
-        startNodeFilterArrayOfHashes.add(mapObj);
-        List<org.onap.aai.dbgraphgen.ResultSet> resultSet=new ArrayList<org.onap.aai.dbgraphgen.ResultSet>();
-        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-      //  ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
         AAIExtensionMap map=mock(AAIExtensionMap.class);
         HttpServletRequest servletRequest=mock(HttpServletRequest.class);
 
@@ -277,12 +235,7 @@ public class SearchGraphTest extends AAISetup{
         DynamicEntity modelAndNamedQuerySearch=mock(DynamicEntity.class);
         when(modelAndNamedQuerySearch.isSet("topNodeType")).thenReturn(true);
 
-
-/*        when(processor.queryByModel("9999","model-ver","model-version-id",
-                "model-inv-id","modelname","aai",
-                startNodeFilterArrayOfHashes,"aai-ver")).thenReturn(resultSet);*/
-
-        searchGraph.executeModelOperation("","","",type,true,
+        searchGraph.executeModelOperation("","","",true,
                 map);
     }
 
@@ -290,13 +243,6 @@ public class SearchGraphTest extends AAISetup{
     public void executeModelOperationXMLTest() throws  Exception{
         Vertex vertex=new EmptyVertex();
         vertex.property("model-name");
-        Map<String,Object> mapObj=new HashMap<String,Object>();
-        mapObj.put("modle-version",vertex);
-        List<Map<String,Object>> startNodeFilterArrayOfHashes=new ArrayList<>();
-        startNodeFilterArrayOfHashes.add(mapObj);
-        List<org.onap.aai.dbgraphgen.ResultSet> resultSet=new ArrayList<org.onap.aai.dbgraphgen.ResultSet>();
-        DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
-        //  ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
         AAIExtensionMap map=mock(AAIExtensionMap.class);
         HttpServletRequest servletRequest=mock(HttpServletRequest.class);
 
@@ -305,19 +251,16 @@ public class SearchGraphTest extends AAISetup{
 
         DynamicEntity modelAndNamedQuerySearch=mock(DynamicEntity.class);
         when(modelAndNamedQuerySearch.isSet("queryParameters")).thenReturn(true);
-/*        when(processor.queryByModel("9999","model-ver","model-version-id",
-                "model-inv-id","modelname","aai",
-                startNodeFilterArrayOfHashes,"aai-ver")).thenReturn(resultSet);*/
 
-        searchGraph.executeModelOperation("","","",type,true,
+        searchGraph.executeModelOperation("","","",true,
                 map);
     }
     @Test
     public void runNodesQueryTest() throws  AAIException{
         UrlBuilder urlBuilder=mock(UrlBuilder.class);
-        List<String> filter=new ArrayList<String>();
+        List<String> filter=new ArrayList<>();
         filter.add("model:EQUALS:DOES-NOT-EXIST:AAI");
-        List<String> edgeFilter=new ArrayList<String>();
+        List<String> edgeFilter=new ArrayList<>();
         edgeFilter.add("model:DOES-NOT-EXIST:DOES-NOT-EXIST:AAI");
       Response response=  searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
               .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
@@ -341,7 +284,7 @@ public class SearchGraphTest extends AAISetup{
         UrlBuilder urlBuilder=mock(UrlBuilder.class);
         List<String> filter=new ArrayList<String>();
         filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST");
-        List<String> edgeFilter=new ArrayList<String>();
+        List<String> edgeFilter=new ArrayList<>();
         searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
                 .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
@@ -349,9 +292,9 @@ public class SearchGraphTest extends AAISetup{
     @Test
     public void runNodesQueryTestGreaterThan3() throws  AAIException{
         UrlBuilder urlBuilder=mock(UrlBuilder.class);
-        List<String> filter=new ArrayList<String>();
+        List<String> filter=new ArrayList<>();
         filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST:AAI");
-        List<String> edgeFilter=new ArrayList<String>();
+        List<String> edgeFilter=new ArrayList<>();
         searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
                 .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
@@ -359,9 +302,9 @@ public class SearchGraphTest extends AAISetup{
     @Test
     public void runNodesQueryTestGreaterThanExists() throws  AAIException{
         UrlBuilder urlBuilder=mock(UrlBuilder.class);
-        List<String> filter=new ArrayList<String>();
+        List<String> filter=new ArrayList<>();
         filter.add("model:EXISTS:DOES-NOT-EXIST:AAI");
-        List<String> edgeFilter=new ArrayList<String>();
+        List<String> edgeFilter=new ArrayList<>();
         searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
                 .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }
@@ -369,9 +312,9 @@ public class SearchGraphTest extends AAISetup{
     @Test(expected = AAIException.class)
     public void runNodesQueryTestGreaterThanDoesNotExists() throws  AAIException{
         UrlBuilder urlBuilder=mock(UrlBuilder.class);
-        List<String> filter=new ArrayList<String>();
+        List<String> filter=new ArrayList<>();
         filter.add("model:DOES_NOT_EXIST:DOES-NOT-EXIST:AAI");
-        List<String> edgeFilter=new ArrayList<String>();
+        List<String> edgeFilter=new ArrayList<>();
         searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter)
                         .setFilterParams(filter).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
     }

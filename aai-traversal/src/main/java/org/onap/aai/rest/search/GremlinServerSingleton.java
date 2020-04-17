@@ -21,8 +21,8 @@ package org.onap.aai.rest.search;
 
 import org.onap.aai.logging.LogFormatTools;
 import org.onap.aai.util.AAIConstants;
-import org.onap.aai.util.FileWatcher;
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ import java.util.TimerTask;
 
 public class GremlinServerSingleton {
 
-    private static EELFLogger logger = EELFManager.getInstance().getLogger(GremlinServerSingleton.class);
+    private static Logger logger = LoggerFactory.getLogger(GremlinServerSingleton.class);
 
     private boolean timerSet;
     private Timer timer;

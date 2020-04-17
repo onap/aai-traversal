@@ -22,6 +22,7 @@ package org.onap.aai.rest.dsl;
 import org.junit.Test;
 import org.onap.aai.AAISetup;
 import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.rest.enums.QueryVersion;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,7 +38,7 @@ public class ProdDslTest extends AAISetup {
                 + ".getVerticesByProperty('cloud-region-id','value').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','vlan-tag')"
                 + ".getVerticesByProperty('vlan-id-outer','value').store('x').cap('x').unfold().dedup()";
 
-        String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+        String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
         assertEquals(dslQuery, query);
     }
 
@@ -49,7 +50,7 @@ public class ProdDslTest extends AAISetup {
                 + ".createEdgeTraversal(EdgeType.TREE, 'pserver','p-interface')"
                 + ".createEdgeTraversal(EdgeType.TREE, 'p-interface','sriov-pf').getVerticesByProperty('pf-pci-id','0000:ee:00.0').store('x').cap('x').unfold().dedup()";
 
-        String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+        String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
         assertEquals(dslQuery, query);
     }
 
@@ -61,7 +62,7 @@ public class ProdDslTest extends AAISetup {
                 + ".createEdgeTraversal(EdgeType.TREE, 'l-interface','sriov-vf')"
                 + ".createEdgeTraversal(EdgeType.COUSIN, 'sriov-vf','sriov-pf').store('x').cap('x').unfold().dedup()";
 
-        String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+        String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
         assertEquals(dslQuery, query);
     }
 
@@ -75,7 +76,7 @@ public class ProdDslTest extends AAISetup {
                 + ".createEdgeTraversal( 'l-interface','lag-interface').getVerticesByProperty('interface-name','bond1')"
                 + ".createEdgeTraversal(EdgeType.COUSIN, 'lag-interface','p-interface').createEdgeTraversal(EdgeType.TREE, 'p-interface','sriov-pf').store('x').cap('x').unfold().dedup()";
 
-        String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+        String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
         assertEquals(dslQuery, query);
     }
 
@@ -88,7 +89,7 @@ public class ProdDslTest extends AAISetup {
                 + ".createEdgeTraversal(EdgeType.COUSIN, 'pserver','vserver').getVerticesByProperty('vserver-name','value')"
                 + ".createEdgeTraversal(EdgeType.TREE, 'vserver','l-interface').createEdgeTraversal(EdgeType.COUSIN, 'l-interface','cp').createEdgeTraversal(EdgeType.COUSIN, 'cp','vlan-tag').store('x').cap('x').unfold().dedup()";
 
-        String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+        String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
         assertEquals(dslQuery, query);
     }
 

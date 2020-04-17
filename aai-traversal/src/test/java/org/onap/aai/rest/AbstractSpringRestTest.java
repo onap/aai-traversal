@@ -19,10 +19,9 @@
  */
 package org.onap.aai.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphTransaction;
 import org.junit.*;
@@ -47,12 +46,12 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @Import(TraversalTestConfiguration.class)
 public abstract class AbstractSpringRestTest {
 
@@ -96,7 +95,7 @@ public abstract class AbstractSpringRestTest {
         headers.add("Real-Time", "true");
         headers.add("X-FromAppId", "JUNIT");
         headers.add("X-TransactionId", "JUNIT");
-        String authorization = Base64.getEncoder().encodeToString("AAI:AAI".getBytes("UTF-8"));
+        String authorization = Base64.getEncoder().encodeToString("AAI:AAI".getBytes(StandardCharsets.UTF_8));
         headers.add("Authorization", "Basic " + authorization);
         httpEntity = new HttpEntity(headers);
         baseUrl = "http://localhost:" + randomPort;
@@ -120,8 +119,7 @@ public abstract class AbstractSpringRestTest {
             GraphTraversalSource g = transaction.traversal();
             g.V().has("source-of-truth", P.within("JUNIT", "AAI-EXTENSIONS"))
                     .toList()
-                    .stream()
-                    .forEach(v -> v.remove());
+                    .forEach(Vertex::remove);
         } catch(Exception ex){
             success = false;
         } finally {

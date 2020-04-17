@@ -19,20 +19,104 @@
  */
 package org.onap.aai.rest.dsl;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.onap.aai.AAISetup;
 import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.rest.enums.QueryVersion;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * The Class DslMain.
  */
-public class DslQueryProcessorTest extends AAISetup {
+public class DslQueryProcessorV2Test extends AAISetup {
 	@Rule
 	public ExpectedException expectedEx = ExpectedException.none();
+
+	@Test
+	public void dbAliasTest() throws AAIException {
+		String aaiQuery = "logical-link* ('model-invariant-id','invid')";
+
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'logical-link').getVerticesByProperty('model-invariant-id-local','invid')"
+				+ ".store('x').cap('x').unfold().dedup()";
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void cloudRegionFromVnf() throws AAIException {
+		String aaiQuery = "generic-vnf*('vnf-name','xyz')  [> vnfc* > vserver*  [>pserver*, > tenant* > cloud-region*], "+
+				                  "> vserver*  [> pserver*, >tenant* > cloud-region*] ]";
+
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'generic-vnf').getVerticesByProperty('vnf-name','xyz').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf','vnfc').store('x')."
+		                  +"createEdgeTraversal(EdgeType.COUSIN, 'vnfc','vserver').store('x').union(builder.newInstance().createEdgeTraversal"
+		                  +"(EdgeType.COUSIN, 'vserver','pserver').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver','tenant')"
+				          +".store('x').createEdgeTraversal(EdgeType.TREE, 'tenant','cloud-region').store('x')),builder.newInstance().createEdgeTraversal"
+				          +"(EdgeType.COUSIN, 'generic-vnf','vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver'"
+				          +",'pserver').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver','tenant').store('x').createEdgeTraversal"
+		                  +"(EdgeType.TREE, 'tenant','cloud-region').store('x'))).cap('x').unfold().dedup()";
+
+
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void cloudRegionFromVnfWithDirection() throws AAIException {
+		String aaiQuery = "generic-vnf*('vnf-name','xyz')  [>> vnfc* >> vserver*  [>>pserver*, >> tenant* >> cloud-region*], "+
+				">> vserver*  [>> pserver*, >>tenant* >> cloud-region*] ]";
+
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'generic-vnf').getVerticesByProperty('vnf-name','xyz').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf','vnfc').store('x')."
+				+"createEdgeTraversal(EdgeType.COUSIN, 'vnfc','vserver').store('x').union(builder.newInstance().createEdgeTraversal"
+				+"(EdgeType.COUSIN, 'vserver','pserver').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver','tenant')"
+				+".store('x').createEdgeTraversal(EdgeType.TREE, 'tenant','cloud-region').store('x')),builder.newInstance().createEdgeTraversal"
+				+"(EdgeType.COUSIN, 'generic-vnf','vserver').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vserver'"
+				+",'pserver').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'vserver','tenant').store('x').createEdgeTraversal"
+				+"(EdgeType.TREE, 'tenant','cloud-region').store('x'))).cap('x').unfold().dedup()";
+
+
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+	@Test
+	public void cloudRegionSites() throws AAIException {
+		String aaiQuery = "cloud-region*('cloud-owner','xyz') > complex*";
+
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner'"
+		                  +",'xyz').store('x').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','complex').store('x').cap('x').unfold().dedup()";
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void pserverWithNoComplexTest() throws AAIException {
+		String aaiQuery = "pserver*('hostname','xyz')!(> complex)";
+
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'pserver').getVerticesByProperty('hostname','xyz').where(builder.newInstance().not("
+		                  +"builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'pserver','complex'))).store('x').cap('x').unfold().dedup()";
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void pserverWhereNotTest() throws AAIException {
+		String aaiQuery = "pserver('hostname','xyz')>vserver*!(> vnfc > configuration))";
+
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'pserver').getVerticesByProperty('hostname','xyz').createEdgeTraversal" +
+				"(EdgeType.COUSIN, 'pserver','vserver').where(builder.newInstance().not(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,"+
+				" 'vserver','vnfc').createEdgeTraversal(EdgeType.COUSIN, 'vnfc','configuration'))).store('x').cap('x').unfold().dedup()";
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
 
 	@Test
 	public void singleNode1() throws AAIException {
@@ -41,7 +125,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner','coid')"
 				+ ".store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -52,7 +136,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner','coid')"
 				+ ".store('x').cap('x').unfold().dedup().limit(10)";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -62,7 +146,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner','coidhello:?_-)(!@#$%^&*+={}[]|/.<,')"
 				+ ".store('x').cap('x').unfold().dedup().limit(10)";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -73,9 +157,9 @@ public class DslQueryProcessorTest extends AAISetup {
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner','coid')"
 				+ ".getVerticesByProperty('cloud-region-id','cr id').store('x').cap('x').unfold().dedup().limit(10)";
 
-		expectedEx.expect(org.onap.aai.exceptions.AAIException.class);
+		expectedEx.expect(AAIException.class);
 		expectedEx.expectMessage("DSL Syntax Error while processing the query");
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 	}
 
 	@Test
@@ -85,10 +169,10 @@ public class DslQueryProcessorTest extends AAISetup {
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner','coid')"
 				+ ".getVerticesByProperty('cloud-region-id','cr id').store('x').cap('x').unfold().dedup().limit(10)";
 
-		expectedEx.expect(org.onap.aai.exceptions.AAIException.class);
+		expectedEx.expect(AAIException.class);
 		expectedEx.expectMessage("DSL Syntax Error while processing the query");
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 	}
 
 	@Test
@@ -98,7 +182,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner','coid')"
 				+ ".getVerticesByProperty('cloud-region-id','cr id').store('x').cap('x').unfold().dedup().limit(10)";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -115,7 +199,7 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".getVerticesByProperty('cloud-region-id','One'))"
 				+ ".createEdgeTraversal(EdgeType.TREE, 'generic-vnf','entitlement').store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -129,15 +213,15 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".getVerticesByProperty('cloud-region-id','One'))"
 				+ ".createEdgeTraversalWithLabels( 'generic-vnf','service-instance', new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.ComposedOf'))).store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
 	@Test
 	public void complex_az_fromComplexTest() throws AAIException {
 
-		String aaiQuery = "cloud-region('cloud-owner','coid')('cloud-region-id','crid')  > [  availability-zone* ,  complex*]";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String aaiQuery = "cloud-region('cloud-owner','coid')('cloud-region-id','crid')   [>  availability-zone* ,>  complex*]";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region')"
 				+ ".getVerticesByProperty('cloud-owner','coid').getVerticesByProperty('cloud-region-id','crid')"
 				+ ".union(builder.newInstance().createEdgeTraversal(EdgeType.TREE, 'cloud-region','availability-zone').store('x')"
@@ -149,8 +233,8 @@ public class DslQueryProcessorTest extends AAISetup {
 	@Test
 	public void complex_az_fromComplexTestWithLabels() throws AAIException {
 
-		String aaiQuery = "cloud-region('cloud-owner','coid')('cloud-region-id','crid')  > [  ('org.onap.relationships.inventory.BelongsTo')availability-zone* ,  ('org.onap.relationships.inventory.LocatedIn')complex*]";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String aaiQuery = "cloud-region('cloud-owner','coid')('cloud-region-id','crid')   [>  ('org.onap.relationships.inventory.BelongsTo')availability-zone* ,>  ('org.onap.relationships.inventory.LocatedIn')complex*]";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region')"
 				+ ".getVerticesByProperty('cloud-owner','coid').getVerticesByProperty('cloud-region-id','crid')"
 				+ ".union(builder.newInstance().createEdgeTraversalWithLabels( 'cloud-region','availability-zone', new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.BelongsTo'))).store('x')"
@@ -165,7 +249,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String builderQuery = "builder.getVerticesByProperty('aai-node-type', 'complex').getVerticesByProperty('data-center-code','data-center-code-name')"
 				+ ".createEdgeTraversal(EdgeType.COUSIN, 'complex','cloud-region').store('x').cap('x').unfold().dedup()";
 		String aaiQuery = "complex('data-center-code','data-center-code-name') >  cloud-region*";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -177,7 +261,7 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".createEdgeTraversal(EdgeType.COUSIN, 'complex','cloud-region').getVerticesByProperty('cloud-region-version','crv')"
 				+ ".store('x').cap('x').unfold().dedup()";
 		String aaiQuery = "complex('data-center-code','data-center-code-name') >  cloud-region*('cloud-region-version','crv')";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -192,7 +276,7 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".store('x').cap('x').unfold().dedup()";
 
         String aaiQuery = "image('application-vendor','F5') > vserver (> generic-vnf('vnf-name','ZALL1MMSC03')) > tenant > cloud-region*";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(builderQuery, query);
 	}
 
@@ -206,7 +290,7 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".store('x').cap('x').unfold().dedup()";
 
 		String aaiQuery = "image('application-vendor','vendor') >  vserver(> generic-vnf('nf-type', 'nfType') ) > tenant > cloud-region*";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -223,7 +307,7 @@ public class DslQueryProcessorTest extends AAISetup {
 
 		String aaiQuery = "generic-vnf('vnf-id','vnfId')  > vnfc* > vserver* > tenant* > cloud-region*";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -237,7 +321,7 @@ public class DslQueryProcessorTest extends AAISetup {
 
 		String aaiQuery = "cloud-region*('cloud-owner','co') > complex*";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -253,10 +337,10 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".createEdgeTraversal(EdgeType.COUSIN, 'pserver','complex').store('x')"
 				+ ").cap('x').unfold().dedup()";
 
-		String aaiQuery = "generic-vnf*('vnf-id','vnfId') > [ pserver* > complex*, "
-				+ "  vserver > pserver* > complex* " + "]";
+		String aaiQuery = "generic-vnf*('vnf-id','vnfId')  [ > pserver* > complex*, "
+				+ "  >vserver > pserver* > complex* " + "]";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -271,9 +355,9 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".createEdgeTraversal(EdgeType.COUSIN, 'pserver','complex').store('x')"
 				+ ".cap('x').unfold().dedup()";
 
-		String aaiQuery = "generic-vnf*('vnf-id','vnfId')   > [  pserver* , "
-				+ "  vserver > pserver*  ] > complex*";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String aaiQuery = "generic-vnf*('vnf-id','vnfId')    [>  pserver* , "
+				+ "  > vserver > pserver*  ] > complex*";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -293,8 +377,8 @@ public class DslQueryProcessorTest extends AAISetup {
 
 		String aaiQuery = "customer('global-customer-id', 'a9a77d5a-123e-4ca2-9eb9-0b015d2ee0fb') > service-subscription('service-subscription-id', 'Nimbus') "
 				+ " > service-instance('service-instance-id','sid') > generic-vnf* "
-				+ "  > [  vnfc* ,  vserver*,  pserver* ,  pnf* ]";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+				+ "   [>  vnfc* ,>  vserver*,>  pserver* ,>  pnf* ]";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -306,9 +390,9 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".getVerticesByProperty('hostname','hostname1'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf','vserver')"
 				+ ".createEdgeTraversal(EdgeType.COUSIN, 'vserver','pserver').getVerticesByProperty('hostname','hostname1'))).store('x').cap('x').unfold().dedup()";
 
-		String aaiQuery = "generic-vnf*('vnf-id','vnfId') (> [  pserver('hostname','hostname1'), "
-				+ " vserver > pserver('hostname','hostname1')])";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String aaiQuery = "generic-vnf*('vnf-id','vnfId') ( [>  pserver('hostname','hostname1'), "
+				+ " > vserver > pserver('hostname','hostname1')])";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
@@ -318,7 +402,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String aaiQuery = "cloud-region* ('cloud-owner')";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner').store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -327,7 +411,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String aaiQuery = "cloud-region* ('cloud-owner','cloud-owner1','cloud-owner2')";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner', new ArrayList<>(Arrays.asList('cloud-owner1','cloud-owner2'))).store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -336,7 +420,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String aaiQuery = "cloud-region* !('cloud-owner','cloud-owner1','cloud-owner2')";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner', new ArrayList<>(Arrays.asList('cloud-owner1','cloud-owner2'))).store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -345,7 +429,7 @@ public class DslQueryProcessorTest extends AAISetup {
 		String aaiQuery = "cloud-region* !('cloud-owner',' ',' null ')";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner', new ArrayList<>(Arrays.asList(' ',' null '))).store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -353,25 +437,48 @@ public class DslQueryProcessorTest extends AAISetup {
 	public void hasPropertyIntegerTest() throws AAIException {
 		String aaiQuery = "cloud-region('cloud-owner', 'att-nc')('cloud-region-id', 'MTN61a') > vlan-tag*('vlan-id-inner', 20)";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner','att-nc').getVerticesByProperty('cloud-region-id','MTN61a').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','vlan-tag').getVerticesByProperty('vlan-id-inner',20).store('x').cap('x').unfold().dedup()";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
 	@Test
-	public void noEdgeRuleTest() throws AAIException {
-		String aaiQuery = "vserver('vserver-id','abc') > logical-link* > l-interface*";
-		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'vserver').getVerticesByProperty('vserver-id','abc').createEdgeTraversal(EdgeType.TREE, 'vserver','logical-link').store('x').createEdgeTraversal('logical-link','l-interface').store('x')cap('x').unfold().dedup()";
-		expectedEx.expect(org.onap.aai.exceptions.AAIException.class);
-		expectedEx.expectMessage("No EdgeRule found for passed nodeTypes: vserver, logical-link");
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+	public void directionalityTest() throws AAIException {
+		String aaiQuery = "cloud-region('cloud-region-id','abc') >> complex* >> l3-network*";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-region-id','abc').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','complex').store('x').createEdgeTraversal(EdgeType.COUSIN, 'complex','l3-network').store('x').cap('x').unfold().dedup()";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void enterSelectFilterTest() throws AAIException {
+		String aaiQuery = "cloud-region*('cloud-region-id','whp3a'){'cloud-region-id'}";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-region-id','whp3a').store('x').cap('x').unfold().dedup()";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2, aaiQuery).get("query").toString();
+		assertEquals(query, dslQuery);
+	}
+
+
+	@Test
+	public void returnSpecificPropsAndAllForDifferentVertices() throws AAIException {
+		String aaiQuery = "cloud-region{'cloud-owner'}('cloud-region-id','new-r111egion-111111') > [ l3-network*, vlan-tag*]";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-region-id','new-r111egion-111111').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','l3-network').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','vlan-tag').store('x')).cap('x').unfold().dedup()";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2, aaiQuery).get("query").toString();
+		assertEquals(query, dslQuery);
+	}
+
+	@Test
+	public void groupingAttributesTestForAggregate() throws AAIException {
+		String aaiQuery = "cloud-region{'cloud-owner'}('cloud-owner','att-nc')('cloud-region-id','wah2a') > vip-ipv6-address-list > [subnet{'subnet-name'}, instance-group{'id'}]";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner','att-nc').getVerticesByProperty('cloud-region-id','wah2a').store('x').createEdgeTraversal(EdgeType.TREE, 'cloud-region','vip-ipv6-address-list').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vip-ipv6-address-list','subnet').store('x'),builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'vip-ipv6-address-list','instance-group').store('x')).cap('x').unfold().dedup()";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2, aaiQuery).get("query").toString();
+		assertEquals(query, dslQuery);
 	}
 
 	@Test
 	public void multipleEdgeRuleTest() throws AAIException {
 		String aaiQuery = "vserver('vserver-id','abc') > l-interface* > lag-interface*";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'vserver').getVerticesByProperty('vserver-id','abc').createEdgeTraversal(EdgeType.TREE, 'vserver','l-interface').store('x').createEdgeTraversal( 'l-interface','lag-interface').store('x').cap('x').unfold().dedup()";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -379,7 +486,7 @@ public class DslQueryProcessorTest extends AAISetup {
 	public void multipleEdgeRuleTestWithLabels() throws AAIException {
 		String aaiQuery = "vserver('vserver-id','abc') > l-interface* > ('org.onap.relationships.inventory.BelongsTo') lag-interface*";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'vserver').getVerticesByProperty('vserver-id','abc').createEdgeTraversal(EdgeType.TREE, 'vserver','l-interface').store('x').createEdgeTraversalWithLabels( 'l-interface','lag-interface', new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.BelongsTo'))).store('x').cap('x').unfold().dedup()";
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -388,13 +495,14 @@ public class DslQueryProcessorTest extends AAISetup {
 		String aaiQuery = "cloud-region* !('cloud-owner')";
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesExcludeByProperty('cloud-owner').store('x').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
 	@Test
 	public void overlyNestedQueryTest() throws AAIException {
-		String aaiQuery = "generic-vnf*('vnf-id','vnfId') (> [ pserver('hostname','hostname1'),  vserver (> [  pserver('hostname','hostname1'),  pserver('hostname','hostname1')])]) > vserver";
+		//String aaiQuery = "generic-vnf*('vnf-id','vnfId') (> [ pserver('hostname','hostname1'),  vserver (> [  pserver('hostname','hostname1'),  pserver('hostname','hostname1')])]) > vserver";
+		String aaiQuery = "generic-vnf*('vnf-id','vnfId') ( [> pserver('hostname','hostname1'), > vserver ( [>  pserver('hostname','hostname1'), > pserver('hostname','hostname1')])]) > vserver";
 
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'generic-vnf').getVerticesByProperty('vnf-id','vnfId').where(builder.newInstance().union" +
 				"(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf','pserver').getVerticesByProperty('hostname','hostname1')," +
@@ -402,13 +510,13 @@ public class DslQueryProcessorTest extends AAISetup {
 				".createEdgeTraversal(EdgeType.COUSIN, 'vserver','pserver').getVerticesByProperty('hostname','hostname1'),builder.newInstance()." +
 				"createEdgeTraversal(EdgeType.COUSIN, 'vserver','pserver').getVerticesByProperty('hostname','hostname1'))))).store('x').createEdgeTraversal(EdgeType.COUSIN, 'generic-vnf','vserver').cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
 	@Test
 	public void overlyNestedQueryTestWithLabels() throws AAIException {
-		String aaiQuery = "generic-vnf*('vnf-id','vnfId') (> [ ('tosca.relationships.HostedOn')pserver('hostname','hostname1'),  ('tosca.relationships.HostedOn')vserver (> [  ('tosca.relationships.HostedOn')pserver('hostname','hostname1'),  ('tosca.relationships.HostedOn')pserver('hostname','hostname1')])]) > ('org.onap.relationships.inventory.PartOf')allotted-resource";
+		String aaiQuery = "generic-vnf*('vnf-id','vnfId') ( [> ('tosca.relationships.HostedOn')pserver('hostname','hostname1'),>  ('tosca.relationships.HostedOn')vserver ( [>  ('tosca.relationships.HostedOn')pserver('hostname','hostname1'),>  ('tosca.relationships.HostedOn')pserver('hostname','hostname1')])]) > ('org.onap.relationships.inventory.PartOf')allotted-resource";
 
 		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'generic-vnf').getVerticesByProperty('vnf-id','vnfId').where(builder.newInstance().union" +
 				"(builder.newInstance().createEdgeTraversalWithLabels( 'generic-vnf','pserver', new ArrayList<>(Arrays.asList('tosca.relationships.HostedOn'))).getVerticesByProperty('hostname','hostname1')," +
@@ -416,7 +524,7 @@ public class DslQueryProcessorTest extends AAISetup {
 				".createEdgeTraversalWithLabels( 'vserver','pserver', new ArrayList<>(Arrays.asList('tosca.relationships.HostedOn'))).getVerticesByProperty('hostname','hostname1'),builder.newInstance()." +
 				"createEdgeTraversalWithLabels( 'vserver','pserver', new ArrayList<>(Arrays.asList('tosca.relationships.HostedOn'))).getVerticesByProperty('hostname','hostname1'))))).store('x').createEdgeTraversalWithLabels( 'generic-vnf','allotted-resource', new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.PartOf'))).cap('x').unfold().dedup()";
 
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
 
@@ -443,12 +551,41 @@ public class DslQueryProcessorTest extends AAISetup {
 				+ ".createEdgeTraversal(EdgeType.TREE, 'cloud-region','tenant').store('x')"
 				+ ".cap('x').unfold().dedup()";
 
-		String aaiQuery = "generic-vnf*('vnf-id','vnfId')   > [  pserver* , "
-				+ "  vserver > pserver*  ] > complex*  > [  availability-zone > cloud-region*,  cloud-region*,  " +
-		          "  ctag-pool*  > [  availability-zone* > complex* ,   generic-vnf* > availability-zone* > complex*,  vpls-pe* > complex*] > cloud-region*] > tenant* " ;
-		String query = dslQueryProcessor.parseAaiQuery(aaiQuery);
+		String aaiQuery = "generic-vnf*('vnf-id','vnfId')    [>  pserver* , "
+				+ "  > vserver > pserver*  ] > complex*   [>  availability-zone > cloud-region*,>  cloud-region*,  " +
+		          " > ctag-pool*   [ > availability-zone* > complex* , >  generic-vnf* > availability-zone* > complex*,>  vpls-pe* > complex*] > cloud-region*] > tenant* " ;
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
 
 		assertEquals(builderQuery, query);
 	}
 
+	@Test
+	public void booleanPropertyValuesTest() throws AAIException {
+		String aaiQuery = "cloud-region ('cloud-owner','cloud-owner1') > zone*('in-maint',true)";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner','cloud-owner1').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','zone').getVerticesByBooleanProperty('in-maint',true).store('x').cap('x').unfold().dedup()";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void upperCaseBooleanPropertyValuesTest() throws AAIException {
+		String aaiQuery = "cloud-region ('cloud-owner','cloud-owner1') > zone*('in-maint',TRUE)";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner','cloud-owner1').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','zone').getVerticesByBooleanProperty('in-maint',true).store('x').cap('x').unfold().dedup()";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+	
+	@Test
+	public void booleanPropertyTest() throws AAIException {
+		String aaiQuery = "cloud-region ('cloud-owner','cloud-owner1') > zone*('in-maint')";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner','cloud-owner1').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','zone').getVerticesByProperty('in-maint').store('x').cap('x').unfold().dedup()";
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test(expected = AAIException.class)
+	public void filterOnUnion_vserverFromTentantFromCloudRegion_BadRequest() throws AAIException {
+		String aaiQuery = "cloud-region('cloud-owner', 'test-aic')>[tenant*('tenant-id', 'tenant1'), tenant*('tenant-id', 'tenant2')]('tenant-name', 'tenant1')>[vserver*]";
+		dslQueryProcessor.parseAaiQuery(QueryVersion.V2,aaiQuery).get("query").toString();
+	}
 }

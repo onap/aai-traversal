@@ -21,23 +21,18 @@ package org.onap.aai.dbgraphmap;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onap.aai.AAISetup;
 import org.onap.aai.HttpTestUtil;
 import org.onap.aai.PayloadUtil;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.extensions.AAIExtensionMap;
-import org.onap.aai.introspection.*;
-import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.rest.util.AAIExtensionMap;
 import org.onap.aai.util.AAIConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,8 +43,8 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.*;
-import org.onap.aai.AAISetup;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SearchGraphNamedQueryTest extends AAISetup{
 
@@ -92,6 +87,7 @@ public class SearchGraphNamedQueryTest extends AAISetup{
         
         File dir = new File(widgetPath);
         File[] files = dir.listFiles();
+        assert files != null;
         for ( File file : files) {
         	try {
     			Path path = Paths.get(widgetPath + AAIConstants.AAI_FILESEP + file.getName());
@@ -114,6 +110,7 @@ public class SearchGraphNamedQueryTest extends AAISetup{
         
         File dir = new File(namedQueryPath);
         File[] files = dir.listFiles();
+        assert files != null;
         for ( File file : files) {
         	try {
     			Path path = Paths.get(namedQueryPath + AAIConstants.AAI_FILESEP + file.getName());
@@ -160,8 +157,8 @@ public class SearchGraphNamedQueryTest extends AAISetup{
 
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Arrays.asList("JUNIT"));
-        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Arrays.asList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Collections.singletonList("JUNIT"));
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
@@ -201,10 +198,10 @@ public class SearchGraphNamedQueryTest extends AAISetup{
 		aaiExtMap.setServletRequest(request);
 		
 		
-		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
+		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, aaiExtMap);
         System.out.println("response was\n" + response.getEntity().toString());
         assertEquals("Expected success from query", 200, response.getStatus());
-        boolean hasLinkName = response.getEntity().toString().indexOf(linkName) > 0 ? true : false;
+        boolean hasLinkName = response.getEntity().toString().indexOf(linkName) > 0;
         assertTrue("Response contains linkName", hasLinkName );
     }
 
@@ -235,9 +232,9 @@ public class SearchGraphNamedQueryTest extends AAISetup{
 		aaiExtMap.setServletRequest(request);
 		
 		
-		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
+		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, aaiExtMap);
         assertEquals("Expected success from query", 200, response.getStatus());
-        boolean hasModelName = response.getEntity().toString().indexOf("junit-model-name") > 0 ? true : false;
+        boolean hasModelName = response.getEntity().toString().indexOf("junit-model-name") > 0;
         assertTrue("Response contains modelName from model-ver", hasModelName );
     }
   
@@ -316,9 +313,9 @@ public class SearchGraphNamedQueryTest extends AAISetup{
 		aaiExtMap.setServletRequest(request);
 		
 		
-		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
+		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, aaiExtMap);
         assertEquals("Expected success from query", 200, response.getStatus());
-        boolean hasModelName = response.getEntity().toString().indexOf("example-model-name-val-closed-loop") > 0 ? true : false;
+        boolean hasModelName = response.getEntity().toString().indexOf("example-model-name-val-closed-loop") > 0;
         assertTrue("Response contains modelName from model-ver", hasModelName );
     }
     
@@ -382,9 +379,9 @@ public class SearchGraphNamedQueryTest extends AAISetup{
 		aaiExtMap.setServletRequest(request);
 		
 		
-		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, DBConnectionType.REALTIME, aaiExtMap);
+		response = searchGraph.runNamedQuery("JUNIT", "JUNIT", queryParameters, aaiExtMap);
         assertEquals("Expected success from query", 200, response.getStatus());
-        boolean hasModelName = response.getEntity().toString().indexOf("example-model-name-val-component-list") > 0 ? true : false;
+        boolean hasModelName = response.getEntity().toString().indexOf("example-model-name-val-component-list") > 0;
         assertTrue("Response contains modelName from model-ver", hasModelName );
     }    
 }

@@ -19,47 +19,40 @@
  */
 package org.onap.aai.rest.search;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
+import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
+import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.dbgraphmap.SearchGraph;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.logging.ErrorLogHelper;
-import org.onap.aai.logging.LoggingContext;
-import org.onap.aai.logging.StopWatch;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
+import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
+import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.GenericQueryBuilder;
 import org.onap.aai.util.NodesQueryBuilder;
 import org.onap.aai.util.TraversalConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.onap.aai.concurrent.AaiCallable;
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
 import org.springframework.beans.factory.annotation.Value;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Implements the search subdomain in the REST API. All API calls must include X-FromAppId and
@@ -68,13 +61,11 @@ import org.springframework.beans.factory.annotation.Value;
 @Path("/{version: v[1-9][0-9]*|latest}/search")
 public class SearchProvider extends RESTAPI {
 
-    private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchProvider.class);
 
     public static final String GENERIC_QUERY = "/generic-query";
 
     public static final String NODES_QUERY = "/nodes-query";
-
-    public static final String TARGET_ENTITY = "DB";
 
     private SearchGraph searchGraph;
 
@@ -130,51 +121,37 @@ public class SearchProvider extends RESTAPI {
             @QueryParam("include") final List<String> includeNodeTypes, @QueryParam("depth") final int depth,
             @PathParam("version") String versionParam) {
 
-        String methodName = "getGenericQueryResponse";
         AAIException ex = null;
-        Response searchResult = null;
-        String fromAppId = null;
-        String transId = null;
-        String rqstTm = genDate();
-        ArrayList<String> templateVars = new ArrayList<String>();
-        double dbTimeMsecs = 0;
+        Response searchResult;
+        String fromAppId;
+        ArrayList<String> templateVars = new ArrayList<>();
         try {
-            LoggingContext.save();
-            LoggingContext.targetEntity(TARGET_ENTITY);
-            LoggingContext.targetServiceName(methodName);
 
             fromAppId = getFromAppId(headers);
-            transId = getTransId(headers);
-            String realTime = headers.getRequestHeaders().getFirst("Real-Time");
+            getTransId(headers);
             // only consider header value for search
-            DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 
             final SchemaVersion version = new SchemaVersion(versionParam);
 
             final ModelType factoryType = ModelType.MOXY;
             Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
-            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, type, loader);
+            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
             DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
             UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
-            LoggingContext.startTime();
-            StopWatch.conditionalStart();
+
+            AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
+            metricLog.pre(Optional.of(new URI(req.getRequestURI())));
+
             searchResult = searchGraph
                     .runGenericQuery(new GenericQueryBuilder().setHeaders(headers).setStartNodeType(startNodeType)
                             .setStartNodeKeyParams(startNodeKeyParams).setIncludeNodeTypes(includeNodeTypes)
                             .setDepth(depth).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
-            dbTimeMsecs += StopWatch.stopIfStarted();
 
-            LoggingContext.successStatusFields();
-            LoggingContext.elapsedTime((long) dbTimeMsecs, TimeUnit.MILLISECONDS);
+            metricLog.post();
 
-            LOGGER.info("Completed");
-            LoggingContext.restoreIfPossible();
-            LoggingContext.successStatusFields();
-
-            String respTm = genDate();
+            //LOGGER.info("Completed");
 
         } catch (AAIException e) {
-            LoggingContext.restoreIfPossible();
             // send error response
             ex = e;
             templateVars.add("GET Search");
@@ -183,7 +160,6 @@ public class SearchProvider extends RESTAPI {
                     .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
                     .build();
         } catch (Exception e) {
-            LoggingContext.restoreIfPossible();
             // send error response
             ex = new AAIException("AAI_4000", e);
             templateVars.add("GET Search");
@@ -239,50 +215,37 @@ public class SearchProvider extends RESTAPI {
             @QueryParam("search-node-type") final String searchNodeType,
             @QueryParam("edge-filter") final List<String> edgeFilterList,
             @QueryParam("filter") final List<String> filterList, @PathParam("version") String versionParam) {
-        String methodName = "getNodesQueryResponse";
+
         AAIException ex = null;
-        Response searchResult = null;
-        String fromAppId = null;
-        String transId = null;
-        String rqstTm = genDate();
-        ArrayList<String> templateVars = new ArrayList<String>();
-        double dbTimeMsecs = 0;
+        Response searchResult;
+        String fromAppId;
+        ArrayList<String> templateVars = new ArrayList<>();
         try {
-            LoggingContext.save();
-            LoggingContext.targetEntity(TARGET_ENTITY);
-            LoggingContext.targetServiceName(methodName);
 
             fromAppId = getFromAppId(headers);
-            transId = getTransId(headers);
+            getTransId(headers);
             String realTime = headers.getRequestHeaders().getFirst("Real-Time");
             // only consider header value for search
-            DBConnectionType type = this.determineConnectionType("force-cache", realTime);
 
             final SchemaVersion version = new SchemaVersion(versionParam);
 
             final ModelType factoryType = ModelType.MOXY;
             Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
-            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, type, loader);
+            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
             DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
             UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
 
-            LoggingContext.startTime();
-            StopWatch.conditionalStart();
+
+            AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
+            metricLog.pre(Optional.of(new URI(req.getRequestURI())));
             searchResult = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(headers)
                     .setTargetNodeType(searchNodeType).setEdgeFilterParams(edgeFilterList).setFilterParams(filterList)
                     .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
 
-            dbTimeMsecs += StopWatch.stopIfStarted();
-            LoggingContext.elapsedTime((long) dbTimeMsecs, TimeUnit.MILLISECONDS);
-            LoggingContext.successStatusFields();
-            LOGGER.info("Completed");
+            metricLog.post();
+            //LOGGER.info("Completed");
 
-            LoggingContext.restoreIfPossible();
-            LoggingContext.successStatusFields();
-
-            String respTm = genDate();
         } catch (AAIException e) {
-            LoggingContext.restoreIfPossible();
             // send error response
             ex = e;
             templateVars.add("GET Search");
@@ -291,7 +254,6 @@ public class SearchProvider extends RESTAPI {
                     .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
                     .build();
         } catch (Exception e) {
-            LoggingContext.restoreIfPossible();
             // send error response
             ex = new AAIException("AAI_4000", e);
             templateVars.add("GET Search");

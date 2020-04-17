@@ -19,7 +19,8 @@
  */
 package org.onap.aai;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +50,7 @@ import static org.junit.Assert.assertThat;
 @Import(TraversalTestConfiguration.class)
 public class QueryParameterTest {
 
-    private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(QueryParameterTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryParameterTest.class);
 
     private HttpTestUtil httpTestUtil;
 

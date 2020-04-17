@@ -17,25 +17,26 @@
  * limitations under the License.
  * ============LICENSE_END=========================================================
  */
-package org.onap.aai.rest.dsl;
+package org.onap.aai.rest.dsl.v1;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
 import com.google.common.collect.Lists;
-import org.onap.aai.AAIDslBaseListener;
-import org.onap.aai.AAIDslParser;
+import org.onap.aai.dsl.v1.AAIDslBaseListener;
+import org.onap.aai.dsl.v1.AAIDslParser;
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
+import org.onap.aai.logging.ErrorLogHelper;
+import org.onap.aai.rest.dsl.DslQueryBuilder;
+import org.onap.aai.rest.dsl.validation.DslValidator;
+import org.onap.aai.rest.dsl.validation.DslValidatorRule;
 import org.onap.aai.setup.SchemaVersions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,17 +45,29 @@ import java.util.stream.Stream;
  */
 public class DslListener extends AAIDslBaseListener {
 
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(DslListener.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DslListener.class);
 
-	boolean validationFlag = false;
-	EdgeIngestor edgeIngestor;
-	Loader loader;
+	private boolean validationFlag = false;
+	private EdgeIngestor edgeIngestor;
+	private Loader loader;
+	private Optional<DslValidator> queryValidator = Optional.empty();
+	private boolean hasReturnValue = false;
+
+	private String validationRules = "none";
 
 	private Deque<DslQueryBuilder> dslQueryBuilders = new LinkedList<>();
 	private Deque<String> traversedNodes = new LinkedList<>();
 	private Deque<List<String>> returnedNodes = new LinkedList<>();
 
-	List<String> traversedEdgeLabels = new LinkedList<>();
+	private List<String> traversedEdgeLabels = new LinkedList<>();
+
+	private boolean isAggregate = false;
+
+	/*
+	 * Additional datastructures to store all nodeCount & looped edges
+	 */
+	private int nodeCount = 0;
+	private List<String> traversedEdges = new LinkedList<>();
 
 	/**
 	 * Instantiates a new DslListener.
@@ -70,12 +83,20 @@ public class DslListener extends AAIDslBaseListener {
 	}
 
 	public String getQuery() throws AAIException {
-		//TODO Change the exception reporting
 		if (!getException().isEmpty()) {
-			LOGGER.error("Exception in the DSL Query" + getException());
-			throw new AAIException("AAI_6149", getException());
+			AAIException aaiException = new AAIException("AAI_6149", getException());
+			ErrorLogHelper.logException(aaiException);
+			throw aaiException;
 		}
 
+		DslValidatorRule ruleValidator = new DslValidatorRule.Builder()
+				.loop(getValidationRules() , traversedEdges)
+				.nodeCount(getValidationRules(), nodeCount).build();
+		if(queryValidator.isPresent() && !queryValidator.get().validate(ruleValidator)){
+			AAIException aaiException = new AAIException("AAI_6151", "Validation error " + queryValidator.get().getErrorMessage() );
+			ErrorLogHelper.logException(aaiException);
+			throw aaiException;
+		}
 		return this.compile();
 	}
 
@@ -85,12 +106,20 @@ public class DslListener extends AAIDslBaseListener {
 	}
 
 	public String getException() {
-		return builder().getQueryException().toString();
+		List<String> exceptions = dslQueryBuilders.stream().map(dslQb -> dslQb.getQueryException().toString()).collect(Collectors.toList());
+		return String.join("", Lists.reverse(exceptions));
 	}
 
 	@Override
 	public void enterAaiquery(AAIDslParser.AaiqueryContext ctx) {
 		dslQueryBuilders.push(new DslQueryBuilder(edgeIngestor, loader));
+	}
+
+	@Override
+	public void exitAaiquery(AAIDslParser.AaiqueryContext ctx) {
+		if (!hasReturnValue) {
+			throw new RuntimeException(new AAIException("AAI_6149", "No nodes marked for output"));
+		}
 	}
 
 	@Override
@@ -124,7 +153,6 @@ public class DslListener extends AAIDslBaseListener {
 		if(!ctx.traversal().isEmpty()) {
 			count += ctx.traversal().size() ;
 		}
-		//TODO so ugly
 		String resultNode = traversedNodes.peekFirst();
 
 		if (!traversedNodes.isEmpty()) {
@@ -147,6 +175,7 @@ public class DslListener extends AAIDslBaseListener {
 
 		if (!traversedNodes.isEmpty()) {
 			builder().edgeQuery(traversedEdgeLabels, traversedNodes.peekFirst(), ctx.label().getText());
+			traversedEdges.add(traversedNodes.peekFirst() + ctx.label().getText());
 		} else {
 			builder().nodeQuery(ctx.label().getText());
 		}
@@ -164,15 +193,17 @@ public class DslListener extends AAIDslBaseListener {
 			if (ctx.filter() != null) {
 				allKeys = ctx.filter().propertyFilter().stream().flatMap(
 						pf -> pf.key().stream()).map(
-						e -> e.getText().replaceAll("\'", "")).collect(Collectors.toList());
+						e -> e.getText().replaceFirst("\'", "").substring(0, e.getText().length() - 2)).collect(Collectors.toList());
 
 			}
 			builder().validateFilter(ctx.label().getText(), allKeys);
 		}
 		if (ctx.store() != null) {
 			builder().store();
+			hasReturnValue = true;
 		}
 		traversedEdgeLabels = new ArrayList<>();
+		nodeCount++;
 	}
 
 
@@ -187,12 +218,17 @@ public class DslListener extends AAIDslBaseListener {
 		String resultNode = returnedNodes.pop().get(0);
 		traversedNodes.addFirst(resultNode);
 		builder().endUnion();
+		if (ctx.store() != null) {
+			builder().store();
+			hasReturnValue = true;
+		}
 	}
 
 	@Override
 	public void enterWhereFilter(AAIDslParser.WhereFilterContext ctx) {
+		boolean isNot = ctx.not() != null && !ctx.not().isEmpty();
 		returnedNodes.addFirst(new ArrayList<>());
-		builder().where();
+		builder().where(isNot);
 	}
 
 	@Override
@@ -200,25 +236,13 @@ public class DslListener extends AAIDslBaseListener {
 		if(!returnedNodes.isEmpty()) {
 			returnedNodes.pop();
 		}
-		builder().endWhere();
-	}
-
-	@Override
-	public void enterTraversal(AAIDslParser.TraversalContext ctx) {
-	}
-
-	@Override
-	public void enterEdge(AAIDslParser.EdgeContext ctx) {
+		boolean isNot = ctx.not() != null && !ctx.not().isEmpty();
+		builder().endWhere(isNot);
 	}
 
 	@Override
 	public void enterEdgeFilter(AAIDslParser.EdgeFilterContext ctx) {
 		traversedEdgeLabels = ctx.key().stream().map(value -> value.getText()).collect(Collectors.toList());
-
-	}
-
-	@Override
-	public void enterFilter(AAIDslParser.FilterContext ctx) {
 
 	}
 
@@ -231,16 +255,25 @@ public class DslListener extends AAIDslBaseListener {
 		boolean isNot = ctx.not() != null && !ctx.not().isEmpty();
 		List<AAIDslParser.NumContext> numberValues = ctx.num();
 
+		List<AAIDslParser.BoolContext> booleanValues = ctx.bool();
+
 		/*
 		 * Add all String values
 		 */
 		List<String> values = valueList.stream().filter(value -> !filterKey.equals(value.getText()))
-				.map(value -> "'" + value.getText().replace("'", "") + "'").collect(Collectors.toList());
+				.map(value -> value.getText()).collect(Collectors.toList());
+
 		/*
 		 * Add all numeric values
 		 */
 		values.addAll(numberValues.stream().filter(value -> !filterKey.equals(value.getText()))
 				.map(value -> value.getText()).collect(Collectors.toList()));
+
+		/*
+		 * Add all boolean values
+		 */
+		values.addAll(booleanValues.stream().filter(value -> !filterKey.equals(value.getText()))
+				.map(value -> value.getText().toLowerCase()).collect(Collectors.toList()));
 
 		builder().filter(isNot, traversedNodes.peekFirst(), filterKey, values);
 
@@ -252,6 +285,22 @@ public class DslListener extends AAIDslBaseListener {
 
 	public void setValidationFlag(boolean validationFlag) {
 		this.validationFlag = validationFlag;
+	}
+
+	public void setQueryValidator(DslValidator queryValidator, String validationRules) {
+		this.queryValidator = Optional.of(queryValidator);
+		this.validationRules = validationRules;
+	}
+	public String getValidationRules() {
+		return validationRules;
+	}
+
+	public void setAggregateFlag(boolean isAggregate) {
+		this.isAggregate = isAggregate;
+	}
+
+	public boolean isAggregate(){
+		return this.isAggregate;
 	}
 
 }

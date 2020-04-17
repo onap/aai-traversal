@@ -29,7 +29,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.ApplicationContextInitializer;
@@ -40,7 +41,7 @@ public class PropertyPasswordConfiguration implements ApplicationContextInitiali
 
     private static final Pattern decodePasswordPattern = Pattern.compile("password\\((.*?)\\)");
     private PasswordDecoder passwordDecoder = new JettyPasswordDecoder();
-    private static final EELFLogger logger = EELFManager.getInstance().getLogger(PropertyPasswordConfiguration.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PropertyPasswordConfiguration.class.getName());
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -68,10 +69,10 @@ public class PropertyPasswordConfiguration implements ApplicationContextInitiali
                     sslProps.put("server.ssl.key-store-password", keystorePassword);
                     sslProps.put("schema.service.ssl.key-store-password", keystorePassword);
                 } else {
-                    logger.info("Not using AAF Certman password file");
+                    logger.debug("Not using AAF Certman password file");
                 }
             } catch (IOException e) {
-                logger.warn("Not using AAF Certman password file, e=" + e.getMessage());
+                logger.debug("Not using AAF Certman password file, e=" + e.getMessage());
             } finally {
                 if (passwordStream != null) {
                     try {
@@ -95,10 +96,10 @@ public class PropertyPasswordConfiguration implements ApplicationContextInitiali
                     sslProps.put("server.ssl.trust-store-password", truststorePassword);
                     sslProps.put("schema.service.ssl.trust-store-password", truststorePassword);
                 } else {
-                    logger.info("Not using AAF Certman passphrases file");
+                    logger.debug("Not using AAF Certman passphrases file");
                 }
             } catch (IOException e) {
-                logger.warn("Not using AAF Certman passphrases file, e=" + e.getMessage());
+                logger.debug("Not using AAF Certman passphrases file, e=" + e.getMessage());
             } finally {
                 if (passphrasesStream != null) {
                     try {
@@ -118,7 +119,7 @@ public class PropertyPasswordConfiguration implements ApplicationContextInitiali
 
         }
         if (!sslProps.isEmpty()) {
-            logger.info("Using AAF Certman files");
+            logger.debug("Using AAF Certman files");
             PropertySource<?> additionalProperties = new MapPropertySource("additionalProperties", sslProps);
             environment.getPropertySources().addFirst(additionalProperties);
         }

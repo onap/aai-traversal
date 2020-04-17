@@ -29,12 +29,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.AAISetup;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.serialization.db.DBSerializer;
-
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
 import org.onap.aai.serialization.engines.QueryStyle;
@@ -96,7 +94,6 @@ public class SimpleFormatTest extends AAISetup{
 		Loader loader = loaderFactory.createLoaderForVersion(factoryType, schemaVersions.getRelatedLinkVersion());
 		dbEngine = spy(new JanusGraphDBEngine(
 				QueryStyle.TRAVERSAL,
-				DBConnectionType.CACHED,
 				loader));
 
 		when(dbEngine.tx()).thenReturn(graph);
@@ -114,7 +111,7 @@ public class SimpleFormatTest extends AAISetup{
 		System.out.println(dbEngine.tx());
 		assertNotNull(graph.traversal());
 		JsonObject json = _simpleFormat.createPropertiesObject(vfmodule).get();
-		json.entrySet().stream().forEach((System.out::println));
+		json.entrySet().forEach((System.out::println));
 		assertTrue(json.has("model-invariant-id"));
 
 	}

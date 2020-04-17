@@ -19,131 +19,131 @@
  */
 package org.onap.aai.web;
 
+import jersey.repackaged.com.google.common.collect.Sets;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.servlet.ServletProperties;
-import org.onap.aai.rest.CQ2Gremlin;
-import org.onap.aai.rest.CQ2GremlinTest;
-import org.onap.aai.rest.DslConsumer;
-import org.onap.aai.rest.QueryConsumer;
-import org.onap.aai.rest.RecentAPIConsumer;
+import org.onap.aai.aailog.logs.AaiDebugLog;
+import org.onap.aai.rest.*;
 import org.onap.aai.rest.search.ModelAndNamedQueryRestProvider;
 import org.onap.aai.rest.search.SearchProvider;
 import org.onap.aai.rest.util.EchoResponse;
-import org.reflections.Reflections;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Priority;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ContainerResponseFilter;
-
-import java.util.List;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
-@Component
-public class JerseyConfiguration extends ResourceConfig {
+import static java.lang.Boolean.parseBoolean;
+import static java.util.Comparator.comparingInt;
+
+@Configuration
+public class JerseyConfiguration {
 
     private static final Logger log = Logger.getLogger(JerseyConfiguration.class.getName());
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(JerseyConfiguration.class.getName());
 
-    private Environment env;
+    private static AaiDebugLog debugLog = new AaiDebugLog();
+    static {
+        debugLog.setupMDC();
+    }
+
+    private static final String LOGGING_ENABLED_PROPERTY = "aai.request.logging.enabled";
+    private static final boolean ENABLE_RESPONSE_LOGGING = false;
+
+    private final Environment environment;
 
     @Autowired
-    public JerseyConfiguration(Environment env) {
+    public JerseyConfiguration(Environment environment) {
+        this.environment = environment;
+    }
 
-        this.env = env;
+    @Bean
+    public ResourceConfig resourceConfig() {
+        ResourceConfig resourceConfig = new ResourceConfig();
 
-        register(SearchProvider.class);
-        register(ModelAndNamedQueryRestProvider.class);
-        register(QueryConsumer.class);
-        register(RecentAPIConsumer.class);
-        register(DslConsumer.class);
-        register(EchoResponse.class);
-        register(CQ2Gremlin.class);
-        register(CQ2GremlinTest.class);
+        Set<Class<?>> classes = Sets.newHashSet(
+                SearchProvider.class,
+                ModelAndNamedQueryRestProvider.class,
+                QueryConsumer.class,
+                RecentAPIConsumer.class,
+                DslConsumer.class,
+                EchoResponse.class,
+                CQ2Gremlin.class,
+                CQ2GremlinTest.class
+        );
+        Set<Class<?>> filterClasses = Sets.newHashSet(
+                org.onap.aai.aailog.filter.AaiAuditLogContainerFilter.class,
+                org.onap.aai.interceptors.pre.RequestTransactionLogging.class,
+                org.onap.aai.interceptors.pre.HeaderValidation.class,
+                org.onap.aai.interceptors.pre.HttpHeaderInterceptor.class,
+                org.onap.aai.interceptors.pre.OneWaySslAuthorization.class,
+                org.onap.aai.interceptors.pre.VersionLatestInterceptor.class,
+                org.onap.aai.interceptors.pre.RetiredInterceptor.class,
+                org.onap.aai.interceptors.pre.VersionInterceptor.class,
+                org.onap.aai.interceptors.pre.RequestHeaderManipulation.class,
+                org.onap.aai.interceptors.pre.RequestModification.class,
+                org.onap.aai.interceptors.post.InvalidResponseStatus.class,
+                org.onap.aai.interceptors.post.ResponseTransactionLogging.class,
+                org.onap.aai.interceptors.post.ResponseHeaderManipulation.class
+        );
+        if (isLoggingEnabled()) {
+            logRequests(resourceConfig);
+        }
+        resourceConfig.registerClasses(classes);
+        logger.debug("REGISTERED CLASSES " + classes.toString());
 
-        //Request Filters
-        registerFiltersForRequests();
-        // Response Filters
-        registerFiltersForResponses();
+        throwIfPriorityAnnotationAbsent(filterClasses);
+        filterClasses.stream()
+                .filter(this::isEnabledByActiveProfiles)
+                .sorted(priorityComparator())
+                .forEach(resourceConfig::register);
 
-        property(ServletProperties.FILTER_FORWARD_ON_404, true);
+        filterClasses.stream()
+                .filter(this::isEnabledByActiveProfiles)
+                .sorted(priorityComparator())
+                .forEach(s -> logger.debug("REGISTERED FILTERS " + s.getName()));
+        return resourceConfig;
+    }
 
-        // Following registers the request headers and response headers
-        // If the LoggingFilter second argument is set to true, it will print response value as well
-        if ("true".equalsIgnoreCase(env.getProperty("aai.request.logging.enabled"))) {
-            register(new LoggingFilter(log, false));
+    private <T> void throwIfPriorityAnnotationAbsent(Collection<Class<? extends T>> classes) {
+        for (Class clazz : classes) {
+            if (!clazz.isAnnotationPresent(Priority.class)) {
+                logger.debug("throwIfPriorityAnnotationAbsent: missing filter priority for : " + clazz.getName());
+                throw new MissingFilterPriorityException(clazz);
+            }
         }
     }
 
-    public void registerFiltersForRequests() {
-
-        // Find all the classes within the interceptors package
-        Reflections reflections = new Reflections("org.onap.aai.interceptors");
-        // Filter them based on the clazz that was passed in
-        Set<Class<? extends ContainerRequestFilter>> filters = reflections.getSubTypesOf(ContainerRequestFilter.class);
-
-
-        // Check to ensure that each of the filter has the @Priority annotation and if not throw exception
-        for (Class filterClass : filters) {
-            if (filterClass.getAnnotation(Priority.class) == null) {
-                throw new RuntimeException("Container filter " + filterClass.getName() + " does not have @Priority annotation");
-            }
-        }
-
-        // Turn the set back into a list
-        List<Class<? extends ContainerRequestFilter>> filtersList = filters
-                .stream()
-                .filter(f -> {
-                    if (f.isAnnotationPresent(Profile.class)
-                            && !env.acceptsProfiles(f.getAnnotation(Profile.class).value())) {
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
-
-        // Sort them by their priority levels value
-        filtersList.sort((c1, c2) -> Integer.valueOf(c1.getAnnotation(Priority.class).value()).compareTo(c2.getAnnotation(Priority.class).value()));
-
-        // Then register this to the jersey application
-        filtersList.forEach(this::register);
+    private <T> Comparator<Class<? extends T>> priorityComparator() {
+        return comparingInt(clazz -> clazz.getAnnotation(Priority.class).value());
     }
 
-    public void registerFiltersForResponses() {
+    private void logRequests(ResourceConfig resourceConfig) {
+        resourceConfig.register(new LoggingFilter(log, ENABLE_RESPONSE_LOGGING));
+    }
 
-        // Find all the classes within the interceptors package
-        Reflections reflections = new Reflections("org.onap.aai.interceptors");
-        // Filter them based on the clazz that was passed in
-        Set<Class<? extends ContainerResponseFilter>> filters = reflections.getSubTypesOf(ContainerResponseFilter.class);
+    private boolean isLoggingEnabled() {
+        return parseBoolean(environment.getProperty(LOGGING_ENABLED_PROPERTY));
+    }
 
+    private boolean isEnabledByActiveProfiles(AnnotatedElement annotatedElement) {
+        boolean result = !annotatedElement.isAnnotationPresent(Profile.class) ||
+                environment.acceptsProfiles(annotatedElement.getAnnotation(Profile.class).value());
+        logger.debug("isEnabledByActiveProfiles: annotatedElement: " + annotatedElement.toString() + " result=" + result);
+        return result;
+    }
 
-        // Check to ensure that each of the filter has the @Priority annotation and if not throw exception
-        for (Class filterClass : filters) {
-            if (filterClass.getAnnotation(Priority.class) == null) {
-                throw new RuntimeException("Container filter " + filterClass.getName() + " does not have @Priority annotation");
-            }
+    private class MissingFilterPriorityException extends RuntimeException {
+        private MissingFilterPriorityException(Class<?> clazz) {
+            super("Container filter " + clazz.getName() + " does not have @Priority annotation");
         }
-
-        // Turn the set back into a list
-        List<Class<? extends ContainerResponseFilter>> filtersList = filters.stream()
-                .filter(f -> {
-                    if (f.isAnnotationPresent(Profile.class)
-                            && !env.acceptsProfiles(f.getAnnotation(Profile.class).value())) {
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
-
-        // Sort them by their priority levels value
-        filtersList.sort((c1, c2) -> Integer.valueOf(c1.getAnnotation(Priority.class).value()).compareTo(c2.getAnnotation(Priority.class).value()));
-
-        // Then register this to the jersey application
-        filtersList.forEach(this::register);
     }
 }

@@ -19,7 +19,9 @@
  */
 package org.onap.aai.dbgraphgen;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.onap.aai.logging.ErrorLogHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -58,7 +60,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ModelBasedProcessing {
 
-	private EELFLogger LOGGER = EELFManager.getInstance().getLogger(ModelBasedProcessing.class);
+	private Logger LOGGER = LoggerFactory.getLogger(ModelBasedProcessing.class);
 	private final int MAX_LEVELS = 50;  // max depth allowed for our model - to protect against infinite loop problems
 
 	private TransactionalGraphEngine engine;
@@ -842,7 +844,8 @@ public class ModelBasedProcessing {
 		}
 		catch (Exception ex) {
 			// Sometimes things have already been deleted by the time we get to them - just log it.
-			LOGGER.warn("Exception when trying to delete: " + thisGuyStr + ".  msg = " + ex.getMessage() + LogFormatTools.getStackTop(ex));
+			AAIException aaiException = new AAIException("AAI_6154", thisGuyStr + ".  msg = " + ex.getMessage());
+			ErrorLogHelper.logException(aaiException);
 		}
 		
 		if( !gotVtxOK ){
@@ -853,7 +856,7 @@ public class ModelBasedProcessing {
 		}
 		else {
 			if( resSet.getNewDataDelFlag() != null && resSet.getNewDataDelFlag().equals("T") ){
-				LOGGER.info(">>  will try to delete this one >> " + thisGuyStr);
+				LOGGER.debug(">>  will try to delete this one >> " + thisGuyStr);
 				
 				try {
 					Boolean requireResourceVersion = false;
@@ -870,9 +873,10 @@ public class ModelBasedProcessing {
 						throw ae;
 					}
 					else {
+						ErrorLogHelper.logException(ae);
 						String errText = ae.getErrorObject().getErrorText();
 						String errDetail = ae.getMessage();
-						LOGGER.warn("Exception when deleting " + thisGuyStr + ".  ErrorCode = " + errorCode + 
+						LOGGER.debug("Exception when deleting " + thisGuyStr + ".  ErrorCode = " + errorCode +
 								", errorText = " + errText + ", details = " + errDetail);
 					}
 				}
@@ -880,7 +884,8 @@ public class ModelBasedProcessing {
 					// We'd expect to get a "node not found" here sometimes depending on the order that 
 					// the model has us finding / deleting nodes.
 					// Ignore the exception - but log it so we can see what happened.
-					LOGGER.warn("Exception when deleting " + thisGuyStr + e.getMessage() + LogFormatTools.getStackTop(e));
+					AAIException aaiException = new AAIException("AAI_6154", thisGuyStr + ".  msg = " + e.getMessage());
+					ErrorLogHelper.logException(aaiException);
 				}
 				
 				// We can't depend on a thrown exception to tell us if a node was deleted since it may

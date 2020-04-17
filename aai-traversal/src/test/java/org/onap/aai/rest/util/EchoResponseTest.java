@@ -19,7 +19,8 @@
  */
 package org.onap.aai.rest.util;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +60,7 @@ public class EchoResponseTest {
 
     private List<MediaType> outputMediaTypes;
 
-    private static final EELFLogger logger = EELFManager.getInstance().getLogger(EchoResponseTest.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EchoResponseTest.class.getName());
 
     @Before
     public void setup(){

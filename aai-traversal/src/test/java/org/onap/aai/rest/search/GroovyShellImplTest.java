@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
@@ -54,9 +53,7 @@ public class GroovyShellImplTest extends AAISetup{
 
     private final static ModelType introspectorFactoryType = ModelType.MOXY;
     private final static QueryStyle queryStyle = QueryStyle.TRAVERSAL;
-    private final static DBConnectionType type = DBConnectionType.REALTIME;
 
-    
     static {
         VALID_HTTP_STATUS_CODES.add(200);
         VALID_HTTP_STATUS_CODES.add(201);
@@ -117,7 +114,6 @@ public class GroovyShellImplTest extends AAISetup{
         loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
         dbEngine = new JanusGraphDBEngine(
                 queryStyle,
-                type,
                 loader);
         GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton);
         builder.queryFrom(URI.create("te"));
@@ -134,7 +130,7 @@ public class GroovyShellImplTest extends AAISetup{
         GraphTraversal<Vertex, Vertex> g = Mockito.mock(GraphTraversal.class);
         g.has("cloud-region-id", "cloud-region-id-1");
         Map<String, Object> params = new HashMap<>();
-        groovyShellImpl.runQuery("vnfs-fromServiceInstance", params);
+        groovyShellImpl.runQuery("vnfs-fromServiceInstance", params, dbEngine.asAdmin().getTraversalSource());
     }
 
 }

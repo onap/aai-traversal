@@ -23,7 +23,13 @@ import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
 import org.onap.aai.restcore.search.GremlinGroovyShell;
+import org.onap.aai.restcore.util.URITools;
+import org.onap.aai.util.AAIConstants;
+
+import javax.ws.rs.core.MultivaluedHashMap;
 
 public class GroovyShellImpl extends GenericQueryProcessor {
 
@@ -32,13 +38,17 @@ public class GroovyShellImpl extends GenericQueryProcessor {
 	}
 	
 	@Override
-	protected GraphTraversal<?,?> runQuery(String query, Map<String, Object> params) {
+	protected GraphTraversal<?,?> runQuery(String query, Map<String, Object> params, GraphTraversalSource traversalSource) {
 
-		params.put("g", this.dbEngine.asAdmin().getTraversalSource());
-		
+		AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
+		metricLog.pre(uri);
+
+		params.put("g", traversalSource);
 		GremlinGroovyShell shell = new GremlinGroovyShell();
-		
-		return shell.executeTraversal(query, params);
+		GraphTraversal<?,?> graphTraversal = shell.executeTraversal(query, params);
+
+		metricLog.post();
+		return graphTraversal;
 	}
 		
 }

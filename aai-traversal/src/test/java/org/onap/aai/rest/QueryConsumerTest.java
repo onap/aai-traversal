@@ -42,8 +42,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -56,8 +56,7 @@ import javax.ws.rs.core.Response;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TraversalApp.class)
@@ -66,7 +65,7 @@ import static org.junit.Assert.fail;
 @Import(TraversalTestConfiguration.class)
 public class QueryConsumerTest {
 
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(QueryConsumerTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerTest.class);
 	private HttpTestUtil httpTestUtil;
 
 	private String pserverUri;
@@ -123,7 +122,7 @@ public class QueryConsumerTest {
 		Response response = httpTestUtil.doPut(complexUri, complexPayload);
 	}
 
-	//@Test
+//	@Test
 	public void testRequiredAGood() throws Exception {
 		String endpoint = "/aai/v14/query?format=pathed";
 		Map<String, String> cloudRegionMap = new HashMap<>();

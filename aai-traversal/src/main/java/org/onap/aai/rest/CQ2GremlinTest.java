@@ -20,26 +20,8 @@
 package org.onap.aai.rest;
 
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
+import com.beust.jcommander.internal.Lists;
+import com.beust.jcommander.internal.Maps;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -47,7 +29,6 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.onap.aai.config.SpringContextAware;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;
@@ -61,21 +42,27 @@ import org.onap.aai.serialization.db.EdgeSerializer;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
-import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Maps;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 @Path("/cq2gremlintest")
 public class CQ2GremlinTest extends RESTAPI {
 
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(CQ2GremlinTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CQ2GremlinTest.class);
 
 	private HttpEntry traversalUriHttpEntry;
 
@@ -110,8 +97,7 @@ public class CQ2GremlinTest extends RESTAPI {
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 		SchemaVersions schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
-		DBConnectionType type = this.determineConnectionType(sourceOfTruth, realTime);
-		traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion(), type);
+		traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion());
 		traversalUriHttpEntry.setPaginationParameters("-1", "-1");
 		return processC2UnitTest(content);
 	}
@@ -123,12 +109,12 @@ public class CQ2GremlinTest extends RESTAPI {
 		gts = graph.traversal();
 		List<Vertex> expectedVertices = createGraph(content, graph);
 		GremlinGroovyShell shell = new GremlinGroovyShell();
-		loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, new SchemaVersion("v16"));
+		loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, new SchemaVersion("v19"));
 		LinkedHashMap <String, Object> params = new LinkedHashMap<>();
 
 		//Adding parameters
-		content.getQueryRequiredProperties().forEach((K, V) -> {params.put(K, V);});
-		content.getQueryOptionalProperties().forEach((K, V) -> {params.put(K, V);});
+		content.getQueryRequiredProperties().forEach(params::put);
+		content.getQueryOptionalProperties().forEach(params::put);
 
 		String query = new GroovyQueryBuilder().executeTraversal(dbEngine, content.getStoredQuery(), params);
 		query = "g" + query;
@@ -166,17 +152,17 @@ public class CQ2GremlinTest extends RESTAPI {
 	private List<Vertex> createGraph(CustomQueryTestDTO content, Graph graph) {
 		Map<String, Vertex> verticesMap = Maps.newLinkedHashMap();
 		//Creating all the Vertices
-		content.getVerticesDtos().stream().forEach(vertex -> {
+		content.getVerticesDtos().forEach(vertex -> {
 			StringBuilder vertexIdentifier = new StringBuilder();
 			List<String> keyValues = Lists.newArrayList();
 			keyValues.add(T.id.toString());
 			keyValues.add(String.format("%02d", verticesMap.size() * 10));
 			AtomicInteger index = new AtomicInteger(0);
-			vertex.forEach((K, V) -> {
+			vertex.forEach((k, v) -> {
 				if(index.get() == 1)
-					vertexIdentifier.append(V);
-				keyValues.add(K);
-				keyValues.add(V);
+					vertexIdentifier.append(k);
+				keyValues.add(k);
+				keyValues.add(v);
 				index.incrementAndGet();
 			});
 			Vertex graphVertex = graph.addVertex(keyValues.toArray());
@@ -186,7 +172,7 @@ public class CQ2GremlinTest extends RESTAPI {
 		GraphTraversalSource g = graph.traversal();
 
 		//Creating all the Edges
-		content.getEdgesDtos().stream().forEach(edge -> {
+		content.getEdgesDtos().forEach(edge -> {
 			String fromId = edge.get("from-id");
 			String toId = edge.get("to-id");
 			boolean treeEdgeIdentifier = !"NONE".equalsIgnoreCase(edge.get("contains-other-v"));
@@ -207,9 +193,7 @@ public class CQ2GremlinTest extends RESTAPI {
 
 
 		List<Vertex> expectedVertices = Lists.newArrayList();
-		content.getExpectedResultsDtos().getIds().stream().forEach(vertexId -> {
-			expectedVertices.add(verticesMap.get(vertexId));
-		});
+		content.getExpectedResultsDtos().getIds().forEach(vertexId -> expectedVertices.add(verticesMap.get(vertexId)));
 		return expectedVertices;
 	}
 
@@ -218,8 +202,8 @@ public class CQ2GremlinTest extends RESTAPI {
 		if(!startNodeVertex.isPresent()){
 			throw new IllegalArgumentException("start-node was not specified");
 		}
-		startNodeVertex.get().forEach((K, V) -> {
-			g.has(K, V);
+		startNodeVertex.get().forEach((k, v) -> {
+			g.has(k, v);
 		});
 	}
 

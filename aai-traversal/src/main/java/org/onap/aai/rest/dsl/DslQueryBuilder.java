@@ -19,21 +19,26 @@
  */
 package org.onap.aai.rest.dsl;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.edges.EdgeRule;
 import org.onap.aai.edges.EdgeRuleQuery;
+import org.onap.aai.edges.enums.AAIDirection;
 import org.onap.aai.edges.enums.EdgeType;
 import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
 import org.onap.aai.schema.enums.PropertyMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DslQueryBuilder {
@@ -42,6 +47,8 @@ public class DslQueryBuilder {
     private final Loader loader;
     private StringBuilder query;
     private StringBuilder queryException;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DslQueryBuilder.class);
 
     public DslQueryBuilder(EdgeIngestor edgeIngestor, Loader loader) {
         this.edgeRules = edgeIngestor;
@@ -74,6 +81,19 @@ public class DslQueryBuilder {
     /*
      * DSL always dedupes the results
      */
+    public DslQueryBuilder end(long selectCounter) {
+        if(selectCounter <= 0) {
+            return this.end();
+        } else {
+            String selectStep = "step" + selectCounter;
+            query.append(".as('").append(selectStep).append("')").append(".as('stepMain')" +
+                    ".select('").append(selectStep).append("')").append(".store('x')").append(".select('stepMain').fold().dedup()");
+        }
+        return this;
+    }
+
+
+
     public DslQueryBuilder end() {
         query.append(".cap('x').unfold().dedup()");
         return this;
@@ -85,6 +105,21 @@ public class DslQueryBuilder {
     }
 
     public DslQueryBuilder edgeQuery(List<String> edgeLabels, String aNode, String bNode) {
+        EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(aNode, bNode);
+        return edgeQueryWithBuilder(edgeLabels, aNode, bNode, baseQ);
+    }
+
+    public DslQueryBuilder edgeQuery(Edge edge, String aNode, String bNode) {
+        List<String> edgeLabels = edge.getLabels().stream().map(edgeLabel -> StringUtils.quote(edgeLabel.getLabel())).collect(Collectors.toList());
+        EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(aNode, bNode);
+
+        if((AAIDirection.valueOf(edge.getDirection().name())) != AAIDirection.BOTH) {
+           baseQ = baseQ.direction(AAIDirection.valueOf(edge.getDirection().name()));
+        }
+        return edgeQueryWithBuilder(edgeLabels, aNode, bNode, baseQ);
+    }
+
+    private DslQueryBuilder edgeQueryWithBuilder(List<String> edgeLabels, String aNode, String bNode, EdgeRuleQuery.Builder edgeBuilder) {
         //TODO : change this for fuzzy search.
 
         String edgeType = "";
@@ -94,48 +129,42 @@ public class DslQueryBuilder {
 
         if (!edgeLabels.isEmpty()) {
             edgeTraversalClause = ".createEdgeTraversalWithLabels(";
-            edgeLabelsClause = String.join("", ", new ArrayList<>(Arrays.asList(", Joiner.on(",").join(edgeLabels), "))");
+            edgeLabelsClause = String.join("", ", new ArrayList<>(Arrays.asList(", String.join(",", edgeLabels), "))");
         }
+        LOGGER.debug("EdgeLabels Clause: {}", edgeLabelsClause);
 
-        EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(aNode, bNode);
         Multimap<String, EdgeRule> rules = ArrayListMultimap.create();
         try {
-            //TODO chnage this - ugly
             if (edgeLabels.isEmpty()) {
-                rules.putAll(edgeRules.getRules(baseQ.build()));
+                rules.putAll(edgeRules.getRules(edgeBuilder.build()));
             } else {
-                edgeLabels.stream().forEach(label -> {
+                edgeLabels.forEach(label -> {
                     try {
-                        rules.putAll(edgeRules.getRules(baseQ.label(label).build()));
+                        rules.putAll(edgeRules.getRules(edgeBuilder.label(label).build()));
                     } catch (EdgeRuleNotFoundException e) {
-                        queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
-                                + ", " + bNode + label);
-
+                        queryException.append("Exception while finding the edge rule between the nodeTypes: ").append(aNode).append(", ").append(bNode).append(label);
                     }
                 });
 
             }
         } catch (EdgeRuleNotFoundException e) {
             if (!edgeLabels.isEmpty()) {
-                queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
-                        + ", " + bNode + edgeLabels.stream().toString());
+                queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode).append(", ").append(bNode).append(edgeLabels.stream().toString());
             }
             else {
-                queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
-                        + ", " + bNode);
+                queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode).append(", ").append(bNode);
             }
             return this;
         }
 
         if (rules.isEmpty() || rules.keys().isEmpty()) {
-            queryException.append("AAI_6120" + "No EdgeRule found for passed nodeTypes: " + aNode
-                    + ", " + bNode);
+            queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode).append(", ").append(bNode);
         } else {
             if (edgeLabels.isEmpty()) {
-                if (edgeRules.hasRule(baseQ.edgeType(EdgeType.TREE).build())) {
+                if (edgeRules.hasRule(edgeBuilder.edgeType(EdgeType.TREE).build())) {
                     edgeType = "EdgeType.TREE" + ",";
                 }
-                if (edgeRules.hasRule(baseQ.edgeType(EdgeType.COUSIN).build())) {
+                if (edgeRules.hasRule(edgeBuilder.edgeType(EdgeType.COUSIN).build())) {
                     if (edgeType.isEmpty()) {
                         edgeType = "EdgeType.COUSIN" + ",";
                     } else {
@@ -152,13 +181,19 @@ public class DslQueryBuilder {
     }
 
 
-    public DslQueryBuilder where() {
+    public DslQueryBuilder where(boolean isNot) {
         query.append(".where(");
+        if(isNot){
+            query.append("builder.newInstance().not(");
+        }
         return this;
     }
 
-    public DslQueryBuilder endWhere() {
+    public DslQueryBuilder endWhere(boolean isNot) {
         query.append(")");
+        if(isNot){
+            query.append(")");
+        }
         return this;
     }
 
@@ -168,12 +203,14 @@ public class DslQueryBuilder {
     }
 
     public DslQueryBuilder filter(boolean isNot, String node, String key, List<String> values) {
-        return this.filterPropertyStart(isNot).filterPropertyKeys(node, key, values).filterPropertyEnd();
+        return this.filterPropertyStart(isNot,values).filterPropertyKeys(node, key, values).filterPropertyEnd();
     }
 
-    public DslQueryBuilder filterPropertyStart(boolean isNot) {
+    public DslQueryBuilder filterPropertyStart(boolean isNot, List<String> values) {
         if (isNot) {
             query.append(".getVerticesExcludeByProperty(");
+        } else if(values!= null && !values.isEmpty() && Boolean.parseBoolean(values.get(0))) {
+            query.append(".getVerticesByBooleanProperty(");
         } else {
             query.append(".getVerticesByProperty(");
         }
@@ -188,46 +225,63 @@ public class DslQueryBuilder {
     public DslQueryBuilder validateFilter(String node, List<String> keys) {
         try {
             Introspector obj = loader.introspectorFromName(node);
+
             if (keys.isEmpty()) {
-                queryException.append("No keys sent. Valid keys for " + node + " are "
-                        + String.join(",", obj.getIndexedProperties()));
+                queryException.append("No keys sent. Valid keys for ")
+                        .append(node)
+                        .append(" are ")
+                        .append(String.join(",", obj.getIndexedProperties()));
                 return this;
             }
 
-            boolean notIndexed = keys.stream()
-                    .filter(prop -> obj.getIndexedProperties().contains(prop)).collect(Collectors.toList()).isEmpty();
-
-            if (notIndexed) {
-                queryException.append("Non indexed keys sent. Valid keys for " + node + " "
-                        + String.join(",", obj.getIndexedProperties()));
-            }
         } catch (AAIUnknownObjectException e) {
-            queryException.append("Unknown Object being referenced by the query" + node);
+            queryException.append("Unknown Object being referenced by the query").append(node);
         }
         return this;
 
     }
 
+    public DslQueryBuilder select(boolean isNot, long selectCounter, List<String> keys) {
+        /*
+         * TODO : isNot should look at the vertex properties and include everything except the notKeys
+         */
+
+        Pattern p = Pattern.compile("aai-node-type");
+        Matcher m = p.matcher(query);
+        int count = 0;
+        while (m.find()){
+            count++;
+        }
+
+        if (selectCounter == count || keys == null) {
+            String selectStep = "step" + selectCounter;
+//          String keysArray = String.join(",", keys);
+            query.append(".as('").append(selectStep).append("')")
+                    .append(".as('stepMain').select('").append(selectStep).append("')");
+        }
+        return this;
+    }
+
     public DslQueryBuilder filterPropertyKeys(String node, String key, List<String> values) {
         try {
             Introspector obj = loader.introspectorFromName(node);
-
-            Optional<String> alias = obj.getPropertyMetadata(key, PropertyMetadata.DB_ALIAS);
+            Optional<String> alias = obj.getPropertyMetadata(key.replace("'",""), PropertyMetadata.DB_ALIAS);
             if (alias.isPresent()) {
-                key = alias.get();
+                key = StringUtils.quote(alias.get());
             }
+
             query.append(key);
 
             if (!values.isEmpty()) {
                 if (values.size() > 1) {
                     String valuesArray = String.join(",", values);
-                    query.append(",").append(" new ArrayList<>(Arrays.asList(" + valuesArray + "))");
+                    query.append(",").append(" new ArrayList<>(Arrays.asList(").append(valuesArray).append("))");
                 } else {
                     query.append(",").append(values.get(0));
                 }
             }
         } catch (AAIUnknownObjectException e) {
-            queryException.append("Unknown Object being referenced by the query" + node);
+            queryException.append("Unknown Object being referenced by the query").append(node);
         }
         return this;
     }

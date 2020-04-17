@@ -19,7 +19,8 @@
  */
 package org.onap.aai.rest;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.junit.Test;
 import org.springframework.http.*;
@@ -34,7 +35,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class SearchProviderRestTest extends AbstractSpringRestTest {
 
-    private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchProviderRestTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchProviderRestTest.class);
 
     @Test
     public void testNodesQueryInvalidData() {
