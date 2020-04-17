@@ -19,7 +19,8 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
@@ -41,7 +42,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 public class NodeQueryProcessor extends GroovyShellImpl {
 
-	private static EELFLogger LOGGER = EELFManager.getInstance().getLogger(NodeQueryProcessor.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(NodeQueryProcessor.class);
 
 	protected String nodeType;
 	private MultivaluedMap<String, String> nodeQueryParams = new MultivaluedHashMap<String, String>();
@@ -106,7 +107,7 @@ public class NodeQueryProcessor extends GroovyShellImpl {
 			// nothing to do, just exit
 			return new ArrayList<>();
 		}
-		GraphTraversal<?, ?> g = this.runQuery(query, params);
+		GraphTraversal<?, ?> g = this.runQuery(query, params, dbEngine.asAdmin().getTraversalSource());
 
 		resultVertices.addAll(g.toList());
 

@@ -20,20 +20,127 @@
 
 package org.onap.aai.rest.dsl; 
 
-import static org.junit.Assert.assertNull;
-
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Deque;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class DslContextTest {
     DslContext dslContext;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
+
         dslContext= new DslContext();
+        dslContext.setCtx(null);
     }
-    
+
+    @Test
+    public void testGetCtx() {
+        assertNull(dslContext.getCtx());
+    }
+
+    @Test
+    public void testSetUnionStart() {
+        dslContext.setUnionStart(true);
+    }
+
+    @Test
+    public void testGetLimitQuery() {
+        assertNotNull(dslContext.getLimitQuery());
+    }
+
+    @Test
+    public void testSetLimitQuery() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("abc");
+        dslContext.setLimitQuery(builder);
+        dslContext.setStartNodeFlag(true);
+        dslContext.setUnionStart(true);
+        dslContext.setUnionStartNodes(null);
+        assertNotNull(dslContext);
+    }
+
+    @Test
+    public void testIsStartNode() {
+        Assert.assertFalse(dslContext.isStartNode());
+    }
+
+    @Test
+    public void testGetStartNode() {
+        dslContext.setStartNode("xyz");
+        Assert.assertEquals(dslContext.getStartNode(), "xyz");
+    }
+
+    @Test
+    public void testGetStartNodeKeys() {
+        Assert.assertNotNull(dslContext.getStartNodeKeys());
+    }
+
+    @Test
+    public void testGetCurrentNode() {
+        dslContext.setCurrentNode("blah");
+        Assert.assertEquals(dslContext.getCurrentNode(), "blah");
+    }
+
+    @Test
+    public void testGetPreviousNode() {
+        dslContext.setPreviousNode("blah");
+        Assert.assertEquals(dslContext.getPreviousNode(), "blah");
+    }
+
+    @Test
+    public void testisTraversal() {
+        dslContext.setTraversal(false);
+        Assert.assertFalse(dslContext.isTraversal());
+    }
+
+    @Test
+    public void testGetWhereQuery() {
+        dslContext.setWhereQuery(true);
+        Assert.assertTrue(dslContext.isWhereQuery());
+    }
+
+    @Test
+    public void testIsUnionQuery() {
+        dslContext.setUnionQuery(true);
+        Assert.assertTrue(dslContext.isUnionQuery());
+    }
+
+    @Test
+    public void testIsUnionStart() {
+        dslContext.setUnionStart(true);
+        Assert.assertTrue(dslContext.isUnionStart());
+    }
+
+    @Test
+    public void testUnionStart() throws Exception {
+        assertNotNull(dslContext.getUnionStartNodes());
+    }
+
+    @Test
+    public void testGetWhereStartNode() {
+        dslContext.setWhereStartNode("blah");
+        Assert.assertEquals(dslContext.getWhereStartNode(), "blah");
+    }
+
+    @Test
+    public void testIsValidationFlag() {
+        Assert.assertTrue(dslContext.isValidationFlag());
+    }
+
+    @Test
+    public void testSetValidationFlag()
+    {
+        dslContext.setValidationFlag(true);
+        Assert.assertTrue(dslContext.isValidationFlag());
+    }
+
     @Test
     public void testUnionStartNodes()
     {

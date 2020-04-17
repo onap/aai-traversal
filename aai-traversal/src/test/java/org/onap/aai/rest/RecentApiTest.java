@@ -19,22 +19,45 @@
  */
 package org.onap.aai.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.janusgraph.core.JanusGraphTransaction;
 import org.junit.Test;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.onap.aai.dbmap.AAIGraph;
+import org.springframework.http.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
+
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 public class RecentApiTest extends AbstractSpringRestTest {
 
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(RecentApiTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RecentApiTest.class);
+
+	@Override
+	public void createTestGraph() {
+		JanusGraphTransaction transaction = AAIGraph.getInstance().getGraph().newTransaction();
+		boolean success = true;
+		try {
+			GraphTraversalSource g = transaction.traversal();
+			g.addV().property("aai-node-type", "pserver").property("hostname", "test-pserver-recents")
+				.property("in-maint", false).property("source-of-truth", "JUNIT")
+				.property("aai-uri", "/cloud-infrastructure/pservers/pserver/test-pserver-recents").next();
+		} catch (Exception ex) {
+			success = false;
+		} finally {
+			if (success) {
+				transaction.commit();
+			} else {
+				transaction.rollback();
+				fail("Unable to setup the graph");
+			}
+		}
+	}
 
 	@Test
 	public void testRecentsQuery() {
@@ -44,10 +67,28 @@ public class RecentApiTest extends AbstractSpringRestTest {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint).queryParam("hours", "190");
 		ResponseEntity responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity,
 				String.class);
-		LOGGER.debug("Response for PUT request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
-		assertNotNull("Response from /aai/recents/v14/pserver is null", responseEntity);
-		assertEquals("Expected the response to be 400", HttpStatus.OK, responseEntity.getStatusCode());
+		LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+		assertNotNull("Response from /aai/recents/v14/pserver is not null", responseEntity);
+		assertEquals("Expected the response to be 200", HttpStatus.OK, responseEntity.getStatusCode());
 
+		// Check different application xml headers for accept
+		headers.set("Accept", "application/xml");
+		httpEntity = new HttpEntity(headers);
+
+		responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity,
+			String.class);
+		LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+		assertNotNull("Response from /aai/recents/v14/pserver is not null", responseEntity);
+		assertEquals("Expected the response to be 200", HttpStatus.OK, responseEntity.getStatusCode());
+
+		headers.set("Accept", "application/xml; charset=UTF-8");
+		httpEntity = new HttpEntity(headers);
+
+		responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity,
+			String.class);
+		LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+		assertNotNull("Response from /aai/recents/v14/pserver is not null", responseEntity);
+		assertEquals("Expected the response to be 200", HttpStatus.OK, responseEntity.getStatusCode());
 	}
 
 	@Test

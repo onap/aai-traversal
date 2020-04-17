@@ -19,7 +19,8 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -93,7 +94,7 @@ public abstract class OnapQueryTest {
     @Rule
     public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-	protected EELFLogger logger;
+	protected Logger logger;
 	protected Graph graph;
 	protected GremlinGroovyShell shell;
 	@Mock protected TransactionalGraphEngine dbEngine;
@@ -144,7 +145,7 @@ public abstract class OnapQueryTest {
 	public void setUp() throws AAIException, NoEdgeRuleFoundException, EdgeRuleNotFoundException, AmbiguousRuleChoiceException {
 		System.setProperty("AJSC_HOME", ".");
 		System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
-		logger = EELFManager.getInstance().getLogger(getClass());
+		logger = LoggerFactory.getLogger(getClass());
 		MockitoAnnotations.initMocks(this);
 		graph = TinkerGraph.open();
 		gts = graph.traversal();

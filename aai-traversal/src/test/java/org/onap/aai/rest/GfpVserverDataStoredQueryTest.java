@@ -19,7 +19,10 @@
  */
 package org.onap.aai.rest;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.onap.aai.config.PropertyPasswordConfiguration;
+import org.onap.aai.transforms.XmlFormatTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import com.jayway.jsonpath.JsonPath;
 import org.janusgraph.core.JanusGraph;
@@ -34,6 +37,7 @@ import org.onap.aai.HttpTestUtil;
 import org.onap.aai.PayloadUtil;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.setup.SchemaVersion;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
@@ -47,9 +51,10 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 public class GfpVserverDataStoredQueryTest extends AAISetup{
 
-    private static final EELFLogger logger = EELFManager.getInstance().getLogger(GfpVserverDataStoredQueryTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(GfpVserverDataStoredQueryTest.class);
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
@@ -102,7 +107,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         assertEquals("Expecting the cloud region to be created", 201, response.getStatus());
         logger.info("Successfully created the cloud region with linterface");
 
-        queryConsumer = new QueryConsumer(traversalUriHttpEntry, schemaVersions, gremlinServerSingleton, basePath);
+        queryConsumer = new QueryConsumer(traversalUriHttpEntry, schemaVersions, gremlinServerSingleton, new XmlFormatTransformer(), basePath);
 
         httpHeaders         = mock(HttpHeaders.class);
 
@@ -164,12 +169,10 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         Response response = queryConsumer.executeQuery(
             payload,
             version.toString(),
-            query,
             "resource_and_url", "" +
             "no_op",
             httpHeaders,
             uriInfo,
-            httpServletRequest,
             "-1",
             "-1"
         );
@@ -203,12 +206,10 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         Response response = queryConsumer.executeQuery(
                 payload,
                 version.toString(),
-                query,
                 "resource_and_url", "" +
                         "no_op",
                 httpHeaders,
                 uriInfo,
-                httpServletRequest,
                 "-1",
                 "-1"
         );
@@ -243,12 +244,10 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         Response response = queryConsumer.executeQuery(
                 payload,
                 version.toString(),
-                query,
                 "resource_and_url", "" +
                         "no_op",
                 httpHeaders,
                 uriInfo,
-                httpServletRequest,
                 "-1",
                 "-1"
         );

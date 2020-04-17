@@ -26,7 +26,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import com.google.common.base.CaseFormat;
 import org.junit.Test;
@@ -35,7 +36,7 @@ import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 
 public class TopologyFromSubscriberNameAndServiceTypeTest extends QueryTest {
-	private static final EELFLogger LOGGER = EELFManager.getInstance()
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(TopologyFromSubscriberNameAndServiceTypeTest.class);
 
 	public TopologyFromSubscriberNameAndServiceTypeTest() throws AAIException, NoEdgeRuleFoundException {

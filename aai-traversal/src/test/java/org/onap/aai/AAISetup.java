@@ -61,6 +61,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
         RestBeanConfig.class,
         SearchConfiguration.class,
 		DslConfiguration.class,
+		XmlFormatTransformerConfiguration.class,
 		GremlinServerSingleton.class
 })
 @TestPropertySource(properties = {

@@ -19,12 +19,13 @@
  */
 package org.onap.aai.transforms;
 
+
+import joptsimple.internal.Objects;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.collections.MapUtils;
 
 public class MapTraverser {
 
@@ -36,9 +37,8 @@ public class MapTraverser {
 
     public Map<String, Object> convertKeys(Map<String, Object> map){
 
-        if (MapUtils.isEmpty(map)) {
-        	throw new NullPointerException("map cannot be null");
-        }
+        Objects.ensureNotNull(map);
+
         Map<String, Object> modifiedMap = new HashMap<String, Object>();
         convertKeys(map, modifiedMap);
 

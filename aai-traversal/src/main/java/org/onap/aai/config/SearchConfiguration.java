@@ -23,7 +23,7 @@ import org.onap.aai.dbgraphmap.SearchGraph;
 
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.introspection.LoaderFactory;
-import org.onap.aai.rest.dsl.DslListener;
+import org.onap.aai.rest.dsl.v1.DslListener;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
 import org.onap.aai.rest.search.CQConfig;
 import org.onap.aai.rest.search.GremlinServerSingleton;

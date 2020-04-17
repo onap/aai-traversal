@@ -19,23 +19,7 @@
  */
 package org.onap.aai.rest;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.onap.aai.config.SpringContextAware;
-import org.onap.aai.dbmap.DBConnectionType;
-import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.search.CustomQueryConfigDTO;
@@ -49,6 +33,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Path("/cq2gremlin")
@@ -86,8 +79,6 @@ public class CQ2Gremlin extends RESTAPI {
 	protected Response processGremlinQuery(CustomQueryConfigDTO content, UriInfo info,
 			HttpHeaders headers) {
 		try{
-			String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-			String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 			LinkedHashMap <String, Object> params;
 			CustomQueryDTO queryDTO = content.getQueryDTO();
 			String query = queryDTO.getQuery();
@@ -108,8 +99,7 @@ public class CQ2Gremlin extends RESTAPI {
 			}
 			
 			SchemaVersions schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
-			DBConnectionType type = this.determineConnectionType(sourceOfTruth, realTime);
-			traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion(), type);
+			traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion());
 			traversalUriHttpEntry.setPaginationParameters("-1", "-1");
 			
 			TransactionalGraphEngine dbEngine = traversalUriHttpEntry.getDbEngine();

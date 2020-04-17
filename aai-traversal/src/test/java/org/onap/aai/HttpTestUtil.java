@@ -19,12 +19,9 @@
  */
 package org.onap.aai;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
 import org.javatuples.Pair;
 import org.mockito.Mockito;
 import org.onap.aai.config.SpringContextAware;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
@@ -37,12 +34,15 @@ import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.*;
-import javax.xml.validation.Schema;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doReturn;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.when;
 
 public class HttpTestUtil extends RESTAPI {
 
-    private static final EELFLogger logger = EELFManager.getInstance().getLogger(HttpTestUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpTestUtil.class);
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
@@ -116,7 +116,7 @@ public class HttpTestUtil extends RESTAPI {
 
             SchemaVersion version = null;
 
-            if(arr != null && arr.length > 1){
+            if(arr.length > 1){
                 if(arr[0].matches("^v\\d+")){
                     version = new SchemaVersion(arr[0]);
                     uri = uri.replaceAll("^v\\d+", "");
@@ -128,10 +128,8 @@ public class HttpTestUtil extends RESTAPI {
             }
             Mockito.when(uriInfo.getPath()).thenReturn(uri);
 
-            DBConnectionType type = DBConnectionType.REALTIME;
             HttpEntry resourceHttpEntry = SpringContextAware.getBean("traversalHttpEntry", HttpEntry.class);
-            resourceHttpEntry.setHttpEntryProperties(version, type);
-           // HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
+            resourceHttpEntry.setHttpEntryProperties(version);
             Loader loader         = resourceHttpEntry.getLoader();
             dbEngine              = resourceHttpEntry.getDbEngine();
 
@@ -210,7 +208,7 @@ public class HttpTestUtil extends RESTAPI {
 
             SchemaVersion version = null;
 
-            if(arr != null && arr.length > 1){
+            if(arr.length > 1){
                 if(arr[0].matches("^v\\d+")){
                     version = new SchemaVersion(arr[0]);
                     uri = uri.replaceAll("^v\\d+", "");
@@ -221,11 +219,8 @@ public class HttpTestUtil extends RESTAPI {
                 version = schemaVersions.getDefaultVersion();
             }
 
-            DBConnectionType type = DBConnectionType.REALTIME;
-            
-            //HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
             HttpEntry resourceHttpEntry = SpringContextAware.getBean("traversalHttpEntry", HttpEntry.class);
-            resourceHttpEntry.setHttpEntryProperties(version, type);
+            resourceHttpEntry.setHttpEntryProperties(version);
             
             Loader loader         = resourceHttpEntry.getLoader();
             dbEngine              = resourceHttpEntry.getDbEngine();
@@ -295,7 +290,7 @@ public class HttpTestUtil extends RESTAPI {
 
             SchemaVersion version = null;
 
-            if(arr != null && arr.length > 1){
+            if(arr.length > 1){
                 if(arr[0].matches("^v\\d+")){
                     version = new SchemaVersion(arr[0]);
                     if(!uri.contains("relationship-list/relationship")){
@@ -309,10 +304,8 @@ public class HttpTestUtil extends RESTAPI {
             }
 
             Mockito.when(uriInfo.getPath()).thenReturn(uri);
-            DBConnectionType type = DBConnectionType.REALTIME;
             HttpEntry resourceHttpEntry = SpringContextAware.getBean("traversalHttpEntry", HttpEntry.class);
-            resourceHttpEntry.setHttpEntryProperties(version, type);
-           // HttpEntry httpEntry   = new HttpEntry(version, ModelType.MOXY, QueryStyle.TRAVERSAL, type);
+            resourceHttpEntry.setHttpEntryProperties(version);
             Loader loader         = resourceHttpEntry.getLoader();
             dbEngine              = resourceHttpEntry.getDbEngine();
 

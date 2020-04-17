@@ -19,24 +19,10 @@
  */
 package org.onap.aai.dbgraphmap;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilderException;
-import javax.xml.bind.JAXBException;
-
+import com.google.common.base.CaseFormat;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -52,42 +38,42 @@ import org.onap.aai.db.props.AAIProperties;
 import org.onap.aai.dbgen.PropertyLimitDesc;
 import org.onap.aai.dbgraphgen.ModelBasedProcessing;
 import org.onap.aai.dbgraphgen.ResultSet;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.edges.EdgeRule;
 import org.onap.aai.edges.EdgeRuleQuery;
 import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.extensions.AAIExtensionMap;
-import org.onap.aai.introspection.Introspector;
-import org.onap.aai.introspection.Loader;
-import org.onap.aai.introspection.LoaderFactory;
-import org.onap.aai.introspection.ModelType;
-import org.onap.aai.introspection.MoxyLoader;
+import org.onap.aai.introspection.*;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
+import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.parsers.relationship.RelationshipToURI;
 import org.onap.aai.query.builder.QueryBuilder;
+import org.onap.aai.rest.util.AAIExtensionMap;
 import org.onap.aai.schema.enums.ObjectMetadata;
 import org.onap.aai.schema.enums.PropertyMetadata;
 import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
+import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.exceptions.AAIFormatVertexException;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersions;
+import org.onap.aai.util.GenericQueryBuilder;
 import org.onap.aai.util.NodesQueryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
-import com.google.common.base.CaseFormat;
-
-import edu.emory.mathcs.backport.java.util.Collections;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import org.onap.aai.util.GenericQueryBuilder;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilderException;
+import javax.xml.bind.JAXBException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -97,7 +83,7 @@ import org.onap.aai.util.GenericQueryBuilder;
  */
 public class SearchGraph {
 
-    private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(SearchGraph.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchGraph.class);
 
     private LoaderFactory loaderFactory;
 
@@ -145,11 +131,10 @@ public class SearchGraph {
             // for now query it directly without attempting to craft a valid URI
             if (genericQueryBuilder.getStartNodeType().equalsIgnoreCase("service-instance")
                     && genericQueryBuilder.getStartNodeKeyParams().size() == 1) {
-                Introspector obj =
-                        genericQueryBuilder.getLoader().introspectorFromName(genericQueryBuilder.getStartNodeType());
+                genericQueryBuilder.getLoader().introspectorFromName(genericQueryBuilder.getStartNodeType());
                 // Build a hash with keys to uniquely identify the start Node
-                String keyName = null;
-                String keyValue = null;
+                String keyName;
+                String keyValue;
 
                 QueryBuilder builder = genericQueryBuilder.getDbEngine().getQueryBuilder()
                         .getVerticesByIndexedProperty(AAIProperties.NODE_TYPE, "service-instance");
@@ -185,7 +170,7 @@ public class SearchGraph {
             Vertex startNode = results.get(0);
 
             Collection<Vertex> ver = new HashSet<>();
-            List<Vertex> queryResults = new ArrayList<>();
+            List<Vertex> queryResults;
             GraphTraversalSource traversalSource =
                     genericQueryBuilder.getDbEngine().asAdmin().getReadOnlyTraversalSource();
             GraphTraversal<Vertex, Vertex> traversal;
@@ -204,7 +189,8 @@ public class SearchGraph {
 
 
             if (queryResults.isEmpty()) {
-                LOGGER.warn("No nodes found - apipe was null/empty");
+                AAIException aaiException = new AAIException("AAI_6114", "No nodes found - apipe was null/empty");
+                ErrorLogHelper.logException(aaiException);
             } else {
 
                 Introspector searchResults = createSearchResults(genericQueryBuilder.getLoader(),
@@ -218,7 +204,7 @@ public class SearchGraph {
                 result = searchResults.marshal(properties);
                 response = Response.ok().entity(result).build();
 
-                LOGGER.debug(ver.size() + " node(s) traversed, " + queryResults.size() + " found");
+                LOGGER.debug("{} node(s) traversed, {} found", ver.size(), queryResults.size());
             }
             success = true;
         } catch (AAIException e) {
@@ -286,8 +272,7 @@ public class SearchGraph {
 
             Introspector target;
 
-            if (StringUtils.isBlank(nodesQuery.getTargetNodeType())
-                    || StringUtils.isBlank(nodesQuery.getTargetNodeType())) {
+            if (StringUtils.isBlank(nodesQuery.getTargetNodeType())) {
                 throw new AAIException("AAI_6120", "null or empty target-node-type passed to the node query");
             }
 
@@ -300,13 +285,11 @@ public class SearchGraph {
 
             if (nodesQuery.getFilterParams().isEmpty() && nodesQuery.getEdgeFilterParams().isEmpty()) {
                 // For now, it's ok to pass no filter params. We'll just return ALL the nodes of the requested type.
-                LOGGER.warn("No filters passed to the node query");
+                LOGGER.debug("No filters passed to the node query");
             }
 
-            StringBuilder queryStringForMsg = new StringBuilder();
             GraphTraversal<Vertex, Vertex> traversal = nodesQuery.getDbEngine().asAdmin().getReadOnlyTraversalSource()
                     .V().has(AAIProperties.NODE_TYPE, nodesQuery.getTargetNodeType());
-            queryStringForMsg.append("has(\"aai-node-type\"," + nodesQuery.getTargetNodeType() + ")");
 
             for (String filter : nodesQuery.getFilterParams()) {
                 String[] pieces = filter.split(":");
@@ -322,13 +305,12 @@ public class SearchGraph {
                         String value = "?";
                         if (pieces.length == 3) {
                             value = pieces[2];
-                        } else if (pieces.length > 3) {
+                        } else { // length > 3
                             // When a ipv6 address comes in as a value, it has colons in it which require us to
                             // pull the "value" off the end of the filter differently
                             int startPos4Value = propName.length() + filterType.length() + 3;
                             value = filter.substring(startPos4Value);
                         }
-                        queryStringForMsg.append(".has(" + propName + "," + value + ")");
                         traversal.has(propName, value);
                     } else if (filterType.equals(DOES_NOT_EQUAL)) {
                         if (pieces.length < 3) {
@@ -337,19 +319,16 @@ public class SearchGraph {
                         String value = "?";
                         if (pieces.length == 3) {
                             value = pieces[2];
-                        } else if (pieces.length > 3) {
+                        } else { // length > 3
                             // When a ipv6 address comes in as a value, it has colons in it which require us to
                             // pull the "value" off the end of the filter differently
                             int startPos4Value = propName.length() + filterType.length() + 3;
                             value = filter.substring(startPos4Value);
                         }
-                        queryStringForMsg.append(".hasNot(" + propName + "," + value + ")");
                         traversal.not(__.has(propName, value));
                     } else if (filterType.equals(EXISTS)) {
-                        queryStringForMsg.append(".has(" + propName + ")");
                         traversal.has(propName);
                     } else if (filterType.equals(DOES_NOT_EXIST)) {
-                        queryStringForMsg.append(".hasNot(" + propName + ")");
                         traversal.hasNot(propName);
                     } else {
                         throw new AAIException("AAI_6120", "bad filterType passed: [" + filterType + "]");
@@ -400,7 +379,7 @@ public class SearchGraph {
 
                     if (filterType.equals(DOES_NOT_EXIST)) {
                         traversal.where(__.not(edgeSearch));
-                    } else if (filterType.equals(EXISTS)) {
+                    } else {
                         traversal.where(edgeSearch);
                     }
                 }
@@ -521,7 +500,7 @@ public class SearchGraph {
      * @throws AAIException the AAI exception
      */
     public Response runNamedQuery(String fromAppId, String transId, String queryParameters,
-            DBConnectionType connectionType, AAIExtensionMap aaiExtMap) throws JAXBException, AAIException {
+            AAIExtensionMap aaiExtMap) throws AAIException {
 
         Introspector inventoryItems;
         boolean success = true;
@@ -531,7 +510,7 @@ public class SearchGraph {
             MoxyLoader loader = (MoxyLoader) loaderFactory.createLoaderForVersion(ModelType.MOXY,
                     schemaVersions.getDefaultVersion());
             DynamicJAXBContext jaxbContext = loader.getJAXBContext();
-            dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, connectionType, loader);
+            dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
             DBSerializer serializer =
                     new DBSerializer(schemaVersions.getDefaultVersion(), dbEngine, ModelType.MOXY, fromAppId);
             ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
@@ -552,7 +531,7 @@ public class SearchGraph {
             if (modelAndNamedQuerySearch == null) {
                 throw new AAIException("AAI_5105");
             }
-            HashMap<String, Object> namedQueryLookupHash = new HashMap<String, Object>();
+            Map<String, Object> namedQueryLookupHash = new HashMap<>();
 
             DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
             String namedQueryUuid = null;
@@ -590,12 +569,12 @@ public class SearchGraph {
 
             List<Map<String, Object>> startNodeFilterHash = new ArrayList<>();
 
-            mapInstanceFilters((DynamicEntity) modelAndNamedQuerySearch.get("instanceFilters"), startNodeFilterHash,
+            mapInstanceFilters(modelAndNamedQuerySearch.get("instanceFilters"), startNodeFilterHash,
                     jaxbContext);
 
             Map<String, Object> secondaryFilterHash = new HashMap<>();
 
-            mapSecondaryFilters((DynamicEntity) modelAndNamedQuerySearch.get("secondaryFilts"), secondaryFilterHash,
+            mapSecondaryFilters(modelAndNamedQuerySearch.get("secondaryFilts"), secondaryFilterHash,
                     jaxbContext);
 
             List<ResultSet> resultSet = processor.queryByNamedQuery(transId, fromAppId, namedQueryUuid,
@@ -641,8 +620,8 @@ public class SearchGraph {
      * @throws UnsupportedEncodingException the unsupported encoding exception
      */
     public Response executeModelOperation(String fromAppId, String transId, String queryParameters,
-            DBConnectionType connectionType, boolean isDelete, AAIExtensionMap aaiExtMap)
-            throws JAXBException, AAIException, DynamicException, UnsupportedEncodingException {
+            boolean isDelete, AAIExtensionMap aaiExtMap)
+            throws AAIException, DynamicException {
         Response response;
         boolean success = true;
         TransactionalGraphEngine dbEngine = null;
@@ -651,7 +630,7 @@ public class SearchGraph {
             MoxyLoader loader = (MoxyLoader) loaderFactory.createLoaderForVersion(ModelType.MOXY,
                     schemaVersions.getDefaultVersion());
             DynamicJAXBContext jaxbContext = loader.getJAXBContext();
-            dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, connectionType, loader);
+            dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
             DBSerializer serializer =
                     new DBSerializer(schemaVersions.getDefaultVersion(), dbEngine, ModelType.MOXY, fromAppId);
             ModelBasedProcessing processor = new ModelBasedProcessing(loader, dbEngine, serializer);
@@ -674,12 +653,10 @@ public class SearchGraph {
                 throw new AAIException("AAI_5105");
             }
 
-            Map<String, Object> modelQueryLookupHash = new HashMap<>();
-
             String modelVersionId = null;
             String modelName = null;
             String modelInvariantId = null;
-            String modelVersion = null;
+            String modelVersion;
             String topNodeType = null;
 
             if (modelAndNamedQuerySearch.isSet("topNodeType")) {
@@ -698,7 +675,7 @@ public class SearchGraph {
                 DynamicEntity qp = modelAndNamedQuerySearch.get("queryParameters");
 
                 if (qp.isSet("model")) {
-                    DynamicEntity model = (DynamicEntity) qp.get("model");
+                    DynamicEntity model = qp.get("model");
 
                     // on an old-style model object, the following 4 attrs were all present
                     if (model.isSet("modelNameVersionId")) {
@@ -723,7 +700,7 @@ public class SearchGraph {
                     if (model.isSet("modelVers")) {
                         // we know that this is new style, because modelVers was not an option
                         // before v9
-                        DynamicEntity modelVers = (DynamicEntity) model.get("modelVers");
+                        DynamicEntity modelVers = model.get("modelVers");
                         if (modelVers.isSet("modelVer")) {
                             List<DynamicEntity> modelVerList = modelVers.get("modelVer");
                             // if they send more than one, too bad, they get the first one
@@ -752,8 +729,7 @@ public class SearchGraph {
                 List<ResultSet> resultSet = processor.queryByModel(transId, fromAppId, modelVersionId, modelInvariantId,
                         modelName, topNodeType, startNodeFilterHash, aaiExtMap.getApiVersion());
 
-                Map<Object, String> objectToVertMap = new HashMap<>();
-                List<Object> invItemList = unpackResultSet(resultSet, dbEngine, loader, serializer);
+                unpackResultSet(resultSet, dbEngine, loader, serializer);
 
                 ResultSet rs = resultSet.get(0);
 

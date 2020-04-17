@@ -19,22 +19,21 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
+import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
+import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.dbgraphmap.SearchGraph;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.extensions.AAIExtensionMap;
 import org.onap.aai.logging.ErrorLogHelper;
-import org.onap.aai.logging.LoggingContext;
-import org.onap.aai.logging.StopWatch;
+
+import org.onap.aai.rest.util.AAIExtensionMap;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.TraversalConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.onap.aai.concurrent.AaiCallable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -43,8 +42,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 /**
  * Implements the search subdomain in the REST API. All API calls must include
@@ -54,15 +54,13 @@ import java.util.concurrent.TimeUnit;
 @Path("/search")
 public class ModelAndNamedQueryRestProvider extends RESTAPI {
 
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(ModelAndNamedQueryRestProvider.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelAndNamedQueryRestProvider.class);
 
 	public static final String NAMED_QUERY = "/named-query";
 	
 	public static final String MODEL_QUERY = "/model";
 	
-	public static final String TARGET_ENTITY = "DB";
 
-	
 	private SearchGraph searchGraph;
 
 	private SchemaVersions schemaVersions;
@@ -107,19 +105,12 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 	public Response processNamedQueryResponse(@Context HttpHeaders headers,
                                               @Context HttpServletRequest req,
                                               String queryParameters) {
-		String methodName = "getNamedQueryResponse";
 		AAIException ex = null;
-		Response response = null;
-		String fromAppId = null;
-		String transId = null;
-		double dbTimeMsecs = 0;
-		String rqstTm = genDate();
-		ArrayList<String> templateVars = new ArrayList<String>();	
+		Response response;
+		String fromAppId;
+		String transId;
+		ArrayList<String> templateVars = new ArrayList<String>();
 		try { 
-			LoggingContext.save();
-			LoggingContext.targetEntity(TARGET_ENTITY);
-			LoggingContext.targetServiceName(methodName);
-			
 			fromAppId = getFromAppId(headers);
 			transId = getTransId(headers);
 			
@@ -127,29 +118,25 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			aaiExtMap.setHttpHeaders(headers);
 			aaiExtMap.setServletRequest(req);
 			aaiExtMap.setApiVersion(schemaVersions.getDefaultVersion().toString());
-			String realTime = headers.getRequestHeaders().getFirst("Real-Time");
-			//only consider header value for search		
-			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
-			
-			LoggingContext.startTime();
-			StopWatch.conditionalStart();
-			
-			response = searchGraph.runNamedQuery(fromAppId, transId, queryParameters, type, aaiExtMap);
-	
-			dbTimeMsecs += StopWatch.stopIfStarted();
-			LoggingContext.elapsedTime((long)dbTimeMsecs,TimeUnit.MILLISECONDS);
-			LoggingContext.successStatusFields();
-			
-			
-			LOGGER.info ("Completed");
-			
-			LoggingContext.restoreIfPossible();
-			LoggingContext.successStatusFields();
-			
-			String respTm = genDate();
+			//only consider header value for search
+
+
+			AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
+			String uriString = req.getRequestURI();
+			Optional<URI> o;
+			if (uriString != null) {
+				 o = Optional.of(new URI(uriString));
+			}
+			else {
+				o = Optional.empty();
+			}
+			metricLog.pre(o);
+
+			response = searchGraph.runNamedQuery(fromAppId, transId, queryParameters, aaiExtMap);
+			metricLog.post();
+			//LOGGER.info ("Completed");
 
 		} catch (AAIException e) {
-			LoggingContext.restoreIfPossible();
 			// send error response
 			ex = e;
 			templateVars.add("POST Search");
@@ -159,7 +146,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 						.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
 						.build();
 		} catch (Exception e) {
-			LoggingContext.restoreIfPossible();
 			// send error response
 			ex = new AAIException("AAI_4000", e);
 			templateVars.add("POST Search");
@@ -214,20 +200,13 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
                                               @Context HttpServletRequest req,
                                               String inboundPayload,
                                               @QueryParam("action") String action) {
-		String methodName = "getModelQueryResponse";
 		AAIException ex = null;
-		Response response = null;
-		String fromAppId = null;
-		String transId = null;
-		double dbTimeMsecs = 0;
-		
-		String rqstTm = genDate();
-		ArrayList<String> templateVars = new ArrayList<String>();	
+		Response response;
+		String fromAppId;
+		String transId;
+
+		ArrayList<String> templateVars = new ArrayList<>();
 		try { 
-			LoggingContext.save();
-			LoggingContext.targetEntity(TARGET_ENTITY);
-			LoggingContext.targetServiceName(methodName);
-			
 			fromAppId = getFromAppId(headers);
 			transId = getTransId(headers);
 			
@@ -238,30 +217,28 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			aaiExtMap.setFromAppId(fromAppId);
 			aaiExtMap.setTransId(transId);
 			
-			String realTime = headers.getRequestHeaders().getFirst("Real-Time");
-			//only consider header value for search		
-			DBConnectionType type = this.determineConnectionType("force-cache", realTime);
-			
-			LoggingContext.startTime();
-			StopWatch.conditionalStart();
-			
-			if (action != null && action.equalsIgnoreCase("DELETE")) { 
-				response = searchGraph.executeModelOperation(fromAppId, transId, inboundPayload, type, true, aaiExtMap);
-			} else {
-				response = searchGraph.executeModelOperation(fromAppId, transId, inboundPayload, type, false, aaiExtMap);
+			//only consider header value for search
+
+
+			AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
+			String uriString = req.getRequestURI();
+			Optional<URI> o;
+			if (uriString != null) {
+				o = Optional.of(new URI(uriString));
 			}
-			dbTimeMsecs += StopWatch.stopIfStarted();
-			LoggingContext.elapsedTime((long)dbTimeMsecs,TimeUnit.MILLISECONDS);
-			LoggingContext.successStatusFields();
-			
-			LOGGER.info ("Completed");
-			
-			LoggingContext.restoreIfPossible();
-			LoggingContext.successStatusFields();
-			String respTm = genDate();
-			
+			else {
+				o = Optional.empty();
+			}
+			metricLog.pre(o);
+			if (action != null && action.equalsIgnoreCase("DELETE")) { 
+				response = searchGraph.executeModelOperation(fromAppId, transId, inboundPayload, true, aaiExtMap);
+			} else {
+				response = searchGraph.executeModelOperation(fromAppId, transId, inboundPayload, false, aaiExtMap);
+			}
+			metricLog.post();
+			//LOGGER.info ("Completed");
+
 		} catch (AAIException e) {
-			LoggingContext.restoreIfPossible();
 			// send error response
 			ex = e;
 			templateVars.add("POST Search");
@@ -271,7 +248,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 						.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
 						.build();
 		} catch (Exception e) {
-			LoggingContext.restoreIfPossible();
 			// send error response
 			ex = new AAIException("AAI_4000", e);
 			templateVars.add("POST Search");

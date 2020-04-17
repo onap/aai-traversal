@@ -19,12 +19,13 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.onap.aai.restclient.RestClient;
-import org.onap.aai.restclient.RestClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 
 import javax.annotation.PostConstruct;
@@ -33,14 +34,15 @@ import java.util.Map;
 
 public class SchemaServiceCQConfig extends CQConfig {
 
-    private static EELFLogger logger = EELFManager.getInstance().getLogger(SchemaServiceCQConfig.class);
+    private static Logger logger = LoggerFactory.getLogger(SchemaServiceCQConfig.class);
     private static final String SCHEMA_SERVICE = "schema-service";
 
     @Value("${schema.service.custom.queries.endpoint}")
     private String customQueriesUri;
 
+    @Qualifier("restClient")
     @Autowired
-    private RestClientFactory restClientFactory;
+    private RestClient restClient;
 
     @PostConstruct
     public void initialize() {
@@ -55,8 +57,6 @@ public class SchemaServiceCQConfig extends CQConfig {
         logger.info("Calling the SchemaService to retrieve stored queries");
         String content = "";
         Map<String, String> headersMap = new HashMap<>();
-        RestClient restClient = restClientFactory
-                .getRestClient(SCHEMA_SERVICE);
 
         ResponseEntity<String> schemaResponse = restClient.getGetRequest(content, customQueriesUri, headersMap);
         queryConfig = new GetCustomQueryConfig(schemaResponse.getBody());

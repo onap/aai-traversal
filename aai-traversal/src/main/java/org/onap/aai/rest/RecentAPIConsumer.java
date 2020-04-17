@@ -19,34 +19,12 @@
  */
 package org.onap.aai.rest;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
 import org.onap.aai.concurrent.AaiCallable;
-import org.onap.aai.dbmap.DBConnectionType;
-
 import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
-import org.onap.aai.setup.SchemaVersion;
-import org.onap.aai.setup.SchemaVersions;
+
 import org.onap.aai.rest.db.HttpEntry;
-import org.onap.aai.rest.dsl.DslQueryProcessor;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.rest.search.QueryProcessorType;
@@ -58,15 +36,21 @@ import org.onap.aai.serialization.queryformats.Format;
 import org.onap.aai.serialization.queryformats.FormatFactory;
 import org.onap.aai.serialization.queryformats.Formatter;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
-import org.onap.aai.logging.LoggingContext;
-import org.onap.aai.logging.StopWatch;
-
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
+import org.onap.aai.transforms.XmlFormatTransformer;
 import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.TraversalConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Path("/recents/{version: v[1-9][0-9]*|latest}")
 public class RecentAPIConsumer extends RESTAPI {
@@ -77,12 +61,9 @@ public class RecentAPIConsumer extends RESTAPI {
 	private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
 	/** The query style. */
 
-	private static final String TARGET_ENTITY = "DB";
-	private static final EELFLogger LOGGER = EELFManager.getInstance().getLogger(RecentAPIConsumer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RecentAPIConsumer.class);
 
 	private HttpEntry traversalUriHttpEntry;
-
-	private DslQueryProcessor dslQueryProcessor;
 
 	private SchemaVersions schemaVersions;
 
@@ -90,26 +71,28 @@ public class RecentAPIConsumer extends RESTAPI {
 
 	private GremlinServerSingleton gremlinServerSingleton;
 
+	private XmlFormatTransformer xmlFormatTransformer;
+
 
 	@Autowired
 	public RecentAPIConsumer(
 		HttpEntry traversalUriHttpEntry,
-		DslQueryProcessor dslQueryProcessor,
 		SchemaVersions schemaVersions,
 		GremlinServerSingleton gremlinServerSingleton,
+		XmlFormatTransformer xmlFormatTransformer,
 		@Value("${schema.uri.base.path}") String basePath
 	){
 		this.traversalUriHttpEntry  = traversalUriHttpEntry;
-		this.dslQueryProcessor      = dslQueryProcessor;
 		this.schemaVersions         = schemaVersions;
 		this.gremlinServerSingleton = gremlinServerSingleton;
+		this.xmlFormatTransformer   = xmlFormatTransformer;
 		this.basePath               = basePath;
 	}
 
 	@GET
 	@Path("/{nodeType: .+}")
 	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getRecentData(String content, @PathParam("version") String versionParam,
 			@PathParam("nodeType") String nodeType, @Context HttpHeaders headers, @Context UriInfo info) {
 
@@ -126,15 +109,12 @@ public class RecentAPIConsumer extends RESTAPI {
 	public Response processRecentData(String content, @PathParam("version") String versionParam,
 			@PathParam("nodeType") String nodeType, @Context UriInfo info, @Context HttpHeaders headers) {
 
-		String methodName = "processRecentData";
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-		String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 		String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
 		QueryProcessorType processorType = this.processorType;
-		Response response = null;
+		Response response;
 		TransactionalGraphEngine dbEngine = null;
 		try {
-			LoggingContext.save();
 			
 			if (queryProcessor != null) {
 				processorType = QueryProcessorType.valueOf(queryProcessor);
@@ -143,8 +123,7 @@ public class RecentAPIConsumer extends RESTAPI {
 			SchemaVersion version = new SchemaVersion(versionParam);
 			this.checkVersion(version);
 			
-			DBConnectionType type = this.determineConnectionType(sourceOfTruth, realTime);
-			traversalUriHttpEntry.setHttpEntryProperties(version, type);
+			traversalUriHttpEntry.setHttpEntryProperties(version);
 			dbEngine = traversalUriHttpEntry.getDbEngine();
 
 			/*
@@ -156,10 +135,7 @@ public class RecentAPIConsumer extends RESTAPI {
 			
 			GenericQueryProcessor processor = null;
 
-			LoggingContext.targetEntity(TARGET_ENTITY);
-			LoggingContext.targetServiceName(methodName);
-			LoggingContext.startTime();
-			StopWatch.conditionalStart();
+
 
 			processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton).queryFrom(nodeType, "nodeQuery")
 					.uriParams(info.getQueryParameters())
@@ -179,12 +155,19 @@ public class RecentAPIConsumer extends RESTAPI {
 
 			result = formater.output(vertices).toString();
 
-			double msecs = StopWatch.stopIfStarted();
-			LoggingContext.elapsedTime((long) msecs, TimeUnit.MILLISECONDS);
-			LoggingContext.successStatusFields();
-			LOGGER.info("Completed");
+			//LOGGER.info("Completed");
 
-			response = Response.status(Status.OK).type(MediaType.APPLICATION_JSON).entity(result).build();
+			String acceptType = headers.getHeaderString("Accept");
+
+			if(acceptType == null){
+				acceptType = MediaType.APPLICATION_JSON;
+			}
+
+			if(MediaType.APPLICATION_XML_TYPE.isCompatible(MediaType.valueOf(acceptType))){
+				result = xmlFormatTransformer.transform(result);
+			}
+
+			response = Response.status(Status.OK).type(acceptType).entity(result).build();
 
 		} catch (AAIException e) {
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, e);
@@ -193,8 +176,6 @@ public class RecentAPIConsumer extends RESTAPI {
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, ex);
 		} finally {
 			
-			LoggingContext.restoreIfPossible();
-			LoggingContext.successStatusFields();
 			if (dbEngine != null) {
 				dbEngine.rollback();
 			}
@@ -212,7 +193,7 @@ public class RecentAPIConsumer extends RESTAPI {
 
 	public void checkNodeType(String nodeType) throws AAIException {
 		try {
-			Introspector target = traversalUriHttpEntry.getLoader().introspectorFromName(nodeType);
+			traversalUriHttpEntry.getLoader().introspectorFromName(nodeType);
 		} catch (AAIUnknownObjectException e) {
 			throw new AAIException("AAI_6115", "Unrecognized nodeType [" + nodeType + "] passed to recents query."); 
 		}
@@ -224,7 +205,7 @@ public class RecentAPIConsumer extends RESTAPI {
 		
 		if (params != null && params.containsKey("hours") && params.getFirst("hours").matches("-?\\d+")) {
 			isHoursParameter = true;
-			Long hours = 0L;
+			long hours;
 			try{
 				hours = Long.parseLong(params.getFirst("hours"));
 			}
@@ -238,7 +219,7 @@ public class RecentAPIConsumer extends RESTAPI {
 		if (params != null && params.containsKey("date-time") && params.getFirst("date-time").matches("-?\\d+")) {
 			isDateTimeParameter = true;
 			Long minStartTime = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(AAIConstants.HISTORY_MAX_HOURS);
-			Long startTime = 0L;
+			Long startTime;
 			try{
 				startTime = Long.parseLong(params.getFirst("date-time"));
 			}

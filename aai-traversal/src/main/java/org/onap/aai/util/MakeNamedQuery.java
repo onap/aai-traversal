@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.apache.commons.io.FileUtils;
 import org.onap.aai.config.SpringContextAware;
@@ -41,7 +42,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class MakeNamedQuery {
 	
-	private static final EELFLogger logger = EELFManager.getInstance().getLogger(MakeNamedQuery.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(MakeNamedQuery.class.getName());
 
 	public static void main(String[] args) throws Exception {
 		String _apiVersion = AAIConfig.get(AAIConstants.AAI_DEFAULT_API_VERSION_PROP);

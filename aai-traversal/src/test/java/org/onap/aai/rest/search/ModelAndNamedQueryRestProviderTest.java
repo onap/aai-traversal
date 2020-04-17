@@ -19,23 +19,16 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
-import org.onap.aai.dbmap.DBConnectionType;
-import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.engines.QueryStyle;
-import org.onap.aai.serialization.engines.JanusGraphDBEngine;
-import org.onap.aai.serialization.engines.TransactionalGraphEngine;
-import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
@@ -57,11 +50,6 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
     private SchemaVersion version;
     private static final ModelType introspectorFactoryType = ModelType.MOXY;
-    private static final QueryStyle queryStyle = QueryStyle.TRAVERSAL;
-    private static final DBConnectionType type = DBConnectionType.REALTIME;
-
-    private Loader loader;
-    private TransactionalGraphEngine dbEngine;
 
     static {
         VALID_HTTP_STATUS_CODES.add(200);
@@ -82,7 +70,7 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
     private List<MediaType> outputMediaTypes;
 
-    private static final EELFLogger logger = EELFManager.getInstance().getLogger(ModelAndNamedQueryRestProviderTest.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ModelAndNamedQueryRestProviderTest.class.getName());
 
     @Before
     public void setup(){
@@ -112,8 +100,8 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Arrays.asList("JUNIT"));
-        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Arrays.asList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Collections.singletonList("JUNIT"));
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
@@ -125,11 +113,6 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
-        loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new JanusGraphDBEngine(
-                queryStyle,
-                type,
-                loader);
     }
 
     @Test
@@ -224,7 +207,6 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
         String message = String.format("Unable to find the %s in src/test/resources", filename);
         assertNotNull(message, inputStream);
 
-        String resource = IOUtils.toString(inputStream);
-        return resource;
+        return IOUtils.toString(inputStream);
     }
 }

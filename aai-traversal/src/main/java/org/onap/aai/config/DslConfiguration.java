@@ -19,28 +19,35 @@
  */
 package org.onap.aai.config;
 
+import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.introspection.LoaderFactory;
-import org.onap.aai.rest.dsl.DslListener;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
+import org.onap.aai.rest.enums.QueryVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class DslConfiguration {
 
     @Bean
     @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public DslListener dslListener(EdgeIngestor edgeIngestor, SchemaVersions schemaVersions, LoaderFactory loaderFactory){
-        return new DslListener(edgeIngestor, schemaVersions, loaderFactory);
+    public Map<QueryVersion, ParseTreeListener> dslListeners(EdgeIngestor edgeIngestor, SchemaVersions schemaVersions, LoaderFactory loaderFactory){
+        Map<QueryVersion, ParseTreeListener> dslListeners = new HashMap<>();
+        dslListeners.put(QueryVersion.V1,new org.onap.aai.rest.dsl.v1.DslListener(edgeIngestor, schemaVersions, loaderFactory));
+        dslListeners.put(QueryVersion.V2,new org.onap.aai.rest.dsl.v2.DslListener(edgeIngestor, schemaVersions, loaderFactory));
+        return dslListeners;
     }
 
     @Bean
     @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public DslQueryProcessor dslQueryProcessor(DslListener dslListener){
-        return new DslQueryProcessor(dslListener);
+    public DslQueryProcessor dslQueryProcessor(Map<QueryVersion, ParseTreeListener> dslListeners){
+        return new DslQueryProcessor(dslListeners);
     }
 }

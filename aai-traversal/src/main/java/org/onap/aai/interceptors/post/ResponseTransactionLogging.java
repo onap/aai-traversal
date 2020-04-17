@@ -19,14 +19,14 @@
  */
 package org.onap.aai.interceptors.post;
 
-import com.att.eelf.configuration.EELFLogger;
-import com.att.eelf.configuration.EELFManager;
 import com.google.gson.JsonObject;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.interceptors.AAIContainerFilter;
 import org.onap.aai.interceptors.AAIHeaderProperties;
 import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.util.AAIConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Priority;
@@ -34,14 +34,21 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.PathSegment;
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Priority(AAIResponseFilterPriority.RESPONSE_TRANS_LOGGING)
 public class ResponseTransactionLogging extends AAIContainerFilter implements ContainerResponseFilter {
 
-	private static final EELFLogger TRANSACTION_LOGGER = EELFManager.getInstance().getLogger(ResponseTransactionLogging.class);
+	private static final Logger TRANSACTION_LOGGER = LoggerFactory.getLogger(ResponseTransactionLogging.class);
+
+	private final static String QUERY_API_PATH_SEGMENT = "query";
+	private final static String NODES_QUERY_API_PATH_SEGMENT = "nodes-query";
+	private final static String GENERIC_QUERY_API_PATH_SEGMENT = "generic-query";
+	private final static String DSL_API_PATH_SEGMENT = "dsl";
+	private final static String RECENTS_API_PATH_SEGMENT = "recents";
+	private final static Set<String> READ_ONLY_QUERIES = getReadOnlyQueries();
 
 	@Autowired
 	private HttpServletResponse httpServletResponse;
@@ -57,12 +64,13 @@ public class ResponseTransactionLogging extends AAIContainerFilter implements Co
 	private void transLogging(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
 
 		String logValue;
-		String getValue;
+		String isGetTransactionResponseLoggingEnabled;
 		String postValue;
-		
+
 		try {
+
 			logValue = AAIConfig.get("aai.transaction.logging");
-			getValue = AAIConfig.get("aai.transaction.logging.get");
+			isGetTransactionResponseLoggingEnabled = AAIConfig.get("aai.transaction.logging.get");
 			postValue = AAIConfig.get("aai.transaction.logging.post");
 		} catch (AAIException e) {
 			return;
@@ -81,7 +89,6 @@ public class ResponseTransactionLogging extends AAIContainerFilter implements Co
 		String response = this.getResponseString(responseContext);
 
 		if (!Boolean.parseBoolean(logValue)) {
-		} else if (!Boolean.parseBoolean(getValue) && "GET".equals(httpMethod)) {
 		} else if (!Boolean.parseBoolean(postValue) && "POST".equals(httpMethod)) {
 		} else {
 			
@@ -94,12 +101,33 @@ public class ResponseTransactionLogging extends AAIContainerFilter implements Co
 			logEntry.addProperty("resourceId", fullUri);
 			logEntry.addProperty("resourceType", httpMethod);
 			logEntry.addProperty("rqstBuf", Objects.toString(request, ""));
-			logEntry.addProperty("respBuf", Objects.toString(response, ""));
-			
-			try {
-				TRANSACTION_LOGGER.debug(logEntry.toString());
-			} catch (Exception e) {
-				ErrorLogHelper.logError("AAI_4000", "Exception writing transaction log.");
+
+			boolean recordResponse = true;
+			if (!Boolean.parseBoolean(isGetTransactionResponseLoggingEnabled) && "GET".equals(httpMethod)) {
+				recordResponse = false;
+			}
+			else {
+				/**
+				 * Parse the uri path and see if it is a read-only query
+				 * If it is, do not record the response in the logs
+				 */
+
+				List<PathSegment> pathSegmentList = requestContext.getUriInfo().getPathSegments();
+				for (PathSegment queryType : pathSegmentList) {
+					if (READ_ONLY_QUERIES.contains(queryType.toString())) {
+						recordResponse = false;
+					}
+				}
+
+				if (recordResponse) {
+					logEntry.addProperty("respBuf", Objects.toString(response, ""));
+				}
+
+				try {
+					TRANSACTION_LOGGER.debug(logEntry.toString());
+				} catch (Exception e) {
+					ErrorLogHelper.logError("AAI_4000", "Exception writing transaction log.");
+				}
 			}
 		}
 
@@ -118,6 +146,16 @@ public class ResponseTransactionLogging extends AAIContainerFilter implements Co
 			response.addProperty("Entity", "");
 		}
 		return response.toString();
+	}
+
+	private static Set<String> getReadOnlyQueries() {
+		Set<String> readOnlyQueries = new HashSet<String>();
+		readOnlyQueries.add(NODES_QUERY_API_PATH_SEGMENT);
+		readOnlyQueries.add(GENERIC_QUERY_API_PATH_SEGMENT);
+		readOnlyQueries.add(RECENTS_API_PATH_SEGMENT);
+		readOnlyQueries.add(QUERY_API_PATH_SEGMENT);
+		readOnlyQueries.add(DSL_API_PATH_SEGMENT);
+		return readOnlyQueries;
 	}
 
 }

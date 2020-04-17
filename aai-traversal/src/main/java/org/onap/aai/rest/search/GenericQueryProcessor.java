@@ -19,10 +19,12 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -30,9 +32,12 @@ import org.javatuples.Pair;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.query.builder.MissingOptionalParameter;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
+import org.onap.aai.rest.enums.QueryVersion;
 import org.onap.aai.restcore.search.GroovyQueryBuilder;
 import org.onap.aai.restcore.util.URITools;
+import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
+import org.onap.aai.serialization.queryformats.Format;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
 
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -45,7 +50,7 @@ import java.util.regex.Pattern;
 
 public abstract class GenericQueryProcessor {
 
-	private static EELFLogger LOGGER = EELFManager.getInstance().getLogger(GenericQueryProcessor.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(GenericQueryProcessor.class);
 
 	protected final Optional<URI> uri;
 	protected final MultivaluedMap<String, String> queryParams;
@@ -57,11 +62,27 @@ public abstract class GenericQueryProcessor {
 	protected GroovyQueryBuilder groovyQueryBuilder = new GroovyQueryBuilder();
 	protected final boolean isGremlin;
 	protected Optional<DslQueryProcessor> dslQueryProcessorOptional;
+
+	public Map<String, List<String>> getPropertiesMap() {
+		return propertiesList;
+	}
+
+	public void setPropertiesMap(Map<String, List<String>> propertiesMap) {
+		this.propertiesList = propertiesMap;
+	}
+
+	private Map<String, List<String>> propertiesList;
 	/* dsl parameters to store dsl query and to check
+
 	 * if this is a DSL request
 	 */
 	protected Optional<String> dsl;
 	protected final boolean isDsl ;
+	protected boolean isHistory;
+	protected GraphTraversalSource traversalSource;
+	protected QueryStyle style;
+	protected QueryVersion dslApiVersion;
+	protected Format format;
 
 	protected GenericQueryProcessor(Builder builder) {
 		this.uri = builder.getUri();
@@ -73,16 +94,23 @@ public abstract class GenericQueryProcessor {
 		this.isDsl = builder.isDsl();
 		this.gremlinServerSingleton = builder.getGremlinServerSingleton();
 		this.dslQueryProcessorOptional = builder.getDslQueryProcessor();
+		this.dslApiVersion = builder.getDslApiVersion();
 		
 		if (uri.isPresent()) {
 			queryParams = URITools.getQueryMap(uri.get());
+		} else if (builder.getUriParams() != null) {
+			queryParams = builder.getUriParams();
 		} else {
 			queryParams = new MultivaluedHashMap<>();
 		}
+		this.traversalSource = builder.getTraversalSource();
+		this.style = builder.getStyle();
+		this.isHistory = builder.isHistory();
+		this.format = builder.getFormat();
 	}
 	
-	protected abstract GraphTraversal<?,?> runQuery(String query, Map<String, Object> params);
-	
+	protected abstract GraphTraversal<?,?> runQuery(String query, Map<String, Object> params, GraphTraversalSource traversalSource);
+
 	protected List<Object> processSubGraph(SubGraphStyle style, GraphTraversal<?,?> g) {
 		final List<Object> resultVertices = new Vector<>();
 		g.store("y");
@@ -106,17 +134,44 @@ public abstract class GenericQueryProcessor {
 
 		Pair<String, Map<String, Object>> tuple = this.createQuery();
 		String query = tuple.getValue0();
+		if (queryParams.containsKey("as-tree")) {
+			if (queryParams.getFirst("as-tree").equalsIgnoreCase("true")) {
+				if (this.isDsl) {		// If dsl query and as-tree parameter is true, remove "end" concatenation and append tree.
+					query = removeDslQueryEnd(query);
+				}
+				query = query.concat(".tree()");		// Otherwise, normal gremlin query will just append tree
+			}
+		}
 		Map<String, Object> params = tuple.getValue1();
 
 		if (query.equals("") && (vertices.isPresent() && vertices.get().isEmpty())) {
 			//nothing to do, just exit
 			return new ArrayList<>();
 		}
-		GraphTraversal<?,?> g = this.runQuery(query, params);
+		GraphTraversal<?,?> g = this.runQuery(query, params, traversalSource);
 		
 		resultVertices = this.processSubGraph(style, g);
 		
 		return resultVertices;
+	}
+
+	private String removeDslQueryEnd(String query) {
+		String end = ".cap('x').unfold().dedup()";
+		if (query.length() <= end.length()) {
+			return query;
+		}
+		if (query.contains(end)) {
+			int startIndex = query.length() - end.length();
+			for (int i = 0; startIndex - i >= 0; i++) {			// remove tailing instance
+				startIndex = query.length() - end.length() - i;
+				int lastIndex = query.length() - i;
+				if (query.substring(startIndex, lastIndex).equals(end)) {
+					query = query.substring(0, startIndex) + query.substring(lastIndex);
+					break;
+				}
+			}
+		}
+		return query;
 	}
 	
 	protected Pair<String, Map<String, Object>> createQuery() throws AAIException {
@@ -128,8 +183,15 @@ public abstract class GenericQueryProcessor {
 		}else if (this.isDsl) {
 			String dslUserQuery = dsl.get();
 			 if(dslQueryProcessorOptional.isPresent()){
-				 String dslQuery = dslQueryProcessorOptional.get().parseAaiQuery(dslUserQuery);
-				 query = groovyQueryBuilder.executeTraversal(dbEngine, dslQuery, params);
+				 Map<String, Object>resultMap = dslQueryProcessorOptional.get().parseAaiQuery(dslApiVersion, dslUserQuery);
+				 String dslQuery = resultMap.get("query").toString();
+				 Object propMap = resultMap.get("propertiesMap");
+				 if (propMap instanceof Map) {
+				 	Map<String, List<String>> newPropMap = new HashMap<String, List<String>>();
+				 	newPropMap = (Map<String, List<String>>)propMap;
+					 setPropertiesMap(newPropMap);
+				 }
+				 query = groovyQueryBuilder.executeTraversal(dbEngine, dslQuery, params, style, traversalSource);
 				 String startPrefix = "g.V()";
 				 query = startPrefix + query;
 			 }
@@ -178,7 +240,7 @@ public abstract class GenericQueryProcessor {
 				if (query == null) {
 					query = "";
 				} else {
-					query = groovyQueryBuilder.executeTraversal(dbEngine, query, params);
+					query = groovyQueryBuilder.executeTraversal(dbEngine, query, params, style, traversalSource);
 				}
 
 				String startPrefix = "g.V(startVertexes)";
@@ -227,7 +289,14 @@ public abstract class GenericQueryProcessor {
 		private GremlinServerSingleton gremlinServerSingleton;
 		private Optional<String> nodeType = Optional.empty();
 		private boolean isNodeTypeQuery = false;
-		protected  MultivaluedMap<String, String> uriParams; 
+		protected  MultivaluedMap<String, String> uriParams;
+		protected GraphTraversalSource traversalSource;
+		protected boolean isHistory = false;
+		protected QueryVersion dslApiVersion;
+		protected Format format;
+
+
+		protected QueryStyle style = QueryStyle.GREMLIN_TRAVERSAL;
 		
 		public Builder(TransactionalGraphEngine dbEngine, GremlinServerSingleton gremlinServerSingleton) {
 			this.dbEngine = dbEngine;
@@ -272,8 +341,28 @@ public abstract class GenericQueryProcessor {
 			return this;
 		}
 
+		public Builder format(Format format) {
+			this.format = format;
+			return this;
+		}
+
+		public Builder traversalSource(boolean isHistory, GraphTraversalSource source) {
+			this.traversalSource = source;
+			this.isHistory = isHistory;
+			if(this.isHistory){
+				this.style = QueryStyle.HISTORY_GREMLIN_TRAVERSAL;
+			}
+
+			return this;
+		}
+
 		public Builder queryProcessor(DslQueryProcessor dslQueryProcessor){
 			this.dslQueryProcessor = dslQueryProcessor;
+			return this;
+		}
+
+		public Builder version(QueryVersion version){
+			this.dslApiVersion = version;
 			return this;
 		}
 
@@ -287,6 +376,8 @@ public abstract class GenericQueryProcessor {
 		public Optional<URI> getUri() {
 			return uri;
 		}
+
+		public MultivaluedMap<String, String> getUriParams() { return uriParams; }
 
 		public Optional<String> getGremlin() {
 			return gremlin;
@@ -330,6 +421,40 @@ public abstract class GenericQueryProcessor {
 			}
 			return new GroovyShellImpl(this);
 		}
+
+		public GraphTraversalSource getTraversalSource() {
+			return traversalSource;
+		}
+
+		public void setTraversalSource(GraphTraversalSource traversalSource) {
+			this.traversalSource = traversalSource;
+		}
+
+		public boolean isHistory() {
+			return isHistory;
+		}
+
+		public void setHistory(boolean history) {
+			isHistory = history;
+		}
+
+		public QueryStyle getStyle() {
+			return style;
+		}
+
+		public void setStyle(QueryStyle style) {
+			this.style = style;
+		}
+
+		public QueryVersion getDslApiVersion() {
+			return dslApiVersion;
+		}
+
+		public void setDslApiVersion(QueryVersion dslApiVersion) {
+			this.dslApiVersion = dslApiVersion;
+		}
+
+		public Format getFormat(){ return this.format; }
 		
 	}
 }

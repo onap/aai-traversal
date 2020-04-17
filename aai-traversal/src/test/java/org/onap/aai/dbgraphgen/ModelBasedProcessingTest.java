@@ -19,11 +19,8 @@
  */
 package org.onap.aai.dbgraphgen;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
@@ -35,28 +32,27 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.AAISetup;
-import org.onap.aai.db.props.AAIProperties;
-import org.onap.aai.dbmap.DBConnectionType;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.parsers.exceptions.AAIIdentityMapParseException;
 import org.onap.aai.serialization.db.DBSerializer;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.JanusGraphDBEngine;
+import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import org.onap.aai.setup.SchemaVersion;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ModelBasedProcessingTest extends AAISetup{
 
     private SchemaVersion version;
     private static final ModelType introspectorFactoryType = ModelType.MOXY;
     private static final QueryStyle queryStyle = QueryStyle.TRAVERSAL;
-    private static final DBConnectionType type = DBConnectionType.REALTIME;
-    
+
     private static final String TRANSACTION_ID = "transaction-1";
     private static final String FROM_APP_ID = "JUNIT";
     private static final String API_VERSION = "1.0";
@@ -104,9 +100,8 @@ public class ModelBasedProcessingTest extends AAISetup{
 	public void init() throws AAIException {
 		MockitoAnnotations.initMocks(this);
 		version = schemaVersions.getDefaultVersion();
-		//rules = EdgeRules.getInstance();
 		loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-		TransactionalGraphEngine newDbEngine = new JanusGraphDBEngine(queryStyle, type, loader);
+		TransactionalGraphEngine newDbEngine = new JanusGraphDBEngine(queryStyle, loader);
 		dbEngine = Mockito.spy(newDbEngine);
 		serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, "JUNIT");
 		admin = Mockito.spy(dbEngine.asAdmin());
@@ -408,8 +403,7 @@ public class ModelBasedProcessingTest extends AAISetup{
 		strList.add("1");
 		strList.add("2");
 		strList.add("3");
-		String listString = strList.toString();
-		return listString;
+		return strList.toString();
 	}
 
 	@Test
@@ -876,12 +870,9 @@ public class ModelBasedProcessingTest extends AAISetup{
 		Vertex modelV = serviceGraph.addVertex(T.label, "model", T.id, "66", AAI_NODE_TYPE, "model", "model-invariant-id", "model-invariant-id-1", "model-type", "widget");
 		Vertex modelVerV = serviceGraph.addVertex(T.label, MODEL_VESION_NODE_VALUE, T.id, "67", AAI_NODE_TYPE, MODEL_VESION_NODE_VALUE,
 				MODEL_VERSION_ID_KEY, MODEL_VERSION_ID_VALUE,MODEL_NAME_ID_KEY, MODEL_NAME_ID_VALUE, "model-version", "model-version-1");
-		//Vertex modelElementV = graph.addVertex(T.label, "model-element", T.id, "68", AAI_NODE_TYPE, "model-element");
 		GraphTraversalSource gts = serviceGraph.traversal();
 		
 		edgeSer.addTreeEdge(gts, modelV, modelVerV);
-		//rules4Service.addTreeEdge(gts, modelElementV, modelVerV);
-		//rules4Service.addEdge(gts, modelElementV, modelVerV);
 		Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
 		Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
 		

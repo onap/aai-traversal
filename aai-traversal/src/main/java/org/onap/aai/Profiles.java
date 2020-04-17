@@ -25,7 +25,10 @@ public final class Profiles {
     public static final String DME2         = "dme2";
 
     public static final String ONE_WAY_SSL  = "one-way-ssl";
+    // AAF Basic Auth
     public static final String AAF_AUTHENTICATION  = "aaf-auth";
+    // AAF Auth with Client Certs
+    public static final String AAF_CERT_AUTHENTICATION  = "aaf-cert-auth";
     public static final String TWO_WAY_SSL  = "two-way-ssl";
 
     private Profiles(){}
