@@ -141,9 +141,9 @@ public abstract class TraversalConsumer extends RESTAPI {
 
     protected GraphTraversalSource getTraversalSource(TransactionalGraphEngine dbEngine, Format format, UriInfo info) throws AAIException {
         if (isHistory(format)) {
-            long startTime = this.getStartTime(format, info.getQueryParameters());
-            long endTime = this.getEndTime(info.getQueryParameters());
-            return dbEngine.asAdmin().getTraversalSource().withStrategies(getSubgraphStrategy(startTime, endTime, format));
+            long localStartTime = this.getStartTime(format, info.getQueryParameters());
+            long localEndTime = this.getEndTime(info.getQueryParameters());
+            return dbEngine.asAdmin().getTraversalSource().withStrategies(getSubgraphStrategy(localStartTime, localEndTime, format));
         }
         return dbEngine.asAdmin().getTraversalSource();
     }

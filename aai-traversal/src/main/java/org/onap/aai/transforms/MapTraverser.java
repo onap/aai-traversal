@@ -39,7 +39,7 @@ public class MapTraverser {
 
         Objects.ensureNotNull(map);
 
-        Map<String, Object> modifiedMap = new HashMap<String, Object>();
+        Map<String, Object> modifiedMap = new HashMap<>();
         convertKeys(map, modifiedMap);
 
         return modifiedMap;
@@ -52,7 +52,7 @@ public class MapTraverser {
             key = converter.convert(key);
             Object value = entry.getValue();
             if(value instanceof Map){
-                modified.put(key, convertKeys((Map<String, Object>)value, new HashMap<String, Object>()));
+                modified.put(key, convertKeys((Map<String, Object>) value, new HashMap<>()));
             } else if(value instanceof List){
                 modified.put(key, convertKeys((List<Object>) value));
             } else {
@@ -65,8 +65,8 @@ public class MapTraverser {
 
     public List<Object> convertKeys(List<Object> list){
 
-        List<Object> modifiedList = new ArrayList<Object>();
-        if(list != null && list.size() > 0){
+        List<Object> modifiedList = new ArrayList<>();
+        if(list != null && !list.isEmpty()){
 
             for(Object o : list){
                 if(o instanceof Map){

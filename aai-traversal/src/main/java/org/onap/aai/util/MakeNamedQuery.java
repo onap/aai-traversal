@@ -20,11 +20,9 @@
 package org.onap.aai.util;
 import java.io.File;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +90,7 @@ public class MakeNamedQuery {
 
 			HashMap<String, List<Introspector>> widgetToRelationship = new HashMap<>();
 			for (Entry<String, Introspector> aaiResEnt : loader.getAllObjects().entrySet()) {
-				Introspector meObject = loader.introspectorFromName("model");
+				Introspector meObject;
 				// no need for a ModelVers DynamicEntity
 
 				Introspector aaiRes = aaiResEnt.getValue();
@@ -110,16 +108,16 @@ public class MakeNamedQuery {
 					File f = new File(filePathString);
 					if (f.exists()) {
 						System.out.println(f.toString());
-						String json = FileUtils.readFileToString(f);
+						String json = FileUtils.readFileToString(f, Charset.defaultCharset());
 
 						meObject = loader.unmarshal("Model", json);
 						String modelInvariantId = meObject.getValue("model-invariant-id");
 						if (meObject.hasProperty("model-vers")) {
 							Introspector modelVers = meObject.getWrappedValue("model-vers");
-							List<Introspector> modelVerList = (List<Introspector>) modelVers.getWrappedListValue("model-ver");
+							List<Introspector> modelVerList = modelVers.getWrappedListValue("model-ver");
 							for (Introspector modelVer : modelVerList) {
 
-								List<Introspector> relList = new ArrayList<Introspector>();
+								List<Introspector> relList = new ArrayList<>();
 								Introspector widgetRelationship = makeWidgetRelationship(loader, modelInvariantId,
 										modelVer.getValue("model-version-id").toString());
 								relList.add(widgetRelationship);
@@ -133,8 +131,6 @@ public class MakeNamedQuery {
 
 			//source vnf-id, related service-instance-id, all related vnfs in this service-instance-id
 			//this should be abstracted and moved to a file
-
-			HashMap<String, List<Introspector>> relationshipMap = new HashMap<String, List<Introspector>>();
 
 			List<Introspector> genericVnfRelationship = widgetToRelationship.get("generic-vnf");
 			List<Introspector> vserverRelationship = widgetToRelationship.get("vserver");
@@ -164,12 +160,6 @@ public class MakeNamedQuery {
 
 		System.exit(0);
 
-	}	
-	private static List<Introspector> getRels(String widgetName, HashMap<String, Introspector> widgetToRelationship) {
-		List<Introspector> relList = new ArrayList<Introspector>();
-		Introspector genericVnfRelationship = widgetToRelationship.get(widgetName);
-		relList.add(genericVnfRelationship);
-		return relList;
 	}
 	
 	private static Introspector setupNQElements (Introspector nqeObj, List<Introspector> listOfRelationships) {
@@ -183,10 +173,12 @@ public class MakeNamedQuery {
 			} else { 
 				newNQElements = nqeObj.newIntrospectorInstanceOfProperty("named-query-elements");
 				nqeObj.setValue("named-query-elements",  newNQElements.getUnderlyingObject());
-				nqElementList = (List<Object>)newNQElements.getValue("named-query-element");
+				nqElementList = newNQElements.getValue("named-query-element");
 			}
 			newNQElement = loadNQElement(newNQElements, listOfRelationships);
-			nqElementList.add(newNQElement.getUnderlyingObject());
+			if (newNQElement != null) {
+				nqElementList.add(newNQElement.getUnderlyingObject());
+			}
 		
 		} catch (AAIUnknownObjectException e) {
 			logger.info("AAIUnknownObjectException in MakeNamedQuery.setupNQElements() "+e);
@@ -202,13 +194,13 @@ public class MakeNamedQuery {
 		Introspector newNqElement = null;
 		try {
 			newNqElement = nqElements.getLoader().introspectorFromName("named-query-element");
-				
+
 			//newNqElement.setValue("named-query-element-uuid", UUID.randomUUID().toString());
 
 			Introspector newRelationshipList = newNqElement.getLoader().introspectorFromName("relationship-list");
 			newNqElement.setValue("relationship-list", newRelationshipList.getUnderlyingObject());
 
-			List<Object> newRelationshipListList = (List<Object>)newRelationshipList.getValue("relationship");
+			List<Object> newRelationshipListList = newRelationshipList.getValue("relationship");
 
 			for (Introspector rel : listOfRelationships) { 
 				newRelationshipListList.add(rel.getUnderlyingObject());
@@ -230,7 +222,7 @@ public class MakeNamedQuery {
 		try {
 			newRelationship = loader.introspectorFromName("relationship");
 
-			List<Object> newRelationshipData = (List<Object>)newRelationship.getValue("relationship-data");
+			List<Object> newRelationshipData = newRelationship.getValue("relationship-data");
 
 			newRelationship.setValue("related-to", "model");
 

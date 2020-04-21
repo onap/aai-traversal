@@ -47,6 +47,7 @@ import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.transforms.XmlFormatTransformer;
+
 import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +121,7 @@ public class QueryConsumer extends TraversalConsumer {
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
 		QueryProcessorType processorType = this.processorType;
+
 		Response response;
 		TransactionalGraphEngine dbEngine = null;
 
@@ -175,7 +177,7 @@ public class QueryConsumer extends TraversalConsumer {
 					return( createMessageMissingQueryRequiredParameters( missingRequiredQueryParameters, headers));
 				}
 				
-				List<String> invalidQueryParameters =  checkForInvalidQueryParameters( customQueryConfig, URITools.getQueryMap(queryURIObj));
+				List<String> invalidQueryParameters = checkForInvalidQueryParameters( customQueryConfig, URITools.getQueryMap(queryURIObj));
 				
 				if ( !invalidQueryParameters.isEmpty() ) {
 					return( createMessageInvalidQueryParameters( invalidQueryParameters, headers));
@@ -323,7 +325,7 @@ public class QueryConsumer extends TraversalConsumer {
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
 	}
-	
+
 	private Response createMessageInvalidQuerySection(String invalidQuery, HttpHeaders headers) {
 		AAIException e = new AAIException("AAI_3014");
 		
@@ -335,7 +337,6 @@ public class QueryConsumer extends TraversalConsumer {
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
 	}
-	
 	
 	private List<String> checkForInvalidQueryParameters( CustomQueryConfig customQueryConfig,  MultivaluedMap<String, String> queryParams) {
 		
@@ -352,6 +353,7 @@ public class QueryConsumer extends TraversalConsumer {
 		return queryParams.keySet().stream()
 				.filter(param -> !allParameters.contains(param))
 				.collect(Collectors.toList());
+
 	}
 	
 	private Response createMessageInvalidQueryParameters(List<String> invalidQueryParams, HttpHeaders headers) {

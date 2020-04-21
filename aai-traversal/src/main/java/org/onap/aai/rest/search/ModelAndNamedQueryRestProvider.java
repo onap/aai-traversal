@@ -109,8 +109,9 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 		Response response;
 		String fromAppId;
 		String transId;
-		ArrayList<String> templateVars = new ArrayList<String>();
-		try { 
+
+		ArrayList<String> templateVars = new ArrayList<>();
+		try {
 			fromAppId = getFromAppId(headers);
 			transId = getTransId(headers);
 			
@@ -134,7 +135,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 
 			response = searchGraph.runNamedQuery(fromAppId, transId, queryParameters, aaiExtMap);
 			metricLog.post();
-			//LOGGER.info ("Completed");
 
 		} catch (AAIException e) {
 			// send error response
@@ -204,7 +204,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 		Response response;
 		String fromAppId;
 		String transId;
-
 		ArrayList<String> templateVars = new ArrayList<>();
 		try { 
 			fromAppId = getFromAppId(headers);
@@ -236,7 +235,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 				response = searchGraph.executeModelOperation(fromAppId, transId, inboundPayload, false, aaiExtMap);
 			}
 			metricLog.post();
-			//LOGGER.info ("Completed");
 
 		} catch (AAIException e) {
 			// send error response

@@ -55,6 +55,8 @@ import java.util.concurrent.TimeUnit;
 @Path("/recents/{version: v[1-9][0-9]*|latest}")
 public class RecentAPIConsumer extends RESTAPI {
 
+	private static final String AAI_3021 = "AAI_3021";
+
 	/** The introspector factory type. */
 	private ModelType introspectorFactoryType = ModelType.MOXY;
 
@@ -187,7 +189,7 @@ public class RecentAPIConsumer extends RESTAPI {
 
 	private void checkVersion(SchemaVersion version) throws AAIException {
 		if(!schemaVersions.getVersions().contains(version)){
-			throw new AAIException("AAI_3021", "Schema Version is not valid");
+			throw new AAIException(AAI_3021, "Schema Version is not valid");
 		}
 	}
 
@@ -210,10 +212,10 @@ public class RecentAPIConsumer extends RESTAPI {
 				hours = Long.parseLong(params.getFirst("hours"));
 			}
 			catch(NumberFormatException ex){
-				throw new AAIException("AAI_3021", " Invalid Hours. Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
+				throw new AAIException(AAI_3021, " Invalid Hours. Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
 			}
 			if (hours < 1 || hours > AAIConstants.HISTORY_MAX_HOURS) {
-				throw new AAIException("AAI_3021", " Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
+				throw new AAIException(AAI_3021, " Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
 			}
 		}
 		if (params != null && params.containsKey("date-time") && params.getFirst("date-time").matches("-?\\d+")) {
@@ -224,19 +226,19 @@ public class RecentAPIConsumer extends RESTAPI {
 				startTime = Long.parseLong(params.getFirst("date-time"));
 			}
 			catch(NumberFormatException ex){
-				throw new AAIException("AAI_3021", " Invalid Data-time. Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
+				throw new AAIException(AAI_3021, " Invalid Data-time. Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
 			}
 			if (startTime < minStartTime) {
-				throw new AAIException("AAI_3021", " Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
+				throw new AAIException(AAI_3021, " Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
 			}
 		}
 		
 		if(!isHoursParameter && !isDateTimeParameter){
-			throw new AAIException("AAI_3021", "Send valid hours or date-time to specify the timebounds");
+			throw new AAIException(AAI_3021, "Send valid hours or date-time to specify the timebounds");
 		}
 		
         if(isHoursParameter && isDateTimeParameter){
-        	throw new AAIException("AAI_3021", "Send either hours or date-time and not both to specify the timebounds");
+        	throw new AAIException(AAI_3021, "Send either hours or date-time and not both to specify the timebounds");
 		}
 
         

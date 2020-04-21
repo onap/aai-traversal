@@ -21,7 +21,6 @@ package org.onap.aai.rest.search;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.att.eelf.configuration.EELFManager;
 
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
@@ -42,21 +41,22 @@ import javax.ws.rs.core.MultivaluedMap;
 
 public class NodeQueryProcessor extends GroovyShellImpl {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(NodeQueryProcessor.class);
+	private static Logger logger = LoggerFactory.getLogger(NodeQueryProcessor.class);
 
 	protected String nodeType;
-	private MultivaluedMap<String, String> nodeQueryParams = new MultivaluedHashMap<String, String>();
+	private MultivaluedMap<String, String> nodeQueryParams = new MultivaluedHashMap<>();
 	protected final Optional<Collection<Vertex>> vertices;
 	protected static Pattern p = Pattern.compile("query/(.*+)");
 	protected Optional<String> gremlin;
 	protected final TransactionalGraphEngine dbEngine;
-	protected GroovyQueryBuilder queryBuilder = new GroovyQueryBuilder();;
+	protected GroovyQueryBuilder queryBuilder = new GroovyQueryBuilder();
 
 	protected NodeQueryProcessor(Builder builder) {
 		super(builder);
 		this.nodeQueryParams = builder.uriParams;
-		if(builder.getNodeType().isPresent())
-		  this.nodeType = builder.getNodeType().get();
+		if(builder.getNodeType().isPresent()) {
+			this.nodeType = builder.getNodeType().get();
+		}
 		this.dbEngine = builder.getDbEngine();
 		this.vertices = builder.getVertices();
 
@@ -89,8 +89,8 @@ public class NodeQueryProcessor extends GroovyShellImpl {
 
 		query = startPrefix + query;
 
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Converted to gremlin query without the start vertices \n {}", query);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Converted to gremlin query without the start vertices \n {}", query);
 		}
 
 		return new Pair<>(query, params);

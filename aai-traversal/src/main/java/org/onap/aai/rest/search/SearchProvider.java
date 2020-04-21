@@ -149,8 +149,6 @@ public class SearchProvider extends RESTAPI {
 
             metricLog.post();
 
-            //LOGGER.info("Completed");
-
         } catch (AAIException e) {
             // send error response
             ex = e;
@@ -224,7 +222,7 @@ public class SearchProvider extends RESTAPI {
 
             fromAppId = getFromAppId(headers);
             getTransId(headers);
-            String realTime = headers.getRequestHeaders().getFirst("Real-Time");
+
             // only consider header value for search
 
             final SchemaVersion version = new SchemaVersion(versionParam);
@@ -243,7 +241,6 @@ public class SearchProvider extends RESTAPI {
                     .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
 
             metricLog.post();
-            //LOGGER.info("Completed");
 
         } catch (AAIException e) {
             // send error response

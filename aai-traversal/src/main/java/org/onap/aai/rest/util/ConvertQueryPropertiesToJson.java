@@ -19,21 +19,15 @@
  */
 package org.onap.aai.rest.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-
-import org.onap.aai.util.AAIConstants;
-
 public class ConvertQueryPropertiesToJson {
 	
-	private final static int maxfilesize = 256000;
+	private static final int MAX_FILE_SIZE = 256000;
 	
 	private void addStart( StringBuilder sb ) {
 		sb.append("{\n  \"stored-queries\":[{\n");
@@ -80,7 +74,7 @@ public class ConvertQueryPropertiesToJson {
 	
 	private List<String> findRqdProperties( String query) {
 		String[] parts = query.split("getVerticesByProperty");
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		if ( parts.length == 1 )
 			return result;
 		int count = 0;
@@ -96,7 +90,7 @@ public class ConvertQueryPropertiesToJson {
 
 	public  String convertProperties( Properties props ) {
 		Enumeration<?> e = props.propertyNames();
-		StringBuilder sb = new StringBuilder(maxfilesize);
+		StringBuilder sb = new StringBuilder(MAX_FILE_SIZE);
 		String queryName;
 		String query;
 		addStart( sb );

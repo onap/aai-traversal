@@ -20,7 +20,6 @@
 package org.onap.aai.dbgraphmap;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
@@ -67,13 +66,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilderException;
 import javax.xml.bind.JAXBException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 
 /**
@@ -139,7 +137,7 @@ public class SearchGraph {
                 QueryBuilder builder = genericQueryBuilder.getDbEngine().getQueryBuilder()
                         .getVerticesByIndexedProperty(AAIProperties.NODE_TYPE, "service-instance");
                 for (String keyData : genericQueryBuilder.getStartNodeKeyParams()) {
-                    int colonIndex = keyData.indexOf(":");
+                    int colonIndex = keyData.indexOf(':');
                     if (colonIndex <= 0) {
                         throw new AAIException("AAI_6120", "Bad key param passed in: [" + keyData + "]");
                     } else {
@@ -228,14 +226,14 @@ public class SearchGraph {
     }
 
     private URI craftUriFromQueryParams(Loader loader, String startNodeType, List<String> startNodeKeyParams)
-            throws UnsupportedEncodingException, IllegalArgumentException, UriBuilderException, AAIException {
+            throws UnsupportedEncodingException, AAIException {
         Introspector relationship = loader.introspectorFromName("relationship");
 
         relationship.setValue("related-to", startNodeType);
         List<Object> relationshipDataList = relationship.getValue("relationship-data");
 
         for (String keyData : startNodeKeyParams) {
-            int colonIndex = keyData.indexOf(":");
+            int colonIndex = keyData.indexOf(':');
             if (colonIndex <= 0) {
                 throw new AAIException("AAI_6120", "Bad key param passed in: [" + keyData + "]");
             } else {
@@ -470,21 +468,16 @@ public class SearchGraph {
      * @param targetNodeType the target node type
      * @param nodeType the node type
      * @return the edge label
-     * @throws AAIException the AAI exception
-     * @throws EdgeRuleNotFoundException
+     * @throws EdgeRuleNotFoundException The Edge Rule Not Found Exception
      */
     public String[] getEdgeLabel(String targetNodeType, String nodeType)
-            throws AAIException, EdgeRuleNotFoundException {
+            throws EdgeRuleNotFoundException {
 
 
         EdgeRuleQuery query = new EdgeRuleQuery.Builder(targetNodeType, nodeType).build();
-        Multimap<String, EdgeRule> edgeRules = ArrayListMultimap.create();
-        edgeRules = edgeIngestor.getRules(query);
+        Multimap<String, EdgeRule> edgeRules = edgeIngestor.getRules(query);
 
-        // Map<String, EdgeRule> rules = EdgeRules.getInstance().getEdgeRules(targetNodeType, nodeType);
-        String[] results = edgeRules.values().stream().map(rule -> rule.getLabel()).collect(Collectors.toList())
-                .toArray(new String[0]);
-        return results;
+        return edgeRules.values().stream().map(EdgeRule::getLabel).toArray(String[]::new);
     }
 
 
@@ -621,7 +614,7 @@ public class SearchGraph {
      */
     public Response executeModelOperation(String fromAppId, String transId, String queryParameters,
             boolean isDelete, AAIExtensionMap aaiExtMap)
-            throws AAIException, DynamicException {
+            throws AAIException {
         Response response;
         boolean success = true;
         TransactionalGraphEngine dbEngine = null;
@@ -652,6 +645,7 @@ public class SearchGraph {
             if (modelAndNamedQuerySearch == null) {
                 throw new AAIException("AAI_5105");
             }
+
 
             String modelVersionId = null;
             String modelName = null;
@@ -721,7 +715,7 @@ public class SearchGraph {
 
             List<Map<String, Object>> startNodeFilterHash = new ArrayList<>();
 
-            String resourceVersion = mapInstanceFilters((DynamicEntity) modelAndNamedQuerySearch.get("instanceFilters"),
+            String resourceVersion = mapInstanceFilters( modelAndNamedQuerySearch.get("instanceFilters"),
                     startNodeFilterHash, jaxbContext);
 
             if (isDelete) {
@@ -743,12 +737,11 @@ public class SearchGraph {
                 for (Map.Entry<String, String> ent : delResult.entrySet()) {
                     resultStr += "v[" + ent.getKey() + "] " + ent.getValue() + ",\n";
                 }
-                resultStr.trim();
 
                 // Note - notifications are now done down in the individual "remove" calls done in
                 // runDeleteByModel() above.
 
-                response = Response.ok(resultStr).build();
+                response = Response.ok(resultStr.trim()).build();
 
             } else {
                 List<ResultSet> resultSet = processor.queryByModel(transId, fromAppId, modelVersionId, modelInvariantId,
@@ -823,7 +816,7 @@ public class SearchGraph {
 
         for (DynamicEntity instFilt : instanceFilter) {
             List<DynamicEntity> any = instFilt.get("any");
-            HashMap<String, Object> thisNodeFilterHash = new HashMap<String, Object>();
+            HashMap<String, Object> thisNodeFilterHash = new HashMap<>();
             for (DynamicEntity anyEnt : any) {
                 String clazz = anyEnt.getClass().getCanonicalName();
                 String simpleClazz = anyEnt.getClass().getSimpleName();
@@ -916,24 +909,22 @@ public class SearchGraph {
             vertexId = objectToVertMap.get(item);
         }
 
-        if (includeTheseVertices.containsKey(vertexId)) {
-            if (invResultItem.isSet("inventoryResponseItems")) {
-                List<DynamicEntity> invItemList = new ArrayList<DynamicEntity>();
-                DynamicEntity inventoryItems = jaxbContext.newDynamicEntity(
-                        "inventory.aai.att.com." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
-                DynamicEntity subInventoryResponseItems = invResultItem.get("inventoryResponseItems");
-                List<DynamicEntity> subInventoryResponseItemList =
-                        subInventoryResponseItems.get("inventoryResponseItem");
-                for (DynamicEntity ent : subInventoryResponseItemList) {
-                    DynamicEntity invItem =
-                            remapInventoryItems(ent, jaxbContext, includeTheseVertices, objectToVertMap, aaiExtMap);
-                    if (invItem != null) {
-                        invItemList.add(invItem);
-                    }
+        if (includeTheseVertices.containsKey(vertexId) && invResultItem.isSet("inventoryResponseItems")) {
+            List<DynamicEntity> invItemList = new ArrayList<>();
+            DynamicEntity inventoryItems = jaxbContext.newDynamicEntity(
+                    "inventory.aai.att.com." + aaiExtMap.getApiVersion() + ".InventoryResponseItems");
+            DynamicEntity subInventoryResponseItems = invResultItem.get("inventoryResponseItems");
+            List<DynamicEntity> subInventoryResponseItemList =
+                    subInventoryResponseItems.get("inventoryResponseItem");
+            for (DynamicEntity ent : subInventoryResponseItemList) {
+                DynamicEntity invItem =
+                        remapInventoryItems(ent, jaxbContext, includeTheseVertices, objectToVertMap, aaiExtMap);
+                if (invItem != null) {
+                    invItemList.add(invItem);
                 }
-                inventoryItems.set("inventoryResponseItem", invItemList);
-                inventoryItem.set("inventoryResponseItems", inventoryItems);
             }
+            inventoryItems.set("inventoryResponseItem", invItemList);
+            inventoryItem.set("inventoryResponseItems", inventoryItems);
         }
         return inventoryItem;
     }
@@ -941,16 +932,13 @@ public class SearchGraph {
     /**
      * Unpack result set.
      *
-     * @param g the g
-     * @param resultSetList the result set list
-     * @param jaxbContext the jaxb context
-     * @param aaiResources the aai resources
-     * @param objectToVertMap the object to vert map
-     * @param aaiExtMap the aai ext map
-     * @return the array list
-     * @throws AAIException the AAI exception
+     * @param resultSetList The result set list
+     * @param engine The engine
+     * @param loader The loader
+     * @param serializer The database serializer
+     * @return the array list - should return list of inventoryItems
+     * @throws AAIException The AAI Exception
      */
-    // this should return an inventoryItem
     private List<Object> unpackResultSet(List<ResultSet> resultSetList, TransactionalGraphEngine engine, Loader loader,
             DBSerializer serializer) throws AAIException {
 
@@ -1006,7 +994,7 @@ public class SearchGraph {
                 if (propertyLimitDesc != null) {
 
                     if (PropertyLimitDesc.SHOW_NONE.equals(propertyLimitDesc)) {
-                        HashMap<String, Object> emptyPropertyOverRideHash = new HashMap<String, Object>();
+                        HashMap<String, Object> emptyPropertyOverRideHash = new HashMap<>();
                         for (String key : thisObj.getAllKeys()) {
                             emptyPropertyOverRideHash.put(key, null);
                         }
@@ -1014,7 +1002,7 @@ public class SearchGraph {
                     } else if (PropertyLimitDesc.SHOW_ALL.equals(propertyLimitDesc)) {
                         // keep everything
                     } else if (PropertyLimitDesc.SHOW_NAME_AND_KEYS_ONLY.equals(propertyLimitDesc)) {
-                        HashMap<String, Object> keysAndNamesPropHash = new HashMap<String, Object>();
+                        HashMap<String, Object> keysAndNamesPropHash = new HashMap<>();
 
                         for (String key : thisObj.getAllKeys()) {
                             keysAndNamesPropHash.put(key, null);
@@ -1051,11 +1039,11 @@ public class SearchGraph {
                     try {
                         // Try to get the modelName if we can. Otherwise, do not fail, just return what we have already.
                         String modelInvariantIdLocal =
-                                (String) vert.<String>property("model-invariant-id-local").orElse(null); // this one
+                                vert.<String>property("model-invariant-id-local").orElse(null); // this one
                                                                                                          // points at a
                                                                                                          // model
                         String modelVersionIdLocal =
-                                (String) vert.<String>property("model-version-id-local").orElse(null); // this one
+                                vert.<String>property("model-version-id-local").orElse(null); // this one
                                                                                                        // points at a
                                                                                                        // model-ver
 
@@ -1073,17 +1061,16 @@ public class SearchGraph {
                                 }
                             }
                         }
-                    } catch (DynamicException e) {
-                        ; // it's ok, dynamic object might not have these fields
                     } catch (Exception e) {
-                        ; // it's ok, couldn't find a matching model
+                        // it's ok, dynamic object might not have these fields
+                        // it's ok, couldn't find a matching model
                     }
 
                     if (resultSet.getSubResultSet() != null) {
                         List<ResultSet> subResultSet = resultSet.getSubResultSet();
-                        if (subResultSet != null && subResultSet.size() > 0) {
+                        if (subResultSet != null && !subResultSet.isEmpty()) {
                             List<Object> res = unpackResultSet(subResultSet, engine, loader, serializer);
-                            if (res.size() > 0) {
+                            if (!res.isEmpty()) {
                                 inventoryItems.setValue("inventory-response-item", res);
                                 inventoryItem.setValue("inventory-response-items",
                                         inventoryItems.getUnderlyingObject());
@@ -1099,9 +1086,7 @@ public class SearchGraph {
 
     private void filterProperties(Introspector thisObj, Map<String, Object> override) {
 
-        thisObj.getProperties().stream().filter(x -> {
-            return !override.containsKey(x);
-        }).forEach(prop -> {
+        thisObj.getProperties().stream().filter(x -> !override.containsKey(x)).forEach(prop -> {
             if (thisObj.isSimpleType(prop)) {
                 thisObj.setValue(prop, null);
             }

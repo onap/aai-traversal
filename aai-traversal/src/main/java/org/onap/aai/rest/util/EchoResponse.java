@@ -45,7 +45,7 @@ public class EchoResponse extends RESTAPI {
 	
 	protected static String authPolicyFunctionName = "util";
 		
-	public static final String echoPath = "/echo";
+	public static final String ECHO_PATH = "/echo";
 
 	/**
 	 * Simple health-check API that echos back the X-FromAppId and X-TransactionId to clients.
@@ -59,20 +59,19 @@ public class EchoResponse extends RESTAPI {
 	 */
 	@GET
 	@Produces( { MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Path(echoPath)
+	@Path(ECHO_PATH)
 	public Response echoResult(@Context HttpHeaders headers, @Context HttpServletRequest req,
 			@QueryParam("action") String myAction) {
-		Response response = null;
-		
 		AAIException ex = null;
-		String fromAppId = null;
-		String transId = null;
+		Response response;
+		String fromAppId;
+		String transId;
 		
 		try { 
 			fromAppId = getFromAppId(headers );
 			transId = getTransId(headers);
 		} catch (AAIException e) { 
-			ArrayList<String> templateVars = new ArrayList<String>();
+			ArrayList<String> templateVars = new ArrayList<>();
 			templateVars.add("PUT uebProvider");
 			templateVars.add("addTopic");
 			return Response
@@ -83,9 +82,9 @@ public class EchoResponse extends RESTAPI {
 		
 		try {
 			
-			HashMap<AAIException, ArrayList<String>> exceptionList = new HashMap<AAIException, ArrayList<String>>();
+			HashMap<AAIException, ArrayList<String>> exceptionList = new HashMap<>();
 					
-			ArrayList<String> templateVars = new ArrayList<String>();
+			ArrayList<String> templateVars = new ArrayList<>();
 			templateVars.add(fromAppId);
 			templateVars.add(transId);
 		
@@ -98,7 +97,7 @@ public class EchoResponse extends RESTAPI {
 			
 		} catch (Exception e) {
 			ex = new AAIException("AAI_4000", e);
-			ArrayList<String> templateVars = new ArrayList<String>();
+			ArrayList<String> templateVars = new ArrayList<>();
 			templateVars.add(Action.GET.name());
 			templateVars.add(fromAppId +" "+transId);
 
