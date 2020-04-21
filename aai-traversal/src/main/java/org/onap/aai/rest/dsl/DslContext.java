@@ -33,7 +33,7 @@ public class DslContext {
 	private boolean validationFlag = true;
 	private boolean isStartNode = false;
 	private String startNode = "";
-	private List<String> startNodeKeys = new ArrayList<String>();
+	private List<String> startNodeKeys = new ArrayList<>();
 	
 	private String currentNode;
 	private String previousNode;
@@ -45,7 +45,7 @@ public class DslContext {
 
 	private String whereStartNode = "";
 	
-	private Deque<String> unionStartNodes = new LinkedList<String>();
+	private Deque<String> unionStartNodes = new LinkedList<>();
 
 	/*
 	 * Limit Queries have to be applied in the end - so i have to set this in

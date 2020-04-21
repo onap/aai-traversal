@@ -77,7 +77,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
-import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.TraversalConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -141,15 +140,15 @@ public class QueryConsumer extends RESTAPI {
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String realTime = headers.getRequestHeaders().getFirst("Real-Time");
 		String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
-		QueryProcessorType processorType = this.processorType;
-		Response response = null;
+		QueryProcessorType localProcessorType = this.processorType;
+		Response response;
 		TransactionalGraphEngine dbEngine = null;
 		try {
 			LoggingContext.save();
 			this.checkQueryParams(info.getQueryParameters());
 			Format format = Format.getFormat(queryFormat);
 			if (queryProcessor != null) {
-				processorType = QueryProcessorType.valueOf(queryProcessor);
+				localProcessorType = QueryProcessorType.valueOf(queryProcessor);
 			}
 			SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
 			JsonParser parser = new JsonParser();
@@ -230,15 +229,15 @@ public class QueryConsumer extends RESTAPI {
 				
 				processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 						.startFrom(vertexSet).queryFrom(queryURIObj)
-						.processWith(processorType).create();
+						.processWith(localProcessorType).create();
 			} else if (!queryURI.equals("")){
 				processor =  new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 						.queryFrom(queryURIObj)
-						.processWith(processorType).create();
+						.processWith(localProcessorType).create();
 			} else {
 				processor =  new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 						.queryFrom(gremlin, "gremlin")
-						.processWith(processorType).create();
+						.processWith(localProcessorType).create();
 			}
 			String result = "";
 			List<Object> vertTemp = processor.execute(subGraphStyle);
@@ -311,7 +310,6 @@ public class QueryConsumer extends RESTAPI {
 	
 	private CustomQueryConfig getCustomQueryConfig(URI uriObj ) {
 		
-		CustomQueryConfig customQueryConfig;
 		String path = uriObj.getPath();
 
 		String[] parts = path.split("/");
@@ -338,12 +336,9 @@ public class QueryConsumer extends RESTAPI {
 			templateVars.add(missingRequiredQueryParams.toString());
 		}
 
-		Response response = Response
-				.status(e.getErrorObject().getHTTPResponseCode())
-				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
-						templateVars)).build();	
-
-		return response;
+		return Response.status(e.getErrorObject().getHTTPResponseCode())
+				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e,
+						templateVars)).build();
 	} 
 	
 	private Response createMessageInvalidQuerySection(String invalidQuery, HttpHeaders headers, UriInfo info, HttpServletRequest req) {
@@ -355,18 +350,15 @@ public class QueryConsumer extends RESTAPI {
 			templateVars.add(invalidQuery);
 		}
 
-		Response response = Response
-				.status(e.getErrorObject().getHTTPResponseCode())
-				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
-						templateVars)).build();	
-
-		return response;
+		return Response.status(e.getErrorObject().getHTTPResponseCode())
+				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e,
+						templateVars)).build();
 	} 
 	
 	
 	public List<String> checkForInvalidQueryParameters( CustomQueryConfig customQueryConfig,  MultivaluedMap<String, String> queryParams) {
 		
-		List<String> allParameters = new ArrayList<String>();
+		List<String> allParameters = new ArrayList<>();
 		/*
 		 * Add potential Required and Optional to allParameters
 		 */
@@ -375,11 +367,10 @@ public class QueryConsumer extends RESTAPI {
 		
 		if(queryParams.isEmpty())
 			return new ArrayList<>();
-		List<String> invalidParameters = queryParams.keySet().stream()
-				                                             .filter(param -> !allParameters.contains(param))
-				                                             .collect(Collectors.toList());
-		
-		return invalidParameters;
+
+		return queryParams.keySet().stream()
+				.filter(param -> !allParameters.contains(param))
+				.collect(Collectors.toList());
 		
 	}
 	
@@ -392,12 +383,9 @@ public class QueryConsumer extends RESTAPI {
 			templateVars.add(invalidQueryParams.toString());
 		}
 
-		Response response = Response
-				.status(e.getErrorObject().getHTTPResponseCode())
-				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
-						templateVars)).build();	
-
-		return response;
+		return Response.status(e.getErrorObject().getHTTPResponseCode())
+				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e,
+						templateVars)).build();
 	} 
 	
 

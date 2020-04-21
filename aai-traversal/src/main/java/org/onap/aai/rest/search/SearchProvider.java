@@ -132,11 +132,9 @@ public class SearchProvider extends RESTAPI {
 
         String methodName = "getGenericQueryResponse";
         AAIException ex = null;
-        Response searchResult = null;
-        String fromAppId = null;
-        String transId = null;
-        String rqstTm = genDate();
-        ArrayList<String> templateVars = new ArrayList<String>();
+        Response searchResult;
+        String fromAppId;
+        ArrayList<String> templateVars = new ArrayList<>();
         double dbTimeMsecs = 0;
         try {
             LoggingContext.save();
@@ -144,7 +142,6 @@ public class SearchProvider extends RESTAPI {
             LoggingContext.targetServiceName(methodName);
 
             fromAppId = getFromAppId(headers);
-            transId = getTransId(headers);
             String realTime = headers.getRequestHeaders().getFirst("Real-Time");
             // only consider header value for search
             DBConnectionType type = this.determineConnectionType("force-cache", realTime);
@@ -171,7 +168,6 @@ public class SearchProvider extends RESTAPI {
             LoggingContext.restoreIfPossible();
             LoggingContext.successStatusFields();
 
-            String respTm = genDate();
 
         } catch (AAIException e) {
             LoggingContext.restoreIfPossible();
@@ -241,11 +237,9 @@ public class SearchProvider extends RESTAPI {
             @QueryParam("filter") final List<String> filterList, @PathParam("version") String versionParam) {
         String methodName = "getNodesQueryResponse";
         AAIException ex = null;
-        Response searchResult = null;
-        String fromAppId = null;
-        String transId = null;
-        String rqstTm = genDate();
-        ArrayList<String> templateVars = new ArrayList<String>();
+        Response searchResult;
+        String fromAppId;
+        ArrayList<String> templateVars = new ArrayList<>();
         double dbTimeMsecs = 0;
         try {
             LoggingContext.save();
@@ -253,7 +247,6 @@ public class SearchProvider extends RESTAPI {
             LoggingContext.targetServiceName(methodName);
 
             fromAppId = getFromAppId(headers);
-            transId = getTransId(headers);
             String realTime = headers.getRequestHeaders().getFirst("Real-Time");
             // only consider header value for search
             DBConnectionType type = this.determineConnectionType("force-cache", realTime);
@@ -280,7 +273,6 @@ public class SearchProvider extends RESTAPI {
             LoggingContext.restoreIfPossible();
             LoggingContext.successStatusFields();
 
-            String respTm = genDate();
         } catch (AAIException e) {
             LoggingContext.restoreIfPossible();
             // send error response

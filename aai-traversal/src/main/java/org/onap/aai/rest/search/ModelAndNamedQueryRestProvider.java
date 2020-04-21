@@ -31,7 +31,6 @@ import org.onap.aai.logging.StopWatch;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.setup.SchemaVersions;
-import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.TraversalConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.onap.aai.concurrent.AaiCallable;
@@ -109,12 +108,11 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
                                               String queryParameters) {
 		String methodName = "getNamedQueryResponse";
 		AAIException ex = null;
-		Response response = null;
-		String fromAppId = null;
-		String transId = null;
+		Response response;
+		String fromAppId;
+		String transId;
 		double dbTimeMsecs = 0;
-		String rqstTm = genDate();
-		ArrayList<String> templateVars = new ArrayList<String>();	
+		ArrayList<String> templateVars = new ArrayList<>();
 		try { 
 			LoggingContext.save();
 			LoggingContext.targetEntity(TARGET_ENTITY);
@@ -146,7 +144,6 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			LoggingContext.restoreIfPossible();
 			LoggingContext.successStatusFields();
 			
-			String respTm = genDate();
 
 		} catch (AAIException e) {
 			LoggingContext.restoreIfPossible();
@@ -216,13 +213,12 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
                                               @QueryParam("action") String action) {
 		String methodName = "getModelQueryResponse";
 		AAIException ex = null;
-		Response response = null;
-		String fromAppId = null;
-		String transId = null;
+		Response response;
+		String fromAppId;
+		String transId;
 		double dbTimeMsecs = 0;
 		
-		String rqstTm = genDate();
-		ArrayList<String> templateVars = new ArrayList<String>();	
+		ArrayList<String> templateVars = new ArrayList<>();
 		try { 
 			LoggingContext.save();
 			LoggingContext.targetEntity(TARGET_ENTITY);
@@ -258,8 +254,7 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
 			
 			LoggingContext.restoreIfPossible();
 			LoggingContext.successStatusFields();
-			String respTm = genDate();
-			
+
 		} catch (AAIException e) {
 			LoggingContext.restoreIfPossible();
 			// send error response

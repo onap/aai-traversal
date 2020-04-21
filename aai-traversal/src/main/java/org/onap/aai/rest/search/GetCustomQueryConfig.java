@@ -19,34 +19,10 @@
  */
 package org.onap.aai.rest.search;
 
-/*-
- * ============LICENSE_START=======================================================
- * org.onap.aai
- * ================================================================================
- * Copyright (C) 2017 AT&T Intellectual Property. All rights reserved.
- * ================================================================================
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ============LICENSE_END=========================================================
- */
-
-import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onap.aai.util.AAIConstants;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -61,14 +37,12 @@ public class GetCustomQueryConfig {
 	private CustomQueryConfig customQueryConfig;
 	
 	
-	private final static String QUERY_CONFIG = "query";
-	private final static String REQUIRED_CONFIG = "required-properties";
-	private final static String OPTIONAL_CONFIG = "optional-properties";
-	private final static String STORED_QUERIES_CONFIG = "stored-queries";
-	private final static String STORED_QUERY_CONFIG = "stored-query";
+	private static final String QUERY_CONFIG = "query";
+	private static final String REQUIRED_CONFIG = "required-properties";
+	private static final String OPTIONAL_CONFIG = "optional-properties";
+	private static final String STORED_QUERIES_CONFIG = "stored-queries";
+	private static final String STORED_QUERY_CONFIG = "stored-query";
 	
-//	public static final String AAI_HOME_ETC_QUERY_JSON = AAIConstants.AAI_HOME_ETC + "query" + AAIConstants.AAI_FILESEP + "stored-queries.json";
-
 	public GetCustomQueryConfig(String customQueryJson ) {
 		init(customQueryJson);
 	}
@@ -104,40 +78,27 @@ public class GetCustomQueryConfig {
 		return toStringList(null);
 	}
 	
-	private String getPropertyString(JsonObject configObject, String config) {
-		JsonElement subqueryConfig;
-		
-		if ( configObject.has(config)) {
-			subqueryConfig = configObject.get(config);
-			if ( subqueryConfig != null && !subqueryConfig.isJsonNull() ) {
-				return subqueryConfig.getAsString();
-			}
-		}
-		return null;
-	}
-	
 	private void getStoredQueryBlock( JsonObject configObject, String config ) {
 		if ( !configObject.has(config)) {
-			customQueryConfig.setQueryRequiredProperties( new ArrayList<String>() );
-			customQueryConfig.setQueryOptionalProperties( new ArrayList<String>()  );
+			customQueryConfig.setQueryRequiredProperties( new ArrayList<>() );
+			customQueryConfig.setQueryOptionalProperties( new ArrayList<>()  );
 			return;
 		}
 		
 		JsonElement queryConfig;
 		JsonObject subObject;
-		String multipleStartNodes;
 		List<String> propertyList;
 
 		queryConfig = configObject.get(config);
 		subObject = queryConfig.getAsJsonObject();
 		propertyList = getPropertyList(subObject, REQUIRED_CONFIG);
 		if ( propertyList == null ) {
-			propertyList = new ArrayList<String>();
+			propertyList = new ArrayList<>();
 		}
 		customQueryConfig.setQueryRequiredProperties( propertyList );
 		propertyList = getPropertyList(subObject, OPTIONAL_CONFIG);
 		if ( propertyList == null ) {
-			propertyList = new ArrayList<String>();
+			propertyList = new ArrayList<>();
 		}
 		customQueryConfig.setQueryOptionalProperties( propertyList );
 			
@@ -150,7 +111,6 @@ public class GetCustomQueryConfig {
 		JsonObject configObject;
 		JsonElement query;
 		JsonElement queryConfig;
-		String queryString;
 
 		for (JsonElement storedQuery : storedQueries) {
 			if (storedQuery.isJsonObject()) {

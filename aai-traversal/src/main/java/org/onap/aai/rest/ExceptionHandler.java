@@ -49,28 +49,24 @@ public class ExceptionHandler implements ExceptionMapper<Exception> {
     @Context
     private HttpHeaders headers;
     
-    /**
-	 * @{inheritDoc}
-	 */
     @Override
     public Response toResponse(Exception exception) {
 
     	Response response = null;
-    	ArrayList<String> templateVars = new ArrayList<String>();
+    	ArrayList<String> templateVars = new ArrayList<>();
 
     	//the general case is that cxf will give us a WebApplicationException
     	//with a linked exception
     	if (exception instanceof WebApplicationException) { 
     		WebApplicationException e = (WebApplicationException) exception;
-    		if (e.getCause() != null) {
-    			if (e.getCause() instanceof SAXParseException2) {
-    				templateVars.add("UnmarshalException");
-    				AAIException ex = new AAIException("AAI_4007", exception);
-    				response = Response
-    						.status(400)
-    						.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-    						.build();
-    			}
+    		if (e.getCause() instanceof SAXParseException2) {
+				templateVars.add("UnmarshalException");
+				AAIException ex = new AAIException("AAI_4007", exception);
+				response = Response
+						.status(400)
+						.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
+						.build();
+
     		}
     	} else if (exception instanceof JsonParseException) {
     		//jackson does it differently so we get the direct JsonParseException
