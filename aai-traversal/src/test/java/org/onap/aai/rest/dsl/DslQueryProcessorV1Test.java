@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.rules.ExpectedException;
 import org.onap.aai.AAISetup;
 import org.onap.aai.exceptions.AAIException;
@@ -445,10 +446,12 @@ public class DslQueryProcessorV1Test extends AAISetup {
 		assertEquals(dslQuery, query);
 	}
 
+	@Ignore
 	@Test
 	public void hasPropertyIntegerTest() throws AAIException {
-		String aaiQuery = "cloud-region('cloud-owner', 'att-nc')('cloud-region-id', 'MTN61a') > vlan-tag*('vlan-id-inner', 20)";
-		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner','att-nc').getVerticesByProperty('cloud-region-id','MTN61a').createEdgeTraversal(EdgeType.COUSIN, 'cloud-region','vlan-tag').getVerticesByProperty('vlan-id-inner',20).store('x').cap('x').unfold().dedup()";
+		String aaiQuery = "cloud-region('cloud-owner', 'att-nc')('cloud-region-id', 'MTN61a') > vlan-range > vlan-tag*('vlan-id-inner', 20)";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'cloud-region').getVerticesByProperty('cloud-owner','att-nc').getVerticesByProperty('cloud-region-id','MTN61a')"
+				+ ".createEdgeTraversal(EdgeType.TREE, 'cloud-region','vlan-range').createEdgeTraversal(EdgeType.TREE, 'vlan-range','vlan-tag').getVerticesByProperty('vlan-id-inner',20).store('x').cap('x').unfold().dedup()";
 		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);
 	}
@@ -511,6 +514,24 @@ public class DslQueryProcessorV1Test extends AAISetup {
 				"builder.newInstance().createEdgeTraversalWithLabels( 'generic-vnf','vserver', new ArrayList<>(Arrays.asList('tosca.relationships.HostedOn'))).where(builder.newInstance().union(builder.newInstance()" +
 				".createEdgeTraversalWithLabels( 'vserver','pserver', new ArrayList<>(Arrays.asList('tosca.relationships.HostedOn'))).getVerticesByProperty('hostname','hostname1'),builder.newInstance()." +
 				"createEdgeTraversalWithLabels( 'vserver','pserver', new ArrayList<>(Arrays.asList('tosca.relationships.HostedOn'))).getVerticesByProperty('hostname','hostname1'))))).store('x').createEdgeTraversalWithLabels( 'generic-vnf','allotted-resource', new ArrayList<>(Arrays.asList('org.onap.relationships.inventory.PartOf'))).cap('x').unfold().dedup()";
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void getPserverWithAnEdgeToComplexAndCloudRegion() throws AAIException {
+		String aaiQuery = "pserver*('prov-status')(> complex)(> cloud-region)";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'pserver').getVerticesByProperty('prov-status').where(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'pserver','complex')).where(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'pserver','cloud-region')).store('x').cap('x').unfold().dedup()";
+
+		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
+		assertEquals(dslQuery, query);
+	}
+
+	@Test
+	public void getPserverWithAnEdgeToComplexButNotToCloudRegion() throws AAIException {
+		String aaiQuery = "pserver*('prov-status')(> complex)!(> cloud-region)";
+		String dslQuery = "builder.getVerticesByProperty('aai-node-type', 'pserver').getVerticesByProperty('prov-status').where(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'pserver','complex')).where(builder.newInstance().not(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN, 'pserver','cloud-region'))).store('x').cap('x').unfold().dedup()";
 
 		String query = dslQueryProcessor.parseAaiQuery(QueryVersion.V1,aaiQuery).get("query").toString();
 		assertEquals(dslQuery, query);

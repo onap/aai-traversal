@@ -44,7 +44,7 @@ if [ "${userid}" != "aaiadmin" ]; then
     exit 1
 fi
 
-. /etc/profile.d/aai.sh
+
 PROJECT_HOME=/opt/app/aai-traversal
 prop_file=$PROJECT_HOME/resources/etc/appprops/aaiconfig.properties
 log_dir=$PROJECT_HOME/logs/misc

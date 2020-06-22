@@ -165,6 +165,8 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         queryParameters.add("format", "resource_and_url");
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getPath()).thenReturn(query);
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("https://localhost:8446" + query));
 
         Response response = queryConsumer.executeQuery(
             payload,
@@ -172,6 +174,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
             "resource_and_url", "" +
             "no_op",
             httpHeaders,
+            mockRequest,
             uriInfo,
             "-1",
             "-1"
@@ -203,12 +206,16 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getPath()).thenReturn(query);
 
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("https://localhost:8446" + query));
+
         Response response = queryConsumer.executeQuery(
                 payload,
                 version.toString(),
                 "resource_and_url", "" +
                         "no_op",
                 httpHeaders,
+                mockRequest,
                 uriInfo,
                 "-1",
                 "-1"
@@ -240,6 +247,9 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         queryParameters.add("format", "resource_and_url");
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getPath()).thenReturn(query);
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("https://localhost:8446" + query));
+
 
         Response response = queryConsumer.executeQuery(
                 payload,
@@ -247,6 +257,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
                 "resource_and_url", "" +
                         "no_op",
                 httpHeaders,
+                mockRequest,
                 uriInfo,
                 "-1",
                 "-1"

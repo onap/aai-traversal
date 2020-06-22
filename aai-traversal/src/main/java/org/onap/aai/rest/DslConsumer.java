@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.janusgraph.core.SchemaViolationException;
 import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
@@ -49,12 +50,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Path("{version: v[1-9][0-9]*|latest}/dsl")
 public class DslConsumer extends TraversalConsumer {
@@ -99,6 +100,7 @@ public class DslConsumer extends TraversalConsumer {
 								 @DefaultValue("no_op") @QueryParam("subgraph") String subgraph,
 								 @DefaultValue("all") @QueryParam("validate") String validate,
 								 @Context HttpHeaders headers,
+								 @Context HttpServletRequest req,
 								 @Context UriInfo info,
 								 @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
 								 @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
@@ -111,14 +113,14 @@ public class DslConsumer extends TraversalConsumer {
 				new AaiCallable() {
 					@Override
 					public Response process() throws Exception {
-						return (processExecuteQuery(content, versionParam, queryFormat, subgraph, validate, headers, info,
+						return (processExecuteQuery(content, req, versionParam, queryFormat, subgraph, validate, headers, info,
 								resultIndex, resultSize));
 					}
 				}
 		);
 	}
 
-	public Response processExecuteQuery(String content, String versionParam, String queryFormat, String subgraph,
+	public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam, String queryFormat, String subgraph,
 										String validate, HttpHeaders headers, UriInfo info, String resultIndex,
 										String resultSize) {
 
@@ -139,7 +141,8 @@ public class DslConsumer extends TraversalConsumer {
 
 		TransactionalGraphEngine dbEngine = null;
 		try {
-			traversalUriHttpEntry.setHttpEntryProperties(version);
+			String serverBase = req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
+			traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
 			traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
 			dbEngine = traversalUriHttpEntry.getDbEngine();
 			JsonObject input = new JsonParser().parse(content).getAsJsonObject();
@@ -178,16 +181,20 @@ public class DslConsumer extends TraversalConsumer {
 			SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
 			List<Object> vertTemp = processor.execute(subGraphStyle);
 
+
+			// Dedup if duplicate objects are returned in each array in the aggregate format scenario.
+			List<Object> vertTempDedupedObjectList = dedupObjectInAggregateFormatResult(vertTemp);
+
 			List <Object> vertices;
 			if (isAggregate(format)){
-				vertices = traversalUriHttpEntry.getPaginatedVertexListForAggregateFormat(vertTemp);
+				vertices = traversalUriHttpEntry.getPaginatedVertexListForAggregateFormat(vertTempDedupedObjectList);
 			} else {
 				vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
 			}
 
 			DBSerializer serializer = new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
 			FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions,
-					this.basePath);
+					this.basePath, serverBase);
 
 			MultivaluedMap<String, String> mvm = new MultivaluedHashMap<>();
 			mvm.putAll(info.getQueryParameters());
@@ -231,6 +238,9 @@ public class DslConsumer extends TraversalConsumer {
 			
 		} catch (AAIException e) {
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, e);
+		} catch (SchemaViolationException sve) {
+			AAIException ex = new AAIException("AAI_4020", sve);
+			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, ex);
 		} catch (Exception e) {
 			AAIException ex = new AAIException("AAI_4000", e);
 			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, ex);
@@ -242,5 +252,17 @@ public class DslConsumer extends TraversalConsumer {
 		}
 
 		return response;
+	}
+
+	private List<Object> dedupObjectInAggregateFormatResult(List<Object> vertTemp) {
+		List<Object> vertTempDedupedObjectList = new ArrayList<Object>();
+		Iterator<Object> itr = vertTemp.listIterator();
+		while (itr.hasNext()){
+			Object o = itr.next();
+			if (o instanceof ArrayList) {
+				vertTempDedupedObjectList.add(((ArrayList) o).stream().distinct().collect(Collectors.toList()));
+			}
+		}
+		return vertTempDedupedObjectList;
 	}
 }

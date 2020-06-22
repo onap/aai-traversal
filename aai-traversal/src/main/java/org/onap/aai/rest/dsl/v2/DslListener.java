@@ -207,13 +207,13 @@ public class DslListener extends AAIDslBaseListener {
 			if (ctx.filter() != null) {
 				allKeys = ctx.filter().propertyFilter().stream().flatMap(
 						pf -> pf.key().stream()).map(
-						e -> e.getText().replaceAll("\'", "")).collect(Collectors.toList());
+						e -> e.getText().replaceFirst("\'", "").substring(0, e.getText().length() - 2)).collect(Collectors.toList());
 			}
 			builder().validateFilter(ctx.label().getText(), allKeys);
 		}
 		if (ctx.store() != null) {
-			if (isAggregate() && (selectCounter == nodeCount) && (nodeCount < traversedNodes.size())) {
-				builder().select(false, selectCounter++, null);
+			if (isAggregate()) {
+				builder().select(selectCounter++, null);
 			}
 			builder().store();
 			hasReturnValue = true;
@@ -290,7 +290,7 @@ public class DslListener extends AAIDslBaseListener {
 		 * Add all String values
 		 */
 		List<String> values = valueList.stream().filter(value -> !filterKey.equals(value.getText()))
-				.map(value -> "'" + value.getText().replace("'", "") + "'").collect(Collectors.toList());
+				.map(value -> value.getText()).collect(Collectors.toList());
 		/*
 		 * Add all numeric values
 		 */
@@ -312,8 +312,6 @@ public class DslListener extends AAIDslBaseListener {
 
         List<AAIDslParser.KeyContext> keyList = ctx.key();
 
-        boolean isNot = ctx.not() != null && !ctx.not().isEmpty();
-
         /*
          * Add all String values
          */
@@ -322,7 +320,7 @@ public class DslListener extends AAIDslBaseListener {
 			setSelectKeys(traversedNodes.getFirst(), allKeys);
 		}
 		if (isAggregate() && (traversedNodes.size() == nodeCount)) {
-			builder().select(isNot, selectCounter++, allKeys);
+			builder().select(selectCounter++, allKeys);
 		}
     }
 
