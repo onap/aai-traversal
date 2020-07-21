@@ -5,14 +5,14 @@ grammar AAIDsl;
 
 aaiquery: startStatement limit?;
 
-startStatement: (vertex ) (traversal)* ;
+startStatement: (vertex|unionVertex ) (traversal)* ;
 nestedStatement: (vertex|unionVertex ) (traversal)* ;
 
 vertex: label store? (filter)?;
 
 traversal:  (edge (vertex|unionVertex));
 
-filter:  (propertyFilter)* whereFilter?;
+filter:  (propertyFilter)* whereFilter*;
 propertyFilter: (not? '(' key (',' (key | num | bool))* ')');
 bool: BOOL;
 

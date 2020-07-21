@@ -47,13 +47,13 @@ import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.transforms.XmlFormatTransformer;
-
 import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
@@ -97,6 +97,7 @@ public class QueryConsumer extends TraversalConsumer {
 								 @DefaultValue("graphson") @QueryParam("format") String queryFormat,
 								 @DefaultValue("no_op") @QueryParam("subgraph") String subgraph,
 								 @Context HttpHeaders headers,
+								 @Context HttpServletRequest req,
 								 @Context UriInfo info,
 								 @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
 								 @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
@@ -109,19 +110,18 @@ public class QueryConsumer extends TraversalConsumer {
 				new AaiCallable<Response>() {
 			@Override
 			public Response process() {
-				return processExecuteQuery(content, versionParam, queryFormat, subgraph, headers, info, resultIndex, resultSize);
+				return processExecuteQuery(content, req, versionParam, queryFormat, subgraph, headers, info, resultIndex, resultSize);
 			}
 		});
 	}
 
-	public Response processExecuteQuery(String content, String versionParam, String queryFormat, String subgraph,
+	public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam, String queryFormat, String subgraph,
 										HttpHeaders headers, UriInfo info, String resultIndex,
 										String resultSize) {
 
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
 		QueryProcessorType processorType = this.processorType;
-
 		Response response;
 		TransactionalGraphEngine dbEngine = null;
 
@@ -143,7 +143,8 @@ public class QueryConsumer extends TraversalConsumer {
 			String gremlin = "";
 			
 			SchemaVersion version = new SchemaVersion(versionParam);
-			traversalUriHttpEntry.setHttpEntryProperties(version);
+			String serverBase = req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
+			traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
 			/*
 			 * Changes for Pagination
 			 */
@@ -171,13 +172,13 @@ public class QueryConsumer extends TraversalConsumer {
 			
 			CustomQueryConfig customQueryConfig = getCustomQueryConfig(queryURIObj);
 			if ( customQueryConfig != null ) {
-				List<String> missingRequiredQueryParameters =  checkForMissingQueryParameters( customQueryConfig.getQueryRequiredProperties(), URITools.getQueryMap(queryURIObj));
+				List<String> missingRequiredQueryParameters = checkForMissingQueryParameters( customQueryConfig.getQueryRequiredProperties(), URITools.getQueryMap(queryURIObj));
 				
 				if ( !missingRequiredQueryParameters.isEmpty() ) {
 					return( createMessageMissingQueryRequiredParameters( missingRequiredQueryParameters, headers));
 				}
 				
-				List<String> invalidQueryParameters = checkForInvalidQueryParameters( customQueryConfig, URITools.getQueryMap(queryURIObj));
+				List<String> invalidQueryParameters =  checkForInvalidQueryParameters( customQueryConfig, URITools.getQueryMap(queryURIObj));
 				
 				if ( !invalidQueryParameters.isEmpty() ) {
 					return( createMessageInvalidQueryParameters( invalidQueryParameters, headers));
@@ -221,7 +222,7 @@ public class QueryConsumer extends TraversalConsumer {
 			List<Object> vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
 
 			DBSerializer serializer = new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
-			FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions, this.basePath);
+			FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions, this.basePath, serverBase);
 
 			MultivaluedMap<String, String> mvm = new MultivaluedHashMap<>();
             mvm.putAll(info.getQueryParameters());
@@ -232,8 +233,6 @@ public class QueryConsumer extends TraversalConsumer {
             Formatter formatter = ff.get(format, mvm);
 
 			String result = formatter.output(vertices).toString();
-
-			//LOGGER.info ("Completed");
 
 			String acceptType = headers.getHeaderString("Accept");
 
@@ -325,7 +324,7 @@ public class QueryConsumer extends TraversalConsumer {
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
 	}
-
+	
 	private Response createMessageInvalidQuerySection(String invalidQuery, HttpHeaders headers) {
 		AAIException e = new AAIException("AAI_3014");
 		
@@ -337,6 +336,7 @@ public class QueryConsumer extends TraversalConsumer {
 				.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, 
 						templateVars)).build();	
 	}
+	
 	
 	private List<String> checkForInvalidQueryParameters( CustomQueryConfig customQueryConfig,  MultivaluedMap<String, String> queryParams) {
 		
@@ -353,7 +353,6 @@ public class QueryConsumer extends TraversalConsumer {
 		return queryParams.keySet().stream()
 				.filter(param -> !allParameters.contains(param))
 				.collect(Collectors.toList());
-
 	}
 	
 	private Response createMessageInvalidQueryParameters(List<String> invalidQueryParams, HttpHeaders headers) {

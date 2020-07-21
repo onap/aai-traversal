@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
@@ -55,8 +56,8 @@ import java.util.concurrent.TimeUnit;
 @Path("/recents/{version: v[1-9][0-9]*|latest}")
 public class RecentAPIConsumer extends RESTAPI {
 
-	private static final String AAI_3021 = "AAI_3021";
-
+    private static final String AAI_3021 = "AAI_3021";
+    
 	/** The introspector factory type. */
 	private ModelType introspectorFactoryType = ModelType.MOXY;
 
@@ -95,20 +96,24 @@ public class RecentAPIConsumer extends RESTAPI {
 	@Path("/{nodeType: .+}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getRecentData(String content, @PathParam("version") String versionParam,
-			@PathParam("nodeType") String nodeType, @Context HttpHeaders headers, @Context UriInfo info) {
+	public Response getRecentData(String content,
+								  @PathParam("version") String versionParam,
+								  @PathParam("nodeType") String nodeType,
+								  @Context HttpHeaders headers,
+								  @Context HttpServletRequest req,
+								  @Context UriInfo info) {
 
 		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED, TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
 				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET, new AaiCallable<Response>() {
 					@Override
 					public Response process() {
-						return processRecentData(content, versionParam, nodeType, info, headers);
+						return processRecentData(content, req, versionParam, nodeType, info, headers);
 					}
 				});
 
 	}
 
-	public Response processRecentData(String content, @PathParam("version") String versionParam,
+	public Response processRecentData(String content, HttpServletRequest req, @PathParam("version") String versionParam,
 			@PathParam("nodeType") String nodeType, @Context UriInfo info, @Context HttpHeaders headers) {
 
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
@@ -124,8 +129,9 @@ public class RecentAPIConsumer extends RESTAPI {
 
 			SchemaVersion version = new SchemaVersion(versionParam);
 			this.checkVersion(version);
-			
-			traversalUriHttpEntry.setHttpEntryProperties(version);
+
+			String serverBase = req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
+			traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
 			dbEngine = traversalUriHttpEntry.getDbEngine();
 
 			/*
@@ -150,7 +156,7 @@ public class RecentAPIConsumer extends RESTAPI {
 			List<Object> vertices = processor.execute(subGraphStyle);
 
 			DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
-            FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions, this.basePath);
+            FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions, this.basePath, serverBase);
             Format format = Format.pathed_resourceversion;
 			
 			Formatter formater = ff.get(format, info.getQueryParameters());

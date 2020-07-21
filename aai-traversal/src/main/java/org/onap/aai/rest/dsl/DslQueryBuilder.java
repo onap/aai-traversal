@@ -49,6 +49,7 @@ public class DslQueryBuilder {
     private StringBuilder queryException;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslQueryBuilder.class);
+    private long selectCount = 0;
 
     public DslQueryBuilder(EdgeIngestor edgeIngestor, Loader loader) {
         this.edgeRules = edgeIngestor;
@@ -82,17 +83,14 @@ public class DslQueryBuilder {
      * DSL always dedupes the results
      */
     public DslQueryBuilder end(long selectCounter) {
+        selectCount = selectCounter;
         if(selectCounter <= 0) {
             return this.end();
         } else {
-            String selectStep = "step" + selectCounter;
-            query.append(".as('").append(selectStep).append("')").append(".as('stepMain')" +
-                    ".select('").append(selectStep).append("')").append(".store('x')").append(".select('stepMain').fold().dedup()");
+            query.append(".select('stepMain').fold().dedup()");
         }
         return this;
     }
-
-
 
     public DslQueryBuilder end() {
         query.append(".cap('x').unfold().dedup()");
@@ -241,7 +239,7 @@ public class DslQueryBuilder {
 
     }
 
-    public DslQueryBuilder select(boolean isNot, long selectCounter, List<String> keys) {
+    public DslQueryBuilder select(long selectCounter, List<String> keys) {
         /*
          * TODO : isNot should look at the vertex properties and include everything except the notKeys
          */
@@ -269,21 +267,76 @@ public class DslQueryBuilder {
             if (alias.isPresent()) {
                 key = StringUtils.quote(alias.get());
             }
-
+            String classType = obj.getType(trimSingleQuotes(key));
             query.append(key);
 
-            if (!values.isEmpty()) {
-                if (values.size() > 1) {
+            if (values != null && !values.isEmpty()) {
+                if (values.size() > 1) {        // values.size() > 1 indicates possibility of a list
+                    // eliminate quotes from each element
+                    for (int i = 0; i < values.size(); i++) {
+                        values.set(i, getConvertedValue(classType, key, values.get(i)));
+                    }
                     String valuesArray = String.join(",", values);
                     query.append(",").append(" new ArrayList<>(Arrays.asList(").append(valuesArray).append("))");
-                } else {
-                    query.append(",").append(values.get(0));
+                } else {                        // otherwise values should only contain one value
+                    query.append(",").append(getConvertedValue(classType, key, values.get(0)));
                 }
             }
         } catch (AAIUnknownObjectException e) {
             queryException.append("Unknown Object being referenced by the query").append(node);
         }
         return this;
+    }
+
+    private String getConvertedValue(String classType, String key, String value) {
+        String convertedValue = value;
+        if (isTypeSensitive(classType)) {
+            convertedValue = trimSingleQuotes(value);
+            try {
+                // cast it to the corresponding type
+                if (classType.equals(Integer.class.getName())) {
+                    int castInt = Integer.parseInt(convertedValue);
+                    convertedValue = String.valueOf(castInt);
+                }
+                else if (classType.equals(Long.class.getName())) {
+                    long castLong = Long.parseLong(convertedValue);
+                    convertedValue = String.valueOf(castLong);
+                }
+                else if (classType.equals(Boolean.class.getName())) {
+                    if (convertedValue.equals("1")) {           // checking for integer true value
+                        convertedValue = "true";
+                    }
+                    boolean castBoolean = Boolean.parseBoolean(convertedValue);
+                    convertedValue = String.valueOf(castBoolean);
+                }
+            } catch (Exception e) {
+                queryException.append("AAI_4020 ").append(String.format("Value [%s] is not an instance of the expected data type for property key [%s] and cannot be converted. " +
+                        "Expected: class %s, found: class %s", value, key, classType, String.class.getName()));
+            }
+        }
+        return convertedValue;
+    }
+
+    private boolean isTypeSensitive(String classType) {
+        if (classType.equals(Integer.class.getName()) ||
+                classType.equals(Boolean.class.getName()) ||
+                classType.equals(Long.class.getName())) {
+            return true;
+        }
+        return false;
+    }
+
+    private String trimSingleQuotes(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        String trimSingleQuotes = "";
+        if (s.startsWith("'") && s.endsWith("'")) {
+            trimSingleQuotes = s.substring(1, s.length() - 1);
+        } else {
+            trimSingleQuotes = s;
+        }
+        return trimSingleQuotes;
     }
 
     public DslQueryBuilder union() {

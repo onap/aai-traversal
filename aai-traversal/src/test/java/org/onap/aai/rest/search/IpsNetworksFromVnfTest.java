@@ -155,6 +155,7 @@ public class IpsNetworksFromVnfTest extends QueryTest {
 
 		expectedResult.add(genericVnf);
 		expectedResult.add(vnfc);
+		expectedResult.add(cp);
 		expectedResult.add(vipIpv4AddressList);
 		expectedResult.add(vipIpv6AddressList);
 

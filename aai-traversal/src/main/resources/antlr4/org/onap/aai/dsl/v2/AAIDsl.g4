@@ -5,7 +5,7 @@ grammar AAIDsl;
 
 aaiquery: startStatement limit?;
 
-startStatement: (vertex  ) (traversal)* ;
+startStatement: (vertex|unionVertex  ) (traversal)* ;
 nestedStatement:  (traversal)+ ;
 
 vertex: label store? (filter)?;
@@ -13,14 +13,15 @@ vertex: label store? (filter)?;
 //traversal:  (  vertex|unionVertex edge);
 traversal:  (edge* (vertex|unionVertex));
 
-filter:  (selectFilter)* (propertyFilter)* whereFilter?;
+filter:  (selectFilter)* (propertyFilter)* whereFilter*;
 propertyFilter: (not? '(' key (',' (key | num | bool))* ')');
-selectFilter: (not? '{' key (',' key)* '}');
+selectFilter: ( '{' key (',' key)* '}');
 bool: BOOL;
 
 whereFilter: (not? '('  nestedStatement ')' );
 
-unionVertex: '[' ( nestedStatement ( comma (nestedStatement))*) ']' store?;
+//unionVertex: '[' ( nestedStatement ( comma (nestedStatement))*) ']' store?;
+unionVertex: '[' ( (edgeFilter)* nestedStatement ( comma ( (edgeFilter)* nestedStatement))*) ']' store?;
 
 comma: ',';
 edge: ( TRAVERSE|DIRTRAVERSE) (edgeFilter)?;

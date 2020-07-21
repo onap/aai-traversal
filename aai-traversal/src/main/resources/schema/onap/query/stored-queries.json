@@ -298,11 +298,11 @@
 	  }
   },{
     "getClfiRoadmTailSummary":{
-      "stored-query":"builder.store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'logical-link').createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'service-instance').store('x').createEdgeTraversal(EdgeType.TREE,'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE,'service-subscription', 'customer').store('x')).cap('x').unfold().dedup()"
+      "stored-query":"builder.createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').tree()"
     }
   },{
     "getRouterRoadmTailSummary":{
-      "stored-query":"builder.store('x').createEdgeTraversal(EdgeType.TREE,'pnf', 'p-interface').store('x').createEdgeTraversal(EdgeType.COUSIN,'p-interface', 'logical-link').store('x').union(builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').store('x').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').store('x'), builder.newInstance().createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'logical-link').createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'service-instance').store('x').createEdgeTraversal(EdgeType.TREE,'service-instance', 'service-subscription').store('x').createEdgeTraversal(EdgeType.TREE,'service-subscription', 'customer').store('x')).cap('x').unfold().dedup()"
+      "stored-query":"builder.createEdgeTraversal(EdgeType.TREE,'pnf', 'p-interface').createEdgeTraversal(EdgeType.COUSIN,'p-interface', 'logical-link').createEdgeTraversal(EdgeType.COUSIN,'logical-link', 'p-interface').createEdgeTraversal(EdgeType.TREE,'p-interface', 'pnf').tree()"
     }
   },{
     "topology-summary-fromCloudRegion":{
