@@ -34,7 +34,7 @@
 	<artifactId>aai-traversal</artifactId>
 
 	<properties>
-	  <aai.schema.service.version>1.7.2-SNAPSHOT</aai.schema.service.version>
+	  <aai.schema.service.version>1.7.3</aai.schema.service.version>
 	  <mockito.core.version>1.10.19</mockito.core.version>
 		<java.version>1.8</java.version>
 		<start-class>org.onap.aai.TraversalApp</start-class>
