@@ -324,6 +324,7 @@
 	<logger name="org.onap.aai" level="DEBUG" additivity="false">
 		<appender-ref ref="asyncDEBUG" />
 		<appender-ref ref="asyncSANE" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="org.onap.aai.aaf" level="DEBUG" additivity="false">
 		<appender-ref ref="asyncAUTH" />
@@ -360,5 +361,6 @@
 
 	<root level="DEBUG">
 		<appender-ref ref="external" />
+		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>
