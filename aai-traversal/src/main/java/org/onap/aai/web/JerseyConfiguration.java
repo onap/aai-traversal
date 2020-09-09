@@ -19,10 +19,8 @@
  */
 package org.onap.aai.web;
 
-import jersey.repackaged.com.google.common.collect.Sets;
-import org.glassfish.jersey.filter.LoggingFilter;
+import com.google.common.collect.Sets;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.onap.aai.aailog.logs.AaiDebugLog;
 import org.onap.aai.rest.*;
 import org.onap.aai.rest.search.ModelAndNamedQueryRestProvider;
 import org.onap.aai.rest.search.SearchProvider;
@@ -50,11 +48,6 @@ public class JerseyConfiguration {
     private static final Logger log = Logger.getLogger(JerseyConfiguration.class.getName());
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(JerseyConfiguration.class.getName());
 
-    private static AaiDebugLog debugLog = new AaiDebugLog();
-    static {
-        debugLog.setupMDC();
-    }
-
     private static final String LOGGING_ENABLED_PROPERTY = "aai.request.logging.enabled";
     private static final boolean ENABLE_RESPONSE_LOGGING = false;
 
@@ -80,7 +73,6 @@ public class JerseyConfiguration {
                 CQ2GremlinTest.class
         );
         Set<Class<?>> filterClasses = Sets.newHashSet(
-                org.onap.aai.aailog.filter.AaiAuditLogContainerFilter.class,
                 org.onap.aai.interceptors.pre.RequestTransactionLogging.class,
                 org.onap.aai.interceptors.pre.HeaderValidation.class,
                 org.onap.aai.interceptors.pre.HttpHeaderInterceptor.class,
@@ -94,9 +86,6 @@ public class JerseyConfiguration {
                 org.onap.aai.interceptors.post.ResponseTransactionLogging.class,
                 org.onap.aai.interceptors.post.ResponseHeaderManipulation.class
         );
-        if (isLoggingEnabled()) {
-            logRequests(resourceConfig);
-        }
         resourceConfig.registerClasses(classes);
         logger.debug("REGISTERED CLASSES " + classes.toString());
 
@@ -124,10 +113,6 @@ public class JerseyConfiguration {
 
     private <T> Comparator<Class<? extends T>> priorityComparator() {
         return comparingInt(clazz -> clazz.getAnnotation(Priority.class).value());
-    }
-
-    private void logRequests(ResourceConfig resourceConfig) {
-        resourceConfig.register(new LoggingFilter(log, ENABLE_RESPONSE_LOGGING));
     }
 
     private boolean isLoggingEnabled() {

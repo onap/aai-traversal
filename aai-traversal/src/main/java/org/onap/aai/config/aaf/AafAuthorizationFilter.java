@@ -24,7 +24,7 @@ import com.att.eelf.configuration.EELFManager;
 import org.apache.commons.io.IOUtils;
 import org.onap.aai.Profiles;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.filter.OrderedRequestContextFilter;
+import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
