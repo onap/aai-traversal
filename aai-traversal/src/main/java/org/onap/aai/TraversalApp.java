@@ -116,8 +116,6 @@ public class TraversalApp {
 
 	@PreDestroy
 	public void cleanup(){
-		contextMap = MDC.getCopyOfContextMap();
-		MDC.setContextMap (contextMap);
 		logger.debug("Traversal MicroService stopped");
 		logger.info("Shutting down both realtime and cached connections");
 		AAIGraph.getInstance().graphShutdown();

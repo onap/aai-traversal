@@ -21,7 +21,6 @@ package org.onap.aai;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.att.eelf.configuration.EELFManager;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -83,7 +82,7 @@ public class TraversalTestConfiguration {
                     .build();
 
             restTemplate = builder
-                    .requestFactory(new HttpComponentsClientHttpRequestFactory(client))
+                    .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(client))
                     .build();
         }else {
             restTemplate = builder.build();
