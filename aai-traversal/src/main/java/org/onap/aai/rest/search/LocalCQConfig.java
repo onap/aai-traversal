@@ -24,7 +24,6 @@ import org.onap.aai.logging.ErrorLogHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
-import org.onap.aai.aaf.auth.FileWatcher;
 import org.onap.aai.logging.LogFormatTools;
 import org.onap.aai.util.AAIConstants;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,6 +86,27 @@ public class LocalCQConfig extends CQConfig {
             timer.schedule(task, new Date(), 10000);
         }
 
+    }
+
+    abstract class FileWatcher extends TimerTask {
+        private long timeStamp;
+        private File file;
+
+        public FileWatcher(File file) {
+            this.file = file;
+            this.timeStamp = file.lastModified();
+        }
+
+        public final void run() {
+            long timeStamp = this.file.lastModified();
+            if (timeStamp - this.timeStamp > 500L) {
+                this.timeStamp = timeStamp;
+                this.onChange(this.file);
+            }
+
+        }
+
+        protected abstract void onChange(File var1);
     }
 
 }
