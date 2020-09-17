@@ -1,0 +1,7 @@
+distribution_type: container
+container_release_tag: 1.7.2
+project: traversal
+ref: 512dcbf89f53113c21e5de3e7b0a56fe13ce44f3
+containers:
+    - name: aai-traversal
+      version: 1.7-STAGING-20200917T135353Z
