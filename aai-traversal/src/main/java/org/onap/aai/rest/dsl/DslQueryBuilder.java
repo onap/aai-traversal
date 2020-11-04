@@ -303,7 +303,7 @@ public class DslQueryBuilder {
                     convertedValue = String.valueOf(castLong);
                 }
                 else if (classType.equals(Boolean.class.getName())) {
-                    if (convertedValue.equals("1")) {           // checking for integer true value
+                    if ("1".equals(convertedValue)) {           // checking for integer true value
                         convertedValue = "true";
                     }
                     boolean castBoolean = Boolean.parseBoolean(convertedValue);
