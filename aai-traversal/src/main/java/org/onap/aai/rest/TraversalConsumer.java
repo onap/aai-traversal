@@ -19,13 +19,18 @@
  */
 package org.onap.aai.rest;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.process.traversal.strategy.decoration.SubgraphStrategy;
+import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.db.props.AAIProperties;
 import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.introspection.sideeffect.OwnerCheck;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.engines.QueryStyle;
@@ -34,12 +39,17 @@ import org.onap.aai.serialization.queryformats.Format;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
+import java.security.Principal;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public abstract class TraversalConsumer extends RESTAPI {
 
     private static final String HISTORICAL_FORMAT = "state,lifecycle";
     private final boolean historyEnabled;
+    private final boolean multiTenancyEnabled;
     private final int historyTruncateWindow;
     private final long currentTime = System.currentTimeMillis();
     private Long startTime = null;
@@ -51,6 +61,8 @@ public abstract class TraversalConsumer extends RESTAPI {
                 SpringContextAware.getApplicationContext().getEnvironment().getProperty("history.truncate.window.days", "365"));
         this.historyEnabled = Boolean.parseBoolean(
                 SpringContextAware.getApplicationContext().getEnvironment().getProperty("history.enabled", "false"));
+        this.multiTenancyEnabled = Boolean.parseBoolean(
+                SpringContextAware.getApplicationContext().getEnvironment().getProperty("multi.tenancy.enabled", "false"));
     }
 
     public boolean isHistory(Format queryFormat) {
@@ -137,15 +149,46 @@ public abstract class TraversalConsumer extends RESTAPI {
                 ).create();
     }
 
+    private SubgraphStrategy getDataOwnerSubgraphStrategy(Set<String> roles) {
+        return SubgraphStrategy.build()
+                .vertices(
+                        __.or(__.has("data-owner", P.within(roles)), __.hasNot("data-owner"))
+                ).create();
+    }
 
+    protected GraphTraversalSource getTraversalSource(TransactionalGraphEngine dbEngine, Format format, UriInfo info, Set<String> roles) throws AAIException {
+        GraphTraversalSource traversalSource;
 
-    protected GraphTraversalSource getTraversalSource(TransactionalGraphEngine dbEngine, Format format, UriInfo info) throws AAIException {
         if (isHistory(format)) {
             long localStartTime = this.getStartTime(format, info.getQueryParameters());
             long localEndTime = this.getEndTime(info.getQueryParameters());
-            return dbEngine.asAdmin().getTraversalSource().withStrategies(getSubgraphStrategy(localStartTime, localEndTime, format));
+            traversalSource = dbEngine.asAdmin().getTraversalSource().withStrategies(getSubgraphStrategy(localStartTime, localEndTime, format));
+        } else {
+            traversalSource = dbEngine.asAdmin().getTraversalSource();
         }
-        return dbEngine.asAdmin().getTraversalSource();
+
+        if (multiTenancyEnabled) {
+            return traversalSource.withStrategies(this.getDataOwnerSubgraphStrategy(roles));
+        }
+
+        return traversalSource;
+    }
+
+    protected Set<String> getRoles(Principal userPrincipal) {
+        KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) userPrincipal;
+        if (ObjectUtils.isEmpty(token)) {
+            return Collections.EMPTY_SET;
+        }
+
+        SimpleKeycloakAccount account = (SimpleKeycloakAccount) token.getDetails();
+        if (ObjectUtils.isEmpty(account)) {
+            return Collections.EMPTY_SET;
+        }
+
+        return account.getRoles()
+                .stream()
+                .map(role -> StringUtils.removeEnd(role, OwnerCheck.READ_ONLY_SUFFIX))
+                .collect(Collectors.toSet());
     }
 
     protected void validateHistoryParams(Format format, MultivaluedMap<String, String> params) throws AAIException {

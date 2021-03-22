@@ -101,6 +101,8 @@ public class QueryConsumer extends TraversalConsumer {
 								 @Context UriInfo info,
 								 @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
 								 @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
+		Set<String> roles = this.getRoles(req.getUserPrincipal());
+
 		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
 				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
 				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT,
@@ -110,14 +112,14 @@ public class QueryConsumer extends TraversalConsumer {
 				new AaiCallable<Response>() {
 			@Override
 			public Response process() {
-				return processExecuteQuery(content, req, versionParam, queryFormat, subgraph, headers, info, resultIndex, resultSize);
+				return processExecuteQuery(content, req, versionParam, queryFormat, subgraph, headers, info, resultIndex, resultSize, roles);
 			}
 		});
 	}
 
 	public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam, String queryFormat, String subgraph,
 										HttpHeaders headers, UriInfo info, String resultIndex,
-										String resultSize) {
+										String resultSize, Set<String> roles) {
 
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
@@ -193,7 +195,7 @@ public class QueryConsumer extends TraversalConsumer {
 			if(isHistory(format)){
 				validateHistoryParams(format, info.getQueryParameters());
 			}
-			GraphTraversalSource traversalSource = getTraversalSource(dbEngine, format, info);
+			GraphTraversalSource traversalSource = getTraversalSource(dbEngine, format, info, roles);
 			QueryStyle queryStyle = getQueryStyle(format, traversalUriHttpEntry);
 
 			if (!startURIs.isEmpty()) {
