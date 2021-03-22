@@ -104,6 +104,8 @@ public class DslConsumer extends TraversalConsumer {
 								 @Context UriInfo info,
 								 @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
 								 @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
+		Set<String> roles = this.getRoles(req.getUserPrincipal());
+
 		return runner(TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_ENABLED,
 				TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_APP,
 				TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_LIMIT,
@@ -114,7 +116,7 @@ public class DslConsumer extends TraversalConsumer {
 					@Override
 					public Response process() throws Exception {
 						return (processExecuteQuery(content, req, versionParam, queryFormat, subgraph, validate, headers, info,
-								resultIndex, resultSize));
+								resultIndex, resultSize, roles));
 					}
 				}
 		);
@@ -122,7 +124,7 @@ public class DslConsumer extends TraversalConsumer {
 
 	public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam, String queryFormat, String subgraph,
 										String validate, HttpHeaders headers, UriInfo info, String resultIndex,
-										String resultSize) {
+										String resultSize, Set<String> roles) {
 
 		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
 		String dslOverride = headers.getRequestHeaders().getFirst("X-DslOverride");
@@ -172,7 +174,7 @@ public class DslConsumer extends TraversalConsumer {
 				validateHistoryParams(format, info.getQueryParameters());
 			}
 
-			GraphTraversalSource traversalSource = getTraversalSource(dbEngine, format, info);
+			GraphTraversalSource traversalSource = getTraversalSource(dbEngine, format, info, roles);
 
 			GenericQueryProcessor processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
 					.queryFrom(dsl, "dsl").queryProcessor(dslQueryProcessor).version(dslApiVersion).processWith(processorType)
