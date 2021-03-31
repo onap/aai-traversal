@@ -16,6 +16,24 @@
       "revId": "13424b1e492c4a5bdb546010a698cef83be6af9f",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cad2c41f_116e6f91",
+        "filename": "aai-traversal/src/main/resources/application.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 6932
+      },
+      "writtenOn": "2021-03-31T18:45:58Z",
+      "side": 1,
+      "message": "Updates pushed. Thanks.",
+      "parentUuid": "a6a7ee41_fc149870",
+      "revId": "13424b1e492c4a5bdb546010a698cef83be6af9f",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
