@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a6a7ee41_fc149870",
+        "filename": "aai-traversal/src/main/resources/application.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2021-03-31T18:04:50Z",
+      "side": 1,
+      "message": "You shouldn\u0027t enable this profile by default because it would require first keycloak to be setup and the user can choose override this by adding it as environment variable",
+      "revId": "13424b1e492c4a5bdb546010a698cef83be6af9f",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
