@@ -95,6 +95,7 @@
 		<schema.version.api.default>v23</schema.version.api.default>
 		<schema.version.list>v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,v21,v22,v23</schema.version.list>
 		<schema.uri.base.path>/aai</schema.uri.base.path>
+		<keycloak.version>11.0.2</keycloak.version>
 		<!-- End of Default ONAP Schema Properties -->
 	</properties>
 	<profiles>
@@ -688,7 +689,26 @@
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-utils</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-starter</artifactId>
+		</dependency>
 	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.keycloak.bom</groupId>
+				<artifactId>keycloak-adapter-bom</artifactId>
+				<version>${keycloak.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
 		<resources>
 			<resource>
@@ -820,6 +840,15 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration combine.children="append">
+					<excludes>
+						<exclude>**/*WebSecurityConfig.*</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
