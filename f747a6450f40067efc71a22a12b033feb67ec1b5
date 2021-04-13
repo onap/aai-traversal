@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db2452a6_ff7e7908",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/TraversalConsumer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2021-04-13T15:48:16Z",
+      "side": 1,
+      "message": "This query returns all the vertexes that match the data-owner with the expected roles and any vertexes that don\u0027t have an data-owner.\nIs that on purpose, don\u0027t you only want the data back with the property data-owner?",
+      "revId": "f747a6450f40067efc71a22a12b033feb67ec1b5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
