@@ -16,6 +16,24 @@
       "revId": "f747a6450f40067efc71a22a12b033feb67ec1b5",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6010fafd_824a7105",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/TraversalConsumer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 7355
+      },
+      "writtenOn": "2021-04-14T15:36:38Z",
+      "side": 1,
+      "message": "Yes, It is on purpose and was requested for multitenancy.",
+      "parentUuid": "db2452a6_ff7e7908",
+      "revId": "f747a6450f40067efc71a22a12b033feb67ec1b5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
     }
   ]
 }
