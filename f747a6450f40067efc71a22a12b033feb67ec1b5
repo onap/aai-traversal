@@ -69,6 +69,24 @@
       "revId": "f747a6450f40067efc71a22a12b033feb67ec1b5",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f86b3caf_2c167d09",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/TraversalConsumer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 75
+      },
+      "writtenOn": "2021-04-19T15:10:57Z",
+      "side": 1,
+      "message": "@Eric, it would be best to move to the else portion of the block after line 167.\nThe reason being the conditional is checking if its an history traversal which is an separate instance from the traversal microservice that is currently not in onap.\nIf lets say once history traversal is contributed and you enabled multi tenancy, the history traversal would not behave in the intended way because there are two withStrategies, it might just apply the multi tenancy strategy but not the history strategy.\nLines 163 to 165 will never be executed on the traversal microservice but an instance of the history traversal that is not in onap yet.",
+      "parentUuid": "f4a0ce51_2f4646ba",
+      "revId": "f747a6450f40067efc71a22a12b033feb67ec1b5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
     }
   ]
 }
