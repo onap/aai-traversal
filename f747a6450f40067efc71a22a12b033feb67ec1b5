@@ -51,6 +51,24 @@
       "revId": "f747a6450f40067efc71a22a12b033feb67ec1b5",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4a0ce51_2f4646ba",
+        "filename": "aai-traversal/src/main/java/org/onap/aai/rest/TraversalConsumer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 7548
+      },
+      "writtenOn": "2021-04-19T14:46:54Z",
+      "side": 1,
+      "message": "If multitenancy is active, a extra filter needs to be applied to traversal source.\nMoving the conditional for previous if/else will result in duplicated code.",
+      "parentUuid": "c1f4974f_343fe213",
+      "revId": "f747a6450f40067efc71a22a12b033feb67ec1b5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
     }
   ]
 }
