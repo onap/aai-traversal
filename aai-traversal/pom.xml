@@ -96,7 +96,9 @@
 		<schema.version.list>v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,v21,v22,v23</schema.version.list>
 		<schema.uri.base.path>/aai</schema.uri.base.path>
 		<keycloak.version>11.0.2</keycloak.version>
+		<testcontainers.version>1.6.1</testcontainers.version>
 		<!-- End of Default ONAP Schema Properties -->
+		<build.helper-maven-plugin.version>3.2.0</build.helper-maven-plugin.version>
 	</properties>
 	<profiles>
 		<!-- Docker profile to be used for building docker image and pushing to 
@@ -697,6 +699,18 @@
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-spring-boot-starter</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.github.dasniko</groupId>
+			<artifactId>testcontainers-keycloak</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>${keycloak.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -903,6 +917,23 @@
 			  <configuration>
 			    <runOrder>alphabetical</runOrder>
 			  </configuration>
+			  <executions>
+				  <execution>
+					  <id>integration-test</id>
+					  <goals>
+						  <goal>test</goal>
+					  </goals>
+					  <phase>integration-test</phase>
+					  <configuration>
+						  <excludes>
+							  <exclude>none</exclude>
+						  </excludes>
+						  <includes>
+							  <include>**/*IT.java</include>
+						  </includes>
+					  </configuration>
+				  </execution>
+			  </executions>
 			</plugin>
 
 			<plugin>
@@ -1019,6 +1050,39 @@
 					<skipExistingHeaders>false</skipExistingHeaders>
 					<skip>false</skip>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>${build.helper-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>add-integration-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/it/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-integration-test-resource</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>src/it/resources</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
