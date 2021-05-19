@@ -22,6 +22,7 @@ package org.onap.aai.rest;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.micrometer.core.annotation.Timed;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.janusgraph.core.SchemaViolationException;
 import org.onap.aai.concurrent.AaiCallable;
@@ -58,6 +59,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Path("{version: v[1-9][0-9]*|latest}/dsl")
+@Timed
 public class DslConsumer extends TraversalConsumer {
 
 	private HttpEntry traversalUriHttpEntry;
