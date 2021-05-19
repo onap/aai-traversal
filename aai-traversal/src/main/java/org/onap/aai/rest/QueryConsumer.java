@@ -22,6 +22,7 @@ package org.onap.aai.rest;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.micrometer.core.annotation.Timed;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.onap.aai.concurrent.AaiCallable;
@@ -62,6 +63,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Path("{version: v[1-9][0-9]*|latest}/query")
+@Timed
 public class QueryConsumer extends TraversalConsumer {
 
 	private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
