@@ -19,6 +19,7 @@
  */
 package org.onap.aai.rest.search;
 
+import io.micrometer.core.annotation.Timed;
 import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
 import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.dbgraphmap.SearchGraph;
@@ -59,6 +60,7 @@ import java.util.Optional;
  * X-TransactionId in the header.
  */
 @Path("/{version: v[1-9][0-9]*|latest}/search")
+@Timed
 public class SearchProvider extends RESTAPI {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchProvider.class);

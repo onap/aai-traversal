@@ -19,6 +19,7 @@
  */
 package org.onap.aai.rest;
 
+import io.micrometer.core.annotation.Timed;
 import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
@@ -54,6 +55,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Path("/recents/{version: v[1-9][0-9]*|latest}")
+@Timed
 public class RecentAPIConsumer extends RESTAPI {
 
     private static final String AAI_3021 = "AAI_3021";
