@@ -40,6 +40,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Test REST requests against configuration resource
@@ -86,8 +87,10 @@ public class ConfigurationTest extends AbstractSpringRestTest {
         responseEntity = restTemplate.exchange(actuatorurl + "/actuator/prometheus", HttpMethod.GET, httpEntity, String.class);
         responseBody = (String) responseEntity.getBody();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertTrue(responseBody.contains("app_id"));
+        System.out.println("responseBody---------" + responseBody);
+        assertFalse(responseBody.contains("aai_uri"));
         assertTrue(responseBody.contains("group_id"));
+
 
         //Set Accept as MediaType.APPLICATION_JSON in order to get access of endpoint "/actuator/info" and "/actuator/health"
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
