@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
+		<version>1.9.1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -191,7 +191,7 @@
 							</execution>
 							<execution>
 								<id>generate-images</id>
-								<phase>package</phase>
+								<phase>verify</phase>
 								<goals>
 									<goal>build</goal>
 								</goals>
@@ -927,10 +927,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<artifactId>exec-maven-plugin</artifactId>
 				<groupId>org.codehaus.mojo</groupId>
 			</plugin>
@@ -978,7 +974,6 @@
 				<configuration>
 					<mainClass>${start-class}</mainClass>
 					<layout>ZIP</layout>
-					<classifier>exec</classifier>
 				</configuration>
 				<executions>
 					<execution>
@@ -988,7 +983,31 @@
 					</execution>
 				</executions>
 			</plugin>
-
+            <plugin>
+              <artifactId>maven-resources-plugin</artifactId>
+              <version>3.0.0</version>
+              <executions>
+                <execution>
+                  <id>copy-fat-jar</id>
+                  <phase>post-integration-test</phase>
+                  <goals>
+                    <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                      <outputDirectory>${aai.build.directory}/lib/</outputDirectory>
+                      <resources>
+                          <resource>
+                              <directory>${project.build.directory}/</directory>
+                              <includes>
+                                  <include>${project.artifactId}-${project.version}.jar</include>
+                              </includes>
+                              <filtering>false</filtering>
+                          </resource>
+                      </resources>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
 
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
