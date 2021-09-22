@@ -50,9 +50,8 @@ The REST interface logs can be found under /opt/app/aai-traversal/logs/rest.
 Any RESTful client such as SoapUI may be configured and setup to use for testing AAI requests.
 
 # Integration Tests
-In order to isolate integration tests from unit tests, `it` directory has been created under `src`.
+Integration tests are located in `it` directory, and disabled by default in the pom file:
+`<skipITs>true</skipITs>`
 
-As a naming convention, All integration test classes should end with `IT` to be executed, and can be run along with all other unit tests with `mvn integration-test`
-
-
+As a naming convention, All integration test classes should end with `IT`, and will be executed by changing the `skipITs` value in pom file, or through the command line `-DskipITs=false`
 
