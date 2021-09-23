@@ -30,7 +30,7 @@
     </parent>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
-    <version>1.9.2-SNAPSHOT</version>
+    <version>1.9.2</version>
     <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>
