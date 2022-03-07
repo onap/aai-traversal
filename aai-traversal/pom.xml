@@ -101,6 +101,8 @@
 		<micrometer-registry-prometheus.version>1.6.6</micrometer-registry-prometheus.version>
 		<micrometer-jersey2>1.6.6</micrometer-jersey2>
 		<testcontainers.version>1.6.1</testcontainers.version>
+		<netty.handler.version>4.1.63.Final</netty.handler.version>
+		<netty.version>4.1.63.Final</netty.version>
 		<!-- End of Default ONAP Schema Properties -->
 
 		<!-- Integration tests will be skipped by default. Could be enabled here or by -DskipITs=false-->
@@ -651,6 +653,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler</artifactId>
+			<version>${netty.handler.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -677,6 +680,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
+			<version>${netty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
