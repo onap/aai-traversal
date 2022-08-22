@@ -1,5 +1,5 @@
 distribution_type: container
-container_release_tag: 1.9.5
+container_release_tag: 1.9.6
 project: traversal
 ref: 993f4809f8568953b1f87ed0c1cb28bd48fdcf06
 containers:
