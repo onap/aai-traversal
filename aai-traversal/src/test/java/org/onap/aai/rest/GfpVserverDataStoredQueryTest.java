@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,30 +19,6 @@
  */
 package org.onap.aai.rest;
 
-import org.onap.aai.config.PropertyPasswordConfiguration;
-import org.onap.aai.transforms.XmlFormatTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.att.eelf.configuration.EELFManager;
-import com.jayway.jsonpath.JsonPath;
-import org.janusgraph.core.JanusGraph;
-import org.janusgraph.core.JanusGraphTransaction;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.onap.aai.AAISetup;
-import org.onap.aai.HttpTestUtil;
-import org.onap.aai.PayloadUtil;
-import org.onap.aai.dbmap.AAIGraph;
-import org.onap.aai.setup.SchemaVersion;
-import org.springframework.test.context.ContextConfiguration;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.*;
-import java.util.*;
-
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -51,10 +27,37 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
-public class GfpVserverDataStoredQueryTest extends AAISetup{
+import com.att.eelf.configuration.EELFManager;
+import com.jayway.jsonpath.JsonPath;
 
-    private static final Logger logger = LoggerFactory.getLogger(GfpVserverDataStoredQueryTest.class);
+import java.util.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.*;
+
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.JanusGraphTransaction;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.onap.aai.AAISetup;
+import org.onap.aai.HttpTestUtil;
+import org.onap.aai.PayloadUtil;
+import org.onap.aai.config.PropertyPasswordConfiguration;
+import org.onap.aai.dbmap.AAIGraph;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.transforms.XmlFormatTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.test.context.ContextConfiguration;
+
+@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
+public class GfpVserverDataStoredQueryTest extends AAISetup {
+
+    private static final Logger logger =
+        LoggerFactory.getLogger(GfpVserverDataStoredQueryTest.class);
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
@@ -79,9 +82,8 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
 
         version = schemaVersions.getDefaultVersion();
 
-        cloudRegionUri = "/aai/" + version.toString()
-                                   + "/cloud-infrastructure/cloud-regions/"
-                                   + "cloud-region/testOwner1/testRegion1";
+        cloudRegionUri = "/aai/" + version.toString() + "/cloud-infrastructure/cloud-regions/"
+            + "cloud-region/testOwner1/testRegion1";
         httpTestUtil = new HttpTestUtil();
 
         Map<String, String> templateValues = new HashMap<>();
@@ -97,8 +99,8 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         templateValues.put("ipv6-address", "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
         templateValues.put("vlan-interface", "vlan-interface1");
 
-        String cloudRegionPayload = PayloadUtil.
-                getTemplatePayload("cloud-region-with-linterface.json", templateValues);
+        String cloudRegionPayload =
+            PayloadUtil.getTemplatePayload("cloud-region-with-linterface.json", templateValues);
 
         Response response = httpTestUtil.doPut(cloudRegionUri, cloudRegionPayload);
         logger.info("Response status received {}", response.getEntity());
@@ -107,12 +109,13 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         assertEquals("Expecting the cloud region to be created", 201, response.getStatus());
         logger.info("Successfully created the cloud region with linterface");
 
-        queryConsumer = new QueryConsumer(traversalUriHttpEntry, schemaVersions, gremlinServerSingleton, new XmlFormatTransformer(), basePath);
+        queryConsumer = new QueryConsumer(traversalUriHttpEntry, schemaVersions,
+            gremlinServerSingleton, new XmlFormatTransformer(), basePath);
 
-        httpHeaders         = mock(HttpHeaders.class);
+        httpHeaders = mock(HttpHeaders.class);
 
-        headersMultiMap     = new MultivaluedHashMap<>();
-        queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
+        headersMultiMap = new MultivaluedHashMap<>();
+        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -138,7 +141,8 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
     }
 
     @Test
-    public void testStoredQueryVerifyDoesNotThrowMethodTooLargeWhenLargeNumberOfStartingVertexes() throws Exception {
+    public void testStoredQueryVerifyDoesNotThrowMethodTooLargeWhenLargeNumberOfStartingVertexes()
+        throws Exception {
 
         // Add hundred thousand vserver vertexes to properly
         // test the scenario where the application was
@@ -166,23 +170,15 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getPath()).thenReturn(query);
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("https://localhost:8446" + query));
+        when(mockRequest.getRequestURL())
+            .thenReturn(new StringBuffer("https://localhost:8446" + query));
 
-        Response response = queryConsumer.executeQuery(
-            payload,
-            version.toString(),
-            "resource_and_url", "" +
-            "no_op",
-            httpHeaders,
-            mockRequest,
-            uriInfo,
-            "-1",
-            "-1"
-        );
+        Response response = queryConsumer.executeQuery(payload, version.toString(),
+            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
 
         String entity = response.getEntity().toString();
-        assertEquals("Expected the response to be 200 but got this returned: " + response.getEntity().toString(),
-                200, response.getStatus());
+        assertEquals("Expected the response to be 200 but got this returned: "
+            + response.getEntity().toString(), 200, response.getStatus());
         List<String> urls = JsonPath.read(entity, "$.results[*].url");
         assertEquals("Expected the urls to be 3", 3, urls.size());
         removeVertexes();
@@ -207,31 +203,24 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         when(uriInfo.getPath()).thenReturn(query);
 
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("https://localhost:8446" + query));
+        when(mockRequest.getRequestURL())
+            .thenReturn(new StringBuffer("https://localhost:8446" + query));
 
-        Response response = queryConsumer.executeQuery(
-                payload,
-                version.toString(),
-                "resource_and_url", "" +
-                        "no_op",
-                httpHeaders,
-                mockRequest,
-                uriInfo,
-                "-1",
-                "-1"
-        );
+        Response response = queryConsumer.executeQuery(payload, version.toString(),
+            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
 
         String entity = response.getEntity().toString();
 
-        assertEquals("Expected the response to be 400 but got this returned: " + entity,
-                400, response.getStatus());
+        assertEquals("Expected the response to be 400 but got this returned: " + entity, 400,
+            response.getStatus());
 
         assertThat("Expecting error message since query doesn't exist", entity,
-                containsString("Query payload is invalid"));
+            containsString("Query payload is invalid"));
     }
 
     @Test
-    public void testStoredQueryWhenStartFilterReturnsZeroVertexesItShouldHandleProperly() throws Exception {
+    public void testStoredQueryWhenStartFilterReturnsZeroVertexesItShouldHandleProperly()
+        throws Exception {
 
         Map<String, String> templateValues = new HashMap<>();
 
@@ -248,35 +237,27 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getPath()).thenReturn(query);
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("https://localhost:8446" + query));
+        when(mockRequest.getRequestURL())
+            .thenReturn(new StringBuffer("https://localhost:8446" + query));
 
-
-        Response response = queryConsumer.executeQuery(
-                payload,
-                version.toString(),
-                "resource_and_url", "" +
-                        "no_op",
-                httpHeaders,
-                mockRequest,
-                uriInfo,
-                "-1",
-                "-1"
-        );
+        Response response = queryConsumer.executeQuery(payload, version.toString(),
+            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
 
         String entity = response.getEntity().toString();
 
-        assertEquals("Expected the response to be 404 but got this returned: " + entity,
-                404, response.getStatus());
+        assertEquals("Expected the response to be 404 but got this returned: " + entity, 404,
+            response.getStatus());
 
-        assertThat(entity, containsString("Start URI returned no vertexes, please check the start URI"));
+        assertThat(entity,
+            containsString("Start URI returned no vertexes, please check the start URI"));
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         removeVertexes();
     }
 
-    private void removeVertexes(){
+    private void removeVertexes() {
 
         JanusGraph JanusGraph = AAIGraph.getInstance().getGraph();
         JanusGraphTransaction transaction = JanusGraph.newTransaction();
@@ -286,12 +267,12 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         try {
             GraphTraversalSource g = transaction.traversal();
             g.V().has("source-of-truth", "JUNIT").toList().stream()
-                    .forEach((vertex) -> vertex.remove());
-        } catch(Exception ex){
+                .forEach((vertex) -> vertex.remove());
+        } catch (Exception ex) {
             success = false;
             logger.error("Unable to remove all of the junit vservers due to {}", ex);
         } finally {
-            if(success){
+            if (success) {
                 transaction.commit();
             } else {
                 transaction.rollback();
@@ -300,7 +281,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
 
     }
 
-    private void addVservers(int vserversCount){
+    private void addVservers(int vserversCount) {
 
         JanusGraph JanusGraph = AAIGraph.getInstance().getGraph();
         JanusGraphTransaction transaction = JanusGraph.newTransaction();
@@ -310,20 +291,19 @@ public class GfpVserverDataStoredQueryTest extends AAISetup{
         try {
 
             GraphTraversalSource g = transaction.traversal();
-            for(int index = 0; index < vserversCount; index++){
+            for (int index = 0; index < vserversCount; index++) {
                 String randomVserverId = UUID.randomUUID().toString();
                 g.addV().property("aai-node-type", "vserver")
-                        .property( "vserver-id", "random-" + randomVserverId)
-                        .property( "vserver-name", "junit-vservers")
-                        .property( "source-of-truth", "JUNIT")
-                        .next();
+                    .property("vserver-id", "random-" + randomVserverId)
+                    .property("vserver-name", "junit-vservers").property("source-of-truth", "JUNIT")
+                    .next();
             }
 
-        } catch(Exception ex){
+        } catch (Exception ex) {
             success = false;
             logger.error("Unable to add all of the vservers due to {}", ex);
         } finally {
-            if(success){
+            if (success) {
                 transaction.commit();
             } else {
                 transaction.rollback();

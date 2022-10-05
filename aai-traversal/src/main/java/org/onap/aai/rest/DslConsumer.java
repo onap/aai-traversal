@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,17 @@ package org.onap.aai.rest;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import io.micrometer.core.annotation.Timed;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.janusgraph.core.SchemaViolationException;
 import org.onap.aai.concurrent.AaiCallable;
@@ -51,222 +61,211 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Path("{version: v[1-9][0-9]*|latest}/dsl")
 @Timed
 public class DslConsumer extends TraversalConsumer {
 
-	private HttpEntry traversalUriHttpEntry;
+    private HttpEntry traversalUriHttpEntry;
 
-	private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
+    private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DslConsumer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DslConsumer.class);
 
-	private DslQueryProcessor dslQueryProcessor;
+    private DslQueryProcessor dslQueryProcessor;
 
-	private SchemaVersions schemaVersions;
+    private SchemaVersions schemaVersions;
 
-	private String basePath;
+    private String basePath;
 
-	private GremlinServerSingleton gremlinServerSingleton;
-	private final QueryVersion DEFAULT_VERSION = QueryVersion.V1;
-	private QueryVersion dslApiVersion = DEFAULT_VERSION;
+    private GremlinServerSingleton gremlinServerSingleton;
+    private final QueryVersion DEFAULT_VERSION = QueryVersion.V1;
+    private QueryVersion dslApiVersion = DEFAULT_VERSION;
 
-	private XmlFormatTransformer xmlFormatTransformer;
+    private XmlFormatTransformer xmlFormatTransformer;
 
-	@Autowired
-	public DslConsumer(HttpEntry traversalUriHttpEntry, DslQueryProcessor dslQueryProcessor,
-					   SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
-					   XmlFormatTransformer xmlFormatTransformer,
-					   @Value("${schema.uri.base.path}") String basePath) {
-		this.traversalUriHttpEntry = traversalUriHttpEntry;
-		this.dslQueryProcessor = dslQueryProcessor;
-		this.schemaVersions = schemaVersions;
-		this.gremlinServerSingleton = gremlinServerSingleton;
-		this.xmlFormatTransformer = xmlFormatTransformer;
-		this.basePath = basePath;
-	}
+    @Autowired
+    public DslConsumer(HttpEntry traversalUriHttpEntry, DslQueryProcessor dslQueryProcessor,
+        SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
+        XmlFormatTransformer xmlFormatTransformer,
+        @Value("${schema.uri.base.path}") String basePath) {
+        this.traversalUriHttpEntry = traversalUriHttpEntry;
+        this.dslQueryProcessor = dslQueryProcessor;
+        this.schemaVersions = schemaVersions;
+        this.gremlinServerSingleton = gremlinServerSingleton;
+        this.xmlFormatTransformer = xmlFormatTransformer;
+        this.basePath = basePath;
+    }
 
-	@PUT
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response executeQuery(String content,
-								 @PathParam("version") String versionParam,
-								 @DefaultValue("graphson") @QueryParam("format") String queryFormat,
-								 @DefaultValue("no_op") @QueryParam("subgraph") String subgraph,
-								 @DefaultValue("all") @QueryParam("validate") String validate,
-								 @Context HttpHeaders headers,
-								 @Context HttpServletRequest req,
-								 @Context UriInfo info,
-								 @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
-								 @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
-		Set<String> roles = this.getRoles(req.getUserPrincipal());
+    @PUT
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response executeQuery(String content, @PathParam("version") String versionParam,
+        @DefaultValue("graphson") @QueryParam("format") String queryFormat,
+        @DefaultValue("no_op") @QueryParam("subgraph") String subgraph,
+        @DefaultValue("all") @QueryParam("validate") String validate, @Context HttpHeaders headers,
+        @Context HttpServletRequest req, @Context UriInfo info,
+        @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
+        @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
+        Set<String> roles = this.getRoles(req.getUserPrincipal());
 
-		return runner(TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_ENABLED,
-				TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_APP,
-				TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_LIMIT,
-				headers,
-				info,
-				HttpMethod.PUT,
-				new AaiCallable() {
-					@Override
-					public Response process() throws Exception {
-						return (processExecuteQuery(content, req, versionParam, queryFormat, subgraph, validate, headers, info,
-								resultIndex, resultSize, roles));
-					}
-				}
-		);
-	}
+        return runner(TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_ENABLED,
+            TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_APP,
+            TraversalConstants.AAI_TRAVERSAL_DSL_TIMEOUT_LIMIT, headers, info, HttpMethod.PUT,
+            new AaiCallable() {
+                @Override
+                public Response process() throws Exception {
+                    return (processExecuteQuery(content, req, versionParam, queryFormat, subgraph,
+                        validate, headers, info, resultIndex, resultSize, roles));
+                }
+            });
+    }
 
-	public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam, String queryFormat, String subgraph,
-										String validate, HttpHeaders headers, UriInfo info, String resultIndex,
-										String resultSize, Set<String> roles) {
+    public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam,
+        String queryFormat, String subgraph, String validate, HttpHeaders headers, UriInfo info,
+        String resultIndex, String resultSize, Set<String> roles) {
 
-		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-		String dslOverride = headers.getRequestHeaders().getFirst("X-DslOverride");
+        String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
+        String dslOverride = headers.getRequestHeaders().getFirst("X-DslOverride");
 
-		Optional<String> dslApiVersionHeader = Optional.ofNullable(headers.getRequestHeaders().getFirst("X-DslApiVersion"));
-		if (dslApiVersionHeader.isPresent()) {
-			try {
-				dslApiVersion = QueryVersion.valueOf(dslApiVersionHeader.get());
-			} catch (IllegalArgumentException e) {
-				LOGGER.debug("Defaulting DSL Api Version to  "+DEFAULT_VERSION);
-			}
-		}
+        Optional<String> dslApiVersionHeader =
+            Optional.ofNullable(headers.getRequestHeaders().getFirst("X-DslApiVersion"));
+        if (dslApiVersionHeader.isPresent()) {
+            try {
+                dslApiVersion = QueryVersion.valueOf(dslApiVersionHeader.get());
+            } catch (IllegalArgumentException e) {
+                LOGGER.debug("Defaulting DSL Api Version to  " + DEFAULT_VERSION);
+            }
+        }
 
-		Response response;
-		SchemaVersion version = new SchemaVersion(versionParam);
+        Response response;
+        SchemaVersion version = new SchemaVersion(versionParam);
 
-		TransactionalGraphEngine dbEngine = null;
-		try {
-			String serverBase = req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
-			traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
-			traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
-			dbEngine = traversalUriHttpEntry.getDbEngine();
-			JsonObject input = new JsonParser().parse(content).getAsJsonObject();
-			JsonElement dslElement = input.get("dsl");
-			String dsl = "";
-			if (dslElement != null) {
-				dsl = dslElement.getAsString();
-			}
+        TransactionalGraphEngine dbEngine = null;
+        try {
+            String serverBase =
+                req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
+            traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
+            traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
+            dbEngine = traversalUriHttpEntry.getDbEngine();
+            JsonObject input = new JsonParser().parse(content).getAsJsonObject();
+            JsonElement dslElement = input.get("dsl");
+            String dsl = "";
+            if (dslElement != null) {
+                dsl = dslElement.getAsString();
+            }
 
+            boolean isDslOverride = dslOverride != null
+                && !AAIConfig.get(TraversalConstants.DSL_OVERRIDE).equals("false")
+                && dslOverride.equals(AAIConfig.get(TraversalConstants.DSL_OVERRIDE));
 
-			boolean isDslOverride = dslOverride != null && !AAIConfig.get(TraversalConstants.DSL_OVERRIDE).equals("false")
-					&& dslOverride.equals(AAIConfig.get(TraversalConstants.DSL_OVERRIDE));
-			
-			if(isDslOverride) {
-				dslQueryProcessor.setStartNodeValidationFlag(false);
-			}
+            if (isDslOverride) {
+                dslQueryProcessor.setStartNodeValidationFlag(false);
+            }
 
-			dslQueryProcessor.setValidationRules(validate);
+            dslQueryProcessor.setValidationRules(validate);
 
-			Format format = Format.getFormat(queryFormat);
+            Format format = Format.getFormat(queryFormat);
 
-			if(isAggregate(format)){
-				dslQueryProcessor.setAggregate(true);
-			}
+            if (isAggregate(format)) {
+                dslQueryProcessor.setAggregate(true);
+            }
 
-			if(isHistory(format)){
-				validateHistoryParams(format, info.getQueryParameters());
-			}
+            if (isHistory(format)) {
+                validateHistoryParams(format, info.getQueryParameters());
+            }
 
-			GraphTraversalSource traversalSource = getTraversalSource(dbEngine, format, info, roles);
+            GraphTraversalSource traversalSource =
+                getTraversalSource(dbEngine, format, info, roles);
 
-			GenericQueryProcessor processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-					.queryFrom(dsl, "dsl").queryProcessor(dslQueryProcessor).version(dslApiVersion).processWith(processorType)
-					.format(format).uriParams(info.getQueryParameters()).traversalSource(isHistory(format), traversalSource).create();
+            GenericQueryProcessor processor =
+                new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
+                    .queryFrom(dsl, "dsl").queryProcessor(dslQueryProcessor).version(dslApiVersion)
+                    .processWith(processorType).format(format).uriParams(info.getQueryParameters())
+                    .traversalSource(isHistory(format), traversalSource).create();
 
-			SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
-			List<Object> vertTemp = processor.execute(subGraphStyle);
+            SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
+            List<Object> vertTemp = processor.execute(subGraphStyle);
 
+            // Dedup if duplicate objects are returned in each array in the aggregate format
+            // scenario.
+            List<Object> vertTempDedupedObjectList = dedupObjectInAggregateFormatResult(vertTemp);
 
-			// Dedup if duplicate objects are returned in each array in the aggregate format scenario.
-			List<Object> vertTempDedupedObjectList = dedupObjectInAggregateFormatResult(vertTemp);
+            List<Object> vertices;
+            if (isAggregate(format)) {
+                vertices = traversalUriHttpEntry
+                    .getPaginatedVertexListForAggregateFormat(vertTempDedupedObjectList);
+            } else {
+                vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
+            }
 
-			List <Object> vertices;
-			if (isAggregate(format)){
-				vertices = traversalUriHttpEntry.getPaginatedVertexListForAggregateFormat(vertTempDedupedObjectList);
-			} else {
-				vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
-			}
+            DBSerializer serializer =
+                new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
+            FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer,
+                schemaVersions, this.basePath, serverBase);
 
-			DBSerializer serializer = new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
-			FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions,
-					this.basePath, serverBase);
+            MultivaluedMap<String, String> mvm = new MultivaluedHashMap<>();
+            mvm.putAll(info.getQueryParameters());
+            if (isHistory(format)) {
+                mvm.putSingle("startTs", Long.toString(getStartTime(format, mvm)));
+                mvm.putSingle("endTs", Long.toString(getEndTime(mvm)));
+            }
+            Formatter formatter = ff.get(format, mvm);
 
-			MultivaluedMap<String, String> mvm = new MultivaluedHashMap<>();
-			mvm.putAll(info.getQueryParameters());
-			if (isHistory(format)) {
-				mvm.putSingle("startTs", Long.toString(getStartTime(format, mvm)));
-				mvm.putSingle("endTs", Long.toString(getEndTime(mvm)));
-			}
-			Formatter formatter = ff.get(format, mvm);
+            final Map<String, List<String>> propertiesMap = processor.getPropertiesMap();
+            String result = "";
+            if (propertiesMap != null && !propertiesMap.isEmpty()) {
+                result = formatter.output(vertices, propertiesMap).toString();
+            } else {
+                result = formatter.output(vertices).toString();
+            }
 
-			final Map<String, List<String>> propertiesMap = processor.getPropertiesMap();
-			String result = "";
-			if (propertiesMap != null && !propertiesMap.isEmpty()){
-				result = formatter.output(vertices, propertiesMap).toString();
-			}
-			else {
-				result = formatter.output(vertices).toString();
-			}
+            String acceptType = headers.getHeaderString("Accept");
 
-			String acceptType = headers.getHeaderString("Accept");
+            if (acceptType == null) {
+                acceptType = MediaType.APPLICATION_JSON;
+            }
 
-			if(acceptType == null){
-				acceptType = MediaType.APPLICATION_JSON;
-			}
+            if (MediaType.APPLICATION_XML_TYPE.isCompatible(MediaType.valueOf(acceptType))) {
+                result = xmlFormatTransformer.transform(result);
+            }
 
-			if(MediaType.APPLICATION_XML_TYPE.isCompatible(MediaType.valueOf(acceptType))){
-				result = xmlFormatTransformer.transform(result);
-			}
+            if (traversalUriHttpEntry.isPaginated()) {
+                response = Response.status(Status.OK).type(acceptType)
+                    .header("total-results", traversalUriHttpEntry.getTotalVertices())
+                    .header("total-pages", traversalUriHttpEntry.getTotalPaginationBuckets())
+                    .entity(result).build();
+            } else {
+                response = Response.status(Status.OK).type(acceptType).entity(result).build();
+            }
 
-			if(traversalUriHttpEntry.isPaginated()){
-				response = Response.status(Status.OK)
-						.type(acceptType)
-						.header("total-results", traversalUriHttpEntry.getTotalVertices())
-						.header("total-pages", traversalUriHttpEntry.getTotalPaginationBuckets())
-						.entity(result)
-						.build();
-			}else {
-				response = Response.status(Status.OK)
-						.type(acceptType)
-						.entity(result).build();
-			}
-			
-		} catch (AAIException e) {
-			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, e);
-		} catch (SchemaViolationException sve) {
-			AAIException ex = new AAIException("AAI_4020", sve);
-			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, ex);
-		} catch (Exception e) {
-			AAIException ex = new AAIException("AAI_4000", e);
-			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, ex);
-		} finally {
-			if (dbEngine != null) {
-				dbEngine.rollback();
-			}
+        } catch (AAIException e) {
+            response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, e);
+        } catch (SchemaViolationException sve) {
+            AAIException ex = new AAIException("AAI_4020", sve);
+            response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, ex);
+        } catch (Exception e) {
+            AAIException ex = new AAIException("AAI_4000", e);
+            response = consumerExceptionResponseGenerator(headers, info, HttpMethod.PUT, ex);
+        } finally {
+            if (dbEngine != null) {
+                dbEngine.rollback();
+            }
 
-		}
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	private List<Object> dedupObjectInAggregateFormatResult(List<Object> vertTemp) {
-		List<Object> vertTempDedupedObjectList = new ArrayList<Object>();
-		Iterator<Object> itr = vertTemp.listIterator();
-		while (itr.hasNext()){
-			Object o = itr.next();
-			if (o instanceof ArrayList) {
-				vertTempDedupedObjectList.add(((ArrayList) o).stream().distinct().collect(Collectors.toList()));
-			}
-		}
-		return vertTempDedupedObjectList;
-	}
+    private List<Object> dedupObjectInAggregateFormatResult(List<Object> vertTemp) {
+        List<Object> vertTempDedupedObjectList = new ArrayList<Object>();
+        Iterator<Object> itr = vertTemp.listIterator();
+        while (itr.hasNext()) {
+            Object o = itr.next();
+            if (o instanceof ArrayList) {
+                vertTempDedupedObjectList
+                    .add(((ArrayList) o).stream().distinct().collect(Collectors.toList()));
+            }
+        }
+        return vertTempDedupedObjectList;
+    }
 }

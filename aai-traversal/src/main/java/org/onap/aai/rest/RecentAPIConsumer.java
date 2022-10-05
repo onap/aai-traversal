@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,11 +20,19 @@
 package org.onap.aai.rest;
 
 import io.micrometer.core.annotation.Timed;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+
 import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
-
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
@@ -47,209 +55,205 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 @Path("/recents/{version: v[1-9][0-9]*|latest}")
 @Timed
 public class RecentAPIConsumer extends RESTAPI {
 
     private static final String AAI_3021 = "AAI_3021";
-    
-	/** The introspector factory type. */
-	private ModelType introspectorFactoryType = ModelType.MOXY;
 
-	private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
-	/** The query style. */
+    /** The introspector factory type. */
+    private ModelType introspectorFactoryType = ModelType.MOXY;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RecentAPIConsumer.class);
+    private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
+    /** The query style. */
 
-	private HttpEntry traversalUriHttpEntry;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecentAPIConsumer.class);
 
-	private SchemaVersions schemaVersions;
+    private HttpEntry traversalUriHttpEntry;
 
-	private String basePath;
+    private SchemaVersions schemaVersions;
 
-	private GremlinServerSingleton gremlinServerSingleton;
+    private String basePath;
 
-	private XmlFormatTransformer xmlFormatTransformer;
+    private GremlinServerSingleton gremlinServerSingleton;
 
+    private XmlFormatTransformer xmlFormatTransformer;
 
-	@Autowired
-	public RecentAPIConsumer(
-		HttpEntry traversalUriHttpEntry,
-		SchemaVersions schemaVersions,
-		GremlinServerSingleton gremlinServerSingleton,
-		XmlFormatTransformer xmlFormatTransformer,
-		@Value("${schema.uri.base.path}") String basePath
-	){
-		this.traversalUriHttpEntry  = traversalUriHttpEntry;
-		this.schemaVersions         = schemaVersions;
-		this.gremlinServerSingleton = gremlinServerSingleton;
-		this.xmlFormatTransformer   = xmlFormatTransformer;
-		this.basePath               = basePath;
-	}
+    @Autowired
+    public RecentAPIConsumer(HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
+        GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
+        @Value("${schema.uri.base.path}") String basePath) {
+        this.traversalUriHttpEntry = traversalUriHttpEntry;
+        this.schemaVersions = schemaVersions;
+        this.gremlinServerSingleton = gremlinServerSingleton;
+        this.xmlFormatTransformer = xmlFormatTransformer;
+        this.basePath = basePath;
+    }
 
-	@GET
-	@Path("/{nodeType: .+}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getRecentData(String content,
-								  @PathParam("version") String versionParam,
-								  @PathParam("nodeType") String nodeType,
-								  @Context HttpHeaders headers,
-								  @Context HttpServletRequest req,
-								  @Context UriInfo info) {
+    @GET
+    @Path("/{nodeType: .+}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getRecentData(String content, @PathParam("version") String versionParam,
+        @PathParam("nodeType") String nodeType, @Context HttpHeaders headers,
+        @Context HttpServletRequest req, @Context UriInfo info) {
 
-		return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED, TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-				TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET, new AaiCallable<Response>() {
-					@Override
-					public Response process() {
-						return processRecentData(content, req, versionParam, nodeType, info, headers);
-					}
-				});
+        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
+            new AaiCallable<Response>() {
+                @Override
+                public Response process() {
+                    return processRecentData(content, req, versionParam, nodeType, info, headers);
+                }
+            });
 
-	}
+    }
 
-	public Response processRecentData(String content, HttpServletRequest req, @PathParam("version") String versionParam,
-			@PathParam("nodeType") String nodeType, @Context UriInfo info, @Context HttpHeaders headers) {
+    public Response processRecentData(String content, HttpServletRequest req,
+        @PathParam("version") String versionParam, @PathParam("nodeType") String nodeType,
+        @Context UriInfo info, @Context HttpHeaders headers) {
 
-		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-		String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
-		QueryProcessorType processorType = this.processorType;
-		Response response;
-		TransactionalGraphEngine dbEngine = null;
-		try {
-			
-			if (queryProcessor != null) {
-				processorType = QueryProcessorType.valueOf(queryProcessor);
-			}
+        String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
+        String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
+        QueryProcessorType processorType = this.processorType;
+        Response response;
+        TransactionalGraphEngine dbEngine = null;
+        try {
 
-			SchemaVersion version = new SchemaVersion(versionParam);
-			this.checkVersion(version);
+            if (queryProcessor != null) {
+                processorType = QueryProcessorType.valueOf(queryProcessor);
+            }
 
-			String serverBase = req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
-			traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
-			dbEngine = traversalUriHttpEntry.getDbEngine();
+            SchemaVersion version = new SchemaVersion(versionParam);
+            this.checkVersion(version);
 
-			/*
-			 * Check for mandatory parameters here
-			 */
-			
-			this.checkNodeType(nodeType);
-			this.checkQueryParams(info.getQueryParameters());
-			
-			GenericQueryProcessor processor = null;
+            String serverBase =
+                req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
+            traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
+            dbEngine = traversalUriHttpEntry.getDbEngine();
 
+            /*
+             * Check for mandatory parameters here
+             */
 
+            this.checkNodeType(nodeType);
+            this.checkQueryParams(info.getQueryParameters());
 
-			processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton).queryFrom(nodeType, "nodeQuery")
-					.uriParams(info.getQueryParameters())
-					.processWith(processorType).create();
+            GenericQueryProcessor processor = null;
 
-			
-			
-			String result = "";
-			SubGraphStyle subGraphStyle = null;
-			List<Object> vertices = processor.execute(subGraphStyle);
+            processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
+                .queryFrom(nodeType, "nodeQuery").uriParams(info.getQueryParameters())
+                .processWith(processorType).create();
 
-			DBSerializer serializer = new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
-            FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer, schemaVersions, this.basePath, serverBase);
+            String result = "";
+            SubGraphStyle subGraphStyle = null;
+            List<Object> vertices = processor.execute(subGraphStyle);
+
+            DBSerializer serializer =
+                new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
+            FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer,
+                schemaVersions, this.basePath, serverBase);
             Format format = Format.pathed_resourceversion;
-			
-			Formatter formater = ff.get(format, info.getQueryParameters());
 
-			result = formater.output(vertices).toString();
+            Formatter formater = ff.get(format, info.getQueryParameters());
 
-			//LOGGER.info("Completed");
+            result = formater.output(vertices).toString();
 
-			String acceptType = headers.getHeaderString("Accept");
+            // LOGGER.info("Completed");
 
-			if(acceptType == null){
-				acceptType = MediaType.APPLICATION_JSON;
-			}
+            String acceptType = headers.getHeaderString("Accept");
 
-			if(MediaType.APPLICATION_XML_TYPE.isCompatible(MediaType.valueOf(acceptType))){
-				result = xmlFormatTransformer.transform(result);
-			}
+            if (acceptType == null) {
+                acceptType = MediaType.APPLICATION_JSON;
+            }
 
-			response = Response.status(Status.OK).type(acceptType).entity(result).build();
+            if (MediaType.APPLICATION_XML_TYPE.isCompatible(MediaType.valueOf(acceptType))) {
+                result = xmlFormatTransformer.transform(result);
+            }
 
-		} catch (AAIException e) {
-			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, e);
-		} catch (Exception e) {
-			AAIException ex = new AAIException("AAI_4000", e);
-			response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, ex);
-		} finally {
-			
-			if (dbEngine != null) {
-				dbEngine.rollback();
-			}
+            response = Response.status(Status.OK).type(acceptType).entity(result).build();
 
-		}
+        } catch (AAIException e) {
+            response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, e);
+        } catch (Exception e) {
+            AAIException ex = new AAIException("AAI_4000", e);
+            response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, ex);
+        } finally {
 
-		return response;
-	}
+            if (dbEngine != null) {
+                dbEngine.rollback();
+            }
 
-	private void checkVersion(SchemaVersion version) throws AAIException {
-		if(!schemaVersions.getVersions().contains(version)){
-			throw new AAIException(AAI_3021, "Schema Version is not valid");
-		}
-	}
+        }
 
-	public void checkNodeType(String nodeType) throws AAIException {
-		try {
-			traversalUriHttpEntry.getLoader().introspectorFromName(nodeType);
-		} catch (AAIUnknownObjectException e) {
-			throw new AAIException("AAI_6115", "Unrecognized nodeType [" + nodeType + "] passed to recents query."); 
-		}
-	}
-	public void checkQueryParams(MultivaluedMap<String, String> params) throws AAIException {
+        return response;
+    }
 
-		boolean isHoursParameter = false;
-		boolean isDateTimeParameter = false;
-		
-		if (params != null && params.containsKey("hours") && params.getFirst("hours").matches("-?\\d+")) {
-			isHoursParameter = true;
-			long hours;
-			try{
-				hours = Long.parseLong(params.getFirst("hours"));
-			}
-			catch(NumberFormatException ex){
-				throw new AAIException(AAI_3021, " Invalid Hours. Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
-			}
-			if (hours < 1 || hours > AAIConstants.HISTORY_MAX_HOURS) {
-				throw new AAIException(AAI_3021, " Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
-			}
-		}
-		if (params != null && params.containsKey("date-time") && params.getFirst("date-time").matches("-?\\d+")) {
-			isDateTimeParameter = true;
-			Long minStartTime = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(AAIConstants.HISTORY_MAX_HOURS);
-			Long startTime;
-			try{
-				startTime = Long.parseLong(params.getFirst("date-time"));
-			}
-			catch(NumberFormatException ex){
-				throw new AAIException(AAI_3021, " Invalid Data-time. Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
-			}
-			if (startTime < minStartTime) {
-				throw new AAIException(AAI_3021, " Valid values for date-time are "+minStartTime+" to " +  System.currentTimeMillis() );
-			}
-		}
-		
-		if(!isHoursParameter && !isDateTimeParameter){
-			throw new AAIException(AAI_3021, "Send valid hours or date-time to specify the timebounds");
-		}
-		
-        if(isHoursParameter && isDateTimeParameter){
-        	throw new AAIException(AAI_3021, "Send either hours or date-time and not both to specify the timebounds");
-		}
+    private void checkVersion(SchemaVersion version) throws AAIException {
+        if (!schemaVersions.getVersions().contains(version)) {
+            throw new AAIException(AAI_3021, "Schema Version is not valid");
+        }
+    }
 
-        
-	}
+    public void checkNodeType(String nodeType) throws AAIException {
+        try {
+            traversalUriHttpEntry.getLoader().introspectorFromName(nodeType);
+        } catch (AAIUnknownObjectException e) {
+            throw new AAIException("AAI_6115",
+                "Unrecognized nodeType [" + nodeType + "] passed to recents query.");
+        }
+    }
+
+    public void checkQueryParams(MultivaluedMap<String, String> params) throws AAIException {
+
+        boolean isHoursParameter = false;
+        boolean isDateTimeParameter = false;
+
+        if (params != null && params.containsKey("hours")
+            && params.getFirst("hours").matches("-?\\d+")) {
+            isHoursParameter = true;
+            long hours;
+            try {
+                hours = Long.parseLong(params.getFirst("hours"));
+            } catch (NumberFormatException ex) {
+                throw new AAIException(AAI_3021, " Invalid Hours. Valid values for hours are 1 to "
+                    + AAIConstants.HISTORY_MAX_HOURS);
+            }
+            if (hours < 1 || hours > AAIConstants.HISTORY_MAX_HOURS) {
+                throw new AAIException(AAI_3021,
+                    " Valid values for hours are 1 to " + AAIConstants.HISTORY_MAX_HOURS);
+            }
+        }
+        if (params != null && params.containsKey("date-time")
+            && params.getFirst("date-time").matches("-?\\d+")) {
+            isDateTimeParameter = true;
+            Long minStartTime = System.currentTimeMillis()
+                - TimeUnit.HOURS.toMillis(AAIConstants.HISTORY_MAX_HOURS);
+            Long startTime;
+            try {
+                startTime = Long.parseLong(params.getFirst("date-time"));
+            } catch (NumberFormatException ex) {
+                throw new AAIException(AAI_3021,
+                    " Invalid Data-time. Valid values for date-time are " + minStartTime + " to "
+                        + System.currentTimeMillis());
+            }
+            if (startTime < minStartTime) {
+                throw new AAIException(AAI_3021, " Valid values for date-time are " + minStartTime
+                    + " to " + System.currentTimeMillis());
+            }
+        }
+
+        if (!isHoursParameter && !isDateTimeParameter) {
+            throw new AAIException(AAI_3021,
+                "Send valid hours or date-time to specify the timebounds");
+        }
+
+        if (isHoursParameter && isDateTimeParameter) {
+            throw new AAIException(AAI_3021,
+                "Send either hours or date-time and not both to specify the timebounds");
+        }
+
+    }
 
 }

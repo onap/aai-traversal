@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@
 package org.onap.aai.config;
 
 import org.onap.aai.dbgraphmap.SearchGraph;
-
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.rest.search.CQConfig;
@@ -39,30 +38,28 @@ import org.springframework.context.annotation.PropertySource;
 
 public class SearchConfiguration {
 
-	private static final String SCHEMA_SERVICE_TRANSLATOR = "schema-service";
+    private static final String SCHEMA_SERVICE_TRANSLATOR = "schema-service";
 
-	@Value("${schema.translator.list}")
-	private String translator;
+    @Value("${schema.translator.list}")
+    private String translator;
 
-	@Bean
-	public SearchGraph searchGraph(LoaderFactory loaderFactory, EdgeIngestor edgeIngestor, SchemaVersions schemaVersions) {
-		return new SearchGraph(loaderFactory, edgeIngestor, schemaVersions);
-	}
+    @Bean
+    public SearchGraph searchGraph(LoaderFactory loaderFactory, EdgeIngestor edgeIngestor,
+        SchemaVersions schemaVersions) {
+        return new SearchGraph(loaderFactory, edgeIngestor, schemaVersions);
+    }
 
-	@Bean
-	public GremlinServerSingleton gremlinServerSingleton(){
-		return new GremlinServerSingleton(getCustomQueryConfig());
-	}
+    @Bean
+    public GremlinServerSingleton gremlinServerSingleton() {
+        return new GremlinServerSingleton(getCustomQueryConfig());
+    }
 
-
-	@Bean
-	public CQConfig getCustomQueryConfig(){
-		if(translator.equals(SCHEMA_SERVICE_TRANSLATOR)) {
-			return new SchemaServiceCQConfig();
-		}
-		return new LocalCQConfig();
-	}
-
-
+    @Bean
+    public CQConfig getCustomQueryConfig() {
+        if (translator.equals(SCHEMA_SERVICE_TRANSLATOR)) {
+            return new SchemaServiceCQConfig();
+        }
+        return new LocalCQConfig();
+    }
 
 }

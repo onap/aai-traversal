@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,19 @@
  */
 package org.onap.aai.rest;
 
-
 import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Maps;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.*;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -49,171 +59,156 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-
 @Path("/cq2gremlintest")
 public class CQ2GremlinTest extends RESTAPI {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CQ2GremlinTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CQ2GremlinTest.class);
 
-	private HttpEntry traversalUriHttpEntry;
+    private HttpEntry traversalUriHttpEntry;
 
+    @Autowired
+    protected LoaderFactory loaderFactory;
 
-	@Autowired
-	protected LoaderFactory loaderFactory;
+    @Autowired
+    protected EdgeSerializer rules;
 
-	@Autowired
-	protected EdgeSerializer rules;
+    protected Loader loader;
+    protected GraphTraversalSource gts;
 
-	protected Loader loader;
-	protected GraphTraversalSource gts;
+    @Autowired
+    public CQ2GremlinTest(HttpEntry traversalUriHttpEntry,
+        @Value("${schema.uri.base.path}") String basePath) {
+        this.traversalUriHttpEntry = traversalUriHttpEntry;
 
+    }
 
-	@Autowired
-	public CQ2GremlinTest(
-			HttpEntry traversalUriHttpEntry,
-			@Value("${schema.uri.base.path}") String basePath
-			){
-		this.traversalUriHttpEntry  = traversalUriHttpEntry;
+    @PUT
+    @Path("")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getC2Qgremlin(@RequestBody CustomQueryTestDTO content,
+        @Context HttpHeaders headers, @Context UriInfo info) throws AAIException {
+        if (content == null) {
+            return Response.status(HttpStatus.BAD_REQUEST.value())
+                .entity("At least one Json payload should be passed").build();
+        }
+        String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
+        String realTime = headers.getRequestHeaders().getFirst("Real-Time");
+        SchemaVersions schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
+        traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion());
+        traversalUriHttpEntry.setPaginationParameters("-1", "-1");
+        return processC2UnitTest(content);
+    }
 
-	}
+    private Response processC2UnitTest(CustomQueryTestDTO content) {
 
-	@PUT
-	@Path("")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getC2Qgremlin(@RequestBody CustomQueryTestDTO content,@Context HttpHeaders headers, @Context UriInfo info) throws AAIException {
-		if(content == null){
-			return Response.status(HttpStatus.BAD_REQUEST.value()).entity("At least one Json payload should be passed").build();
-		}
-		String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-		String realTime = headers.getRequestHeaders().getFirst("Real-Time");
-		SchemaVersions schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
-		traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion());
-		traversalUriHttpEntry.setPaginationParameters("-1", "-1");
-		return processC2UnitTest(content);
-	}
+        TransactionalGraphEngine dbEngine = traversalUriHttpEntry.getDbEngine();
+        Graph graph = TinkerGraph.open();
+        gts = graph.traversal();
+        List<Vertex> expectedVertices = createGraph(content, graph);
+        GremlinGroovyShell shell = new GremlinGroovyShell();
+        loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, new SchemaVersion("v19"));
+        LinkedHashMap<String, Object> params = new LinkedHashMap<>();
 
-	private Response processC2UnitTest(CustomQueryTestDTO content) {
+        // Adding parameters
+        content.getQueryRequiredProperties().forEach(params::put);
+        content.getQueryOptionalProperties().forEach(params::put);
 
-		TransactionalGraphEngine dbEngine = traversalUriHttpEntry.getDbEngine();
-		Graph graph = TinkerGraph.open();
-		gts = graph.traversal();
-		List<Vertex> expectedVertices = createGraph(content, graph);
-		GremlinGroovyShell shell = new GremlinGroovyShell();
-		loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, new SchemaVersion("v19"));
-		LinkedHashMap <String, Object> params = new LinkedHashMap<>();
+        String query =
+            new GroovyQueryBuilder().executeTraversal(dbEngine, content.getStoredQuery(), params);
+        query = "g" + query;
+        GraphTraversal<Vertex, Vertex> g = graph.traversal().V();
+        addStartNode(g, content);
+        params.put("g", g);
 
-		//Adding parameters
-		content.getQueryRequiredProperties().forEach(params::put);
-		content.getQueryOptionalProperties().forEach(params::put);
+        // Assertion
+        GraphTraversal<Vertex, Vertex> result =
+            (GraphTraversal<Vertex, Vertex>) shell.executeTraversal(query, params);
 
-		String query = new GroovyQueryBuilder().executeTraversal(dbEngine, content.getStoredQuery(), params);
-		query = "g" + query;
-		GraphTraversal<Vertex, Vertex> g = graph.traversal().V();
-		addStartNode(g, content);
-		params.put("g", g);
+        List<Vertex> vertices = result.toList();
 
-		//Assertion
-		GraphTraversal<Vertex, Vertex> result = (GraphTraversal<Vertex, Vertex>)shell.executeTraversal(query, params);
+        LOGGER.info("Expected result set of vertexes [{}]", convert(expectedVertices));
+        LOGGER.info("Actual Result set of vertexes [{}]", convert(vertices));
 
-		List<Vertex> vertices = result.toList();
+        List<Vertex> nonDuplicateExpectedResult = new ArrayList<>(new HashSet<>(expectedVertices));
+        vertices = new ArrayList<>(new HashSet<>(vertices));
 
-		LOGGER.info("Expected result set of vertexes [{}]", convert(expectedVertices));
-		LOGGER.info("Actual Result set of vertexes [{}]", convert(vertices));
+        nonDuplicateExpectedResult.sort(Comparator.comparing(vertex -> vertex.id().toString()));
+        vertices.sort(Comparator.comparing(vertex -> vertex.id().toString()));
 
-		List<Vertex> nonDuplicateExpectedResult = new ArrayList<>(new HashSet<>(expectedVertices));
-		vertices = new ArrayList<>(new HashSet<>(vertices));
+        // Use this instead of the assertTrue as this provides more useful
+        // debugging information such as this when expected and actual differ:
+        // java.lang.AssertionError: Expected all the vertices to be found
+        // Expected :[v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12]]
+        // Actual :[v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12]]
+        if (nonDuplicateExpectedResult.equals(vertices)) {
+            return Response.ok("Sucessfully executed Junit").build();
+        }
+        return Response.status(400).build();
 
-		nonDuplicateExpectedResult.sort(Comparator.comparing(vertex -> vertex.id().toString()));
-		vertices.sort(Comparator.comparing(vertex -> vertex.id().toString()));
+    }
 
+    private List<Vertex> createGraph(CustomQueryTestDTO content, Graph graph) {
+        Map<String, Vertex> verticesMap = Maps.newLinkedHashMap();
+        // Creating all the Vertices
+        content.getVerticesDtos().forEach(vertex -> {
+            StringBuilder vertexIdentifier = new StringBuilder();
+            List<String> keyValues = Lists.newArrayList();
+            keyValues.add(T.id.toString());
+            keyValues.add(String.format("%02d", verticesMap.size() * 10));
+            AtomicInteger index = new AtomicInteger(0);
+            vertex.forEach((k, v) -> {
+                if (index.get() == 1)
+                    vertexIdentifier.append(k);
+                keyValues.add(k);
+                keyValues.add(v);
+                index.incrementAndGet();
+            });
+            Vertex graphVertex = graph.addVertex(keyValues.toArray());
+            verticesMap.put(vertexIdentifier.toString(), graphVertex);
+        });
 
-		// Use this instead of the assertTrue as this provides more useful
-		// debugging information such as this when expected and actual differ:
-		// java.lang.AssertionError: Expected all the vertices to be found
-		// Expected :[v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12]]
-		// Actual   :[v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12]]
-		if(nonDuplicateExpectedResult.equals(vertices)){
-			return Response.ok("Sucessfully executed Junit").build();
-		}
-		return Response.status(400).build();
+        GraphTraversalSource g = graph.traversal();
 
-	}
+        // Creating all the Edges
+        content.getEdgesDtos().forEach(edge -> {
+            String fromId = edge.get("from-id");
+            String toId = edge.get("to-id");
+            boolean treeEdgeIdentifier = !"NONE".equalsIgnoreCase(edge.get("contains-other-v"));
+            Vertex fromVertex = verticesMap.get(fromId);
+            Vertex toVertex = verticesMap.get(toId);
+            try {
+                if (treeEdgeIdentifier) {
+                    rules.addTreeEdge(g, fromVertex, toVertex);
+                } else {
+                    rules.addEdge(g, fromVertex, toVertex);
+                }
+            } catch (AAIException ex) {
+                LOGGER.warn(ex.toString(), ex);
+            }
 
-	private List<Vertex> createGraph(CustomQueryTestDTO content, Graph graph) {
-		Map<String, Vertex> verticesMap = Maps.newLinkedHashMap();
-		//Creating all the Vertices
-		content.getVerticesDtos().forEach(vertex -> {
-			StringBuilder vertexIdentifier = new StringBuilder();
-			List<String> keyValues = Lists.newArrayList();
-			keyValues.add(T.id.toString());
-			keyValues.add(String.format("%02d", verticesMap.size() * 10));
-			AtomicInteger index = new AtomicInteger(0);
-			vertex.forEach((k, v) -> {
-				if(index.get() == 1)
-					vertexIdentifier.append(k);
-				keyValues.add(k);
-				keyValues.add(v);
-				index.incrementAndGet();
-			});
-			Vertex graphVertex = graph.addVertex(keyValues.toArray());
-			verticesMap.put(vertexIdentifier.toString(), graphVertex);
-		});
+        });
 
-		GraphTraversalSource g = graph.traversal();
+        List<Vertex> expectedVertices = Lists.newArrayList();
+        content.getExpectedResultsDtos().getIds()
+            .forEach(vertexId -> expectedVertices.add(verticesMap.get(vertexId)));
+        return expectedVertices;
+    }
 
-		//Creating all the Edges
-		content.getEdgesDtos().forEach(edge -> {
-			String fromId = edge.get("from-id");
-			String toId = edge.get("to-id");
-			boolean treeEdgeIdentifier = !"NONE".equalsIgnoreCase(edge.get("contains-other-v"));
-			Vertex fromVertex = verticesMap.get(fromId);
-			Vertex toVertex = verticesMap.get(toId);
-			try{
-				if(treeEdgeIdentifier){
-					rules.addTreeEdge(g, fromVertex, toVertex);
-				}
-				else{
-					rules.addEdge(g, fromVertex, toVertex);
-				}
-			} catch(AAIException ex){
-				LOGGER.warn(ex.toString(), ex);
-			}
+    protected void addStartNode(GraphTraversal<Vertex, Vertex> g, CustomQueryTestDTO content) {
+        Optional<LinkedHashMap<String, String>> startNodeVertex = content.getVerticesDtos().stream()
+            .filter(map -> map.containsKey("start-node")).findFirst();
+        if (!startNodeVertex.isPresent()) {
+            throw new IllegalArgumentException("start-node was not specified");
+        }
+        startNodeVertex.get().forEach((k, v) -> {
+            g.has(k, v);
+        });
+    }
 
-		});
-
-
-		List<Vertex> expectedVertices = Lists.newArrayList();
-		content.getExpectedResultsDtos().getIds().forEach(vertexId -> expectedVertices.add(verticesMap.get(vertexId)));
-		return expectedVertices;
-	}
-
-	protected void addStartNode(GraphTraversal<Vertex, Vertex> g, CustomQueryTestDTO content) {
-		Optional<LinkedHashMap<String, String>> startNodeVertex = content.getVerticesDtos().stream().filter(map -> map.containsKey("start-node")).findFirst();
-		if(!startNodeVertex.isPresent()){
-			throw new IllegalArgumentException("start-node was not specified");
-		}
-		startNodeVertex.get().forEach((k, v) -> {
-			g.has(k, v);
-		});
-	}
-
-	protected String convert(List<Vertex> vertices){
-		return vertices
-				.stream()
-				.map(vertex -> vertex.property("aai-node-type").value().toString())
-				.collect(Collectors.joining(","));
-	}
-
-
+    protected String convert(List<Vertex> vertices) {
+        return vertices.stream().map(vertex -> vertex.property("aai-node-type").value().toString())
+            .collect(Collectors.joining(","));
+    }
 
 }

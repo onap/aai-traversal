@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,23 +27,27 @@ import org.junit.Test;
 
 public class ConvertQueryPropertiesToJsonTest {
     @Test
-    public void testRqdProperty(){
+    public void testRqdProperty() {
 
         ConvertQueryPropertiesToJson convert = new ConvertQueryPropertiesToJson();
         Properties props = new Properties();
-        props.setProperty("queryName1", "builder.getVerticesByProperty('rqdProp', rqdPropId).getVerticesByProperty('rqdProp2', rqdPropId2).createEdgeTraversal(EdgeType.TREE, 'node1', 'child-node1')");
-        props.setProperty("lastQueryName", "builder.getVerticesByProperty('notRqdProp', \"OUT\").createEdgeTraversal(EdgeType.TREE, 'node2', 'child-node2')");
+        props.setProperty("queryName1",
+            "builder.getVerticesByProperty('rqdProp', rqdPropId).getVerticesByProperty('rqdProp2', rqdPropId2).createEdgeTraversal(EdgeType.TREE, 'node1', 'child-node1')");
+        props.setProperty("lastQueryName",
+            "builder.getVerticesByProperty('notRqdProp', \"OUT\").createEdgeTraversal(EdgeType.TREE, 'node2', 'child-node2')");
         String json = convert.convertProperties(props);
         assertNotNull(json);
     }
- 
+
     @Test
-    public void testLastQueryRqdProperty(){
+    public void testLastQueryRqdProperty() {
 
         ConvertQueryPropertiesToJson convert = new ConvertQueryPropertiesToJson();
         Properties props = new Properties();
-        props.setProperty("queryName1", "builder.createEdgeTraversal(EdgeType.TREE, 'node1', 'child-node1')");
-        props.setProperty("lastQueryName", "builder.getVerticesByProperty('rqdProp', rqdPropId).createEdgeTraversal(EdgeType.TREE, 'node2', 'child-node2')");
+        props.setProperty("queryName1",
+            "builder.createEdgeTraversal(EdgeType.TREE, 'node1', 'child-node1')");
+        props.setProperty("lastQueryName",
+            "builder.getVerticesByProperty('rqdProp', rqdPropId).createEdgeTraversal(EdgeType.TREE, 'node2', 'child-node2')");
         String json = convert.convertProperties(props);
         assertNotNull(json);
     }

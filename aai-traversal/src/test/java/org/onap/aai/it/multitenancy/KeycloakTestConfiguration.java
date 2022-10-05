@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,9 @@ import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
+
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -42,23 +44,19 @@ class KeycloakTestConfiguration {
     @Bean
     KeycloakContainer keycloakContainer(KeycloakTestProperties properties) {
         KeycloakContainer keycloak = new KeycloakContainer("jboss/keycloak:12.0.4")
-                .withRealmImportFile(properties.realmJson)
-                .withCreateContainerCmdModifier(cmd -> cmd.withHostConfig(
-                    new HostConfig().withPortBindings(new PortBinding(Ports.Binding.bindPort(Integer.parseInt(properties.port)), new ExposedPort(8080)))
-                ));
+            .withRealmImportFile(properties.realmJson).withCreateContainerCmdModifier(
+                cmd -> cmd.withHostConfig(new HostConfig().withPortBindings(
+                    new PortBinding(Ports.Binding.bindPort(Integer.parseInt(properties.port)),
+                        new ExposedPort(8080)))));
         keycloak.start();
         return keycloak;
     }
 
     @Bean
     Keycloak keycloakAdminClient(KeycloakContainer keycloak, KeycloakTestProperties properties) {
-        return KeycloakBuilder.builder()
-                .serverUrl(keycloak.getAuthServerUrl())
-                .realm(properties.realm)
-                .clientId(properties.adminCli)
-                .username(keycloak.getAdminUsername())
-                .password(keycloak.getAdminPassword())
-                .build();
+        return KeycloakBuilder.builder().serverUrl(keycloak.getAuthServerUrl())
+            .realm(properties.realm).clientId(properties.adminCli)
+            .username(keycloak.getAdminUsername()).password(keycloak.getAdminPassword()).build();
     }
 
     @Bean

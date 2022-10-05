@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,17 @@
  */
 package org.onap.aai.it.multitenancy;
 
+import static org.junit.Assert.*;
+
 import com.jayway.jsonpath.JsonPath;
+
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.janusgraph.core.JanusGraphTransaction;
 import org.junit.Test;
@@ -34,13 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 @Import(KeycloakTestConfiguration.class)
 @TestPropertySource(locations = "classpath:it/application-keycloak-test.properties")
@@ -61,44 +63,30 @@ public class MultiTenancyIT extends AbstractSpringRestTest {
         try {
             GraphTraversalSource g = transaction.traversal();
 
-            g.addV().property("aai-node-type", "pnf")
-                    .property("pnf-name", "test-pnf-name-01")
-                    .property("prov-status", "in_service")
-                    .property("data-owner", "operator")
-                    .property("in-maint", false)
-                    .property("source-of-truth", "JUNIT")
-                    .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-01").next();
+            g.addV().property("aai-node-type", "pnf").property("pnf-name", "test-pnf-name-01")
+                .property("prov-status", "in_service").property("data-owner", "operator")
+                .property("in-maint", false).property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-01").next();
 
-            g.addV().property("aai-node-type", "pnf")
-                    .property("pnf-name", "test-pnf-name-02")
-                    .property("prov-status", "in_service")
-                    .property("in-maint", false)
-                    .property("source-of-truth", "JUNIT")
-                    .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-02").next();
+            g.addV().property("aai-node-type", "pnf").property("pnf-name", "test-pnf-name-02")
+                .property("prov-status", "in_service").property("in-maint", false)
+                .property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-02").next();
 
-            g.addV().property("aai-node-type", "pnf")
-                    .property("pnf-name", "test-pnf-name-03")
-                    .property("prov-status", "in_service")
-                    .property("data-owner", "selector")
-                    .property("in-maint", false)
-                    .property("source-of-truth", "JUNIT")
-                    .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-03").next();
+            g.addV().property("aai-node-type", "pnf").property("pnf-name", "test-pnf-name-03")
+                .property("prov-status", "in_service").property("data-owner", "selector")
+                .property("in-maint", false).property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-03").next();
 
-            g.addV().property("aai-node-type", "pnf")
-                    .property("pnf-name", "test-pnf-name-04")
-                    .property("prov-status", "in_service")
-                    .property("data-owner", "selector")
-                    .property("in-maint", false)
-                    .property("source-of-truth", "JUNIT")
-                    .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-04").next();
+            g.addV().property("aai-node-type", "pnf").property("pnf-name", "test-pnf-name-04")
+                .property("prov-status", "in_service").property("data-owner", "selector")
+                .property("in-maint", false).property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-04").next();
 
-            g.addV().property("aai-node-type", "pnf")
-                    .property("pnf-name", "test-pnf-name-05")
-                    .property("prov-status", "in_service")
-                    .property("data-owner", "selector")
-                    .property("in-maint", false)
-                    .property("source-of-truth", "JUNIT")
-                    .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-05").next();
+            g.addV().property("aai-node-type", "pnf").property("pnf-name", "test-pnf-name-05")
+                .property("prov-status", "in_service").property("data-owner", "selector")
+                .property("in-maint", false).property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/network/pnfs/pnf/test-pnf-name-05").next();
         } catch (Exception ex) {
             success = false;
         } finally {
@@ -132,7 +120,8 @@ public class MultiTenancyIT extends AbstractSpringRestTest {
         assertEquals(queryResults.size(), 2);
 
         // get pnf with bob (operator_readOnly)
-        username = "bob"; password = "bob";
+        username = "bob";
+        password = "bob";
         headers = this.getHeaders(username, password);
         httpEntity = new HttpEntity(payload, headers);
         responseEntity = restTemplate.exchange(endpoint, HttpMethod.PUT, httpEntity, String.class);
@@ -141,7 +130,8 @@ public class MultiTenancyIT extends AbstractSpringRestTest {
         assertEquals(queryResults.size(), 2);
 
         // get pnf with ted (selector)
-        username = "ted"; password = "ted";
+        username = "ted";
+        password = "ted";
         headers = this.getHeaders(username, password);
         httpEntity = new HttpEntity(payload, headers);
         responseEntity = restTemplate.exchange(endpoint, HttpMethod.PUT, httpEntity, String.class);
@@ -174,13 +164,9 @@ public class MultiTenancyIT extends AbstractSpringRestTest {
 
     private String getStringToken(String username, String password) {
         Keycloak keycloakClient = KeycloakBuilder.builder()
-                .serverUrl(keycloakContainer.getAuthServerUrl())
-                .realm(properties.realm)
-                .clientId(properties.clientId)
-                .clientSecret(properties.clientSecret)
-                .username(username)
-                .password(password)
-                .build();
+            .serverUrl(keycloakContainer.getAuthServerUrl()).realm(properties.realm)
+            .clientId(properties.clientId).clientSecret(properties.clientSecret).username(username)
+            .password(password).build();
 
         AccessTokenResponse tokenResponse = keycloakClient.tokenManager().getAccessToken();
         assertNotNull(tokenResponse);

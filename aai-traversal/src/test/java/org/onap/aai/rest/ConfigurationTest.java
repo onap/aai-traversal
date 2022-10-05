@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,14 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.rest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,21 +42,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-
 /**
  * Test REST requests against configuration resource
  */
 @TestPropertySource(locations = "classpath:application-test.properties")
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class, classes = {SpringContextAware.class})
+@ContextConfiguration(
+    initializers = PropertyPasswordConfiguration.class,
+    classes = {SpringContextAware.class})
 @Import(TraversalTestConfiguration.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringContextAware.class, TraversalApp.class})
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = {SpringContextAware.class, TraversalApp.class})
 public class ConfigurationTest extends AbstractSpringRestTest {
     @Autowired
     RestTemplate restTemplate;
@@ -59,6 +63,7 @@ public class ConfigurationTest extends AbstractSpringRestTest {
     private HttpEntity<String> httpEntity;
     private String actuatorurl;
     private HttpHeaders headers;
+
     @Before
     public void setup() throws UnsupportedEncodingException {
 
@@ -83,24 +88,27 @@ public class ConfigurationTest extends AbstractSpringRestTest {
         ResponseEntity responseEntity = null;
         String responseBody = null;
 
-        //set Accept as text/plain in order to get access of endpoint "/actuator/prometheus"
-        responseEntity = restTemplate.exchange(actuatorurl + "/actuator/prometheus", HttpMethod.GET, httpEntity, String.class);
+        // set Accept as text/plain in order to get access of endpoint "/actuator/prometheus"
+        responseEntity = restTemplate.exchange(actuatorurl + "/actuator/prometheus", HttpMethod.GET,
+            httpEntity, String.class);
         responseBody = (String) responseEntity.getBody();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         System.out.println("responseBody---------" + responseBody);
         assertFalse(responseBody.contains("aai_uri"));
         assertTrue(responseBody.contains("group_id"));
 
-
-        //Set Accept as MediaType.APPLICATION_JSON in order to get access of endpoint "/actuator/info" and "/actuator/health"
+        // Set Accept as MediaType.APPLICATION_JSON in order to get access of endpoint
+        // "/actuator/info" and "/actuator/health"
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpEntity = new HttpEntity<String>(headers);
-        responseEntity = restTemplate.exchange(actuatorurl + "/actuator/info", HttpMethod.GET, httpEntity, String.class);
+        responseEntity = restTemplate.exchange(actuatorurl + "/actuator/info", HttpMethod.GET,
+            httpEntity, String.class);
         responseBody = (String) responseEntity.getBody();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertTrue(responseBody.contains("aai-traversal"));
 
-        responseEntity = restTemplate.exchange(actuatorurl + "/actuator/health", HttpMethod.GET, httpEntity, String.class);
+        responseEntity = restTemplate.exchange(actuatorurl + "/actuator/health", HttpMethod.GET,
+            httpEntity, String.class);
         responseBody = (String) responseEntity.getBody();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertTrue(responseBody.contains("UP"));

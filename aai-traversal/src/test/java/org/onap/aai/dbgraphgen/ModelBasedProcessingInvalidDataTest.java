@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,16 @@
  */
 package org.onap.aai.dbgraphgen;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+
+import java.util.*;
+
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.graphdb.types.system.BaseVertexLabel;
 import org.janusgraph.graphdb.types.system.EmptyVertex;
@@ -40,13 +48,6 @@ import org.onap.aai.introspection.ModelType;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 
-import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Mockito.when;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
@@ -60,7 +61,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Mock
     private ModelBasedProcessing mockProcessor;
 
-
     @Mock
     private DbMethHelper dbMethHelper;
 
@@ -73,7 +73,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        loader = loaderFactory.createLoaderForVersion(ModelType.MOXY, schemaVersions.getDefaultVersion());
+        loader = loaderFactory.createLoaderForVersion(ModelType.MOXY,
+            schemaVersions.getDefaultVersion());
         processor = new ModelBasedProcessing(loader, dbEngine, serializer);
 
         dbMethHelper = new DbMethHelper(loader, dbEngine);
@@ -83,180 +84,160 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test
     public void getStartNodesAndModVersionIdsTest() throws AAIException {
 
-
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("test", new Object());
         startNodeFilterArrayOfHashes.add(map);
         Map<String, String> result = new HashMap<>();
 
         Map<String, String> result1 = mockProcessor.getStartNodesAndModVersionIds("test", "test",
-                "test", "test", "test",
-                "test", startNodeFilterArrayOfHashes,
-                "test");
+            "test", "test", "test", "test", startNodeFilterArrayOfHashes, "test");
         assertNotNull(result);
 
     }
-
 
     @Test(expected = NullPointerException.class)
     public void getStartNodesAndModVersionIdsTest2() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("test", new Object());
         startNodeFilterArrayOfHashes.add(map);
-        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test",
-                "", "test", "test",
-                "test", startNodeFilterArrayOfHashes,
-                "test");
+        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test", "",
+            "test", "test", "test", startNodeFilterArrayOfHashes, "test");
         assertNotNull(result1);
     }
-
 
     @Test(expected = NullPointerException.class)
     public void getStartNodesAndModVersionIdsTest3() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("test", new Object());
         startNodeFilterArrayOfHashes.add(map);
-        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test",
-                "", "", "test",
-                "test", startNodeFilterArrayOfHashes,
-                "test");
+        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test", "",
+            "", "test", "test", startNodeFilterArrayOfHashes, "test");
         assertNotNull(result1);
     }
-
 
     @Test(expected = AAIException.class)
     public void getStartNodesAndModVersionIdsTest4() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("test", new Object());
         startNodeFilterArrayOfHashes.add(map);
-        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test",
-                "", "", "",
-                "test", startNodeFilterArrayOfHashes,
-                "test");
+        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test", "",
+            "", "", "test", startNodeFilterArrayOfHashes, "test");
         assertNotNull(result1);
     }
-
 
     @Test(expected = AAIException.class)
     public void getStartNodesAndModVersionIdsTest5() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("test", new Object());
         startNodeFilterArrayOfHashes.add(map);
-        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test",
-                "", "", "",
-                "", startNodeFilterArrayOfHashes,
-                "test");
+        Map<String, String> result1 = processor.getStartNodesAndModVersionIds("test", "test", "",
+            "", "", "", startNodeFilterArrayOfHashes, "test");
         assertNotNull(result1);
     }
 
-
     @Test(expected = AAIException.class)
     public void getStartNodesAndModVersionIdsNullTest() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
 
         Map<String, String> result = null;
-        result = processor.getStartNodesAndModVersionIds("test", "test",
-                "", "", "",
-                "", startNodeFilterArrayOfHashes,
-                "test");
+        result = processor.getStartNodesAndModVersionIds("test", "test", "", "", "", "",
+            startNodeFilterArrayOfHashes, "test");
 
         assertNotNull(result);
     }
 
-
     @Test(expected = NullPointerException.class)
     public void getStartNodesAndModVersionIdsNullTest1() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
 
         Map<String, String> result = null;
-        result = processor.getStartNodesAndModVersionIds("test", "test",
-                "Test", "", "",
-                "", startNodeFilterArrayOfHashes,
-                "test");
+        result = processor.getStartNodesAndModVersionIds("test", "test", "Test", "", "", "",
+            startNodeFilterArrayOfHashes, "test");
 
         assertNotNull(result);
     }
 
     @Test(expected = NullPointerException.class)
     public void getStartNodesAndModVersionIdsNullTest2() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
 
         Map<String, String> result = null;
-        result = processor.getStartNodesAndModVersionIds("test", "test",
-                "", "test", "",
-                "", startNodeFilterArrayOfHashes,
-                "test");
+        result = processor.getStartNodesAndModVersionIds("test", "test", "", "test", "", "",
+            startNodeFilterArrayOfHashes, "test");
         assertNotNull(result);
     }
 
-
     @Test(expected = NullPointerException.class)
     public void getStartNodesAndModVersionIdsNullTest3() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
 
         Map<String, String> result = null;
-        result = processor.getStartNodesAndModVersionIds("test", "test",
-                "", "", "test",
-                "", startNodeFilterArrayOfHashes,
-                "test");
+        result = processor.getStartNodesAndModVersionIds("test", "test", "", "", "test", "",
+            startNodeFilterArrayOfHashes, "test");
         assertNotNull(result);
     }
 
     @Test(expected = NullPointerException.class)
     public void getModelVerTopWidgetTypeTest() throws AAIException {
         Vertex vertex = new EmptyVertex();
-        //Mockito.when(mockProcessor.getModelVerTopWidgetType(Mockito.any(Vertex.class), Mockito.any(String.class))).thenReturn("Sucess");
+        // Mockito.when(mockProcessor.getModelVerTopWidgetType(Mockito.any(Vertex.class),
+        // Mockito.any(String.class))).thenReturn("Sucess");
         String result = processor.getModelVerTopWidgetType(vertex, "test");
-        assertEquals("result has -local tacked on the end as it should", "Sucess", result
-        );
+        assertEquals("result has -local tacked on the end as it should", "Sucess", result);
 
     }
 
     @Test(expected = NullPointerException.class)
     public void getModelVerTopWidgetType() throws AAIException {
-			/*Mockito.when(mockProcessor.getModelVerTopWidgetType(Mockito.any(String.class),
-					Mockito.any(String.class), Mockito.any(String.class),
-					Mockito.any(String.class), Mockito.any(String.class))
-			).thenReturn("Sucess");*/
+        /*
+         * Mockito.when(mockProcessor.getModelVerTopWidgetType(Mockito.any(String.class),
+         * Mockito.any(String.class), Mockito.any(String.class),
+         * Mockito.any(String.class), Mockito.any(String.class))
+         * ).thenReturn("Sucess");
+         */
         String result = processor.getModelVerTopWidgetType("test", "test", "test", "Test", "test");
-        assertEquals("result has -local tacked on the end as it should", "Sucess", result
-        );
+        assertEquals("result has -local tacked on the end as it should", "Sucess", result);
 
     }
 
     @Test(expected = AAIException.class)
     public void queryByModel() throws AAIException {
-			/*Mockito.when(mockProcessor.getModelVerTopWidgetType(Mockito.any(String.class),
-					Mockito.any(String.class), Mockito.any(String.class),
-					Mockito.any(String.class), Mockito.any(String.class))
-			).thenReturn("Sucess");*/
-        List<ResultSet> result = processor.queryByModel("test", "test",
-                "test", "test", "test",
-                "generic-vnf", null,
-                "test");
+        /*
+         * Mockito.when(mockProcessor.getModelVerTopWidgetType(Mockito.any(String.class),
+         * Mockito.any(String.class), Mockito.any(String.class),
+         * Mockito.any(String.class), Mockito.any(String.class))
+         * ).thenReturn("Sucess");
+         */
+        List<ResultSet> result = processor.queryByModel("test", "test", "test", "test", "test",
+            "generic-vnf", null, "test");
         assertEquals("result has -local tacked on the end as it should", 0, result.size());
-
 
     }
 
-
     @Test(expected = NullPointerException.class)
     public void queryByModel_Timed() throws AAIException {
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("test", new Object());
         startNodeFilterArrayOfHashes.add(map);
-        List<ResultSet> result = processor.queryByModel_Timed("test", "test",
-                "test", "test", "test",
-                "test", startNodeFilterArrayOfHashes,
-                "test");
+        List<ResultSet> result = processor.queryByModel_Timed("test", "test", "test", "test",
+            "test", "test", startNodeFilterArrayOfHashes, "test");
         assertEquals("result has -local tacked on the end as it should", 0, result.size());
-
 
     }
 
@@ -267,17 +248,14 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     public void runDeleteByModel() throws AAIException {
         Map<String, String> resultMock = new HashMap<String, String>();
 
-        //	when(mockProcessor.getNodeUsingUniqueId(any(String.class),any(String.class),any(String.class),any(String.class),any(String.class))).thenReturn(vertex);
-        when(mockProcessor.runDeleteByModel(any(String.class),
-                any(String.class), any(String.class),
-                any(String.class), anyMapOf(String.class, Object.class), any(String.class), any(String.class))
-        ).thenReturn(resultMock);
-        Map<String, String> result = processor.runDeleteByModel("test", "test",
-                "test", "test", startNodeFilterHash,
-                "test",
-                "test");
-        assertEquals("result has -local tacked on the end as it should", result.size(), resultMock.size());
-
+        // when(mockProcessor.getNodeUsingUniqueId(any(String.class),any(String.class),any(String.class),any(String.class),any(String.class))).thenReturn(vertex);
+        when(mockProcessor.runDeleteByModel(any(String.class), any(String.class), any(String.class),
+            any(String.class), anyMapOf(String.class, Object.class), any(String.class),
+            any(String.class))).thenReturn(resultMock);
+        Map<String, String> result = processor.runDeleteByModel("test", "test", "test", "test",
+            startNodeFilterHash, "test", "test");
+        assertEquals("result has -local tacked on the end as it should", result.size(),
+            resultMock.size());
 
     }
 
@@ -287,11 +265,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     public void runDeleteByModelWithNullParams() throws AAIException {
         Map<String, String> resultMock = new HashMap<String, String>();
 
-
-        Map<String, String> result = processor.runDeleteByModel("test", "test",
-                null, null, null,
-                "test",
-                "test");
+        Map<String, String> result =
+            processor.runDeleteByModel("test", "test", null, null, null, "test", "test");
 
         assertNotNull(result);
 
@@ -300,22 +275,17 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test(expected = NullPointerException.class)
     public void runDeleteByModelWithNullParams1() throws AAIException {
 
-        Map<String, String> result1 = processor.runDeleteByModel("test", "test",
-                null, "unknown", null,
-                "test",
-                "test");
+        Map<String, String> result1 =
+            processor.runDeleteByModel("test", "test", null, "unknown", null, "test", "test");
         assertNotNull(result1);
 
     }
 
-
     @Test(expected = NullPointerException.class)
     public void runDeleteByModelWithNullParams2() throws AAIException {
 
-        Map<String, String> result1 = processor.runDeleteByModel("test", "test",
-                null, "unknown", null,
-                "test",
-                "test");
+        Map<String, String> result1 =
+            processor.runDeleteByModel("test", "test", null, "unknown", null, "test", "test");
         assertNotNull(result1);
 
     }
@@ -325,9 +295,11 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String transId = "test";
         String fromAppId = "test";
         String namedQueryUuid = "test";
-        ArrayList<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        ArrayList<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         String apiVer = "test";
-        List<ResultSet> result = processor.queryByNamedQuery(transId, fromAppId, namedQueryUuid, startNodeFilterArrayOfHashes, apiVer);
+        List<ResultSet> result = processor.queryByNamedQuery(transId, fromAppId, namedQueryUuid,
+            startNodeFilterArrayOfHashes, apiVer);
         assertNotNull(result);
     }
 
@@ -337,10 +309,12 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String fromAppId = "test";
         String namedQueryUuid = "test";
         String secondaryFilterCutPoint = "test";
-        List<Map<String, Object>> startNodeFilterArrayOfHashes = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> startNodeFilterArrayOfHashes =
+            new ArrayList<Map<String, Object>>();
         String apiVer = "test";
         Map<String, Object> secondaryFilterHash = new HashMap<String, Object>();
-        List<ResultSet> result = processor.queryByNamedQuery(transId, fromAppId, namedQueryUuid, startNodeFilterArrayOfHashes, apiVer, secondaryFilterCutPoint, secondaryFilterHash);
+        List<ResultSet> result = processor.queryByNamedQuery(transId, fromAppId, namedQueryUuid,
+            startNodeFilterArrayOfHashes, apiVer, secondaryFilterCutPoint, secondaryFilterHash);
         assertNotNull(result);
     }
 
@@ -352,21 +326,16 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         resultSet.setVert(null);
 
         Map<String, String> result = processor.deleteAsNeededFromResultSet("test", "test",
-                resultSet, "test", "test",
-                "test",
-                resultMock);
+            resultSet, "test", "test", "test", resultMock);
 
         assertEquals(result.size(), 0);
 
         resultSet.setVert(vert);
 
         Map<String, String> result1 = processor.deleteAsNeededFromResultSet("test", "test",
-                resultSet, "test", "test",
-                "test",
-                resultMock);
+            resultSet, "test", "test", "test", resultMock);
 
         assertEquals(result.size(), 0);
-
 
     }
 
@@ -414,7 +383,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         rsList.add(rs1);
         rs.setSubResultSet(rsList);
         Map<String, Object> map = new HashMap<String, Object>();
-        //map.put("test.filter",new Object());
+        // map.put("test.filter",new Object());
 
         boolean result = processor.satisfiesFilters(rs, map);
         assertEquals(result, false);
@@ -452,11 +421,10 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     public void collectInstanceDataTest() throws AAIException {
 
         BaseVertexLabel bs = new BaseVertexLabel("test");
-        //bs.setId(80);
+        // bs.setId(80);
         EmptyVertex ev = new EmptyVertex();
-        //ev.setId(50l);
+        // ev.setId(50l);
         Vertex thisLevelElemVtx = ev;
-
 
         Multimap<String, String> thisMap = ArrayListMultimap.create();
         List<String> vidsTraversed = new ArrayList<String>();
@@ -466,22 +434,23 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         namedQueryElementHash.put("test", "test");
         Map<String, String> delKeyHash = new HashMap<String, String>();
 
-        ResultSet rs = processor.collectInstanceData("test", "test", thisLevelElemVtx, "test", validNextStepMap, vidsTraversed, 1, delKeyHash, namedQueryElementHash, "test");
+        ResultSet rs = processor.collectInstanceData("test", "test", thisLevelElemVtx, "test",
+            validNextStepMap, vidsTraversed, 1, delKeyHash, namedQueryElementHash, "test");
     }
 
     @Test(expected = NullPointerException.class)
-    public void genTopoMap4ModelVerTest() throws
-            AAIException {
+    public void genTopoMap4ModelVerTest() throws AAIException {
         Vertex vertext = new EmptyVertex();
-        Multimap<String, String> map = processor.genTopoMap4ModelVer("test", "test", vertext, "test");
+        Multimap<String, String> map =
+            processor.genTopoMap4ModelVer("test", "test", vertext, "test");
         assertNotEquals(map, null);
     }
 
     @Test(expected = AAIException.class)
-    public void genTopoMap4ModelVerTestNull() throws
-            AAIException {
+    public void genTopoMap4ModelVerTestNull() throws AAIException {
         Vertex vertext = null;
-        Multimap<String, String> map = processor.genTopoMap4ModelVer("test", "test", vertext, "test");
+        Multimap<String, String> map =
+            processor.genTopoMap4ModelVer("test", "test", vertext, "test");
         assertNotEquals(map, null);
     }
 
@@ -495,7 +464,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test(expected = AAIException.class)
     public void getModConstraintHashTest() throws AAIException {
         Vertex modelElementVtx = new EmptyVertex();
-        //modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
+        // modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
         Vertex modelElementVtx1 = new EmptyVertex();
         Map<String, Vertex> currentHash = new HashMap<String, Vertex>();
         currentHash.put("constraint", modelElementVtx1);
@@ -506,7 +475,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test(expected = AAIException.class)
     public void getModConstraintHashTestNull() throws AAIException {
         Vertex modelElementVtx = null;
-        //modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
+        // modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
         Vertex modelElementVtx1 = null;
         Map<String, Vertex> currentHash = new HashMap<String, Vertex>();
         currentHash.put("constraint", modelElementVtx1);
@@ -517,7 +486,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test(expected = NullPointerException.class)
     public void getTopElementForSvcOrResModelVerTest() throws AAIException {
         Vertex modelElementVtx = new EmptyVertex();
-        //modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
+        // modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
         Vertex modelElementVtx1 = new EmptyVertex();
         Map<String, Vertex> currentHash = new HashMap<String, Vertex>();
         currentHash.put("constraint", modelElementVtx1);
@@ -535,7 +504,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
         namedQueryElementVertex.properties("property-collect-list", "");
 
-        Map<String, Object> result = processor.getNamedQueryPropOverRide(transId, fromAppId, namedQueryElementVertex, instanceVertex, apiVer);
+        Map<String, Object> result = processor.getNamedQueryPropOverRide(transId, fromAppId,
+            namedQueryElementVertex, instanceVertex, apiVer);
         assertNotEquals(result, null);
     }
 
@@ -549,7 +519,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
         namedQueryElementVertex.properties("property-collect-list", "");
 
-        Map<String, Object> result = processor.getNamedQueryPropOverRide(transId, fromAppId, namedQueryElementVertex, instanceVertex, apiVer);
+        Map<String, Object> result = processor.getNamedQueryPropOverRide(transId, fromAppId,
+            namedQueryElementVertex, instanceVertex, apiVer);
         assertNotEquals(result, null);
     }
 
@@ -563,7 +534,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
         namedQueryElementVertex.properties("property-collect-list", "");
 
-        boolean result = processor.namedQueryConstraintSaysStop(transId, fromAppId, namedQueryElementVertex, instanceVertex, apiVer);
+        boolean result = processor.namedQueryConstraintSaysStop(transId, fromAppId,
+            namedQueryElementVertex, instanceVertex, apiVer);
         assertTrue(result);
     }
 
@@ -577,7 +549,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
         namedQueryElementVertex.properties("property-collect-list", "");
 
-        boolean result = processor.namedQueryConstraintSaysStop(transId, fromAppId, namedQueryElementVertex, instanceVertex, apiVer);
+        boolean result = processor.namedQueryConstraintSaysStop(transId, fromAppId,
+            namedQueryElementVertex, instanceVertex, apiVer);
         assertTrue(result);
     }
 
@@ -589,8 +562,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         Vertex instanceVertex = null;
         String apiVer = "test";
 
-
-        boolean result = processor.namedQueryConstraintSaysStop(transId, fromAppId, namedQueryElementVertex, instanceVertex, apiVer);
+        boolean result = processor.namedQueryConstraintSaysStop(transId, fromAppId,
+            namedQueryElementVertex, instanceVertex, apiVer);
         assertTrue(result);
     }
 
@@ -606,7 +579,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
         namedQueryElementVertex.properties("property-collect-list", "");
 
-        Map<String, Object> result = processor.getNamedQueryExtraDataLookup(transId, fromAppId, namedQueryElementVertex, instanceVertex, apiVer);
+        Map<String, Object> result = processor.getNamedQueryExtraDataLookup(transId, fromAppId,
+            namedQueryElementVertex, instanceVertex, apiVer);
 
         assertTrue(result.size() > 0);
     }
@@ -622,8 +596,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         int levelCounter = 1;
 
         Map<String, String> result = processor.collectNQElementHash(transId, fromAppId,
-                thisLevelElemVtx, incomingTrail, currentHash,
-                vidsTraversed, levelCounter);
+            thisLevelElemVtx, incomingTrail, currentHash, vidsTraversed, levelCounter);
 
         assertNotEquals(result, null);
     }
@@ -642,8 +615,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String overRideModelVersionId = "test";
 
         Map<String, String> result = processor.collectDeleteKeyHash(transId, fromAppId,
-                thisLevelElemVtx, incomingTrail, currentHash,
-                vidsTraversed, levelCounter, modConstraintHash, overRideModelId, overRideModelVersionId);
+            thisLevelElemVtx, incomingTrail, currentHash, vidsTraversed, levelCounter,
+            modConstraintHash, overRideModelId, overRideModelVersionId);
 
         assertNotEquals(result, null);
     }
@@ -680,9 +653,9 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         List<String> vidsTraversed = new ArrayList<String>();
         int levelCounter = 1;
 
-        Multimap<String, String> result = processor.collectTopology4ModelVer(transId, fromAppId,
-                thisLevelElemVtx, incomingTrail, thisMap, vidsTraversed, levelCounter, currentHash
-                , "test", "test");
+        Multimap<String, String> result =
+            processor.collectTopology4ModelVer(transId, fromAppId, thisLevelElemVtx, incomingTrail,
+                thisMap, vidsTraversed, levelCounter, currentHash, "test", "test");
 
         assertNotEquals(result, null);
     }
@@ -700,7 +673,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String incomingTrail = "test";
         Multimap<String, String> currentMap = ArrayListMultimap.create();
 
-        Multimap<String, String> result = processor.collectTopology4LinkagePoint(transId, fromAppId, linkagePointStrVal, incomingTrail, currentMap);
+        Multimap<String, String> result = processor.collectTopology4LinkagePoint(transId, fromAppId,
+            linkagePointStrVal, incomingTrail, currentMap);
         assertNotEquals(result, null);
 
     }
@@ -719,7 +693,8 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String fromAppId = "test";
         Vertex queryVertex = new EmptyVertex();
         String namedQueryUuid = "E44533334343";
-        Multimap<String, String> result = processor.genTopoMap4NamedQ(transId, fromAppId, queryVertex, namedQueryUuid);
+        Multimap<String, String> result =
+            processor.genTopoMap4NamedQ(transId, fromAppId, queryVertex, namedQueryUuid);
         assertNotEquals(result, null);
     }
 
@@ -735,7 +710,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         int levelCounter = 1;
 
         Multimap<String, String> result = processor.collectTopology4NamedQ(transId, fromAppId,
-                thisLevelElemVtx, incomingTrail, thisMap, vidsTraversed, levelCounter);
+            thisLevelElemVtx, incomingTrail, thisMap, vidsTraversed, levelCounter);
         assertNotEquals(result, null);
     }
 
@@ -785,7 +760,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         boolean vertex = processor.nodeTypeSupportsPersona(incomingTrail);
         assertFalse(vertex);
 
-
         incomingTrail = "test";
         boolean vertex1 = processor.nodeTypeSupportsPersona(incomingTrail);
         assertTrue(vertex1);
@@ -797,10 +771,10 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String transID = "test";
         Vertex thisLevelElemVtx = new EmptyVertex();
         String incomingTrail = "test";
-        String vertex1 = processor.getNqElementWidgetType(appId, transID, thisLevelElemVtx, incomingTrail);
+        String vertex1 =
+            processor.getNqElementWidgetType(appId, transID, thisLevelElemVtx, incomingTrail);
         assertNotEquals(vertex1, null);
     }
-
 
     @Test(expected = NullPointerException.class)
     public void getModElementWidgetType() throws AAIException {
@@ -819,10 +793,10 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String nodeType = "generic-vnf";
         String idPropertyName = "test";
         String uniqueIdVal = "test";
-        Vertex vertex1 = processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
+        Vertex vertex1 =
+            processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
         assertNotEquals(vertex1, null);
     }
-
 
     @Test(expected = AAIException.class)
     public void getNodeUsingUniqueIdNull() throws AAIException {
@@ -832,11 +806,11 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String idPropertyName = "test";
         String uniqueIdVal = "";
         Vertex vertex1 = null;
-        vertex1 = processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
+        vertex1 =
+            processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
         assertNotEquals(vertex1, null);
 
     }
-
 
     @Test(expected = AAIException.class)
     public void getNodeUsingUniqueIdNull1() throws AAIException {
@@ -846,12 +820,11 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String idPropertyName = "";
         String uniqueIdVal = "test";
         Vertex vertex1 = null;
-        vertex1 = processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
+        vertex1 =
+            processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
         assertNotEquals(vertex1, null);
 
-
     }
-
 
     @Test(expected = AAIException.class)
     public void getNodeUsingUniqueIdNull2() throws AAIException {
@@ -861,9 +834,9 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String idPropertyName = "test";
         String uniqueIdVal = "test";
         Vertex vertex1 = null;
-        vertex1 = processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
+        vertex1 =
+            processor.getNodeUsingUniqueId(transID, appId, nodeType, idPropertyName, uniqueIdVal);
         assertNotEquals(vertex1, null);
-
 
     }
 
@@ -877,7 +850,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         assertNotEquals(result, null);
     }
 
-
     @Test(expected = AAIException.class)
     public void getModelVersUsingNameNull() throws AAIException {
         String appId = "test";
@@ -887,7 +859,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         List<Vertex> result = processor.getModelVersUsingName(transID, appId, modelName);
         assertNotEquals(result, null);
     }
-
 
     @Test(expected = NullPointerException.class)
     public void getModVersUsingModelInvId() throws AAIException {
@@ -959,9 +930,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String modelName = "test";
         processor.validateModel(transID, appId, modelName, modelVersionId);
 
-
     }
 
-
 }
-

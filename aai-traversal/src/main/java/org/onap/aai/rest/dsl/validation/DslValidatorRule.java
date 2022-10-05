@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,7 +84,7 @@ public class DslValidatorRule {
 
     public static class Builder {
 
-        //todo optional
+        // todo optional
         String query = "";
         boolean validateLoop = false;
         boolean validateNodeCount = false;
@@ -114,7 +114,8 @@ public class DslValidatorRule {
         }
 
         public Builder nodeCount(String validateNodeCount, int nodeCount) {
-            if (validateNodeCount.contains(NODECOUNT_RULE) || validateNodeCount.contains(ALL_RULE)) {
+            if (validateNodeCount.contains(NODECOUNT_RULE)
+                || validateNodeCount.contains(ALL_RULE)) {
                 this.setValidateNodeCount(true);
                 this.nodeCount = nodeCount;
             }

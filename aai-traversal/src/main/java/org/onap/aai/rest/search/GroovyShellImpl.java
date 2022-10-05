@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,36 +21,35 @@ package org.onap.aai.rest.search;
 
 import java.util.Map;
 
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import javax.ws.rs.core.MultivaluedHashMap;
 
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
 import org.onap.aai.restcore.search.GremlinGroovyShell;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.util.AAIConstants;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-
 public class GroovyShellImpl extends GenericQueryProcessor {
 
-	protected GroovyShellImpl(Builder builder) {
-		super(builder);
-	}
-	
-	@Override
-	protected GraphTraversal<?,?> runQuery(String query, Map<String, Object> params, GraphTraversalSource traversalSource) {
+    protected GroovyShellImpl(Builder builder) {
+        super(builder);
+    }
 
-		AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
-		metricLog.pre(uri);
+    @Override
+    protected GraphTraversal<?, ?> runQuery(String query, Map<String, Object> params,
+        GraphTraversalSource traversalSource) {
 
-		params.put("g", traversalSource);
-		GremlinGroovyShell shell = new GremlinGroovyShell();
-		GraphTraversal<?,?> graphTraversal = shell.executeTraversal(query, params);
+        AaiDBTraversalMetricLog metricLog =
+            new AaiDBTraversalMetricLog(AAIConstants.AAI_TRAVERSAL_MS);
+        metricLog.pre(uri);
 
-		metricLog.post();
-		return graphTraversal;
-	}
-		
+        params.put("g", traversalSource);
+        GremlinGroovyShell shell = new GremlinGroovyShell();
+        GraphTraversal<?, ?> graphTraversal = shell.executeTraversal(query, params);
+
+        metricLog.post();
+        return graphTraversal;
+    }
+
 }
-
-

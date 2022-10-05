@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,10 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.rest.history;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+import java.util.Collections;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -32,8 +36,8 @@ import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.nodes.NodeIngestor;
 import org.onap.aai.util.AAIConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,18 +48,12 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import java.util.Collections;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TraversalApp.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = TraversalApp.class)
 @TestPropertySource(
-        locations = "classpath:application-test.properties",
-        properties = {
-            "history.enabled=true",
-            "history.truncate.window.days = " + Integer.MAX_VALUE
-        }
-)
+    locations = "classpath:application-test.properties",
+    properties = {"history.enabled=true", "history.truncate.window.days = " + Integer.MAX_VALUE})
 @ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @Import(TraversalTestConfiguration.class)
 public abstract class AbstractSpringHistoryRestTest {
@@ -71,14 +69,14 @@ public abstract class AbstractSpringHistoryRestTest {
 
     @Autowired
     protected NodeIngestor nodeIngestor;
-    
+
     @LocalServerPort
     protected int randomPort;
 
     protected HttpEntity httpEntity;
 
     protected String baseUrl;
-    protected HttpHeaders headers ;
+    protected HttpHeaders headers;
 
     @BeforeClass
     public static void setupConfig() throws AAIException {
@@ -109,12 +107,12 @@ public abstract class AbstractSpringHistoryRestTest {
     /*
      * Inheritors please override this one
      */
-    public void createTestGraph(){
-    	
+    public void createTestGraph() {
+
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
 
         JanusGraph janusGraph = AAIGraph.getInstance().getGraph();
         JanusGraphTransaction transaction = janusGraph.newTransaction();
@@ -123,12 +121,11 @@ public abstract class AbstractSpringHistoryRestTest {
 
         try {
             GraphTraversalSource g = transaction.traversal();
-            g.V().toList()
-                    .forEach(Vertex::remove);
-        } catch(Exception ex){
+            g.V().toList().forEach(Vertex::remove);
+        } catch (Exception ex) {
             success = false;
         } finally {
-            if(success){
+            if (success) {
                 transaction.commit();
             } else {
                 transaction.rollback();

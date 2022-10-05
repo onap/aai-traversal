@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 
-public class NetworkCollectionByServiceInstanceTest extends QueryTest{
+public class NetworkCollectionByServiceInstanceTest extends QueryTest {
     public NetworkCollectionByServiceInstanceTest() throws AAIException, NoEdgeRuleFoundException {
         super();
     }
@@ -38,36 +38,42 @@ public class NetworkCollectionByServiceInstanceTest extends QueryTest{
     public void run() {
         super.run();
     }
+
     @Override
     protected void createGraph() throws AAIException, NoEdgeRuleFoundException {
 
+        // Set up the test graph
+        Vertex serviceinstance1 = graph.addVertex(T.label, "service-instance", T.id, "0",
+            "aai-node-type", "service-instance", "service-instance-id", "service-instance-id-1",
+            "service-instance-name", "service-instance-name-1");
 
-        //Set up the test graph
-        Vertex serviceinstance1 = graph.addVertex(T.label, "service-instance", T.id, "0", "aai-node-type",
-                "service-instance", "service-instance-id", "service-instance-id-1", "service-instance-name",
-                "service-instance-name-1");
+        Vertex collection1 =
+            graph.addVertex(T.label, "collection", T.id, "1", "aai-node-type", "collection");
 
-        Vertex collection1 = graph.addVertex(T.label, "collection", T.id, "1", "aai-node-type", "collection");
+        Vertex instancegroup1 =
+            graph.addVertex(T.label, "instance-group", T.id, "2", "aai-node-type", "instance-group",
+                "id", "id-0", "instance-group-type", "instance-group-type-0", "instance-group-role",
+                "instance-group-role-0", "instance-group-function", "instance-group-function-0",
+                "instance-group-description", "instance-group-description-0");
 
-        Vertex instancegroup1 = graph.addVertex(T.label, "instance-group", T.id, "2", "aai-node-type", "instance-group",
-                "id", "id-0", "instance-group-type", "instance-group-type-0","instance-group-role","instance-group-role-0",
-                "instance-group-function","instance-group-function-0","instance-group-description","instance-group-description-0");
+        Vertex l3network1 =
+            graph.addVertex(T.label, "l3-network", T.id, "3", "aai-node-type", "l3-network");
 
-        Vertex l3network1 = graph.addVertex(T.label, "l3-network", T.id, "3", "aai-node-type", "l3-network");
+        Vertex serviceinstance2 = graph.addVertex(T.label, "service-instance", T.id, "4",
+            "aai-node-type", "service-instance", "service-instance-id", "service-instance-id-2",
+            "service-instance-name", "service-instance-name-1");
 
+        Vertex collection2 =
+            graph.addVertex(T.label, "collection", T.id, "5", "aai-node-type", "collection");
 
+        Vertex instancegroup2 =
+            graph.addVertex(T.label, "instance-group", T.id, "6", "aai-node-type", "instance-group",
+                "id", "id-0", "instance-group-type", "instance-group-type-0", "instance-group-role",
+                "instance-group-role-0", "instance-group-function", "instance-group-function-0",
+                "instance-group-description", "instance-group-description-0");
 
-        Vertex serviceinstance2 = graph.addVertex(T.label, "service-instance", T.id, "4", "aai-node-type",
-                "service-instance", "service-instance-id", "service-instance-id-2", "service-instance-name",
-                "service-instance-name-1");
-
-        Vertex collection2 = graph.addVertex(T.label, "collection", T.id, "5", "aai-node-type", "collection");
-
-        Vertex instancegroup2 = graph.addVertex(T.label, "instance-group", T.id, "6", "aai-node-type", "instance-group",
-                "id", "id-0", "instance-group-type", "instance-group-type-0","instance-group-role","instance-group-role-0",
-                "instance-group-function","instance-group-function-0","instance-group-description","instance-group-description-0");
-
-        Vertex l3network2 = graph.addVertex(T.label, "l3-network", T.id, "7", "aai-node-type", "l3-network");
+        Vertex l3network2 =
+            graph.addVertex(T.label, "l3-network", T.id, "7", "aai-node-type", "l3-network");
 
         GraphTraversalSource g = graph.traversal();
 
@@ -85,13 +91,16 @@ public class NetworkCollectionByServiceInstanceTest extends QueryTest{
         expectedResult.add(l3network1);
 
     }
+
     @Override
     protected String getQueryName() {
         return "network-collection-ByServiceInstance";
     }
+
     @Override
     protected void addStartNode(GraphTraversal<Vertex, Vertex> g) {
-        g.has("aai-node-type", "service-instance").has("service-instance-id", "service-instance-id-1");
+        g.has("aai-node-type", "service-instance").has("service-instance-id",
+            "service-instance-id-1");
     }
 
     @Override
@@ -99,5 +108,3 @@ public class NetworkCollectionByServiceInstanceTest extends QueryTest{
         return;
     }
 }
-
-

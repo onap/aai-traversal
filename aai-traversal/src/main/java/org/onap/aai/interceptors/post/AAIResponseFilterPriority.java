@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,13 +26,14 @@ package org.onap.aai.interceptors.post;
  * and INVALID_RESPONSE_STATUS
  */
 public final class AAIResponseFilterPriority {
-	
-	private AAIResponseFilterPriority() {}
 
-	public static final int INVALID_RESPONSE_STATUS = 1000;
+    private AAIResponseFilterPriority() {
+    }
 
-	public static final int RESPONSE_TRANS_LOGGING = 3000;
+    public static final int INVALID_RESPONSE_STATUS = 1000;
 
-	public static final int HEADER_MANIPULATION = 4000;
+    public static final int RESPONSE_TRANS_LOGGING = 3000;
+
+    public static final int HEADER_MANIPULATION = 4000;
 
 }

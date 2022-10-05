@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,16 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.rest.search;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.*;
+
+import javax.ws.rs.core.*;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -31,16 +41,7 @@ import org.onap.aai.setup.SchemaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.*;
-import java.util.*;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class SearchProviderTest extends AAISetup{
+public class SearchProviderTest extends AAISetup {
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
@@ -71,21 +72,22 @@ public class SearchProviderTest extends AAISetup{
 
     private List<MediaType> outputMediaTypes;
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchProviderTest.class.getName());
+    private static final Logger logger =
+        LoggerFactory.getLogger(SearchProviderTest.class.getName());
 
     @Before
-    public void setup(){
+    public void setup() {
         logger.info("Starting the setup for the integration tests of Rest Endpoints");
         version = schemaVersions.getDefaultVersion();
-        
-        searchProvider      = new SearchProvider(loaderFactory, searchGraph, schemaVersions, basePath);
-        httpHeaders         = mock(HttpHeaders.class);
-        uriInfo             = mock(UriInfo.class);
+
+        searchProvider = new SearchProvider(loaderFactory, searchGraph, schemaVersions, basePath);
+        httpHeaders = mock(HttpHeaders.class);
+        uriInfo = mock(UriInfo.class);
 
         when(uriInfo.getPath()).thenReturn("JUNITURI");
 
-        headersMultiMap     = new MultivaluedHashMap<>();
-        queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
+        headersMultiMap = new MultivaluedHashMap<>();
+        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -101,16 +103,18 @@ public class SearchProviderTest extends AAISetup{
 
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Collections.singletonList("JUNIT"));
-        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-FromAppId"))
+            .thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-TransactionId"))
+            .thenReturn(Collections.singletonList("JUNIT"));
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
-
 
         when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getQueryParameters(false)).thenReturn(queryParameters);
 
-        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very unreasonable
+        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very
+        // unreasonable
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
@@ -131,21 +135,14 @@ public class SearchProviderTest extends AAISetup{
         when(httpHeaders.getRequestHeader("X-FromAppId")).thenThrow(IllegalArgumentException.class);
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
 
-        Response response = searchProvider.getNodesQueryResponse(
-                httpHeaders,
-                null,
-                "cloud-region",
-                keys,
-                includeStrings,
-                version.toString(),
-                uriInfo
-        );
+        Response response = searchProvider.getNodesQueryResponse(httpHeaders, null, "cloud-region",
+            keys, includeStrings, version.toString(), uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
 
-    //TODO fix test
+    // TODO fix test
     @Ignore("Test has a time dependency and fails based on system perf")
     @Test
     public void testNodesQueryTimeoutThrown() throws Exception {
@@ -162,15 +159,8 @@ public class SearchProviderTest extends AAISetup{
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
 
-        Response response = searchProvider.getNodesQueryResponse(
-                httpHeaders,
-                null,
-                "cloud-region",
-                keys,
-                includeStrings,
-                version.toString(),
-                uriInfo
-        );
+        Response response = searchProvider.getNodesQueryResponse(httpHeaders, null, "cloud-region",
+            keys, includeStrings, version.toString(), uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -192,22 +182,15 @@ public class SearchProviderTest extends AAISetup{
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
 
-        Response response = searchProvider.getNodesQueryResponse(
-                httpHeaders,
-                null,
-                "cloud-region",
-                keys,
-                includeStrings,
-                version.toString(),
-                uriInfo
-        );
+        Response response = searchProvider.getNodesQueryResponse(httpHeaders, null, "cloud-region",
+            keys, includeStrings, version.toString(), uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertThat(response.getEntity().toString(), containsString("4009"));
     }
 
-    //TODO fix test
+    // TODO fix test
     @Ignore("Test has a time dependency and fails based on system perf")
     @Test
     public void testGenericQueryTimeoutThrown() throws Exception {
@@ -225,17 +208,8 @@ public class SearchProviderTest extends AAISetup{
 
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
 
-
-        Response response = searchProvider.getGenericQueryResponse(
-                httpHeaders,
-                null,
-                "cloud-region",
-                keys,
-                includeStrings,
-                0,
-                version.toString(),
-                uriInfo
-        );
+        Response response = searchProvider.getGenericQueryResponse(httpHeaders, null,
+            "cloud-region", keys, includeStrings, 0, version.toString(), uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());

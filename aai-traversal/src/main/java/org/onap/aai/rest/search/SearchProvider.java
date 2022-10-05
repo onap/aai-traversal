@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,17 @@
 package org.onap.aai.rest.search;
 
 import io.micrometer.core.annotation.Timed;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+
 import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
 import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.dbgraphmap.SearchGraph;
@@ -46,15 +57,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Implements the search subdomain in the REST API. All API calls must include X-FromAppId and
  * X-TransactionId in the header.
@@ -78,8 +80,8 @@ public class SearchProvider extends RESTAPI {
     private String basePath;
 
     @Autowired
-    public SearchProvider(LoaderFactory loaderFactory, SearchGraph searchGraph, SchemaVersions schemaVersions,
-            @Value("${schema.uri.base.path}") String basePath) {
+    public SearchProvider(LoaderFactory loaderFactory, SearchGraph searchGraph,
+        SchemaVersions schemaVersions, @Value("${schema.uri.base.path}") String basePath) {
         this.loaderFactory = loaderFactory;
         this.searchGraph = searchGraph;
         this.schemaVersions = schemaVersions;
@@ -101,27 +103,29 @@ public class SearchProvider extends RESTAPI {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path(GENERIC_QUERY)
-    public Response getGenericQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
-            @QueryParam("start-node-type") final String startNodeType,
-            @QueryParam("key") final List<String> startNodeKeyParams,
-            @QueryParam("include") final List<String> includeNodeTypes, @QueryParam("depth") final int depth,
-            @PathParam("version") String versionParam, @Context UriInfo info) {
-        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED, TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-                TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
-                new AaiCallable<Response>() {
-                    @Override
-                    public Response process() {
-                        return processGenericQueryResponse(headers, req, startNodeType, startNodeKeyParams,
-                                includeNodeTypes, depth, versionParam);
-                    }
-                });
+    public Response getGenericQueryResponse(@Context HttpHeaders headers,
+        @Context HttpServletRequest req, @QueryParam("start-node-type") final String startNodeType,
+        @QueryParam("key") final List<String> startNodeKeyParams,
+        @QueryParam("include") final List<String> includeNodeTypes,
+        @QueryParam("depth") final int depth, @PathParam("version") String versionParam,
+        @Context UriInfo info) {
+        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
+            new AaiCallable<Response>() {
+                @Override
+                public Response process() {
+                    return processGenericQueryResponse(headers, req, startNodeType,
+                        startNodeKeyParams, includeNodeTypes, depth, versionParam);
+                }
+            });
     }
 
-    public Response processGenericQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
-            @QueryParam("start-node-type") final String startNodeType,
-            @QueryParam("key") final List<String> startNodeKeyParams,
-            @QueryParam("include") final List<String> includeNodeTypes, @QueryParam("depth") final int depth,
-            @PathParam("version") String versionParam) {
+    public Response processGenericQueryResponse(@Context HttpHeaders headers,
+        @Context HttpServletRequest req, @QueryParam("start-node-type") final String startNodeType,
+        @QueryParam("key") final List<String> startNodeKeyParams,
+        @QueryParam("include") final List<String> includeNodeTypes,
+        @QueryParam("depth") final int depth, @PathParam("version") String versionParam) {
 
         AAIException ex = null;
         Response searchResult;
@@ -137,17 +141,20 @@ public class SearchProvider extends RESTAPI {
 
             final ModelType factoryType = ModelType.MOXY;
             Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
-            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
+            TransactionalGraphEngine dbEngine =
+                new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
             DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
-            UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
+            UrlBuilder urlBuilder =
+                new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
 
-            AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
+            AaiDBTraversalMetricLog metricLog =
+                new AaiDBTraversalMetricLog(AAIConstants.AAI_TRAVERSAL_MS);
             metricLog.pre(Optional.of(new URI(req.getRequestURI())));
 
-            searchResult = searchGraph
-                    .runGenericQuery(new GenericQueryBuilder().setHeaders(headers).setStartNodeType(startNodeType)
-                            .setStartNodeKeyParams(startNodeKeyParams).setIncludeNodeTypes(includeNodeTypes)
-                            .setDepth(depth).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+            searchResult = searchGraph.runGenericQuery(new GenericQueryBuilder().setHeaders(headers)
+                .setStartNodeType(startNodeType).setStartNodeKeyParams(startNodeKeyParams)
+                .setIncludeNodeTypes(includeNodeTypes).setDepth(depth).setDbEngine(dbEngine)
+                .setLoader(loader).setUrlBuilder(urlBuilder));
 
             metricLog.post();
 
@@ -156,17 +163,19 @@ public class SearchProvider extends RESTAPI {
             ex = e;
             templateVars.add("GET Search");
             templateVars.add("getGenericQueryResponse");
-            searchResult = Response.status(e.getErrorObject().getHTTPResponseCode())
-                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-                    .build();
+            searchResult = Response
+                .status(e.getErrorObject().getHTTPResponseCode()).entity(ErrorLogHelper
+                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
+                .build();
         } catch (Exception e) {
             // send error response
             ex = new AAIException("AAI_4000", e);
             templateVars.add("GET Search");
             templateVars.add("getGenericQueryResponse");
-            searchResult = Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-                    .build();
+            searchResult = Response
+                .status(Status.INTERNAL_SERVER_ERROR).entity(ErrorLogHelper
+                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
+                .build();
         } finally {
             // log success or failure
             if (ex != null) {
@@ -193,28 +202,32 @@ public class SearchProvider extends RESTAPI {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Path(NODES_QUERY)
-    public Response getNodesQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
-            @QueryParam("search-node-type") final String searchNodeType,
-            @QueryParam("edge-filter") final List<String> edgeFilterList,
-            @QueryParam("filter") final List<String> filterList, @PathParam("version") String versionParam,
-            @Context UriInfo info)
+    public Response getNodesQueryResponse(@Context HttpHeaders headers,
+        @Context HttpServletRequest req,
+        @QueryParam("search-node-type") final String searchNodeType,
+        @QueryParam("edge-filter") final List<String> edgeFilterList,
+        @QueryParam("filter") final List<String> filterList,
+        @PathParam("version") String versionParam, @Context UriInfo info)
 
     {
-        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED, TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-                TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
-                new AaiCallable<Response>() {
-                    @Override
-                    public Response process() {
-                        return processNodesQueryResponse(headers, req, searchNodeType, edgeFilterList, filterList,
-                                versionParam);
-                    }
-                });
+        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
+            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
+            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
+            new AaiCallable<Response>() {
+                @Override
+                public Response process() {
+                    return processNodesQueryResponse(headers, req, searchNodeType, edgeFilterList,
+                        filterList, versionParam);
+                }
+            });
     }
 
-    public Response processNodesQueryResponse(@Context HttpHeaders headers, @Context HttpServletRequest req,
-            @QueryParam("search-node-type") final String searchNodeType,
-            @QueryParam("edge-filter") final List<String> edgeFilterList,
-            @QueryParam("filter") final List<String> filterList, @PathParam("version") String versionParam) {
+    public Response processNodesQueryResponse(@Context HttpHeaders headers,
+        @Context HttpServletRequest req,
+        @QueryParam("search-node-type") final String searchNodeType,
+        @QueryParam("edge-filter") final List<String> edgeFilterList,
+        @QueryParam("filter") final List<String> filterList,
+        @PathParam("version") String versionParam) {
 
         AAIException ex = null;
         Response searchResult;
@@ -231,15 +244,18 @@ public class SearchProvider extends RESTAPI {
 
             final ModelType factoryType = ModelType.MOXY;
             Loader loader = loaderFactory.createLoaderForVersion(factoryType, version);
-            TransactionalGraphEngine dbEngine = new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
+            TransactionalGraphEngine dbEngine =
+                new JanusGraphDBEngine(QueryStyle.TRAVERSAL, loader);
             DBSerializer dbSerializer = new DBSerializer(version, dbEngine, factoryType, fromAppId);
-            UrlBuilder urlBuilder = new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
+            UrlBuilder urlBuilder =
+                new UrlBuilder(version, dbSerializer, schemaVersions, this.basePath);
 
-
-            AaiDBTraversalMetricLog metricLog = new AaiDBTraversalMetricLog (AAIConstants.AAI_TRAVERSAL_MS);
+            AaiDBTraversalMetricLog metricLog =
+                new AaiDBTraversalMetricLog(AAIConstants.AAI_TRAVERSAL_MS);
             metricLog.pre(Optional.of(new URI(req.getRequestURI())));
-            searchResult = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(headers)
-                    .setTargetNodeType(searchNodeType).setEdgeFilterParams(edgeFilterList).setFilterParams(filterList)
+            searchResult = searchGraph.runNodesQuery(
+                new NodesQueryBuilder().setHeaders(headers).setTargetNodeType(searchNodeType)
+                    .setEdgeFilterParams(edgeFilterList).setFilterParams(filterList)
                     .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
 
             metricLog.post();
@@ -249,17 +265,19 @@ public class SearchProvider extends RESTAPI {
             ex = e;
             templateVars.add("GET Search");
             templateVars.add("getNodesQueryResponse");
-            searchResult = Response.status(e.getErrorObject().getHTTPResponseCode())
-                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-                    .build();
+            searchResult = Response
+                .status(e.getErrorObject().getHTTPResponseCode()).entity(ErrorLogHelper
+                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
+                .build();
         } catch (Exception e) {
             // send error response
             ex = new AAIException("AAI_4000", e);
             templateVars.add("GET Search");
             templateVars.add("getNodesQueryResponse");
-            searchResult = Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-                    .build();
+            searchResult = Response
+                .status(Status.INTERNAL_SERVER_ERROR).entity(ErrorLogHelper
+                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
+                .build();
         } finally {
             // log success or failure
             if (ex != null) {
@@ -268,7 +286,5 @@ public class SearchProvider extends RESTAPI {
         }
         return searchResult;
     }
-
-
 
 }

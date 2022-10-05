@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,16 @@
  */
 package org.onap.aai;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.fail;
+
 import com.jayway.jsonpath.JsonPath;
+
+import java.util.*;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.JanusGraphTransaction;
@@ -32,8 +41,8 @@ import org.onap.aai.util.AAIConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,14 +50,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.*;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.fail;
 
 /**
  * A sample junit test using spring boot that provides the ability to spin
@@ -61,7 +62,9 @@ import static org.junit.Assert.fail;
  * This can be used to potentially replace a lot of the fitnesse tests since
  * they will be testing against the same thing except fitnesse uses hbase
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TraversalApp.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @Import(TraversalTestConfiguration.class)
@@ -94,7 +97,7 @@ public class AAIGremlinQueryTest {
         AAIConfig.init();
     }
 
-    public void createGraph(){
+    public void createGraph() {
 
         JanusGraphTransaction transaction = AAIGraph.getInstance().getGraph().newTransaction();
 
@@ -104,18 +107,14 @@ public class AAIGremlinQueryTest {
 
             GraphTraversalSource g = transaction.traversal();
 
-            g.addV()
-                .property("aai-node-type", "pserver")
-                .property("hostname", "test-pserver")
-                .property("in-maint", false)
-                .property("source-of-truth", "JUNIT")
-                .property("aai-uri", "/cloud-infrastructure/pservers/pserver/test-pserver")
-                .next();
+            g.addV().property("aai-node-type", "pserver").property("hostname", "test-pserver")
+                .property("in-maint", false).property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/cloud-infrastructure/pservers/pserver/test-pserver").next();
 
-        } catch(Exception ex){
+        } catch (Exception ex) {
             success = false;
         } finally {
-            if(success){
+            if (success) {
                 transaction.commit();
             } else {
                 transaction.rollback();
@@ -157,7 +156,8 @@ public class AAIGremlinQueryTest {
         String endpoint = "/aai/v11/query?format=console";
 
         httpEntity = new HttpEntity(payload, headers);
-        responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
 
         String result = JsonPath.read(responseEntity.getBody().toString(), "$.results[0].result");
@@ -184,7 +184,8 @@ public class AAIGremlinQueryTest {
         String endpoint = "/aai/v11/query?format=console";
 
         httpEntity = new HttpEntity(payload, headers);
-        responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
 
         String result = JsonPath.read(responseEntity.getBody().toString(), "$.results[0].result");
@@ -202,32 +203,26 @@ public class AAIGremlinQueryTest {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
         httpEntity = new HttpEntity(payload, headers);
         String endpoint = "/aai/v11/query?format=count";
-        ResponseEntity responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-        assertThat(responseEntity.getBody().toString(), containsString("<results><result><pserver>1</pserver></result></results>"));
+        assertThat(responseEntity.getBody().toString(),
+            containsString("<results><result><pserver>1</pserver></result></results>"));
 
         gremlinQueryMap.put("gremlin-query", "g.V().has('hostname', 'test-pserver')");
         payload = PayloadUtil.getTemplatePayload("gremlin-query.json", gremlinQueryMap);
         httpEntity = new HttpEntity(payload, headers);
 
-        Format[] formats = new Format[]{
-            Format.graphson,
-            Format.pathed,
-            Format.id,
-            Format.resource,
-            Format.simple,
-            Format.resource_and_url,
-            Format.console,
-            Format.raw,
-            Format.count
-        };
+        Format[] formats = new Format[] {Format.graphson, Format.pathed, Format.id, Format.resource,
+            Format.simple, Format.resource_and_url, Format.console, Format.raw, Format.count};
 
-        for(Format format : formats){
+        for (Format format : formats) {
 
             endpoint = "/aai/v11/query?format=" + format.toString();
 
             logger.debug("Current endpoint being executed {}", endpoint);
-            responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+            responseEntity =
+                restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
             assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
 
             String responseBody = responseEntity.getBody().toString();
@@ -236,6 +231,7 @@ public class AAIGremlinQueryTest {
             assertThat(responseBody, is(not(containsString("<result><result>"))));
         }
     }
+
     @Test
     public void testPserverCountUsingDsl() throws Exception {
         Map<String, String> dslQuerymap = new HashMap<>();
@@ -248,7 +244,8 @@ public class AAIGremlinQueryTest {
         String endpoint = "/aai/v11/dsl?format=console";
 
         httpEntity = new HttpEntity(payload, headers);
-        responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
 
         String result = JsonPath.read(responseEntity.getBody().toString(), "$.results[0].result");
@@ -266,30 +263,24 @@ public class AAIGremlinQueryTest {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
         httpEntity = new HttpEntity(payload, headers);
         String endpoint = "/aai/v11/dsl?format=count";
-        ResponseEntity responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-        assertThat(responseEntity.getBody().toString(), containsString("<results><result><pserver>1</pserver></result></results>"));
+        assertThat(responseEntity.getBody().toString(),
+            containsString("<results><result><pserver>1</pserver></result></results>"));
 
         httpEntity = new HttpEntity(payload, headers);
 
-        Format[] formats = new Format[]{
-            Format.graphson,
-            Format.pathed,
-            Format.id,
-            Format.resource,
-            Format.simple,
-            Format.resource_and_url,
-            Format.console,
-            Format.raw,
-            Format.count
-        };
+        Format[] formats = new Format[] {Format.graphson, Format.pathed, Format.id, Format.resource,
+            Format.simple, Format.resource_and_url, Format.console, Format.raw, Format.count};
 
-        for(Format format : formats){
+        for (Format format : formats) {
 
             endpoint = "/aai/v11/dsl?format=" + format.toString();
 
             logger.debug("Current endpoint being executed {}", endpoint);
-            responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+            responseEntity =
+                restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
             assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
 
             String responseBody = responseEntity.getBody().toString();
@@ -309,14 +300,12 @@ public class AAIGremlinQueryTest {
 
             GraphTraversalSource g = transaction.traversal();
 
-            g.V().has("source-of-truth", "JUNIT")
-                    .toList()
-                    .forEach(Vertex::remove);
+            g.V().has("source-of-truth", "JUNIT").toList().forEach(Vertex::remove);
 
-        } catch(Exception ex){
+        } catch (Exception ex) {
             success = false;
         } finally {
-            if(success){
+            if (success) {
                 transaction.commit();
             } else {
                 transaction.rollback();

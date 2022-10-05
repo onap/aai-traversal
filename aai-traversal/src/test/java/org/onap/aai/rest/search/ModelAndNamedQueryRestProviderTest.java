@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,19 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.rest.search;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.*;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -30,19 +43,7 @@ import org.onap.aai.setup.SchemaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class ModelAndNamedQueryRestProviderTest extends AAISetup{
+public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
@@ -70,21 +71,23 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
     private List<MediaType> outputMediaTypes;
 
-    private static final Logger logger = LoggerFactory.getLogger(ModelAndNamedQueryRestProviderTest.class.getName());
+    private static final Logger logger =
+        LoggerFactory.getLogger(ModelAndNamedQueryRestProviderTest.class.getName());
 
     @Before
-    public void setup(){
+    public void setup() {
         version = schemaVersions.getDefaultVersion();
         logger.info("Starting the setup for the integration tests of Rest Endpoints");
-     
-        modelAndNamedQueryRestProvider = new ModelAndNamedQueryRestProvider(searchGraph, schemaVersions);
-        httpHeaders         = mock(HttpHeaders.class);
-        uriInfo             = mock(UriInfo.class);
+
+        modelAndNamedQueryRestProvider =
+            new ModelAndNamedQueryRestProvider(searchGraph, schemaVersions);
+        httpHeaders = mock(HttpHeaders.class);
+        uriInfo = mock(UriInfo.class);
 
         when(uriInfo.getPath()).thenReturn("JUNITURI");
 
-        headersMultiMap     = new MultivaluedHashMap<>();
-        queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
+        headersMultiMap = new MultivaluedHashMap<>();
+        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -100,16 +103,18 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Collections.singletonList("JUNIT"));
-        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-FromAppId"))
+            .thenReturn(Collections.singletonList("JUNIT"));
+        when(httpHeaders.getRequestHeader("X-TransactionId"))
+            .thenReturn(Collections.singletonList("JUNIT"));
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
-
 
         when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getQueryParameters(false)).thenReturn(queryParameters);
 
-        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very unreasonable
+        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very
+        // unreasonable
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
@@ -123,12 +128,8 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
         when(request.getContentType()).thenReturn("application/json");
 
-        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
-                httpHeaders,
-                request,
-                queryParameters,
-                uriInfo
-        );
+        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders,
+            request, queryParameters, uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
@@ -142,12 +143,8 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
         when(httpHeaders.getRequestHeader("X-FromAppId")).thenThrow(IllegalArgumentException.class);
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
 
-        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
-                httpHeaders,
-                null,
-                "cloud-region",
-                uriInfo
-        );
+        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders, null,
+            "cloud-region", uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
@@ -165,12 +162,8 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
         when(request.getContentType()).thenReturn("application/json");
 
-        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
-                httpHeaders,
-                request,
-                queryParameters,
-                uriInfo
-        );
+        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders,
+            request, queryParameters, uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -187,12 +180,8 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
         when(request.getContentType()).thenReturn("application/json");
 
-        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(
-                httpHeaders,
-                request,
-                queryParameters,
-                uriInfo
-        );
+        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders,
+            request, queryParameters, uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
@@ -200,9 +189,7 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup{
 
     public String getPayload(String filename) throws IOException {
 
-        InputStream inputStream = getClass()
-                .getClassLoader()
-                .getResourceAsStream(filename);
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
 
         String message = String.format("Unable to find the %s in src/test/resources", filename);
         assertNotNull(message, inputStream);

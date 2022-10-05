@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,10 +24,10 @@ package org.onap.aai.transforms;
  * for converting from the lower hyphen to lower camel case
  * <p>
  * Examples:
- *  lower-test => lowerTest
- *  lower-Test => lowerTest
- *  lowerTest  => lowerTest
- *  lower-test-val => lowerTestVal
+ * lower-test => lowerTest
+ * lower-Test => lowerTest
+ * lowerTest => lowerTest
+ * lower-test-val => lowerTestVal
  * <p>
  *
  */
@@ -46,11 +46,11 @@ public class LowerHyphenToLowerCamelConverter implements Converter {
      *
      * @param input the input string to convert to camel case
      * @return a string that is converted to camel case
-     *          if the input is null, then it returns null
+     *         if the input is null, then it returns null
      */
     @Override
     public String convert(String input) {
-        if(input == null){
+        if (input == null) {
             return null;
         }
 
@@ -59,17 +59,17 @@ public class LowerHyphenToLowerCamelConverter implements Converter {
 
         boolean isPreviousCharDash = false;
 
-        for(int index = 0; index < size; ++index){
+        for (int index = 0; index < size; ++index) {
             char ch = input.charAt(index);
 
-            if(ch == '-'){
+            if (ch == '-') {
                 isPreviousCharDash = true;
                 continue;
             }
-            if(isPreviousCharDash){
+            if (isPreviousCharDash) {
                 builder.append(Character.toUpperCase(ch));
                 isPreviousCharDash = false;
-            } else{
+            } else {
                 builder.append(ch);
             }
         }

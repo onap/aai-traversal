@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,18 +19,20 @@
  */
 package org.onap.aai.rest.search;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.att.eelf.configuration.EELFManager;
-import org.onap.aai.restclient.RestClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.onap.aai.restclient.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 
 public class SchemaServiceCQConfig extends CQConfig {
 
@@ -46,19 +48,20 @@ public class SchemaServiceCQConfig extends CQConfig {
 
     @PostConstruct
     public void initialize() {
-        //Call SchemaService to get custom queries
+        // Call SchemaService to get custom queries
         retrieveCustomQueries();
     }
 
     public void retrieveCustomQueries() {
-	    /*
-	    Call Schema MS to get custom queries using RestTemplate
-	     */
+        /*
+         * Call Schema MS to get custom queries using RestTemplate
+         */
         logger.info("Calling the SchemaService to retrieve stored queries");
         String content = "";
         Map<String, String> headersMap = new HashMap<>();
 
-        ResponseEntity<String> schemaResponse = restClient.getGetRequest(content, customQueriesUri, headersMap);
+        ResponseEntity<String> schemaResponse =
+            restClient.getGetRequest(content, customQueriesUri, headersMap);
         queryConfig = new GetCustomQueryConfig(schemaResponse.getBody());
     }
 }

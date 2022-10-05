@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,23 +19,24 @@
  */
 package org.onap.aai.interceptors.pre;
 
-import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.logging.ErrorLogHelper;
-import org.onap.aai.setup.SchemaVersion;
-import org.onap.aai.setup.SchemaVersions;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
+import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.logging.ErrorLogHelper;
+import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.setup.SchemaVersions;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @PreMatching
 @Priority(AAIRequestFilterPriority.VERSION)
@@ -48,11 +49,9 @@ public class VersionInterceptor extends AAIContainerFilter implements ContainerR
     private final SchemaVersions schemaVersions;
 
     @Autowired
-    public VersionInterceptor(SchemaVersions schemaVersions){
+    public VersionInterceptor(SchemaVersions schemaVersions) {
         this.schemaVersions = schemaVersions;
-        allowedVersions  = schemaVersions.getVersions()
-            .stream()
-            .map(SchemaVersion::toString)
+        allowedVersions = schemaVersions.getVersions().stream().map(SchemaVersion::toString)
             .collect(Collectors.toSet());
 
     }
@@ -62,26 +61,31 @@ public class VersionInterceptor extends AAIContainerFilter implements ContainerR
 
         String uri = requestContext.getUriInfo().getPath();
 
-        if (uri.startsWith("search") || uri.startsWith("util/echo") || uri.startsWith("tools") || uri.startsWith("recents")|| uri.startsWith("cq2gremlin")|| uri.startsWith("cq2gremlintest")) {
+        if (uri.startsWith("search") || uri.startsWith("util/echo") || uri.startsWith("tools")
+            || uri.startsWith("recents") || uri.startsWith("cq2gremlin")
+            || uri.startsWith("cq2gremlintest")) {
             return;
-		}
+        }
 
         Matcher matcher = EXTRACT_VERSION_PATTERN.matcher(uri);
 
         String version = null;
-        if(matcher.matches()){
+        if (matcher.matches()) {
             version = matcher.group(1);
         } else {
-            requestContext.abortWith(createInvalidVersionResponse("AAI_3017", requestContext, version));
+            requestContext
+                .abortWith(createInvalidVersionResponse("AAI_3017", requestContext, version));
             return;
         }
 
-        if(!allowedVersions.contains(version)){
-            requestContext.abortWith(createInvalidVersionResponse("AAI_3016", requestContext, version));
+        if (!allowedVersions.contains(version)) {
+            requestContext
+                .abortWith(createInvalidVersionResponse("AAI_3016", requestContext, version));
         }
     }
 
-    private Response createInvalidVersionResponse(String errorCode, ContainerRequestContext context, String version) {
+    private Response createInvalidVersionResponse(String errorCode, ContainerRequestContext context,
+        String version) {
         AAIException e = new AAIException(errorCode);
         ArrayList<String> templateVars = new ArrayList<>();
 
@@ -91,11 +95,9 @@ public class VersionInterceptor extends AAIContainerFilter implements ContainerR
             templateVars.add(version);
         }
 
-        String entity = ErrorLogHelper.getRESTAPIErrorResponse(context.getAcceptableMediaTypes(), e, templateVars);
+        String entity = ErrorLogHelper.getRESTAPIErrorResponse(context.getAcceptableMediaTypes(), e,
+            templateVars);
 
-        return Response
-                .status(e.getErrorObject().getHTTPResponseCode())
-                .entity(entity)
-                .build();
+        return Response.status(e.getErrorObject().getHTTPResponseCode()).entity(entity).build();
     }
 }

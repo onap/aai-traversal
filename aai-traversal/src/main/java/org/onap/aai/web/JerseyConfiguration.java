@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,19 @@
  */
 package org.onap.aai.web;
 
+import static java.lang.Boolean.parseBoolean;
+import static java.util.Comparator.comparingInt;
+
 import com.google.common.collect.Sets;
+
+import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.annotation.Priority;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.onap.aai.rest.*;
 import org.onap.aai.rest.search.ModelAndNamedQueryRestProvider;
@@ -32,21 +44,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.Priority;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import static java.lang.Boolean.parseBoolean;
-import static java.util.Comparator.comparingInt;
-
 @Configuration
 public class JerseyConfiguration {
 
     private static final Logger log = Logger.getLogger(JerseyConfiguration.class.getName());
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(JerseyConfiguration.class.getName());
+    private static final org.slf4j.Logger logger =
+        LoggerFactory.getLogger(JerseyConfiguration.class.getName());
 
     private static final String LOGGING_ENABLED_PROPERTY = "aai.request.logging.enabled";
     private static final boolean ENABLE_RESPONSE_LOGGING = false;
@@ -62,18 +65,11 @@ public class JerseyConfiguration {
     public ResourceConfig resourceConfig() {
         ResourceConfig resourceConfig = new ResourceConfig();
 
-        Set<Class<?>> classes = Sets.newHashSet(
-                SearchProvider.class,
-                ModelAndNamedQueryRestProvider.class,
-                QueryConsumer.class,
-                RecentAPIConsumer.class,
-                DslConsumer.class,
-                EchoResponse.class,
-                CQ2Gremlin.class,
-                CQ2GremlinTest.class
-        );
-        Set<Class<?>> filterClasses = Sets.newHashSet(
-                org.onap.aai.interceptors.pre.RequestTransactionLogging.class,
+        Set<Class<?>> classes = Sets.newHashSet(SearchProvider.class,
+            ModelAndNamedQueryRestProvider.class, QueryConsumer.class, RecentAPIConsumer.class,
+            DslConsumer.class, EchoResponse.class, CQ2Gremlin.class, CQ2GremlinTest.class);
+        Set<Class<?>> filterClasses =
+            Sets.newHashSet(org.onap.aai.interceptors.pre.RequestTransactionLogging.class,
                 org.onap.aai.interceptors.pre.HeaderValidation.class,
                 org.onap.aai.interceptors.pre.HttpHeaderInterceptor.class,
                 org.onap.aai.interceptors.pre.OneWaySslAuthorization.class,
@@ -84,28 +80,24 @@ public class JerseyConfiguration {
                 org.onap.aai.interceptors.pre.RequestModification.class,
                 org.onap.aai.interceptors.post.InvalidResponseStatus.class,
                 org.onap.aai.interceptors.post.ResponseTransactionLogging.class,
-                org.onap.aai.interceptors.post.ResponseHeaderManipulation.class
-        );
+                org.onap.aai.interceptors.post.ResponseHeaderManipulation.class);
         resourceConfig.registerClasses(classes);
         logger.debug("REGISTERED CLASSES " + classes.toString());
 
         throwIfPriorityAnnotationAbsent(filterClasses);
-        filterClasses.stream()
-                .filter(this::isEnabledByActiveProfiles)
-                .sorted(priorityComparator())
-                .forEach(resourceConfig::register);
+        filterClasses.stream().filter(this::isEnabledByActiveProfiles).sorted(priorityComparator())
+            .forEach(resourceConfig::register);
 
-        filterClasses.stream()
-                .filter(this::isEnabledByActiveProfiles)
-                .sorted(priorityComparator())
-                .forEach(s -> logger.debug("REGISTERED FILTERS " + s.getName()));
+        filterClasses.stream().filter(this::isEnabledByActiveProfiles).sorted(priorityComparator())
+            .forEach(s -> logger.debug("REGISTERED FILTERS " + s.getName()));
         return resourceConfig;
     }
 
     private <T> void throwIfPriorityAnnotationAbsent(Collection<Class<? extends T>> classes) {
         for (Class clazz : classes) {
             if (!clazz.isAnnotationPresent(Priority.class)) {
-                logger.debug("throwIfPriorityAnnotationAbsent: missing filter priority for : " + clazz.getName());
+                logger.debug("throwIfPriorityAnnotationAbsent: missing filter priority for : "
+                    + clazz.getName());
                 throw new MissingFilterPriorityException(clazz);
             }
         }
@@ -120,9 +112,10 @@ public class JerseyConfiguration {
     }
 
     private boolean isEnabledByActiveProfiles(AnnotatedElement annotatedElement) {
-        boolean result = !annotatedElement.isAnnotationPresent(Profile.class) ||
-                environment.acceptsProfiles(annotatedElement.getAnnotation(Profile.class).value());
-        logger.debug("isEnabledByActiveProfiles: annotatedElement: " + annotatedElement.toString() + " result=" + result);
+        boolean result = !annotatedElement.isAnnotationPresent(Profile.class)
+            || environment.acceptsProfiles(annotatedElement.getAnnotation(Profile.class).value());
+        logger.debug("isEnabledByActiveProfiles: annotatedElement: " + annotatedElement.toString()
+            + " result=" + result);
         return result;
     }
 

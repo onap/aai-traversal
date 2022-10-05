@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,11 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.rest;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Collections;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -33,8 +38,8 @@ import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.nodes.NodeIngestor;
 import org.onap.aai.util.AAIConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -45,12 +50,9 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collections;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TraversalApp.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @Import(TraversalTestConfiguration.class)
 public abstract class AbstractSpringRestTest {
@@ -66,14 +68,14 @@ public abstract class AbstractSpringRestTest {
 
     @Autowired
     protected NodeIngestor nodeIngestor;
-    
+
     @LocalServerPort
     protected int randomPort;
 
     protected HttpEntity httpEntity;
 
     protected String baseUrl;
-    protected HttpHeaders headers ;
+    protected HttpHeaders headers;
 
     @BeforeClass
     public static void setupConfig() throws AAIException {
@@ -95,7 +97,8 @@ public abstract class AbstractSpringRestTest {
         headers.add("Real-Time", "true");
         headers.add("X-FromAppId", "JUNIT");
         headers.add("X-TransactionId", "JUNIT");
-        String authorization = Base64.getEncoder().encodeToString("AAI:AAI".getBytes(StandardCharsets.UTF_8));
+        String authorization =
+            Base64.getEncoder().encodeToString("AAI:AAI".getBytes(StandardCharsets.UTF_8));
         headers.add("Authorization", "Basic " + authorization);
         httpEntity = new HttpEntity(headers);
         baseUrl = "http://localhost:" + randomPort;
@@ -104,11 +107,12 @@ public abstract class AbstractSpringRestTest {
     /*
      * Inheritors please override this one
      */
-    public void createTestGraph(){
-    	
+    public void createTestGraph() {
+
     }
+
     @After
-    public void tearDown(){
+    public void tearDown() {
 
         JanusGraph janusGraph = AAIGraph.getInstance().getGraph();
         JanusGraphTransaction transaction = janusGraph.newTransaction();
@@ -117,13 +121,12 @@ public abstract class AbstractSpringRestTest {
 
         try {
             GraphTraversalSource g = transaction.traversal();
-            g.V().has("source-of-truth", P.within("JUNIT", "AAI-EXTENSIONS"))
-                    .toList()
-                    .forEach(Vertex::remove);
-        } catch(Exception ex){
+            g.V().has("source-of-truth", P.within("JUNIT", "AAI-EXTENSIONS")).toList()
+                .forEach(Vertex::remove);
+        } catch (Exception ex) {
             success = false;
         } finally {
-            if(success){
+            if (success) {
                 transaction.commit();
             } else {
                 transaction.rollback();

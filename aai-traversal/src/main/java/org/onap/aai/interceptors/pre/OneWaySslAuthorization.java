@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,10 @@
  */
 package org.onap.aai.interceptors.pre;
 
-import org.onap.aai.Profiles;
-import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.logging.ErrorLogHelper;
-import org.onap.aai.service.AuthorizationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -33,10 +30,14 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import org.onap.aai.Profiles;
+import org.onap.aai.exceptions.AAIException;
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.logging.ErrorLogHelper;
+import org.onap.aai.service.AuthorizationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 
 @Profile(Profiles.ONE_WAY_SSL)
 @PreMatching
@@ -47,17 +48,17 @@ public class OneWaySslAuthorization extends AAIContainerFilter implements Contai
     private AuthorizationService authorizationService;
 
     @Override
-    public void filter(ContainerRequestContext containerRequestContext) throws IOException
-    {
+    public void filter(ContainerRequestContext containerRequestContext) throws IOException {
 
-        if(containerRequestContext.getUriInfo().getRequestUri().getPath().matches("^.*/util/echo$")){
+        if (containerRequestContext.getUriInfo().getRequestUri().getPath()
+            .matches("^.*/util/echo$")) {
             return;
         }
 
         String basicAuth = containerRequestContext.getHeaderString("Authorization");
         List<MediaType> acceptHeaderValues = containerRequestContext.getAcceptableMediaTypes();
 
-        if(basicAuth == null || !basicAuth.startsWith("Basic ")){
+        if (basicAuth == null || !basicAuth.startsWith("Basic ")) {
             Optional<Response> responseOptional = errorResponse("AAI_3300", acceptHeaderValues);
             containerRequestContext.abortWith(responseOptional.get());
             return;
@@ -65,7 +66,7 @@ public class OneWaySslAuthorization extends AAIContainerFilter implements Contai
 
         basicAuth = basicAuth.replaceAll("Basic ", "");
 
-        if(!authorizationService.checkIfUserAuthorized(basicAuth)){
+        if (!authorizationService.checkIfUserAuthorized(basicAuth)) {
             Optional<Response> responseOptional = errorResponse("AAI_3300", acceptHeaderValues);
             containerRequestContext.abortWith(responseOptional.get());
             return;
@@ -76,8 +77,9 @@ public class OneWaySslAuthorization extends AAIContainerFilter implements Contai
     private Optional<Response> errorResponse(String errorCode, List<MediaType> acceptHeaderValues) {
         AAIException aaie = new AAIException(errorCode);
         return Optional.of(Response.status(aaie.getErrorObject().getHTTPResponseCode())
-                .entity(ErrorLogHelper.getRESTAPIErrorResponse(acceptHeaderValues, aaie, new ArrayList<>()))
-                .build());
+            .entity(
+                ErrorLogHelper.getRESTAPIErrorResponse(acceptHeaderValues, aaie, new ArrayList<>()))
+            .build());
 
     }
 }

@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,17 +19,17 @@
  */
 package org.onap.aai.rest.dsl;
 
-import org.onap.aai.rest.enums.EdgeDirection;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.onap.aai.rest.enums.EdgeDirection;
 
 public class Edge {
 
     private List<EdgeLabel> labels;
     private EdgeDirection direction;
 
-    public Edge (EdgeDirection direction, List<EdgeLabel> labels) {
+    public Edge(EdgeDirection direction, List<EdgeLabel> labels) {
         this.labels = labels;
         this.direction = direction;
     }
@@ -53,7 +53,7 @@ public class Edge {
     @Override
     public String toString() {
         return String.format("labels: %s, direction: %s ",
-                labels.stream().map(EdgeLabel::getLabel).collect(Collectors.joining(",")),
-                this.getDirection().name());
+            labels.stream().map(EdgeLabel::getLabel).collect(Collectors.joining(",")),
+            this.getDirection().name());
     }
 }

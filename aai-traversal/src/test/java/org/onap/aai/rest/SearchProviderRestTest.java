@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,19 +19,20 @@
  */
 package org.onap.aai.rest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.att.eelf.configuration.EELFManager;
-import org.junit.Test;
-import org.springframework.http.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Collections;
-
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import com.att.eelf.configuration.EELFManager;
+
+import java.util.Collections;
+
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 public class SearchProviderRestTest extends AbstractSpringRestTest {
 
@@ -45,15 +46,18 @@ public class SearchProviderRestTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity(headers);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
-                .queryParam("key", "cloud-region.cloud-owner:test-aic")
-                .queryParam("include", "cloud-region");
+            .queryParam("key", "cloud-region.cloud-owner:test-aic")
+            .queryParam("include", "cloud-region");
 
-        ResponseEntity responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
+        ResponseEntity responseEntity =
+            restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
 
-        LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+        LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(),
+            responseEntity.getBody());
 
         assertNotNull("Response from /aai/latest/search is null", responseEntity);
-        assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST,
+            responseEntity.getStatusCode());
     }
 
     @Test
@@ -64,19 +68,22 @@ public class SearchProviderRestTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity(headers);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
-                .queryParam("key", "cloud-region.cloud-owner:test-aic")
-                .queryParam("include", "cloud-region");
+            .queryParam("key", "cloud-region.cloud-owner:test-aic")
+            .queryParam("include", "cloud-region");
 
-        ResponseEntity responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
+        ResponseEntity responseEntity =
+            restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
 
-        LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+        LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(),
+            responseEntity.getBody());
 
         assertNotNull("Response from /aai/latest/search is null", responseEntity);
-        assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST,
+            responseEntity.getStatusCode());
     }
 
     @Test
-    public void testGenericQueryBypassTimeout(){
+    public void testGenericQueryBypassTimeout() {
         headers = new HttpHeaders();
 
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -88,16 +95,18 @@ public class SearchProviderRestTest extends AbstractSpringRestTest {
         String endpoint = "/aai/latest/search/generic-query";
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
-                .queryParam("key", "cloud-region.cloud-owner:test-aic")
-                .queryParam("include", "cloud-region")
-                .queryParam("start-node-type", "cloud-region");
+            .queryParam("key", "cloud-region.cloud-owner:test-aic")
+            .queryParam("include", "cloud-region").queryParam("start-node-type", "cloud-region");
 
-        ResponseEntity responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
+        ResponseEntity responseEntity =
+            restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
 
-        LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(), responseEntity.getBody());
+        LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(),
+            responseEntity.getBody());
 
         assertNotNull("Response from /aai/latest/search is null", responseEntity);
-        assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST,
+            responseEntity.getStatusCode());
         assertThat(responseEntity.getBody().toString(), containsString("4009"));
     }
 }

@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,12 @@
 
 package org.onap.aai.aailog.logs;
 
+import java.net.URI;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+
 import org.onap.aai.util.AAIConstants;
 import org.onap.logging.filter.base.Constants;
 import org.onap.logging.filter.base.MDCSetup;
@@ -28,22 +34,16 @@ import org.onap.logging.ref.slf4j.ONAPLogConstants;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.net.URI;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-
 public class AaiDBTraversalMetricLog extends MDCSetup {
 
     protected static final Logger logger = LoggerFactory.getLogger(AaiDBTraversalMetricLog.class);
     private final String partnerName;
     private static final Marker INVOKE_RETURN = MarkerFactory.getMarker("INVOKE-RETURN");
     private static final String TARGET_ENTITY = ONAPComponents.AAI.toString() + ".DB";
+
     public AaiDBTraversalMetricLog(String subcomponent) {
         partnerName = getPartnerName(subcomponent);
     }
-
 
     protected String getTargetServiceName(Optional<URI> uri) {
         return (getServiceName(uri));
@@ -60,12 +60,11 @@ public class AaiDBTraversalMetricLog extends MDCSetup {
         return serviceName;
     }
 
-
     protected String getTargetEntity(Optional<URI> uri) {
         return TARGET_ENTITY;
     }
 
-    protected String getPartnerName(@Value(AAIConstants.AAI_TRAVERSAL_MS) String subcomponent  ) {
+    protected String getPartnerName(@Value(AAIConstants.AAI_TRAVERSAL_MS) String subcomponent) {
         StringBuilder sb = new StringBuilder(ONAPComponents.AAI.toString()).append(subcomponent);
         return (sb.toString());
     }
@@ -95,7 +94,8 @@ public class AaiDBTraversalMetricLog extends MDCSetup {
     }
 
     protected void setupMDC(Optional<URI> uri) {
-        MDC.put("InvokeTimestamp", ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+        MDC.put("InvokeTimestamp",
+            ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
         MDC.put("TargetServiceName", this.getTargetServiceName(uri));
         MDC.put("StatusCode", ONAPLogConstants.ResponseStatus.INPROGRESS.toString());
         this.setInvocationIdFromMDC();

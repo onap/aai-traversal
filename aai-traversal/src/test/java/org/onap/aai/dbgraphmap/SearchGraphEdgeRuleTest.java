@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,34 +30,34 @@ import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.exceptions.AAIException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+public class SearchGraphEdgeRuleTest extends AAISetup {
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
-public class SearchGraphEdgeRuleTest extends AAISetup{
-	@Rule
-	public ExpectedException expectedEx = ExpectedException.none();
-	
-	
-	@Test
-	public void getEdgeLabelTest() throws AAIException, EdgeRuleNotFoundException {
-		String[] label = searchGraph.getEdgeLabel("customer", "service-subscription");
-		
-		assertEquals("org.onap.relationships.inventory.BelongsTo", label[0]);
-	}
-	
-	@Test
-	public void getEdgeLabelThrowsExceptionWhenNoRuleExists() throws Exception {
-		String nodeTypeA = "complex";
-		String nodeTypeB = "service";
-		expectedEx.expect(org.onap.aai.edges.exceptions.EdgeRuleNotFoundException.class);
-		expectedEx.expectMessage("No rules found for EdgeRuleQuery with filter params node type: complex, node type: service, type: any, isPrivate");
-	    searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);
-	}
-	
-	@Test
-	public void getEdgeLabelThrowsExceptionWhenNodeTypesDoNotExist() throws Exception {
-		String nodeTypeA = "A";
-		String nodeTypeB = "B";
-		expectedEx.expect(org.onap.aai.edges.exceptions.EdgeRuleNotFoundException.class);
-		expectedEx.expectMessage("No rules found for EdgeRuleQuery with filter params node type: A, node type: B, type: any, isPrivate");
-	    searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);    
-	}
+    @Test
+    public void getEdgeLabelTest() throws AAIException, EdgeRuleNotFoundException {
+        String[] label = searchGraph.getEdgeLabel("customer", "service-subscription");
+
+        assertEquals("org.onap.relationships.inventory.BelongsTo", label[0]);
+    }
+
+    @Test
+    public void getEdgeLabelThrowsExceptionWhenNoRuleExists() throws Exception {
+        String nodeTypeA = "complex";
+        String nodeTypeB = "service";
+        expectedEx.expect(org.onap.aai.edges.exceptions.EdgeRuleNotFoundException.class);
+        expectedEx.expectMessage(
+            "No rules found for EdgeRuleQuery with filter params node type: complex, node type: service, type: any, isPrivate");
+        searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);
+    }
+
+    @Test
+    public void getEdgeLabelThrowsExceptionWhenNodeTypesDoNotExist() throws Exception {
+        String nodeTypeA = "A";
+        String nodeTypeB = "B";
+        expectedEx.expect(org.onap.aai.edges.exceptions.EdgeRuleNotFoundException.class);
+        expectedEx.expectMessage(
+            "No rules found for EdgeRuleQuery with filter params node type: A, node type: B, type: any, isPrivate");
+        searchGraph.getEdgeLabel(nodeTypeA, nodeTypeB);
+    }
 }

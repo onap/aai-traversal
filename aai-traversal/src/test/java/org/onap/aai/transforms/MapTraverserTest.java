@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,23 +19,24 @@
  */
 package org.onap.aai.transforms;
 
-import org.onap.aai.transforms.LowerCamelToLowerHyphenConverter;
-import org.onap.aai.transforms.MapTraverser;
 import com.bazaarvoice.jolt.JsonUtils;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;
+
+import org.junit.Test;
+import org.onap.aai.transforms.LowerCamelToLowerHyphenConverter;
+import org.onap.aai.transforms.MapTraverser;
 
 public class MapTraverserTest {
 
     private final String testResources = "src/test/resources/maputils/testcases/";
 
-    private String[] testCases = { "TestCase1.json", "TestCase2.json" };
+    private String[] testCases = {"TestCase1.json", "TestCase2.json"};
     private MapTraverser traverser = new MapTraverser(new LowerCamelToLowerHyphenConverter());
 
     @Test(expected = NullPointerException.class)
-    public void testIfMapIsNullThrowNullPointerException(){
+    public void testIfMapIsNullThrowNullPointerException() {
         Map<String, Object> map = null;
         traverser.convertKeys(map);
     }
@@ -43,13 +44,13 @@ public class MapTraverserTest {
     @Test
     public void runTestCases() throws IOException {
 
-        for(String testCase : testCases){
+        for (String testCase : testCases) {
             Map<String, Object> values = JsonUtils.filepathToMap(testResources + testCase);
 
             Object input = values.get("input");
-            Object actual = traverser.convertKeys((Map<String, Object>)input);
+            Object actual = traverser.convertKeys((Map<String, Object>) input);
             Object output = values.get("output");
-            JoltTestUtil.runArrayOrderObliviousDiffy( "failed case " + testCase, output, actual );
+            JoltTestUtil.runArrayOrderObliviousDiffy("failed case " + testCase, output, actual);
         }
     }
 }

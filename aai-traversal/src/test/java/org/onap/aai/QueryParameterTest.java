@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,16 +19,25 @@
  */
 package org.onap.aai;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
 import com.att.eelf.configuration.EELFManager;
+
+import java.util.*;
+
+import javax.ws.rs.core.Response;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.onap.aai.config.PropertyPasswordConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,15 +45,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
-import javax.ws.rs.core.Response;
-import java.util.*;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TraversalApp.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @Import(TraversalTestConfiguration.class)
@@ -61,7 +65,6 @@ public class QueryParameterTest {
     private String configurationId2;
 
     private String configurationUri2;
-
 
     @Autowired
     RestTemplate restTemplate;
@@ -96,14 +99,14 @@ public class QueryParameterTest {
         httpTestUtil = new HttpTestUtil();
 
         configurationId = "test-" + UUID.randomUUID().toString();
-        configurationUri ="/aai/v13/network/configurations/configuration/" + configurationId;
+        configurationUri = "/aai/v13/network/configurations/configuration/" + configurationId;
         Map<String, String> configurationMap = new HashMap<>();
         configurationMap.put("configuration-id", configurationId);
         String payload = PayloadUtil.getTemplatePayload("configuration.json", configurationMap);
         httpTestUtil.doPut(configurationUri, payload);
 
         configurationId2 = "test-" + UUID.randomUUID().toString();
-        configurationUri2 ="/aai/v13/network/configurations/configuration/" + configurationId2;
+        configurationUri2 = "/aai/v13/network/configurations/configuration/" + configurationId2;
         configurationMap.put("configuration-id", configurationId2);
         payload = PayloadUtil.getTemplatePayload("configuration.json", configurationMap);
         httpTestUtil.doPut(configurationUri2, payload);
@@ -112,7 +115,7 @@ public class QueryParameterTest {
         serviceInstanceId = "test-service-instance1";
         serviceInstanceName = "test service instance1";
 
-        customerUri ="/aai/v13/business/network/customers/customer/" + customerId;
+        customerUri = "/aai/v13/business/network/customers/customer/" + customerId;
         Map<String, String> customerMap = new HashMap<>();
         customerMap.put("customer-id", customerId);
         customerMap.put("service-instance-id", serviceInstanceId);
@@ -125,7 +128,7 @@ public class QueryParameterTest {
         customerId2 = "test-" + UUID.randomUUID().toString();
         serviceInstanceId2 = "test-service-instance2";
         serviceInstanceName2 = "test service instance1";
-        customerUri2 ="/aai/v13/business/customers/customer/" + customerId2;
+        customerUri2 = "/aai/v13/business/customers/customer/" + customerId2;
 
         customerMap = new HashMap<>();
         customerMap.put("customer-id", customerId2);
@@ -135,7 +138,7 @@ public class QueryParameterTest {
         httpTestUtil.doPut(customerUri2, payload);
 
         vnfId = "test-" + UUID.randomUUID().toString();
-        vnfUri ="/aai/v13/network/generic-vnfs/generic-vnf/" + vnfId;
+        vnfUri = "/aai/v13/network/generic-vnfs/generic-vnf/" + vnfId;
         Map<String, String> vnfMap = new HashMap<>();
         vnfMap.put("vnf-id", vnfId);
         vnfMap.put("configuration-id", configurationId);
@@ -145,7 +148,7 @@ public class QueryParameterTest {
         httpTestUtil.doPut(vnfUri, payload);
 
         vnfId2 = "test-" + UUID.randomUUID().toString();
-        vnfUri2 ="/aai/v13/network/generic-vnfs/generic-vnf/" + vnfId2;
+        vnfUri2 = "/aai/v13/network/generic-vnfs/generic-vnf/" + vnfId2;
         vnfMap = new HashMap<>();
         vnfMap.put("vnf-id", vnfId2);
         vnfMap.put("configuration-id", configurationId2);
@@ -180,7 +183,8 @@ public class QueryParameterTest {
 
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", customQueryMap);
         httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         LOGGER.info("Response of custom query : {}", responseEntity.getBody().toString());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
         assertThat(responseEntity.getBody().toString(), containsString(customerUri2));

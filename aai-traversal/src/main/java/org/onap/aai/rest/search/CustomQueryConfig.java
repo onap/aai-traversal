@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,32 +22,35 @@ package org.onap.aai.rest.search;
 import java.util.List;
 
 public class CustomQueryConfig {
-	public CustomQueryConfig() {
-		// used by GetCustomQueryConfig
-	}
-	
-	
-	private String query;
-	private List<String> queryOptionalProperties;
-	private List<String> queryRequiredProperties;
-	
-	public void setQuery(String query) {
-		this.query = query;
-	}
-	public String getQuery() {
-		return this.query;
-	}
+    public CustomQueryConfig() {
+        // used by GetCustomQueryConfig
+    }
 
-	public void setQueryOptionalProperties( List<String> queryOptionalProperties) {
-		this.queryOptionalProperties = queryOptionalProperties;
-	}
-	public List<String> getQueryOptionalProperties( ) {
-		return queryOptionalProperties;
-	}
-	public void setQueryRequiredProperties( List<String> queryRequiredProperties) {
-		this.queryRequiredProperties = queryRequiredProperties;
-	}
-	public List<String> getQueryRequiredProperties( ) {
-		return queryRequiredProperties;
-	}
+    private String query;
+    private List<String> queryOptionalProperties;
+    private List<String> queryRequiredProperties;
+
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public String getQuery() {
+        return this.query;
+    }
+
+    public void setQueryOptionalProperties(List<String> queryOptionalProperties) {
+        this.queryOptionalProperties = queryOptionalProperties;
+    }
+
+    public List<String> getQueryOptionalProperties() {
+        return queryOptionalProperties;
+    }
+
+    public void setQueryRequiredProperties(List<String> queryRequiredProperties) {
+        this.queryRequiredProperties = queryRequiredProperties;
+    }
+
+    public List<String> getQueryRequiredProperties() {
+        return queryRequiredProperties;
+    }
 }

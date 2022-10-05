@@ -10,7 +10,7 @@ package org.onap.aai.rest.search;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,37 +20,41 @@ package org.onap.aai.rest.search;
  * ============LICENSE_END=========================================================
  */
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 
+import java.util.List;
+
 public class CustomQueryDTO {
 
-	private String query;
-	@JsonProperty("optional-properties")
-	private List<String> queryOptionalProperties = Lists.newArrayList();
-	@JsonProperty("required-properties")
-	private List<String> queryRequiredProperties = Lists.newArrayList();;
-	
-	public void setQuery(String query) {
-		this.query = query;
-	}
-	public String getQuery() {
-		return this.query;
-	}
+    private String query;
+    @JsonProperty("optional-properties")
+    private List<String> queryOptionalProperties = Lists.newArrayList();
+    @JsonProperty("required-properties")
+    private List<String> queryRequiredProperties = Lists.newArrayList();;
 
-	public void setQueryOptionalProperties( List<String> queryOptionalProperties) {
-		this.queryOptionalProperties = queryOptionalProperties;
-	}
-	public List<String> getQueryOptionalProperties( ) {
-		return queryOptionalProperties;
-	}
-	public void setQueryRequiredProperties( List<String> queryRequiredProperties) {
-		this.queryRequiredProperties = queryRequiredProperties;
-	}
-	public List<String> getQueryRequiredProperties( ) {
-		return queryRequiredProperties;
-	}
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public String getQuery() {
+        return this.query;
+    }
+
+    public void setQueryOptionalProperties(List<String> queryOptionalProperties) {
+        this.queryOptionalProperties = queryOptionalProperties;
+    }
+
+    public List<String> getQueryOptionalProperties() {
+        return queryOptionalProperties;
+    }
+
+    public void setQueryRequiredProperties(List<String> queryRequiredProperties) {
+        this.queryRequiredProperties = queryRequiredProperties;
+    }
+
+    public List<String> getQueryRequiredProperties() {
+        return queryRequiredProperties;
+    }
 
 }

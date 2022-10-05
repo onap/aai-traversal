@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,16 @@
  */
 package org.onap.aai.interceptors.pre;
 
-import org.onap.aai.interceptors.AAIContainerFilter;
-import org.onap.aai.interceptors.AAIHeaderProperties;
+import java.io.IOException;
 
 import javax.annotation.Priority;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
-import java.io.IOException;
+
+import org.onap.aai.interceptors.AAIContainerFilter;
+import org.onap.aai.interceptors.AAIHeaderProperties;
 
 /**
  * The Class HttpHeaderInterceptor
@@ -35,16 +36,18 @@ import java.io.IOException;
 @PreMatching
 @Priority(AAIRequestFilterPriority.HTTP_HEADER)
 public class HttpHeaderInterceptor extends AAIContainerFilter implements ContainerRequestFilter {
-	public static final String patchMethod = "PATCH";
-	
+    public static final String patchMethod = "PATCH";
+
     @Override
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {
-    	String overrideMethod = containerRequestContext.getHeaderString(AAIHeaderProperties.HTTP_METHOD_OVERRIDE);
-    	String httpMethod = containerRequestContext.getMethod();
-    	
-		if (HttpMethod.POST.equalsIgnoreCase(httpMethod) && patchMethod.equalsIgnoreCase(overrideMethod)) {
-			containerRequestContext.setMethod(patchMethod);
-		}
+        String overrideMethod =
+            containerRequestContext.getHeaderString(AAIHeaderProperties.HTTP_METHOD_OVERRIDE);
+        String httpMethod = containerRequestContext.getMethod();
+
+        if (HttpMethod.POST.equalsIgnoreCase(httpMethod)
+            && patchMethod.equalsIgnoreCase(overrideMethod)) {
+            containerRequestContext.setMethod(patchMethod);
+        }
     }
-    
+
 }

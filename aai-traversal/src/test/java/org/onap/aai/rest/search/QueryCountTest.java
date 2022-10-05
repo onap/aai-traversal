@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,32 +19,33 @@
  */
 package org.onap.aai.rest.search;
 
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.onap.aai.exceptions.AAIException;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.onap.aai.exceptions.AAIException;
 
 public abstract class QueryCountTest extends QueryTest {
 
-	//listOfMapEntryForCoutnQueries is for when the query returns a HashMap, not a Vertex
-	protected List<Map.Entry<String, Long>> listOfMapEntryForCoutnQueries;
+    // listOfMapEntryForCoutnQueries is for when the query returns a HashMap, not a Vertex
+    protected List<Map.Entry<String, Long>> listOfMapEntryForCoutnQueries;
 
+    public QueryCountTest() throws AAIException {
+        super();
+    }
 
-	public QueryCountTest() throws AAIException {
-		super();
-	}
+    @Override
+    public void run() {
+        GraphTraversal<HashMap<String, Long>, HashMap<String, Long>> result =
+            (GraphTraversal<HashMap<String, Long>, HashMap<String, Long>>) shell
+                .executeTraversal(query, params);
 
-	@Override
-	public void run() {
-		GraphTraversal<HashMap<String,Long>, HashMap<String,Long>> result = (GraphTraversal<HashMap<String,Long>, HashMap<String,Long>>)shell.executeTraversal(query, params);
+        assertThat("all hash maps found", listOfMapEntryForCoutnQueries, is(result.toList()));
 
-		assertThat("all hash maps found", listOfMapEntryForCoutnQueries, is(result.toList()));
-
-	}
+    }
 
 }

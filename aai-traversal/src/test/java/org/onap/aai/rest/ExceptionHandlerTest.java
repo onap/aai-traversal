@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,18 @@
  */
 package org.onap.aai.rest;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sun.istack.SAXParseException2;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -35,13 +38,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class ExceptionHandlerTest {
 
@@ -57,10 +59,10 @@ public class ExceptionHandlerTest {
     private ExceptionHandler handler = new ExceptionHandler();
 
     @Before
-    public void setup(){
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        MultivaluedHashMap headersMultiMap     = new MultivaluedHashMap<>();
+        MultivaluedHashMap headersMultiMap = new MultivaluedHashMap<>();
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -82,11 +84,12 @@ public class ExceptionHandlerTest {
 
         assertNotNull(response);
         assertNull(response.getEntity());
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),  response.getStatus());
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void testConversionOfWebApplicationResponseWhenUmarshalExceptionResultBadRequest() throws Exception {
+    public void testConversionOfWebApplicationResponseWhenUmarshalExceptionResultBadRequest()
+        throws Exception {
 
         SAXParseException2 mockSaxParseException = mock(SAXParseException2.class);
         Exception exception = new WebApplicationException(mockSaxParseException);
@@ -94,7 +97,7 @@ public class ExceptionHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getEntity());
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),  response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
@@ -106,7 +109,7 @@ public class ExceptionHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getEntity());
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),  response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
@@ -118,7 +121,7 @@ public class ExceptionHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getEntity());
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),  response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
@@ -131,13 +134,13 @@ public class ExceptionHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getEntity());
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),  response.getStatus());
-
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     }
 
     @Test
-    public void testConversionWhenUnknownExceptionResultBadRequestForXmlResponseType() throws Exception {
+    public void testConversionWhenUnknownExceptionResultBadRequestForXmlResponseType()
+        throws Exception {
 
         List<MediaType> outputMediaTypes = new ArrayList<>();
         outputMediaTypes.add(MediaType.valueOf("application/xml"));
@@ -149,6 +152,6 @@ public class ExceptionHandlerTest {
 
         assertNotNull(response);
         assertNotNull(response.getEntity());
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),  response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 }

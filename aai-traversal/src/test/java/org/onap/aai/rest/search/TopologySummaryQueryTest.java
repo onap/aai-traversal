@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,91 +26,100 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Test;
-
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 
 public class TopologySummaryQueryTest extends QueryTest {
 
-	public TopologySummaryQueryTest() throws AAIException, NoEdgeRuleFoundException {
-		super();
-	}
+    public TopologySummaryQueryTest() throws AAIException, NoEdgeRuleFoundException {
+        super();
+    }
 
-	@Test
-	public void run() {
-		super.run();
-	}
-	
-	@Override
-	protected void createGraph() throws AAIException, NoEdgeRuleFoundException {
-		Vertex vnf = graph.addVertex(T.label, "generic-vnf", T.id, "0", "aai-node-type", "generic-vnf", "vnf-id", "vnfuuid");
-		Vertex vnfint = graph.addVertex(T.label, "l-interface", T.id, "10", "aai-node-type", "l-interface", "interface-name", "xe0/0/0");
-		Vertex vnfc = graph.addVertex(T.label, "vnfc", T.id, "1", "aai-node-type", "vnfc");
-		Vertex vserver = graph.addVertex(T.label, "vserver", T.id, "2", "aai-node-type", "vserver");
-		Vertex vserverint = graph.addVertex(T.label, "l-interface", T.id, "11", "aai-node-type", "l-interface", "interface-name", "xe0/0/0");
-		Vertex tenant = graph.addVertex(T.label, "tenant", T.id, "3", "aai-node-type", "tenant");
-		Vertex region = graph.addVertex(T.label, "could-region", T.id, "4", "aai-node-type", "cloud-region");
-		Vertex image = graph.addVertex(T.label, "image", T.id, "5", "aai-node-type", "image");
-		Vertex flavor = graph.addVertex(T.label, "flavor", T.id, "6", "aai-node-type", "flavor");
-		Vertex pserver = graph.addVertex(T.label, "pserver", T.id, "7", "aai-node-type", "pserver");
-		Vertex pserverint = graph.addVertex(T.label, "p-interface", T.id, "9", "aai-node-type", "p-interface", "interface-name", "xe0/0/0");
-		Vertex complex = graph.addVertex(T.label, "complex", T.id, "8", "aai-node-type", "complex");
-		Vertex lineofbusiness = graph.addVertex(T.label, "line-of-business", T.id, "12", "aai-node-type", "line-of-business");
-		Vertex platform = graph.addVertex(T.label, "platform", T.id, "13", "aai-node-type", "platform");
-		Vertex serviceinstance = graph.addVertex(T.label, "service-instance", T.id, "14", "aai-node-type", "service-instance");
-		Vertex owningentity = graph.addVertex(T.label, "owning-entity", T.id, "15", "aai-node-type", "owning-entity");
-		Vertex project = graph.addVertex(T.label, "project", T.id, "16", "aai-node-type", "project");
-		
-		GraphTraversalSource g = graph.traversal();
-		rules.addEdge(g, vnf, vnfc);
-		rules.addEdge(g, vnf, vserver);
-		rules.addEdge(g, vnfc, vserver);
-		rules.addTreeEdge(g, vserver, tenant);
-		rules.addTreeEdge(g, tenant, region);
-		rules.addEdge(g, vserver, image);
-		rules.addEdge(g, vserver, flavor);
-		rules.addEdge(g, vserver, pserver);
-		rules.addEdge(g, pserver, complex);
-		rules.addEdge(g, region, complex);
-		rules.addTreeEdge(g, pserver, pserverint);
-		rules.addTreeEdge(g, vnf, vnfint);
-		rules.addTreeEdge(g, vserver, vserverint);
-		rules.addEdge(g, vnf, lineofbusiness);
-		rules.addEdge(g, vnf, platform);
-		rules.addEdge(g, vnf, serviceinstance);
-		rules.addEdge(g, serviceinstance, owningentity);
-		rules.addEdge(g, serviceinstance, project);
-		
-		expectedResult.add(vnf);
-		expectedResult.add(vnfc);
-		expectedResult.add(vserver);
-		expectedResult.add(tenant);
-		expectedResult.add(region);
-		expectedResult.add(image);
-		expectedResult.add(flavor);
-		expectedResult.add(pserver);
-		expectedResult.add(complex);
-		expectedResult.add(lineofbusiness);
-		expectedResult.add(platform);
-		expectedResult.add(owningentity);
-		expectedResult.add(project);
-		
-	}
+    @Test
+    public void run() {
+        super.run();
+    }
 
-	@Override
-	protected String getQueryName() {
-		return "topology-summary";
-	}
+    @Override
+    protected void createGraph() throws AAIException, NoEdgeRuleFoundException {
+        Vertex vnf = graph.addVertex(T.label, "generic-vnf", T.id, "0", "aai-node-type",
+            "generic-vnf", "vnf-id", "vnfuuid");
+        Vertex vnfint = graph.addVertex(T.label, "l-interface", T.id, "10", "aai-node-type",
+            "l-interface", "interface-name", "xe0/0/0");
+        Vertex vnfc = graph.addVertex(T.label, "vnfc", T.id, "1", "aai-node-type", "vnfc");
+        Vertex vserver = graph.addVertex(T.label, "vserver", T.id, "2", "aai-node-type", "vserver");
+        Vertex vserverint = graph.addVertex(T.label, "l-interface", T.id, "11", "aai-node-type",
+            "l-interface", "interface-name", "xe0/0/0");
+        Vertex tenant = graph.addVertex(T.label, "tenant", T.id, "3", "aai-node-type", "tenant");
+        Vertex region =
+            graph.addVertex(T.label, "could-region", T.id, "4", "aai-node-type", "cloud-region");
+        Vertex image = graph.addVertex(T.label, "image", T.id, "5", "aai-node-type", "image");
+        Vertex flavor = graph.addVertex(T.label, "flavor", T.id, "6", "aai-node-type", "flavor");
+        Vertex pserver = graph.addVertex(T.label, "pserver", T.id, "7", "aai-node-type", "pserver");
+        Vertex pserverint = graph.addVertex(T.label, "p-interface", T.id, "9", "aai-node-type",
+            "p-interface", "interface-name", "xe0/0/0");
+        Vertex complex = graph.addVertex(T.label, "complex", T.id, "8", "aai-node-type", "complex");
+        Vertex lineofbusiness = graph.addVertex(T.label, "line-of-business", T.id, "12",
+            "aai-node-type", "line-of-business");
+        Vertex platform =
+            graph.addVertex(T.label, "platform", T.id, "13", "aai-node-type", "platform");
+        Vertex serviceinstance = graph.addVertex(T.label, "service-instance", T.id, "14",
+            "aai-node-type", "service-instance");
+        Vertex owningentity =
+            graph.addVertex(T.label, "owning-entity", T.id, "15", "aai-node-type", "owning-entity");
+        Vertex project =
+            graph.addVertex(T.label, "project", T.id, "16", "aai-node-type", "project");
 
-	@Override
-	protected void addStartNode(GraphTraversal<Vertex, Vertex> g) {
-		g.has("vnf-id", "vnfuuid");
-		
-	}
+        GraphTraversalSource g = graph.traversal();
+        rules.addEdge(g, vnf, vnfc);
+        rules.addEdge(g, vnf, vserver);
+        rules.addEdge(g, vnfc, vserver);
+        rules.addTreeEdge(g, vserver, tenant);
+        rules.addTreeEdge(g, tenant, region);
+        rules.addEdge(g, vserver, image);
+        rules.addEdge(g, vserver, flavor);
+        rules.addEdge(g, vserver, pserver);
+        rules.addEdge(g, pserver, complex);
+        rules.addEdge(g, region, complex);
+        rules.addTreeEdge(g, pserver, pserverint);
+        rules.addTreeEdge(g, vnf, vnfint);
+        rules.addTreeEdge(g, vserver, vserverint);
+        rules.addEdge(g, vnf, lineofbusiness);
+        rules.addEdge(g, vnf, platform);
+        rules.addEdge(g, vnf, serviceinstance);
+        rules.addEdge(g, serviceinstance, owningentity);
+        rules.addEdge(g, serviceinstance, project);
 
-	@Override
-	protected void addParam(Map<String, Object> params) {
-		return;		
-	}
+        expectedResult.add(vnf);
+        expectedResult.add(vnfc);
+        expectedResult.add(vserver);
+        expectedResult.add(tenant);
+        expectedResult.add(region);
+        expectedResult.add(image);
+        expectedResult.add(flavor);
+        expectedResult.add(pserver);
+        expectedResult.add(complex);
+        expectedResult.add(lineofbusiness);
+        expectedResult.add(platform);
+        expectedResult.add(owningentity);
+        expectedResult.add(project);
+
+    }
+
+    @Override
+    protected String getQueryName() {
+        return "topology-summary";
+    }
+
+    @Override
+    protected void addStartNode(GraphTraversal<Vertex, Vertex> g) {
+        g.has("vnf-id", "vnfuuid");
+
+    }
+
+    @Override
+    protected void addParam(Map<String, Object> params) {
+        return;
+    }
 
 }

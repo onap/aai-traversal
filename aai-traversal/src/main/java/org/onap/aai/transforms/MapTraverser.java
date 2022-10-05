@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,23 +19,22 @@
  */
 package org.onap.aai.transforms;
 
-
-import joptsimple.internal.Objects;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import joptsimple.internal.Objects;
+
 public class MapTraverser {
 
     private Converter converter;
 
-    public MapTraverser(Converter converter){
+    public MapTraverser(Converter converter) {
         this.converter = converter;
     }
 
-    public Map<String, Object> convertKeys(Map<String, Object> map){
+    public Map<String, Object> convertKeys(Map<String, Object> map) {
 
         Objects.ensureNotNull(map);
 
@@ -45,15 +44,16 @@ public class MapTraverser {
         return modifiedMap;
     }
 
-    private Map<String, Object> convertKeys(Map<String, Object> original, Map<String, Object> modified){
+    private Map<String, Object> convertKeys(Map<String, Object> original,
+        Map<String, Object> modified) {
 
-        for(Map.Entry<String, Object> entry : original.entrySet()){
+        for (Map.Entry<String, Object> entry : original.entrySet()) {
             String key = entry.getKey();
             key = converter.convert(key);
             Object value = entry.getValue();
-            if(value instanceof Map){
+            if (value instanceof Map) {
                 modified.put(key, convertKeys((Map<String, Object>) value, new HashMap<>()));
-            } else if(value instanceof List){
+            } else if (value instanceof List) {
                 modified.put(key, convertKeys((List<Object>) value));
             } else {
                 modified.put(key, value);
@@ -63,16 +63,16 @@ public class MapTraverser {
         return modified;
     }
 
-    public List<Object> convertKeys(List<Object> list){
+    public List<Object> convertKeys(List<Object> list) {
 
         List<Object> modifiedList = new ArrayList<>();
-        if(list != null && !list.isEmpty()){
+        if (list != null && !list.isEmpty()) {
 
-            for(Object o : list){
-                if(o instanceof Map){
+            for (Object o : list) {
+                if (o instanceof Map) {
                     Map<String, Object> map = (Map<String, Object>) o;
                     modifiedList.add(convertKeys(map));
-                } else if(o instanceof List){
+                } else if (o instanceof List) {
                     List<Object> l = (List<Object>) o;
                     modifiedList.add(convertKeys(l));
                 } else {

@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,32 +39,32 @@ package org.onap.aai.rest.search;
  * ============LICENSE_END=========================================================
  */
 
-import org.springframework.util.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.springframework.util.StringUtils;
 
 public class CustomQueryConfigDTO {
 
-	@JsonProperty("stored-query")
-	private String storedQuery;
-	@JsonProperty("query")
-	private CustomQueryDTO queryDTO;
+    @JsonProperty("stored-query")
+    private String storedQuery;
+    @JsonProperty("query")
+    private CustomQueryDTO queryDTO;
 
-	public CustomQueryDTO getQueryDTO() {
-		if(queryDTO == null)
-			queryDTO = new CustomQueryDTO();
-		if (!StringUtils.isEmpty(storedQuery)) {
-			queryDTO.setQuery(storedQuery);
-		}
-		return queryDTO;
-	}
+    public CustomQueryDTO getQueryDTO() {
+        if (queryDTO == null)
+            queryDTO = new CustomQueryDTO();
+        if (!StringUtils.isEmpty(storedQuery)) {
+            queryDTO.setQuery(storedQuery);
+        }
+        return queryDTO;
+    }
 
-	public void setQueryDTO(CustomQueryDTO query) {
-		this.queryDTO = query;
-	}
+    public void setQueryDTO(CustomQueryDTO query) {
+        this.queryDTO = query;
+    }
 
-	public void setStoredQuery(String storedQuery) {
-		this.storedQuery = storedQuery;
-	}
-	
+    public void setStoredQuery(String storedQuery) {
+        this.storedQuery = storedQuery;
+    }
+
 }

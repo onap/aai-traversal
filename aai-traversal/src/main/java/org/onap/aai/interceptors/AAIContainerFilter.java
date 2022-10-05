@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,19 +23,19 @@ import java.util.UUID;
 
 import org.onap.aai.util.FormatDate;
 
-public abstract class  AAIContainerFilter {
-    
-	protected String genDate() {
-		FormatDate fd = new FormatDate("YYMMdd-HH:mm:ss:SSS");
-		return fd.getDateTime();
-	}
-	
-	protected boolean isValidUUID(String transId) {
-		try {
-			UUID.fromString(transId);
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-		return true;
-	}
+public abstract class AAIContainerFilter {
+
+    protected String genDate() {
+        FormatDate fd = new FormatDate("YYMMdd-HH:mm:ss:SSS");
+        return fd.getDateTime();
+    }
+
+    protected boolean isValidUUID(String transId) {
+        try {
+            UUID.fromString(transId);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
 }

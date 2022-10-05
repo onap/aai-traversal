@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,13 @@ package org.onap.aai.rest.dsl;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.edges.EdgeRule;
 import org.onap.aai.edges.EdgeRuleQuery;
@@ -34,12 +41,6 @@ import org.onap.aai.schema.enums.PropertyMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class DslQueryBuilder {
 
@@ -84,7 +85,7 @@ public class DslQueryBuilder {
      */
     public DslQueryBuilder end(long selectCounter) {
         selectCount = selectCounter;
-        if(selectCounter <= 0) {
+        if (selectCounter <= 0) {
             return this.end();
         } else {
             query.append(".select('stepMain').fold().dedup()");
@@ -108,26 +109,28 @@ public class DslQueryBuilder {
     }
 
     public DslQueryBuilder edgeQuery(Edge edge, String aNode, String bNode) {
-        List<String> edgeLabels = edge.getLabels().stream().map(edgeLabel -> StringUtils.quote(edgeLabel.getLabel())).collect(Collectors.toList());
+        List<String> edgeLabels = edge.getLabels().stream()
+            .map(edgeLabel -> StringUtils.quote(edgeLabel.getLabel())).collect(Collectors.toList());
         EdgeRuleQuery.Builder baseQ = new EdgeRuleQuery.Builder(aNode, bNode);
 
-        if((AAIDirection.valueOf(edge.getDirection().name())) != AAIDirection.BOTH) {
-           baseQ = baseQ.direction(AAIDirection.valueOf(edge.getDirection().name()));
+        if ((AAIDirection.valueOf(edge.getDirection().name())) != AAIDirection.BOTH) {
+            baseQ = baseQ.direction(AAIDirection.valueOf(edge.getDirection().name()));
         }
         return edgeQueryWithBuilder(edgeLabels, aNode, bNode, baseQ);
     }
 
-    private DslQueryBuilder edgeQueryWithBuilder(List<String> edgeLabels, String aNode, String bNode, EdgeRuleQuery.Builder edgeBuilder) {
-        //TODO : change this for fuzzy search.
+    private DslQueryBuilder edgeQueryWithBuilder(List<String> edgeLabels, String aNode,
+        String bNode, EdgeRuleQuery.Builder edgeBuilder) {
+        // TODO : change this for fuzzy search.
 
         String edgeType = "";
         String edgeLabelsClause = "";
         String edgeTraversalClause = ".createEdgeTraversal(";
 
-
         if (!edgeLabels.isEmpty()) {
             edgeTraversalClause = ".createEdgeTraversalWithLabels(";
-            edgeLabelsClause = String.join("", ", new ArrayList<>(Arrays.asList(", String.join(",", edgeLabels), "))");
+            edgeLabelsClause = String.join("", ", new ArrayList<>(Arrays.asList(",
+                String.join(",", edgeLabels), "))");
         }
         LOGGER.debug("EdgeLabels Clause: {}", edgeLabelsClause);
 
@@ -140,23 +143,27 @@ public class DslQueryBuilder {
                     try {
                         rules.putAll(edgeRules.getRules(edgeBuilder.label(label).build()));
                     } catch (EdgeRuleNotFoundException e) {
-                        queryException.append("Exception while finding the edge rule between the nodeTypes: ").append(aNode).append(", ").append(bNode).append(label);
+                        queryException
+                            .append("Exception while finding the edge rule between the nodeTypes: ")
+                            .append(aNode).append(", ").append(bNode).append(label);
                     }
                 });
 
             }
         } catch (EdgeRuleNotFoundException e) {
             if (!edgeLabels.isEmpty()) {
-                queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode).append(", ").append(bNode).append(edgeLabels.stream().toString());
-            }
-            else {
-                queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode).append(", ").append(bNode);
+                queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode)
+                    .append(", ").append(bNode).append(edgeLabels.stream().toString());
+            } else {
+                queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode)
+                    .append(", ").append(bNode);
             }
             return this;
         }
 
         if (rules.isEmpty() || rules.keys().isEmpty()) {
-            queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode).append(", ").append(bNode);
+            queryException.append("- No EdgeRule found for passed nodeTypes: ").append(aNode)
+                .append(", ").append(bNode);
         } else {
             if (edgeLabels.isEmpty()) {
                 if (edgeRules.hasRule(edgeBuilder.edgeType(EdgeType.TREE).build())) {
@@ -172,16 +179,15 @@ public class DslQueryBuilder {
             }
         }
 
-        query.append(edgeTraversalClause).append(edgeType).append(" '").append(aNode)
-                .append("','").append(bNode).append("'").append(edgeLabelsClause).append(")");
+        query.append(edgeTraversalClause).append(edgeType).append(" '").append(aNode).append("','")
+            .append(bNode).append("'").append(edgeLabelsClause).append(")");
 
         return this;
     }
 
-
     public DslQueryBuilder where(boolean isNot) {
         query.append(".where(");
-        if(isNot){
+        if (isNot) {
             query.append("builder.newInstance().not(");
         }
         return this;
@@ -189,7 +195,7 @@ public class DslQueryBuilder {
 
     public DslQueryBuilder endWhere(boolean isNot) {
         query.append(")");
-        if(isNot){
+        if (isNot) {
             query.append(")");
         }
         return this;
@@ -201,13 +207,14 @@ public class DslQueryBuilder {
     }
 
     public DslQueryBuilder filter(boolean isNot, String node, String key, List<String> values) {
-        return this.filterPropertyStart(isNot,values).filterPropertyKeys(node, key, values).filterPropertyEnd();
+        return this.filterPropertyStart(isNot, values).filterPropertyKeys(node, key, values)
+            .filterPropertyEnd();
     }
 
     public DslQueryBuilder filterPropertyStart(boolean isNot, List<String> values) {
         if (isNot) {
             query.append(".getVerticesExcludeByProperty(");
-        } else if(values!= null && !values.isEmpty() && Boolean.parseBoolean(values.get(0))) {
+        } else if (values != null && !values.isEmpty() && Boolean.parseBoolean(values.get(0))) {
             query.append(".getVerticesByBooleanProperty(");
         } else {
             query.append(".getVerticesByProperty(");
@@ -225,10 +232,8 @@ public class DslQueryBuilder {
             Introspector obj = loader.introspectorFromName(node);
 
             if (keys.isEmpty()) {
-                queryException.append("No keys sent. Valid keys for ")
-                        .append(node)
-                        .append(" are ")
-                        .append(String.join(",", obj.getIndexedProperties()));
+                queryException.append("No keys sent. Valid keys for ").append(node).append(" are ")
+                    .append(String.join(",", obj.getIndexedProperties()));
                 return this;
             }
 
@@ -241,21 +246,22 @@ public class DslQueryBuilder {
 
     public DslQueryBuilder select(long selectCounter, List<String> keys) {
         /*
-         * TODO : isNot should look at the vertex properties and include everything except the notKeys
+         * TODO : isNot should look at the vertex properties and include everything except the
+         * notKeys
          */
 
         Pattern p = Pattern.compile("aai-node-type");
         Matcher m = p.matcher(query);
         int count = 0;
-        while (m.find()){
+        while (m.find()) {
             count++;
         }
 
         if (selectCounter == count || keys == null) {
             String selectStep = "step" + selectCounter;
-//          String keysArray = String.join(",", keys);
-            query.append(".as('").append(selectStep).append("')")
-                    .append(".as('stepMain').select('").append(selectStep).append("')");
+            // String keysArray = String.join(",", keys);
+            query.append(".as('").append(selectStep).append("')").append(".as('stepMain').select('")
+                .append(selectStep).append("')");
         }
         return this;
     }
@@ -263,7 +269,8 @@ public class DslQueryBuilder {
     public DslQueryBuilder filterPropertyKeys(String node, String key, List<String> values) {
         try {
             Introspector obj = loader.introspectorFromName(node);
-            Optional<String> alias = obj.getPropertyMetadata(key.replace("'",""), PropertyMetadata.DB_ALIAS);
+            Optional<String> alias =
+                obj.getPropertyMetadata(key.replace("'", ""), PropertyMetadata.DB_ALIAS);
             if (alias.isPresent()) {
                 key = StringUtils.quote(alias.get());
             }
@@ -271,14 +278,15 @@ public class DslQueryBuilder {
             query.append(key);
 
             if (values != null && !values.isEmpty()) {
-                if (values.size() > 1) {        // values.size() > 1 indicates possibility of a list
+                if (values.size() > 1) { // values.size() > 1 indicates possibility of a list
                     // eliminate quotes from each element
                     for (int i = 0; i < values.size(); i++) {
                         values.set(i, getConvertedValue(classType, key, values.get(i)));
                     }
                     String valuesArray = String.join(",", values);
-                    query.append(",").append(" new ArrayList<>(Arrays.asList(").append(valuesArray).append("))");
-                } else {                        // otherwise values should only contain one value
+                    query.append(",").append(" new ArrayList<>(Arrays.asList(").append(valuesArray)
+                        .append("))");
+                } else { // otherwise values should only contain one value
                     query.append(",").append(getConvertedValue(classType, key, values.get(0)));
                 }
             }
@@ -297,30 +305,29 @@ public class DslQueryBuilder {
                 if (classType.equals(Integer.class.getName())) {
                     int castInt = Integer.parseInt(convertedValue);
                     convertedValue = String.valueOf(castInt);
-                }
-                else if (classType.equals(Long.class.getName())) {
+                } else if (classType.equals(Long.class.getName())) {
                     long castLong = Long.parseLong(convertedValue);
                     convertedValue = String.valueOf(castLong);
-                }
-                else if (classType.equals(Boolean.class.getName())) {
-                    if ("1".equals(convertedValue)) {           // checking for integer true value
+                } else if (classType.equals(Boolean.class.getName())) {
+                    if ("1".equals(convertedValue)) { // checking for integer true value
                         convertedValue = "true";
                     }
                     boolean castBoolean = Boolean.parseBoolean(convertedValue);
                     convertedValue = String.valueOf(castBoolean);
                 }
             } catch (Exception e) {
-                queryException.append("AAI_4020 ").append(String.format("Value [%s] is not an instance of the expected data type for property key [%s] and cannot be converted. " +
-                        "Expected: class %s, found: class %s", value, key, classType, String.class.getName()));
+                queryException.append("AAI_4020 ").append(String.format(
+                    "Value [%s] is not an instance of the expected data type for property key [%s] and cannot be converted. "
+                        + "Expected: class %s, found: class %s",
+                    value, key, classType, String.class.getName()));
             }
         }
         return convertedValue;
     }
 
     private boolean isTypeSensitive(String classType) {
-        if (classType.equals(Integer.class.getName()) ||
-                classType.equals(Boolean.class.getName()) ||
-                classType.equals(Long.class.getName())) {
+        if (classType.equals(Integer.class.getName()) || classType.equals(Boolean.class.getName())
+            || classType.equals(Long.class.getName())) {
             return true;
         }
         return false;
@@ -367,6 +374,5 @@ public class DslQueryBuilder {
         query.append(",");
         return this;
     }
-
 
 }

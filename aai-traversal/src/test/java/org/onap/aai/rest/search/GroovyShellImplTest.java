@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,17 @@
  */
 package org.onap.aai.rest.search;
 
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import groovy.lang.MissingPropertyException;
+
+import java.net.URI;
+import java.util.*;
+
+import javax.ws.rs.core.*;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.Before;
@@ -33,17 +43,9 @@ import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.setup.SchemaVersion;
 
-import javax.ws.rs.core.*;
-import java.net.URI;
-import java.util.*;
+public class GroovyShellImplTest extends AAISetup {
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class GroovyShellImplTest extends AAISetup{
-
-    GroovyShellImpl  groovyShellImpl ;
+    GroovyShellImpl groovyShellImpl;
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
 
@@ -78,11 +80,11 @@ public class GroovyShellImplTest extends AAISetup{
     public void setup() {
 
         version = schemaVersions.getDefaultVersion();
-        httpHeaders         = mock(HttpHeaders.class);
-        uriInfo             = mock(UriInfo.class);
+        httpHeaders = mock(HttpHeaders.class);
+        uriInfo = mock(UriInfo.class);
 
-        headersMultiMap     = new MultivaluedHashMap<>();
-        queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
+        headersMultiMap = new MultivaluedHashMap<>();
+        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -103,19 +105,18 @@ public class GroovyShellImplTest extends AAISetup{
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
-
         when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getQueryParameters(false)).thenReturn(queryParameters);
 
-        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very unreasonable
+        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very
+        // unreasonable
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
-        dbEngine = new JanusGraphDBEngine(
-                queryStyle,
-                loader);
-        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton);
+        dbEngine = new JanusGraphDBEngine(queryStyle, loader);
+        GenericQueryProcessor.Builder builder =
+            new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton);
         builder.queryFrom(URI.create("te"));
         builder.queryFrom("te", "gremlin");
         builder.create();
@@ -130,7 +131,8 @@ public class GroovyShellImplTest extends AAISetup{
         GraphTraversal<Vertex, Vertex> g = Mockito.mock(GraphTraversal.class);
         g.has("cloud-region-id", "cloud-region-id-1");
         Map<String, Object> params = new HashMap<>();
-        groovyShellImpl.runQuery("vnfs-fromServiceInstance", params, dbEngine.asAdmin().getTraversalSource());
+        groovyShellImpl.runQuery("vnfs-fromServiceInstance", params,
+            dbEngine.asAdmin().getTraversalSource());
     }
 
 }

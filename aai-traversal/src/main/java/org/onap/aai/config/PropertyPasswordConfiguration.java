@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.config;
+
+import com.att.eelf.configuration.EELFManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,19 +31,20 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.att.eelf.configuration.EELFManager;
-import org.apache.commons.io.IOUtils;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.*;
 
-public class PropertyPasswordConfiguration implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class PropertyPasswordConfiguration
+    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final Pattern decodePasswordPattern = Pattern.compile("password\\((.*?)\\)");
     private PasswordDecoder passwordDecoder = new JettyPasswordDecoder();
-    private static final Logger logger = LoggerFactory.getLogger(PropertyPasswordConfiguration.class.getName());
+    private static final Logger logger =
+        LoggerFactory.getLogger(PropertyPasswordConfiguration.class.getName());
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -113,21 +116,25 @@ public class PropertyPasswordConfiguration implements ApplicationContextInitiali
             Map<String, Object> propertyOverrides = new LinkedHashMap<>();
             decodePasswords(propertySource, propertyOverrides);
             if (!propertyOverrides.isEmpty()) {
-                PropertySource<?> decodedProperties = new MapPropertySource("decoded "+ propertySource.getName(), propertyOverrides);
-                environment.getPropertySources().addBefore(propertySource.getName(), decodedProperties);
+                PropertySource<?> decodedProperties =
+                    new MapPropertySource("decoded " + propertySource.getName(), propertyOverrides);
+                environment.getPropertySources().addBefore(propertySource.getName(),
+                    decodedProperties);
             }
 
         }
         if (!sslProps.isEmpty()) {
             logger.debug("Using AAF Certman files");
-            PropertySource<?> additionalProperties = new MapPropertySource("additionalProperties", sslProps);
+            PropertySource<?> additionalProperties =
+                new MapPropertySource("additionalProperties", sslProps);
             environment.getPropertySources().addFirst(additionalProperties);
         }
     }
 
     private void decodePasswords(PropertySource<?> source, Map<String, Object> propertyOverrides) {
         if (source instanceof EnumerablePropertySource) {
-            EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) source;
+            EnumerablePropertySource<?> enumerablePropertySource =
+                (EnumerablePropertySource<?>) source;
             for (String key : enumerablePropertySource.getPropertyNames()) {
                 Object rawValue = source.getProperty(key);
                 if (rawValue instanceof String) {
@@ -139,7 +146,8 @@ public class PropertyPasswordConfiguration implements ApplicationContextInitiali
     }
 
     private String decodePasswordsInString(String input) {
-        if (input == null) return null;
+        if (input == null)
+            return null;
         StringBuffer output = new StringBuffer();
         Matcher matcher = decodePasswordPattern.matcher(input);
         while (matcher.find()) {

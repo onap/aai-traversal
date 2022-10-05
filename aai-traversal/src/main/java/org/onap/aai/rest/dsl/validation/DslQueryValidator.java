@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,12 @@
  */
 package org.onap.aai.rest.dsl.validation;
 
-import org.onap.aai.util.AAIConfig;
-import org.onap.aai.util.TraversalConstants;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.onap.aai.util.AAIConfig;
+import org.onap.aai.util.TraversalConstants;
 
 public class DslQueryValidator extends DslValidator {
 
@@ -34,7 +34,9 @@ public class DslQueryValidator extends DslValidator {
 
     public boolean validate(DslValidatorRule dslValidatorRule) {
 
-        return validateLoop(dslValidatorRule.isValidateLoop(), dslValidatorRule.getEdges()) && validateNodeCount(dslValidatorRule.isValidateNodeCount(), dslValidatorRule.getNodeCount());
+        return validateLoop(dslValidatorRule.isValidateLoop(), dslValidatorRule.getEdges())
+            && validateNodeCount(dslValidatorRule.isValidateNodeCount(),
+                dslValidatorRule.getNodeCount());
     }
 
     private boolean validateLoop(boolean isValidateLoop, List<String> edges) {
@@ -50,7 +52,8 @@ public class DslQueryValidator extends DslValidator {
     }
 
     private boolean validateNodeCount(boolean isValidateNodeCount, int nodeCount) {
-        String maxNodeString = AAIConfig.get("aai.dsl.max.nodecount", TraversalConstants.DSL_MAX_NODE_COUNT);
+        String maxNodeString =
+            AAIConfig.get("aai.dsl.max.nodecount", TraversalConstants.DSL_MAX_NODE_COUNT);
         int maxNodeCount = Integer.parseInt(maxNodeString);
         if (isValidateNodeCount && nodeCount > maxNodeCount) {
             this.errorMessage.append("NodeCount Validation failed");

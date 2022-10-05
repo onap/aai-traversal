@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,20 @@
  */
 package org.onap.aai;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.*;
+
+import javax.ws.rs.core.Response;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,19 +40,14 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
-import javax.ws.rs.core.Response;
-import java.util.*;
-
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TraversalApp.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @Import(TraversalTestConfiguration.class)
 public class SubgraphPruneTest {
-
 
     private HttpTestUtil httpTestUtil;
 
@@ -73,7 +75,7 @@ public class SubgraphPruneTest {
         httpTestUtil = new HttpTestUtil();
 
         hostname = "test-" + UUID.randomUUID().toString();
-        pserverUri ="/aai/v11/cloud-infrastructure/pservers/pserver/" + hostname;
+        pserverUri = "/aai/v11/cloud-infrastructure/pservers/pserver/" + hostname;
         Map<String, String> pserverMap = new HashMap<>();
         pserverMap.put("hostname", hostname);
         String payload = PayloadUtil.getTemplatePayload("pserver.json", pserverMap);
@@ -91,8 +93,10 @@ public class SubgraphPruneTest {
         cloudRegionMap.put("vserver-name", "some-vserver-name-id1111");
         cloudRegionMap.put("pserver-uri", pserverUri);
 
-        String cloudRegionPayload = PayloadUtil.getTemplatePayload("cloud-region-with-vserver.json", cloudRegionMap);
-        String cloudRegionUri = "/aai/v11/cloud-infrastructure/cloud-regions/cloud-region/some-owner-id1111/some-region-id1111";
+        String cloudRegionPayload =
+            PayloadUtil.getTemplatePayload("cloud-region-with-vserver.json", cloudRegionMap);
+        String cloudRegionUri =
+            "/aai/v11/cloud-infrastructure/cloud-regions/cloud-region/some-owner-id1111/some-region-id1111";
 
         Response response = httpTestUtil.doPut(cloudRegionUri, cloudRegionPayload);
 
@@ -114,14 +118,16 @@ public class SubgraphPruneTest {
 
         Map<String, String> gremlinQueryMap = new HashMap<>();
         // Having the cap('x') here causes the subgraph to fail
-        gremlinQueryMap.put("gremlin-query", "g.V().has('vserver-id', '" + vserverId + "').store('x').out().has('aai-node-type', 'pserver').store('x').cap('x').unfold()");
+        gremlinQueryMap.put("gremlin-query", "g.V().has('vserver-id', '" + vserverId
+            + "').store('x').out().has('aai-node-type', 'pserver').store('x').cap('x').unfold()");
 
         String payload = PayloadUtil.getTemplatePayload("gremlin-query.json", gremlinQueryMap);
         String endpoint = "/aai/v13/query?format=console&subgraph=prune";
 
         httpEntity = new HttpEntity(payload, headers);
         ResponseEntity responseEntity = null;
-        responseEntity = restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         System.out.println(responseEntity.getBody().toString());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
     }

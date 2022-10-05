@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,21 +19,21 @@
  */
 package org.onap.aai.rest.search;
 
+import java.util.List;
+
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.Tree;
 import org.onap.aai.exceptions.AAIException;
 
-import java.util.List;
-
 public abstract class TreeQueryTest extends QueryTest {
 
-	protected List<Tree> treeList;
+    protected List<Tree> treeList;
 
-	public TreeQueryTest() throws AAIException {
-		super();
-	}
+    public TreeQueryTest() throws AAIException {
+        super();
+    }
 
-	@Override
-	public void run() {
-		treeList = (List<Tree>)shell.executeTraversal(query, params).toList();
-	}
+    @Override
+    public void run() {
+        treeList = (List<Tree>) shell.executeTraversal(query, params).toList();
+    }
 }

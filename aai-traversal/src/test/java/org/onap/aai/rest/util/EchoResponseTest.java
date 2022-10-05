@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,21 +19,23 @@
  */
 package org.onap.aai.rest.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.att.eelf.configuration.EELFManager;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import javax.ws.rs.core.*;
-import java.util.*;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import com.att.eelf.configuration.EELFManager;
+
+import java.util.*;
+
+import javax.ws.rs.core.*;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EchoResponseTest {
 
@@ -63,15 +65,15 @@ public class EchoResponseTest {
     private static final Logger logger = LoggerFactory.getLogger(EchoResponseTest.class.getName());
 
     @Before
-    public void setup(){
+    public void setup() {
         logger.info("Starting the setup for the integration tests of Rest Endpoints");
 
-        echoResponse  = new EchoResponse();
-        httpHeaders         = mock(HttpHeaders.class);
-        uriInfo             = mock(UriInfo.class);
+        echoResponse = new EchoResponse();
+        httpHeaders = mock(HttpHeaders.class);
+        uriInfo = mock(UriInfo.class);
 
-        headersMultiMap     = new MultivaluedHashMap<>();
-        queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
+        headersMultiMap = new MultivaluedHashMap<>();
+        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -92,11 +94,11 @@ public class EchoResponseTest {
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
-
         when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getQueryParameters(false)).thenReturn(queryParameters);
 
-        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very unreasonable
+        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very
+        // unreasonable
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
@@ -125,7 +127,7 @@ public class EchoResponseTest {
     public void testEchoResultWhenValidHeadersButMediaTypeWrong() throws Exception {
 
         when(httpHeaders.getAcceptableMediaTypes()).thenThrow(new IllegalStateException())
-        .thenReturn(outputMediaTypes);
+            .thenReturn(outputMediaTypes);
 
         Response response = echoResponse.echoResult(httpHeaders, null, "");
 

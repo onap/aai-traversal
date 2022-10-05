@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,79 +42,79 @@ import org.onap.aai.restcore.RESTAPI;
  */
 @Path("/util")
 public class EchoResponse extends RESTAPI {
-	
-	protected static String authPolicyFunctionName = "util";
-		
-	public static final String ECHO_PATH = "/echo";
 
-	/**
-	 * Simple health-check API that echos back the X-FromAppId and X-TransactionId to clients.
-	 * If there is a query string, a transaction gets logged into hbase, proving the application is connected to the data store.
-	 * If there is no query string, no transacction logging is done to hbase.
-	 *
-	 * @param headers the headers
-	 * @param req the req
-	 * @param myAction if exists will cause transaction to be logged to hbase
-	 * @return the response
-	 */
-	@GET
-	@Produces( { MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Path(ECHO_PATH)
-	public Response echoResult(@Context HttpHeaders headers, @Context HttpServletRequest req,
-			@QueryParam("action") String myAction) {
-		AAIException ex = null;
-		Response response;
-		String fromAppId;
-		String transId;
-		
-		try { 
-			fromAppId = getFromAppId(headers );
-			transId = getTransId(headers);
-		} catch (AAIException e) { 
-			ArrayList<String> templateVars = new ArrayList<>();
-			templateVars.add("PUT uebProvider");
-			templateVars.add("addTopic");
-			return Response
-					.status(e.getErrorObject().getHTTPResponseCode())
-					.entity(ErrorLogHelper.getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-					.build();
-		}
-		
-		try {
-			
-			HashMap<AAIException, ArrayList<String>> exceptionList = new HashMap<>();
-					
-			ArrayList<String> templateVars = new ArrayList<>();
-			templateVars.add(fromAppId);
-			templateVars.add(transId);
-		
-			exceptionList.put(new AAIException("AAI_0002", "OK"), templateVars);
-				
-			response = Response.status(Status.OK)
-					.entity(ErrorLogHelper.getRESTAPIInfoResponse(
-							headers.getAcceptableMediaTypes(), exceptionList))
-							.build();
-			
-		} catch (Exception e) {
-			ex = new AAIException("AAI_4000", e);
-			ArrayList<String> templateVars = new ArrayList<>();
-			templateVars.add(Action.GET.name());
-			templateVars.add(fromAppId +" "+transId);
+    protected static String authPolicyFunctionName = "util";
 
-			response = Response
-					.status(Status.INTERNAL_SERVER_ERROR)
-					.entity(ErrorLogHelper.getRESTAPIErrorResponse(
-							headers.getAcceptableMediaTypes(), ex,
-							templateVars)).build();
+    public static final String ECHO_PATH = "/echo";
 
-		} finally {
-			if (ex != null) {
-				ErrorLogHelper.logException(ex);
-			}
+    /**
+     * Simple health-check API that echos back the X-FromAppId and X-TransactionId to clients.
+     * If there is a query string, a transaction gets logged into hbase, proving the application is
+     * connected to the data store.
+     * If there is no query string, no transacction logging is done to hbase.
+     *
+     * @param headers the headers
+     * @param req the req
+     * @param myAction if exists will cause transaction to be logged to hbase
+     * @return the response
+     */
+    @GET
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Path(ECHO_PATH)
+    public Response echoResult(@Context HttpHeaders headers, @Context HttpServletRequest req,
+        @QueryParam("action") String myAction) {
+        AAIException ex = null;
+        Response response;
+        String fromAppId;
+        String transId;
 
-		}
-		
-		return response;
-	}
+        try {
+            fromAppId = getFromAppId(headers);
+            transId = getTransId(headers);
+        } catch (AAIException e) {
+            ArrayList<String> templateVars = new ArrayList<>();
+            templateVars.add("PUT uebProvider");
+            templateVars.add("addTopic");
+            return Response
+                .status(e.getErrorObject().getHTTPResponseCode()).entity(ErrorLogHelper
+                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
+                .build();
+        }
+
+        try {
+
+            HashMap<AAIException, ArrayList<String>> exceptionList = new HashMap<>();
+
+            ArrayList<String> templateVars = new ArrayList<>();
+            templateVars.add(fromAppId);
+            templateVars.add(transId);
+
+            exceptionList.put(new AAIException("AAI_0002", "OK"), templateVars);
+
+            response = Response
+                .status(Status.OK).entity(ErrorLogHelper
+                    .getRESTAPIInfoResponse(headers.getAcceptableMediaTypes(), exceptionList))
+                .build();
+
+        } catch (Exception e) {
+            ex = new AAIException("AAI_4000", e);
+            ArrayList<String> templateVars = new ArrayList<>();
+            templateVars.add(Action.GET.name());
+            templateVars.add(fromAppId + " " + transId);
+
+            response = Response
+                .status(Status.INTERNAL_SERVER_ERROR).entity(ErrorLogHelper
+                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
+                .build();
+
+        } finally {
+            if (ex != null) {
+                ErrorLogHelper.logException(ex);
+            }
+
+        }
+
+        return response;
+    }
 
 }

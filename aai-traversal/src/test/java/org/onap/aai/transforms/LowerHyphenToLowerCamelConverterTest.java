@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,15 @@
  */
 package org.onap.aai.transforms;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class LowerHyphenToLowerCamelConverterTest {
@@ -37,35 +37,32 @@ public class LowerHyphenToLowerCamelConverterTest {
     private String input;
     private String expected;
 
-    public LowerHyphenToLowerCamelConverterTest(String input, String expected){
-        this.input  = input;
+    public LowerHyphenToLowerCamelConverterTest(String input, String expected) {
+        this.input = input;
         this.expected = expected;
     }
 
     /**
      * Data Provider for the Lower Hyphen to Camel Converter Tests
      * Make sure the capitalization is not lost during the conversion
+     * 
      * @return
      */
     @Parameters
-    public static Collection<Object[]> data(){
+    public static Collection<Object[]> data() {
 
-        return Arrays.asList(new Object[][]{
-            {null, null},
-            {"test-name", "testName"},
-            {"test---name", "testName"},            // Case multiple
-            {"testName", "testName"},               // Case where upper case word shouldn't be lowercased
-            {"test-name-cool", "testNameCool"},
-            {"test-name-Cool", "testNameCool"},
-            {"test-name-Cool-Name-wow----Rest", "testNameCoolNameWowRest"},
-            {"test-name#fast#", "testName#fast#"},
-            {"test-name---", "testName"},
-            {"----test-name", "TestName"},
-        });
+        return Arrays.asList(
+            new Object[][] {{null, null}, {"test-name", "testName"}, {"test---name", "testName"}, // Case
+                                                                                                  // multiple
+                {"testName", "testName"}, // Case where upper case word shouldn't be lowercased
+                {"test-name-cool", "testNameCool"}, {"test-name-Cool", "testNameCool"},
+                {"test-name-Cool-Name-wow----Rest", "testNameCoolNameWowRest"},
+                {"test-name#fast#", "testName#fast#"}, {"test-name---", "testName"},
+                {"----test-name", "TestName"},});
     }
 
     @Test
-    public void testIfInputSuccessfullyModified(){
+    public void testIfInputSuccessfullyModified() {
         String actual = converter.convert(input);
         assertEquals(expected, actual);
     }

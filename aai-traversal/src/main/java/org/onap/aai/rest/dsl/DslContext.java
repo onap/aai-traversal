@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,146 +19,146 @@
  */
 package org.onap.aai.rest.dsl;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
 public class DslContext {
 
-	private ParserRuleContext ctx;
+    private ParserRuleContext ctx;
 
-	private boolean validationFlag = true;
-	private boolean isStartNode = false;
-	private String startNode = "";
-	private List<String> startNodeKeys = new ArrayList<>();
-	
-	private String currentNode;
-	private String previousNode;
+    private boolean validationFlag = true;
+    private boolean isStartNode = false;
+    private String startNode = "";
+    private List<String> startNodeKeys = new ArrayList<>();
 
-	private boolean isTraversal = false;
-	private boolean isWhereQuery = false;
-	private boolean isUnionQuery = false;
-	private boolean isUnionStart = false;
+    private String currentNode;
+    private String previousNode;
 
-	private String whereStartNode = "";
-	
-	private Deque<String> unionStartNodes = new LinkedList<>();
+    private boolean isTraversal = false;
+    private boolean isWhereQuery = false;
+    private boolean isUnionQuery = false;
+    private boolean isUnionStart = false;
 
-	/*
-	 * Limit Queries have to be applied in the end - so i have to set this in
-	 * context
-	 */
-	public StringBuilder limitQuery = new StringBuilder();
+    private String whereStartNode = "";
 
-	public ParserRuleContext getCtx() {
-		return ctx;
-	}
+    private Deque<String> unionStartNodes = new LinkedList<>();
 
-	public void setCtx(ParserRuleContext ctx) {
-		this.ctx = ctx;
-	}
+    /*
+     * Limit Queries have to be applied in the end - so i have to set this in
+     * context
+     */
+    public StringBuilder limitQuery = new StringBuilder();
 
-	public boolean isStartNode() {
-		return isStartNode;
-	}
+    public ParserRuleContext getCtx() {
+        return ctx;
+    }
 
-	public void setStartNodeFlag(boolean isStartNode) {
-		this.isStartNode = isStartNode;
-	}
-	
-	public String getStartNode() {
-		return startNode;
-	}
+    public void setCtx(ParserRuleContext ctx) {
+        this.ctx = ctx;
+    }
 
-	public void setStartNode(String startNode) {
-		this.startNode = startNode;
-	}
+    public boolean isStartNode() {
+        return isStartNode;
+    }
 
-	public List<String> getStartNodeKeys() {
-		return startNodeKeys;
-	}
-	
-	public String getCurrentNode() {
-		return currentNode;
-	}
+    public void setStartNodeFlag(boolean isStartNode) {
+        this.isStartNode = isStartNode;
+    }
 
-	public void setCurrentNode(String currentNode) {
-		this.currentNode = currentNode;
-	}
+    public String getStartNode() {
+        return startNode;
+    }
 
-	public String getPreviousNode() {
-		return previousNode;
-	}
+    public void setStartNode(String startNode) {
+        this.startNode = startNode;
+    }
 
-	public void setPreviousNode(String previousNode) {
-		this.previousNode = previousNode;
-	}
+    public List<String> getStartNodeKeys() {
+        return startNodeKeys;
+    }
 
-	public boolean isTraversal() {
-		return isTraversal;
-	}
+    public String getCurrentNode() {
+        return currentNode;
+    }
 
-	public void setTraversal(boolean isTraversal) {
-		this.isTraversal = isTraversal;
-	}
+    public void setCurrentNode(String currentNode) {
+        this.currentNode = currentNode;
+    }
 
-	public boolean isWhereQuery() {
-		return isWhereQuery;
-	}
+    public String getPreviousNode() {
+        return previousNode;
+    }
 
-	public void setWhereQuery(boolean isWhereQuery) {
-		this.isWhereQuery = isWhereQuery;
-	}
+    public void setPreviousNode(String previousNode) {
+        this.previousNode = previousNode;
+    }
 
-	public boolean isUnionQuery() {
-		return isUnionQuery;
-	}
+    public boolean isTraversal() {
+        return isTraversal;
+    }
 
-	public void setUnionQuery(boolean isUnionQuery) {
-		this.isUnionQuery = isUnionQuery;
-	}
+    public void setTraversal(boolean isTraversal) {
+        this.isTraversal = isTraversal;
+    }
 
-	public String getWhereStartNode() {
-		return whereStartNode;
-	}
+    public boolean isWhereQuery() {
+        return isWhereQuery;
+    }
 
-	public void setWhereStartNode(String whereStartNode) {
-		this.whereStartNode = whereStartNode;
-	}
+    public void setWhereQuery(boolean isWhereQuery) {
+        this.isWhereQuery = isWhereQuery;
+    }
 
-	public Deque<String> getUnionStartNodes() {
-		return unionStartNodes;
-	}
+    public boolean isUnionQuery() {
+        return isUnionQuery;
+    }
 
-	public void setUnionStartNodes(Deque<String> unionStartNodes) {
-		this.unionStartNodes = unionStartNodes;
-	}
+    public void setUnionQuery(boolean isUnionQuery) {
+        this.isUnionQuery = isUnionQuery;
+    }
 
-	public boolean isUnionStart() {
-		return isUnionStart;
-	}
+    public String getWhereStartNode() {
+        return whereStartNode;
+    }
 
-	public void setUnionStart(boolean isUnionStart) {
-		this.isUnionStart = isUnionStart;
-	}
+    public void setWhereStartNode(String whereStartNode) {
+        this.whereStartNode = whereStartNode;
+    }
 
-	public StringBuilder getLimitQuery() {
-		return limitQuery;
-	}
+    public Deque<String> getUnionStartNodes() {
+        return unionStartNodes;
+    }
 
-	public void setLimitQuery(StringBuilder limitQuery) {
-		this.limitQuery = limitQuery;
-	}
-	
-	public boolean isValidationFlag() {
-		return validationFlag;
-	}
+    public void setUnionStartNodes(Deque<String> unionStartNodes) {
+        this.unionStartNodes = unionStartNodes;
+    }
 
-	public void setValidationFlag(boolean validationFlag) {
-		this.validationFlag = validationFlag;
-	}
+    public boolean isUnionStart() {
+        return isUnionStart;
+    }
+
+    public void setUnionStart(boolean isUnionStart) {
+        this.isUnionStart = isUnionStart;
+    }
+
+    public StringBuilder getLimitQuery() {
+        return limitQuery;
+    }
+
+    public void setLimitQuery(StringBuilder limitQuery) {
+        this.limitQuery = limitQuery;
+    }
+
+    public boolean isValidationFlag() {
+        return validationFlag;
+    }
+
+    public void setValidationFlag(boolean validationFlag) {
+        this.validationFlag = validationFlag;
+    }
 
 }

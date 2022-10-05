@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,9 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.rest.search;
+
+import java.util.Map;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.T;
@@ -26,8 +29,7 @@ import org.junit.Test;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.serialization.db.exceptions.NoEdgeRuleFoundException;
 
-import java.util.Map;
-public class RelatedToCustomQueryTest extends QueryTest{
+public class RelatedToCustomQueryTest extends QueryTest {
 
     public RelatedToCustomQueryTest() throws AAIException, NoEdgeRuleFoundException {
         super();
@@ -37,14 +39,20 @@ public class RelatedToCustomQueryTest extends QueryTest{
     public void run() {
         super.run();
     }
+
     @Override
     protected void createGraph() throws AAIException, NoEdgeRuleFoundException {
 
-        Vertex genericvnf1 = graph.addVertex(T.label, "generic-vnf", T.id, "1", "aai-node-type", "generic-vnf", "vnf-id", "genvnf1", "vnf-name", "genvnfname1", "nf-type", "sample-nf-type");
+        Vertex genericvnf1 =
+            graph.addVertex(T.label, "generic-vnf", T.id, "1", "aai-node-type", "generic-vnf",
+                "vnf-id", "genvnf1", "vnf-name", "genvnfname1", "nf-type", "sample-nf-type");
 
-        Vertex vserver1 = graph.addVertex(T.label, "vserver", T.id, "2", "aai-node-type", "vserver", "vserver-id", "vserverid01");
-        Vertex vserver2 = graph.addVertex(T.label, "vserver", T.id, "3", "aai-node-type", "vserver", "vserver-id", "vserverid02");
-        Vertex vserver3 = graph.addVertex(T.label, "vserver", T.id, "4", "aai-node-type", "vserver", "vserver-id", "vserverid03");
+        Vertex vserver1 = graph.addVertex(T.label, "vserver", T.id, "2", "aai-node-type", "vserver",
+            "vserver-id", "vserverid01");
+        Vertex vserver2 = graph.addVertex(T.label, "vserver", T.id, "3", "aai-node-type", "vserver",
+            "vserver-id", "vserverid02");
+        Vertex vserver3 = graph.addVertex(T.label, "vserver", T.id, "4", "aai-node-type", "vserver",
+            "vserver-id", "vserverid03");
 
         GraphTraversalSource g = graph.traversal();
         rules.addEdge(g, genericvnf1, vserver1);
