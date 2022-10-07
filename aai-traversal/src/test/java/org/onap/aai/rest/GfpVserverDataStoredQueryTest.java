@@ -23,17 +23,26 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.att.eelf.configuration.EELFManager;
 import com.jayway.jsonpath.JsonPath;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.janusgraph.core.JanusGraph;
@@ -164,7 +173,6 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
         UriInfo uriInfo = Mockito.mock(UriInfo.class);
-        HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
 
         queryParameters.add("format", "resource_and_url");
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
@@ -196,7 +204,6 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
         UriInfo uriInfo = Mockito.mock(UriInfo.class);
-        HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
 
         queryParameters.add("format", "resource_and_url");
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
@@ -231,7 +238,6 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
         UriInfo uriInfo = Mockito.mock(UriInfo.class);
-        HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
 
         queryParameters.add("format", "resource_and_url");
         Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
