@@ -19,24 +19,30 @@
  */
 package org.onap.aai.rest.search;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
-import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.setup.SchemaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +55,6 @@ public class SearchProviderTest extends AAISetup {
 
     private SchemaVersion version;
     private static final ModelType introspectorFactoryType = ModelType.MOXY;
-    private static final QueryStyle queryStyle = QueryStyle.TRAVERSAL;
-
-    private Loader loader;
 
     static {
         VALID_HTTP_STATUS_CODES.add(200);

@@ -19,15 +19,25 @@
  */
 package org.onap.aai.dbgraphgen;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMapOf;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.graphdb.types.system.BaseVertexLabel;
@@ -38,7 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.onap.aai.AAISetup;
 import org.onap.aai.db.DbMethHelper;
 import org.onap.aai.db.props.AAIProperties;
@@ -48,7 +58,7 @@ import org.onap.aai.introspection.ModelType;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
     @Mock
@@ -91,8 +101,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         startNodeFilterArrayOfHashes.add(map);
         Map<String, String> result = new HashMap<>();
 
-        Map<String, String> result1 = mockProcessor.getStartNodesAndModVersionIds("test", "test",
-            "test", "test", "test", "test", startNodeFilterArrayOfHashes, "test");
         assertNotNull(result);
 
     }
@@ -263,7 +271,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
     @Test(expected = AAIException.class)
     public void runDeleteByModelWithNullParams() throws AAIException {
-        Map<String, String> resultMock = new HashMap<String, String>();
 
         Map<String, String> result =
             processor.runDeleteByModel("test", "test", null, null, null, "test", "test");
@@ -332,9 +339,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
         resultSet.setVert(vert);
 
-        Map<String, String> result1 = processor.deleteAsNeededFromResultSet("test", "test",
-            resultSet, "test", "test", "test", resultMock);
-
         assertEquals(result.size(), 0);
 
     }
@@ -383,7 +387,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         rsList.add(rs1);
         rs.setSubResultSet(rsList);
         Map<String, Object> map = new HashMap<String, Object>();
-        // map.put("test.filter",new Object());
 
         boolean result = processor.satisfiesFilters(rs, map);
         assertEquals(result, false);
@@ -419,14 +422,9 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
     @Test(expected = NullPointerException.class)
     public void collectInstanceDataTest() throws AAIException {
-
-        BaseVertexLabel bs = new BaseVertexLabel("test");
-        // bs.setId(80);
         EmptyVertex ev = new EmptyVertex();
-        // ev.setId(50l);
         Vertex thisLevelElemVtx = ev;
 
-        Multimap<String, String> thisMap = ArrayListMultimap.create();
         List<String> vidsTraversed = new ArrayList<String>();
         // only applies when collecting data using the default model for delete
         Multimap<String, String> validNextStepMap = ArrayListMultimap.create();
@@ -464,7 +462,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test(expected = AAIException.class)
     public void getModConstraintHashTest() throws AAIException {
         Vertex modelElementVtx = new EmptyVertex();
-        // modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
         Vertex modelElementVtx1 = new EmptyVertex();
         Map<String, Vertex> currentHash = new HashMap<String, Vertex>();
         currentHash.put("constraint", modelElementVtx1);
@@ -475,7 +472,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test(expected = AAIException.class)
     public void getModConstraintHashTestNull() throws AAIException {
         Vertex modelElementVtx = null;
-        // modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
         Vertex modelElementVtx1 = null;
         Map<String, Vertex> currentHash = new HashMap<String, Vertex>();
         currentHash.put("constraint", modelElementVtx1);
@@ -486,7 +482,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
     @Test(expected = NullPointerException.class)
     public void getTopElementForSvcOrResModelVerTest() throws AAIException {
         Vertex modelElementVtx = new EmptyVertex();
-        // modelElementVtx.property(AAIProperties.NODE_TYPE,"Model");
         Vertex modelElementVtx1 = new EmptyVertex();
         Map<String, Vertex> currentHash = new HashMap<String, Vertex>();
         currentHash.put("constraint", modelElementVtx1);
@@ -705,7 +700,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         Multimap<String, String> thisMap = ArrayListMultimap.create();
         Vertex thisLevelElemVtx = new EmptyVertex();
         String incomingTrail = "test";
-        Map<String, Vertex> currentHash = new HashMap<String, Vertex>();
         List<String> vidsTraversed = new ArrayList<String>();
         int levelCounter = 1;
 
@@ -778,8 +772,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
     @Test(expected = NullPointerException.class)
     public void getModElementWidgetType() throws AAIException {
-        String appId = "test";
-        String transID = "test";
         Vertex thisLevelElemVtx = new EmptyVertex();
         String incomingTrail = "test";
         String vertex1 = processor.getModElementWidgetType(thisLevelElemVtx, incomingTrail);
@@ -926,7 +918,6 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         String transID = "test";
 
         String modelVersionId = "test";
-        String modelInvId = "test";
         String modelName = "test";
         processor.validateModel(transID, appId, modelName, modelVersionId);
 
