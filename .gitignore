@@ -13,3 +13,6 @@ bundleconfig-local/etc/logback.xml
 *.iml
 **/oxm/**
 **/dbedgerules/**
+
+.devcontainer
+.vscode
