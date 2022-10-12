@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ package org.onap.aai.rest.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyObject;import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +59,8 @@ public class EchoResponseTest {
 
     private EchoResponse echoResponse;
 
+    private final AaiGraphChecker aaiGraphCheckerMock = mock(AaiGraphChecker.class);
+
     private HttpHeaders httpHeaders;
 
     private UriInfo uriInfo;
@@ -73,15 +75,15 @@ public class EchoResponseTest {
     private static final Logger logger = LoggerFactory.getLogger(EchoResponseTest.class.getName());
 
     @Before
-    public void setup() {
+    public void setup(){
         logger.info("Starting the setup for the integration tests of Rest Endpoints");
 
-        echoResponse = new EchoResponse();
-        httpHeaders = mock(HttpHeaders.class);
-        uriInfo = mock(UriInfo.class);
+        echoResponse  = new EchoResponse(aaiGraphCheckerMock);
+        httpHeaders         = mock(HttpHeaders.class);
+        uriInfo             = mock(UriInfo.class);
 
-        headersMultiMap = new MultivaluedHashMap<>();
-        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
+        headersMultiMap     = new MultivaluedHashMap<>();
+        queryParameters     = Mockito.spy(new MultivaluedHashMap<>());
 
         headersMultiMap.add("X-FromAppId", "JUNIT");
         headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
@@ -102,11 +104,11 @@ public class EchoResponseTest {
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
+
         when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         when(uriInfo.getQueryParameters(false)).thenReturn(queryParameters);
 
-        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very
-        // unreasonable
+        // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very unreasonable
         Mockito.doReturn(null).when(queryParameters).remove(anyObject());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
@@ -115,17 +117,35 @@ public class EchoResponseTest {
     @Test
     public void testEchoResultWhenValidHeaders() throws Exception {
 
-        Response response = echoResponse.echoResult(httpHeaders, null, "");
+        Response response = echoResponse.echoResult(httpHeaders, null, null);
 
         assertNotNull(response);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 
     @Test
+    public void testEchoResultWhenActionIsProvidedDbAvailable() throws Exception {
+        when(aaiGraphCheckerMock.isAaiGraphDbAvailable()).thenReturn(true);
+        Response response = echoResponse.echoResult(httpHeaders, null, "myAction");
+
+        assertNotNull(response);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testEchoResultWhenActionIsProvidedDbNotAvailable() throws Exception {
+        when(aaiGraphCheckerMock.isAaiGraphDbAvailable()).thenReturn(false);
+        Response response = echoResponse.echoResult(httpHeaders, null, "myAction");
+
+        assertNotNull(response);
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
     public void testEchoResultWhenInValidHeadersThrowsBadRequest() throws Exception {
 
         httpHeaders = mock(HttpHeaders.class);
-        Response response = echoResponse.echoResult(httpHeaders, null, "");
+        Response response = echoResponse.echoResult(httpHeaders, null, null);
 
         assertNotNull(response);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -135,9 +155,9 @@ public class EchoResponseTest {
     public void testEchoResultWhenValidHeadersButMediaTypeWrong() throws Exception {
 
         when(httpHeaders.getAcceptableMediaTypes()).thenThrow(new IllegalStateException())
-            .thenReturn(outputMediaTypes);
+        .thenReturn(outputMediaTypes);
 
-        Response response = echoResponse.echoResult(httpHeaders, null, "");
+        Response response = echoResponse.echoResult(httpHeaders, null, null);
 
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
