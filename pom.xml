@@ -30,7 +30,7 @@
     </parent>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
-    <version>1.9.6-SNAPSHOT</version>
+    <version>1.11.0-SNAPSHOT</version>
     <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>
@@ -41,7 +41,7 @@
             Nexus Proxy Properties and Snapshot Locations
             Ideally this can be overwritten at runtime per internal environment specific values at runtime
         -->
-        <aai.common.version>1.9.3</aai.common.version>
+        <aai.common.version>1.9.4</aai.common.version>
         <nexusproxy>https://nexus.onap.org</nexusproxy>
         <site.path>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
         <release.path>/content/repositories/releases/</release.path>
@@ -49,7 +49,7 @@
         <staging.path>/content/repositories/staging/</staging.path>
         <!-- GMaven plugin uses this property to figure out the name of the docker tag -->
         <aai.project.version>${project.version}</aai.project.version>
-        <aai.schema.service.version>1.9.7</aai.schema.service.version>
+        <aai.schema.service.version>1.11.0</aai.schema.service.version>
     </properties>
     <build>
         <pluginManagement>
