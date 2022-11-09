@@ -25,7 +25,9 @@
 	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
 	<property resource="application.properties" />
-
+	<property name="maxHistory" value='7' />
+	<property name="totalSizeCap" value='1GB' />
+	<property name="queueSize" value='1000'/>
 	<property name="namespace" value="aai-traversal"/>
 
 	<property name="AJSC_HOME" value="${AJSC_HOME:-.}" />
@@ -57,11 +59,38 @@
 	<conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
 	<conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
 	<conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>
-				%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}
-			</pattern>
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp><fieldName>timestamp</fieldName></timestamp>
+				<message/>
+				<mdc>
+					<fieldName>context</fieldName>
+					<excludeMdcKeyName>ServerIPAddress</excludeMdcKeyName>
+					<excludeMdcKeyName>EntryTimestamp</excludeMdcKeyName>
+					<excludeMdcKeyName>InvokeTimestamp</excludeMdcKeyName>
+					<excludeMdcKeyName>ErrorCode</excludeMdcKeyName>
+					<excludeMdcKeyName>ErrorDesc</excludeMdcKeyName>
+				</mdc>
+				<stackTrace>
+					<fieldName>exception</fieldName>
+					<throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+						<exclude>^sun\.reflect\..*\.invoke</exclude>
+						<exclude>^net\.sf\.cglib\.proxy\.MethodProxy\.invoke</exclude>
+						<rootCauseFirst>true</rootCauseFirst>
+					</throwableConverter>
+				</stackTrace>
+				<threadName><fieldName>thread</fieldName></threadName>
+				<loggerName>
+					<fieldName>logger</fieldName>
+					<shortenedLoggerNameLength>36</shortenedLoggerNameLength>
+				</loggerName>
+				<logLevel/>
+				<pattern>
+					<pattern>{"logType":"app"}</pattern>
+				</pattern>
+			</providers>
 		</encoder>
 	</appender>
 
@@ -69,8 +98,8 @@
 		<file>${logDirectory}/rest/sane.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/rest/sane.log.%d{yyyy-MM-dd}</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{1024} - %msg%n
@@ -79,17 +108,16 @@
 	</appender>
 
 	<appender name="asyncSANE" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1000</queueSize>
+		<queueSize>${queueSize}</queueSize>
 		<includeCallerData>true</includeCallerData>
 		<appender-ref ref="SANE" />
 	</appender>
 	<appender name="METRIC" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${logDirectory}/rest/metrics.log</file>
-		<rollingPolicy
-				class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/rest/metrics.log.%d{yyyy-MM-dd}</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${metricPattern}</pattern>
@@ -97,7 +125,7 @@
 	</appender>
 
 	<appender name="asyncMETRIC" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1000</queueSize>
+		<queueSize>${queueSize}</queueSize>
 		<includeCallerData>true</includeCallerData>
 		<appender-ref ref="METRIC"/>
 	</appender>
@@ -113,8 +141,8 @@
 		<rollingPolicy
 				class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/rest/debug.log.%d{yyyy-MM-dd}</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${debugPattern}</pattern>
@@ -122,18 +150,17 @@
 	</appender>
 
 	<appender name="asyncDEBUG" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1000</queueSize>
+		<queueSize>${queueSize}</queueSize>
 		<appender-ref ref="DEBUG" />
 		<includeCallerData>true</includeCallerData>
 	</appender>
 	<appender name="ERROR"
 			  class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${logDirectory}/rest/error.log</file>
-		<rollingPolicy
-				class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/rest/error.log.%d{yyyy-MM-dd}</fileNamePattern>
-		<maxHistory>14</maxHistory>
-		<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>WARN</level>
@@ -144,7 +171,7 @@
 	</appender>
 
 	<appender name="asyncERROR" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1000</queueSize>
+		<queueSize>${queueSize}</queueSize>
 		<appender-ref ref="ERROR"/>
 	</appender>
 
@@ -154,8 +181,8 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/rest/audit.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${auditPattern}</pattern>
@@ -163,7 +190,7 @@
 	</appender>
 
 	<appender name="asyncAUDIT" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1000</queueSize>
+		<queueSize>${queueSize}</queueSize>
 		<includeCallerData>true</includeCallerData>
 		<appender-ref ref="AUDIT" />
 	</appender>
@@ -179,8 +206,8 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/rest/translog.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${transLogPattern}</pattern>
@@ -188,7 +215,7 @@
 	</appender>
 
 	<appender name="asynctranslog" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1000</queueSize>
+		<queueSize>${queueSize}</queueSize>
 		<includeCallerData>true</includeCallerData>
 		<appender-ref ref="translog" />
 	</appender>
@@ -202,6 +229,8 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/dmaapAAIEventConsumer/error.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${errorPattern}</pattern>
@@ -220,8 +249,8 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/dmaapAAIEventConsumer/debug.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${debugPattern}</pattern>
@@ -238,8 +267,8 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/dmaapAAIEventConsumer/dmaap-transaction.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${auditPattern}</pattern>
@@ -256,8 +285,8 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/dmaapAAIEventConsumer/metrics.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${metricPattern}</pattern>
@@ -272,8 +301,8 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/external/external.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>${debugPattern}</pattern>
@@ -288,15 +317,15 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${logDirectory}/auth/auth.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
-			<maxHistory>14</maxHistory>
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<maxHistory>${maxHistory}</maxHistory>
+			<totalSizeCap>${totalSizeCap}</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ, UTC}[%thread] %-5level %logger{1024} - %msg%n</pattern>
 		</encoder>
 	</appender>
 	<appender name="asyncAUTH" class="ch.qos.logback.classic.AsyncAppender">
-		<queueSize>1000</queueSize>
+		<queueSize>${queueSize}</queueSize>
 		<includeCallerData>true</includeCallerData>
 		<appender-ref ref="auth" />
 	</appender>
@@ -328,35 +357,45 @@
 	</logger>
 	<logger name="org.onap.aai.aaf" level="DEBUG" additivity="false">
 		<appender-ref ref="asyncAUTH" />
+		<appender-ref ref="STDOUT" />
 	</logger>
-	<logger name="org.onap.logging.filter.base.AbstractAuditLogFilter" level="INFO">
+	<logger name="org.onap.logging.filter.base.AbstractAuditLogFilter" level="INFO" additivity="false">
     	<appender-ref ref="asyncAUDIT"/>
+		<appender-ref ref="STDOUT" />
     </logger>
-    <logger name="org.onap.aai.aailog.logs.AaiScheduledTaskAuditLog" level="INFO">
-    		<appender-ref ref="asyncAUDIT"/>
-    	</logger>
-    <logger name="org.onap.aai.aailog.logs.AaiDBTraversalMetricLog" level="INFO">
+    <logger name="org.onap.aai.aailog.logs.AaiScheduledTaskAuditLog" level="INFO" additivity="false">
+		<appender-ref ref="asyncAUDIT"/>
+		<appender-ref ref="STDOUT" />
+	</logger>
+    <logger name="org.onap.aai.aailog.logs.AaiDBTraversalMetricLog" level="INFO" additivity="false">
     	<appender-ref ref="asyncMETRIC"/>
+		<appender-ref ref="STDOUT" />
     </logger>
-    <logger name="org.onap.aai.aailog.logs.AaiDmaapMetricLog" level="INFO">
+    <logger name="org.onap.aai.aailog.logs.AaiDmaapMetricLog" level="INFO" additivity="false">
     	<appender-ref ref="dmaapAAIEventConsumerMetric"/>
+		<appender-ref ref="STDOUT" />
     </logger>
-    <logger name="org.onap.aai.logging.ErrorLogHelper" level="WARN">
+    <logger name="org.onap.aai.logging.ErrorLogHelper" level="WARN" additivity="false">
     	<appender-ref ref="asyncERROR"/>
+		<appender-ref ref="STDOUT" />
     </logger>
 	<logger name="org.onap.aai.interceptors.post" level="DEBUG" additivity="false">
 		<appender-ref ref="asynctranslog" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="org.onap.aai.web.JerseyConfiguration" level="DEBUG" additivity="false">
 		<appender-ref ref="asyncDEBUG" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 	<logger name="org.onap.aai.dmaap" level="DEBUG" additivity="false">
 		<appender-ref ref="dmaapAAIEventConsumer" />
 		<appender-ref ref="dmaapAAIEventConsumerDebug" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 
 	<logger name="com.att.nsa.mr" level="INFO" >
 		<appender-ref ref="dmaapAAIEventConsumerInfo" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 
 	<root level="DEBUG">
