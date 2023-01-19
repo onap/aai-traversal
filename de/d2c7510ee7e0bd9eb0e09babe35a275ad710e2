@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: William Reehil <william.reehil@att.com>
+Submitted-by: William Reehil <william.reehil@att.com>
+Submitted-at: Thu, 19 Jan 2023 19:35:08 +0000
+Reviewed-on: https://gerrit.onap.org/r/c/aai/traversal/+/132964
+Project: aai/traversal
+Branch: refs/heads/jakarta
