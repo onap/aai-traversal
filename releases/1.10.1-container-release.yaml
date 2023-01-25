@@ -1,0 +1,7 @@
+distribution_type: container
+container_release_tag: 1.10.1
+project: traversal
+ref: 75665b2c21d6c9298125863738cccb4de6d8b878
+containers:
+    - name: aai-traversal
+      version: 1.10-STAGING-20230124T224605Z
