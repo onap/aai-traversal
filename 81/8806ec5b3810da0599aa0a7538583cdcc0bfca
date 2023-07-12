@@ -1,0 +1,7 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Andreas Geissler <andreas-geissler@telekom.de>
+Submitted-by: Andreas Geissler <andreas-geissler@telekom.de>
+Submitted-at: Wed, 12 Jul 2023 11:27:36 +0000
+Reviewed-on: https://gerrit.onap.org/r/c/aai/traversal/+/135362
+Project: aai/traversal
+Branch: refs/heads/master
