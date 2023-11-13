@@ -73,7 +73,6 @@ import org.onap.aai.util.GenericQueryBuilder;
 import org.onap.aai.util.NodesQueryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Database Mapping class which acts as the middle man between the REST interface objects for the
@@ -90,7 +89,6 @@ public class SearchGraph {
 
     private SchemaVersions schemaVersions;
 
-    @Autowired
     public SearchGraph(LoaderFactory loaderFactory, EdgeIngestor edgeIngestor,
         SchemaVersions schemaVersions) {
         this.loaderFactory = loaderFactory;

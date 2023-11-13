@@ -19,20 +19,30 @@
  */
 package org.onap.aai.rest;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import io.micrometer.core.annotation.Timed;
-
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -63,6 +73,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import io.micrometer.core.annotation.Timed;
 
 @Path("{version: v[1-9][0-9]*|latest}/query")
 @Timed
@@ -134,8 +150,7 @@ public class QueryConsumer extends TraversalConsumer {
             }
             SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
 
-            JsonParser parser = new JsonParser();
-            JsonObject input = parser.parse(content).getAsJsonObject();
+            JsonObject input = JsonParser.parseString(content).getAsJsonObject();
             JsonElement startElement = input.get("start");
             JsonElement queryElement = input.get("query");
             JsonElement gremlinElement = input.get("gremlin");

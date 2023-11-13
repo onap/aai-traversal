@@ -39,7 +39,6 @@ import org.onap.aai.rest.dsl.validation.DslValidator;
 import org.onap.aai.rest.enums.QueryVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The Class DslQueryProcessor.
@@ -58,7 +57,6 @@ public class DslQueryProcessor {
 
     private boolean isAggregate = false;
 
-    @Autowired
     public DslQueryProcessor(Map<QueryVersion, ParseTreeListener> dslListeners) {
         this.dslListeners = dslListeners;
     }

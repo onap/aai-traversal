@@ -25,9 +25,6 @@ import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,6 +54,9 @@ import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.rest.util.AAIExtensionMap;
 import org.onap.aai.util.AAIConstants;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 public class SearchGraphNamedQueryTest extends AAISetup {
 
     protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
@@ -83,7 +83,7 @@ public class SearchGraphNamedQueryTest extends AAISetup {
     private HttpTestUtil httpTestUtil;
 
     private String getJsonValue(String json, String key) {
-        JsonObject jsonObj = new JsonParser().parse(json).getAsJsonObject();
+        JsonObject jsonObj = JsonParser.parseString(json).getAsJsonObject();
         String strValue = "";
         if (jsonObj.isJsonObject()) {
             strValue = jsonObj.get(key).getAsString();

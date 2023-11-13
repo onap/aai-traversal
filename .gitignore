@@ -8,6 +8,7 @@ bundleconfig-local/etc/logback.xml
 /.pydevproject
 /bin/
 /.classpath
+**/.classpath
 **/.idea/
 */.idea
 *.iml

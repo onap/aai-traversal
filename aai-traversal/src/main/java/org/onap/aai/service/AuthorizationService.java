@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.jetty.util.security.Password;
-import org.onap.aai.Profiles;
+import org.onap.aai.TraversalProfiles;
 import org.onap.aai.util.AAIConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile(Profiles.ONE_WAY_SSL)
+@Profile(TraversalProfiles.ONE_WAY_SSL)
 public class AuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationService.class);

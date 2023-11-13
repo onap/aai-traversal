@@ -299,7 +299,7 @@
 	<logger name="org.zookeeper" level="OFF" />
 
 
-	<logger name="org.onap.aai" level="DEBUG" additivity="false">
+	<logger name="org.onap.aai" level="INFO" additivity="false">
 		<appender-ref ref="asyncDEBUG" />
 		<appender-ref ref="asyncSANE" />
 		<appender-ref ref="STDOUT" />
@@ -338,6 +338,9 @@
 		<appender-ref ref="dmaapAAIEventConsumerInfo" />
 	</logger>
 
+	<logger name="org.onap.aai.dbgen" level="WARN"/>
+	<logger name="org.onap.aai.aailog" level="WARN"/>
+
 	<!-- ============================================================================ -->
 	<!-- General EELF logger -->
 	<!-- ============================================================================ -->
@@ -347,7 +350,7 @@
 		<appender-ref ref="asyncMETRIC" />
 	</logger>
 
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="external" />
 		<appender-ref ref="STDOUT" />
 	</root>
