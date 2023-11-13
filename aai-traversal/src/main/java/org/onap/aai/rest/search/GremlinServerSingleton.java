@@ -40,7 +40,6 @@ import org.onap.aai.logging.LogFormatTools;
 import org.onap.aai.util.AAIConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 public class GremlinServerSingleton {
@@ -61,7 +60,6 @@ public class GremlinServerSingleton {
      * the properties object
      *
      */
-    @Autowired
     public GremlinServerSingleton(CQConfig customQueryInfo) {
         this.customQueryInfo = customQueryInfo;
     }

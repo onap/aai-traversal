@@ -42,7 +42,6 @@ import org.onap.aai.rest.enums.EdgeDirection;
 import org.onap.aai.setup.SchemaVersions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The Class DslListener.
@@ -86,7 +85,6 @@ public class DslListener extends AAIDslBaseListener {
     /**
      * Instantiates a new DslListener.
      */
-    @Autowired
     public DslListener(EdgeIngestor edgeIngestor, SchemaVersions schemaVersions,
         LoaderFactory loaderFactory) {
         this.loader = loaderFactory.createLoaderForVersion(ModelType.MOXY,

@@ -20,13 +20,18 @@
 package org.onap.aai.rest.history;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.janusgraph.core.JanusGraphTransaction;
@@ -41,6 +46,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 @Ignore("The state format requires the history schema to be loaded.  "
     + "Because aaigraph is a singleton its very complicated to have 2 different schemas loaded for testing.  "
@@ -179,7 +188,7 @@ public class DslConsumerHistoryStateTest extends AbstractSpringHistoryRestTest {
         httpEntity = new HttpEntity(payload, headers);
         ResponseEntity responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        JsonArray results = new JsonParser().parse(responseEntity.getBody().toString())
+        JsonArray results = JsonParser.parseString(responseEntity.getBody().toString())
             .getAsJsonObject().getAsJsonArray("results");
         LOGGER.debug("Response for PUT request with uri {} : {}", baseUrl + endpoint,
             responseEntity.getBody());
