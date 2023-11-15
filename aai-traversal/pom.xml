@@ -20,7 +20,9 @@
     ============LICENSE_END=========================================================
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -32,8 +34,6 @@
 	<artifactId>aai-traversal</artifactId>
 
 	<properties>
-		<mockito.core.version>2.4.0</mockito.core.version>
-		<powermock.version>1.7.0RC2</powermock.version>
 		<java.version>1.8</java.version>
 		<start-class>org.onap.aai.TraversalApp</start-class>
 
@@ -47,7 +47,6 @@
 
 		<!-- Default docker registry that maven fabric plugin will try to pull 
 			from -->
-		<gremlin.version>3.2.3</gremlin.version>
 		<docker.registry>docker.io</docker.registry>
 		<!-- Specifying the docker push registry where the image should be pushed -->
 		<!-- This value should be overwritten at runtime to wherever need to be 
@@ -58,7 +57,8 @@
 		<!-- Location where assembly of our scripts, resources and main jar will 
 			be held Check the ${project.artifactId}/src/main/assembly/descriptor.xml 
 			for more info -->
-		<aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
+		<aai.build.directory>
+			${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
 		<aai.docker.version>1.0.0</aai.docker.version>
 		<aai.docker.namespace>onap</aai.docker.namespace>
 		<aai.base.image>alpine</aai.base.image>
@@ -67,7 +67,8 @@
 		<!-- Nexus Proxy Properties and Snapshot Locations Ideally this can be 
 			overwritten at runtime per internal environment specific values at runtime -->
 		<nexusproxy>https://nexus.onap.org</nexusproxy>
-		<site.path>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
+		<site.path>
+			/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
 		<release.path>/content/repositories/releases/</release.path>
 		<snapshot.path>/content/repositories/snapshots/</snapshot.path>
 
@@ -84,8 +85,10 @@
 		<!-- Start of Default ONAP Schema Properties -->
 		<schema.source.name>onap</schema.source.name>
 		<schema.configuration.location>N/A</schema.configuration.location>
-		<schema.nodes.location>${project.basedir}/src/main/resources/schema/${schema.source.name}/oxm</schema.nodes.location>
-		<schema.edges.location>${project.basedir}/src/main/resources/schema/${schema.source.name}/dbedgerules</schema.edges.location>
+		<schema.nodes.location>
+			${project.basedir}/src/main/resources/schema/${schema.source.name}/oxm</schema.nodes.location>
+		<schema.edges.location>
+			${project.basedir}/src/main/resources/schema/${schema.source.name}/dbedgerules</schema.edges.location>
 		<schema.version.depth.start>v10</schema.version.depth.start>
 		<schema.version.related.link.start>v10</schema.version.related.link.start>
 		<schema.version.app.root.start>v11</schema.version.app.root.start>
@@ -94,17 +97,37 @@
 		<schema.version.api.default>v27</schema.version.api.default>
 		<schema.version.list>v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,v21,v22,v23,v24,v25,v26,v27</schema.version.list>
 		<schema.uri.base.path>/aai</schema.uri.base.path>
+
+		<!-- versions -->
 		<keycloak.version>11.0.2</keycloak.version>
 		<micrometer-spring-legacy.version>1.3.19</micrometer-spring-legacy.version>
 		<micrometer-core.version>1.6.6</micrometer-core.version>
 		<micrometer-registry-prometheus.version>1.6.6</micrometer-registry-prometheus.version>
 		<micrometer-jersey2>1.6.6</micrometer-jersey2>
 		<testcontainers.version>1.6.1</testcontainers.version>
-		<netty.handler.version>4.1.63.Final</netty.handler.version>
+		<netty.handler.version>4.1.45.Final</netty.handler.version>
 		<netty.version>4.1.63.Final</netty.version>
+		<gremlin.version>3.2.3</gremlin.version>
+		<mockito.core.version>2.4.0</mockito.core.version>
+		<powermock.version>1.7.0RC2</powermock.version>
+
+		<aai.release.version>1.9.4</aai.release.version>
+		<spring.boot.version>2.1.12.RELEASE</spring.boot.version>
+		<spring.version>5.1.13.RELEASE</spring.version>
+		<spring.test.version>${spring.version}</spring.test.version>
+		<spring.jms.version>${spring.version}</spring.jms.version>
+		<janusgraph.version>0.2.3</janusgraph.version>
+		<gremlin.version>3.2.3</gremlin.version>
+		<swagger.version>1.5.24</swagger.version>
+		<logback.version>1.2.7</logback.version>
+		<jackson.version>2.10.1</jackson.version>
+		<eclipse.persistence.version>2.7.11</eclipse.persistence.version>
+		<activemq.version>5.16.1</activemq.version>
+		<antlr.version>4.7.2</antlr.version>
 		<!-- End of Default ONAP Schema Properties -->
 
-		<!-- Integration tests will be skipped by default. Could be enabled here or by -DskipITs=false-->
+		<!-- Integration tests will be skipped by default. Could be enabled here or by
+		-DskipITs=false-->
 		<skipITs>true</skipITs>
 	</properties>
 	<profiles>
@@ -130,7 +153,8 @@
 								</goals>
 								<configuration>
 									<source>
-										def userAaiBaseImage = session.userProperties['aai.base.image'];
+										def userAaiBaseImage =
+										session.userProperties['aai.base.image'];
 										def userAaiCommonVersion =
 										session.userProperties['aai.base.image.version'];
 										if (userAaiCommonVersion != null) {
@@ -157,13 +181,15 @@
 							<apiVersion>1.23</apiVersion>
 							<images>
 								<image>
-									<name>${docker.push.registry}/${aai.docker.namespace}/${project.artifactId}:%l</name>
+									<name>
+										${docker.push.registry}/${aai.docker.namespace}/${project.artifactId}:%l</name>
 									<build>
 										<filter>@</filter>
 										<tags>
 											<tag>latest</tag>
 											<tag>${project.docker.latesttag.version}</tag>
-											<tag>${project.major.version}.${project.minor.version}-STAGING-${maven.build.timestamp}</tag>
+											<tag>
+												${project.major.version}.${project.minor.version}-STAGING-${maven.build.timestamp}</tag>
 										</tags>
 										<cleanup>try</cleanup>
 										<dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
@@ -305,10 +331,6 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<!-- <dependencyManagement> <dependencies> <dependency> <groupId>org.springframework.boot</groupId> 
-		<artifactId>spring-boot-starter-parent</artifactId> <type>pom</type> <scope>import</scope> 
-		</dependency> </dependencies> </dependencyManagement> -->
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -351,14 +373,17 @@
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
+			<version>2.3.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-core</artifactId>
+			<version>2.3.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jopt-simple</groupId>
@@ -368,6 +393,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-core</artifactId>
+			<version>${swagger.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.ws.rs</groupId>
@@ -378,10 +404,12 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
+			<version>${swagger.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-jersey-jaxrs</artifactId>
+			<version>${swagger.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.glassfish.jersey.media</groupId>
@@ -416,6 +444,7 @@
 		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
+			<version>1.10</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.commons</groupId>
@@ -426,6 +455,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.att.eelf</groupId>
@@ -435,14 +465,17 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
+			<version>${logback.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-access</artifactId>
+			<version>${logback.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
@@ -452,23 +485,30 @@
 		<dependency>
 			<groupId>org.codehaus.janino</groupId>
 			<artifactId>janino</artifactId>
+			<version>3.0.15</version>
 		</dependency>
+
+		<!-- TODO: Remove -->
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-junit</artifactId>
+			<version>2.0.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+			<version>19.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.janusgraph</groupId>
 			<artifactId>janusgraph-cql</artifactId>
+			<version>${janusgraph.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -479,10 +519,12 @@
 		<dependency>
 			<groupId>com.github.jnr</groupId>
 			<artifactId>jnr-ffi</artifactId>
+			<version>2.1.11</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tinkerpop</groupId>
 			<artifactId>gremlin-driver</artifactId>
+			<version>${gremlin.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.groovy</groupId>
@@ -493,6 +535,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<!-- <version>${jackson.version}</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
@@ -521,48 +564,54 @@
 		<dependency>
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
+			<version>1.78</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
+			<version>20190722</version>
 		</dependency>
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
+			<version>2.3.31</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>eclipselink</artifactId>
+			<version>${eclipse.persistence.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>org.eclipse.persistence.moxy</artifactId>
+			<version>${eclipse.persistence.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.github.fge</groupId>
 			<artifactId>json-patch</artifactId>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.javatuples</groupId>
 			<artifactId>javatuples</artifactId>
+			<version>1.2</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+			<version>2.8.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.bazaarvoice.jolt</groupId>
 			<artifactId>jolt-complete</artifactId>
+			<version>0.0.24</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
+			<version>2.2.0</version>
 		</dependency>
 		<!-- Do not use activemq-all because they force you to use a specific logging 
 			and they shade it so you can't simply exclude it and when you deploy the 
@@ -570,15 +619,22 @@
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-broker</artifactId>
+			<version>${activemq.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-client</artifactId>
+			<version>${activemq.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.onap.aai.aai-common</groupId>
 			<artifactId>aai-core</artifactId>
+			<version>${aai.release.version}</version>
 			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-test</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>org.onap.aai.aai-common</groupId>
 					<artifactId>aai-aaf-auth</artifactId>
@@ -612,6 +668,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jms</artifactId>
+			<version>${spring.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.sun.jersey</groupId>
@@ -625,10 +682,12 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.onap.aai.aai-common</groupId>
 			<artifactId>aai-rest</artifactId>
+			<version>${aai.release.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.onap.aai.aai-common</groupId>
@@ -636,9 +695,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- TODO: Remove -->
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
+			<version>1.5.0</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -655,6 +716,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-rsa</artifactId>
+			<version>1.0.8.RELEASE</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
@@ -688,6 +750,7 @@
 		<dependency>
 			<groupId>org.onap.aaf.authz</groupId>
 			<artifactId>aaf-cadi-aaf</artifactId>
+			<version>2.1.15</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
@@ -707,6 +770,7 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
+			<version>${antlr.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -722,6 +786,7 @@
 		<dependency>
 			<groupId>org.apache.tinkerpop</groupId>
 			<artifactId>gremlin-core</artifactId>
+			<version>${gremlin.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -732,14 +797,17 @@
 		<dependency>
 			<groupId>org.apache.tinkerpop</groupId>
 			<artifactId>tinkergraph-gremlin</artifactId>
+			<version>${gremlin.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tinkerpop</groupId>
 			<artifactId>gremlin-groovy</artifactId>
+			<version>${gremlin.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-utils</artifactId>
+			<version>3.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -771,6 +839,121 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- TODO: Check if these overrides are necessary -->
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy-groovysh</artifactId>
+				<version>2.5.9</version>
+				<classifier>indy</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>2.27</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-crypto</artifactId>
+				<version>5.1.7.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>com.datastax.cassandra</groupId>
+				<artifactId>cassandra-driver-core</artifactId>
+				<version>3.6.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-core</artifactId>
+				<version>2.0.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>1.29</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.jaxrs</groupId>
+				<artifactId>jackson-jaxrs-json-provider</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-core</artifactId>
+				<version>2.2</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>2.0.1.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.annotation</groupId>
+				<artifactId>javax.annotation-api</artifactId>
+				<version>1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-core</artifactId>
+				<version>4.0.7</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-dependencies</artifactId>
+			<version>${spring.boot.version}</version>
+			<type>pom</type>
+			<scope>import</scope>
+	</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-framework-bom</artifactId>
+			<version>${spring.version}</version>
+			<type>pom</type>
+			<scope>import</scope>
+	</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.9.16</version>
+	</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy-agent</artifactId>
+			<version>1.9.16</version>
+	</dependency>
+	<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.1.0</version>
+		<scope>provided</scope>
+</dependency>
+	<dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-core</artifactId>
+    <version>${mockito.core.version}</version>
+</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -907,7 +1090,8 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration combine.children="append">
+				<version>0.8.5</version>
+				<configuration>
 					<excludes>
 						<exclude>**/*WebSecurityConfig.*</exclude>
 					</excludes>
@@ -947,19 +1131,17 @@
 			<plugin>
 				<artifactId>exec-maven-plugin</artifactId>
 				<groupId>org.codehaus.mojo</groupId>
+				<version>3.1.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
 			</plugin>
-			<plugin>
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M4</version>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
 				</configuration>
@@ -989,6 +1171,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
 				<configuration>
 					<mainClass>${start-class}</mainClass>
 					<layout>ZIP</layout>
