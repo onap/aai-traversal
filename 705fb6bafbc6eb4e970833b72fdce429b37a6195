@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c2ef9d87_8f5577fa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2023-11-15T12:47:45Z",
+      "side": 1,
+      "message": "You forgot to bump the aai.schema.service.version to 1.12.3 in the root pom.xml",
+      "revId": "705fb6bafbc6eb4e970833b72fdce429b37a6195",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
