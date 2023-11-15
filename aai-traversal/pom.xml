@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.12.1-SNAPSHOT</version>
+		<version>1.12.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
