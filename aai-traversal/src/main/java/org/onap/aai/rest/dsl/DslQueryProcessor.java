@@ -47,16 +47,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DslQueryProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslQueryProcessor.class);
-
-    private Map<QueryVersion, ParseTreeListener> dslListeners;
-    private boolean startNodeValidationFlag = true;
-    private String validationRules = "";
-    private String packageName = "org.onap.aai.dsl.";
+    private static final String DSL_BASE_PACKAGE = "org.onap.aai.dsl.";
     private static final String LEXER = "AAIDslLexer";
     private static final String PARSER = "AAIDslParser";
     private static final String EOF_TOKEN = "<EOF>";
+    
+    private final Map<QueryVersion, ParseTreeListener> dslListeners;
 
+    private boolean startNodeValidationFlag = true;
     private boolean isAggregate = false;
+    private String validationRules = "";
 
     @Autowired
     public DslQueryProcessor(Map<QueryVersion, ParseTreeListener> dslListeners) {
@@ -71,8 +71,7 @@ public class DslQueryProcessor {
             InputStream stream =
                 new ByteArrayInputStream(aaiQuery.getBytes(StandardCharsets.UTF_8));
 
-            packageName = packageName + version.toString().toLowerCase() + ".";
-
+            String packageName = DSL_BASE_PACKAGE + version.toString().toLowerCase() + ".";
             Class<?> lexerClass = Class.forName(packageName + LEXER);
             Class<?> parserClass = Class.forName(packageName + PARSER);
 
