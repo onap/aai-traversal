@@ -51,17 +51,30 @@ import org.slf4j.LoggerFactory;
 public abstract class GenericQueryProcessor {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GenericQueryProcessor.class);
+    protected static final Pattern p = Pattern.compile("query/(.*+)");
+    protected static final GroovyQueryBuilder groovyQueryBuilder = new GroovyQueryBuilder();
 
-    protected final Optional<URI> uri;
+    protected final Optional<DslQueryProcessor> dslQueryProcessorOptional;
+    protected final GremlinServerSingleton gremlinServerSingleton;
     protected final MultivaluedMap<String, String> queryParams;
     protected final Optional<Collection<Vertex>> vertices;
-    protected static Pattern p = Pattern.compile("query/(.*+)");
-    protected Optional<String> gremlin;
     protected final TransactionalGraphEngine dbEngine;
-    protected GremlinServerSingleton gremlinServerSingleton;
-    protected GroovyQueryBuilder groovyQueryBuilder = new GroovyQueryBuilder();
+    protected final Optional<String> gremlin;
+    protected final Optional<URI> uri;
     protected final boolean isGremlin;
-    protected Optional<DslQueryProcessor> dslQueryProcessorOptional;
+
+    /*
+     * dsl parameters to store dsl query and to check
+     * 
+     * if this is a DSL request
+     */
+    protected final boolean isDsl;
+    protected final boolean isHistory;
+    protected Optional<String> dsl;
+    protected GraphTraversalSource traversalSource;
+    protected QueryStyle style;
+    protected QueryVersion dslApiVersion;
+    protected Format format;
 
     public Map<String, List<String>> getPropertiesMap() {
         return propertiesList;
@@ -72,18 +85,6 @@ public abstract class GenericQueryProcessor {
     }
 
     private Map<String, List<String>> propertiesList;
-    /*
-     * dsl parameters to store dsl query and to check
-     * 
-     * if this is a DSL request
-     */
-    protected Optional<String> dsl;
-    protected final boolean isDsl;
-    protected boolean isHistory;
-    protected GraphTraversalSource traversalSource;
-    protected QueryStyle style;
-    protected QueryVersion dslApiVersion;
-    protected Format format;
 
     protected GenericQueryProcessor(Builder builder) {
         this.uri = builder.getUri();
