@@ -46,16 +46,16 @@ import org.slf4j.LoggerFactory;
 public class DslQueryProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslQueryProcessor.class);
-
-    private Map<QueryVersion, ParseTreeListener> dslListeners;
-    private boolean startNodeValidationFlag = true;
-    private String validationRules = "";
     private static final String DSL_BASE_PACKAGE = "org.onap.aai.dsl.";
     private static final String LEXER = "AAIDslLexer";
     private static final String PARSER = "AAIDslParser";
     private static final String EOF_TOKEN = "<EOF>";
+    
+    private final Map<QueryVersion, ParseTreeListener> dslListeners;
 
+    private boolean startNodeValidationFlag = true;
     private boolean isAggregate = false;
+    private String validationRules = "";
 
     public DslQueryProcessor(Map<QueryVersion, ParseTreeListener> dslListeners) {
         this.dslListeners = dslListeners;
