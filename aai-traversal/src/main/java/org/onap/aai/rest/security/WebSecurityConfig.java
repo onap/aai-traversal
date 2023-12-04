@@ -72,7 +72,7 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         web.ignoring().regexMatchers("^.*/util/echo$");
     }
 }

@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response.Status;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.restcore.RESTAPI;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -51,6 +52,7 @@ public class EchoResponse extends RESTAPI {
 
 	private AaiGraphChecker aaiGraphChecker;
 
+	@Autowired
 	public EchoResponse(AaiGraphChecker aaiGraphChecker) {
 		this.aaiGraphChecker = aaiGraphChecker;
 	}

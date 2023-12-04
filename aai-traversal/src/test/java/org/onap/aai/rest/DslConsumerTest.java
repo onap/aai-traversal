@@ -22,14 +22,16 @@ package org.onap.aai.rest;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -42,7 +44,16 @@ import org.onap.aai.util.AAIConfig;
 import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class DslConsumerTest extends AbstractSpringRestTest {
 
@@ -330,8 +341,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String responseString = responseEntity.getBody().toString();
 
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         JsonObject properties = resultsValue.get("properties").getAsJsonObject();
@@ -358,8 +368,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         JsonObject properties = resultsValue.get("properties").getAsJsonObject();
@@ -387,8 +396,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String responseString = responseEntity.getBody().toString();
 
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         JsonObject properties = resultsValue.get("pserver").getAsJsonObject();
@@ -416,8 +424,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String responseString = responseEntity.getBody().toString();
 
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         JsonObject properties = resultsValue.get("pserver").getAsJsonObject();
@@ -446,8 +453,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String responseString = responseEntity.getBody().toString();
 
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         JsonObject properties = resultsValue.get("pserver").getAsJsonObject();
@@ -475,8 +481,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String responseString = responseEntity.getBody().toString();
 
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         JsonObject properties = resultsValue.get("pserver").getAsJsonObject();
@@ -502,8 +507,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         assertNull(
@@ -546,8 +550,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonArray resultsValue = resultsArray.get(0).getAsJsonArray();
         assertNotNull(resultsValue.get(1).getAsJsonObject()
@@ -592,8 +595,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject properties = resultsArray.get(0).getAsJsonObject()
             .get("/aai/v16/cloud-infrastructure/pservers/pserver/test-pserver-dsl")
@@ -626,8 +628,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         assertEquals(1, resultsArray.size()); // Returns only test-pserver-dsl, does not return
                                               // test-pserver-dsl-03 since it does not have an edge
@@ -654,8 +655,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         assertEquals(1, resultsArray.size()); // Returns only test-pserver-dsl-02
         assertEquals(null, resultsArray.get(0).getAsJsonObject()
@@ -698,8 +698,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String responseString = responseEntity.getBody().toString();
 
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultValue = resultsArray.get(0).getAsJsonObject();
         JsonObject complex = resultValue.get("complex").getAsJsonObject();
@@ -721,8 +720,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String responseString = responseEntity.getBody().toString();
 
         // Extract the properties array from the response and compare in assert statements
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         for (JsonElement je : resultsArray) {
             JsonObject jo = je.getAsJsonObject();
@@ -752,8 +750,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString(); // pnf should have no results
 
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         boolean hasPserver1 = false, hasPserver2 = false;
         for (JsonElement je : resultsArray) {
@@ -791,8 +788,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
-        JsonParser jsonParser = new JsonParser();
-        JsonObject results = jsonParser.parse(responseString).getAsJsonObject();
+        JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         for (JsonElement je : resultsArray) {
             JsonObject jo = je.getAsJsonObject();

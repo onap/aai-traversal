@@ -38,7 +38,6 @@ import org.onap.aai.rest.search.ModelAndNamedQueryRestProvider;
 import org.onap.aai.rest.search.SearchProvider;
 import org.onap.aai.rest.util.EchoResponse;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -56,7 +55,6 @@ public class JerseyConfiguration {
 
     private final Environment environment;
 
-    @Autowired
     public JerseyConfiguration(Environment environment) {
         this.environment = environment;
     }

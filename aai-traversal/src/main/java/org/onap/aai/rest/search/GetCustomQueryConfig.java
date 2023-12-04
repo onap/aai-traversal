@@ -19,16 +19,16 @@
  */
 package org.onap.aai.rest.search;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GetCustomQueryConfig {
 
@@ -46,8 +46,7 @@ public class GetCustomQueryConfig {
     }
 
     private void init(String customQueryJson) {
-        JsonParser parser = new JsonParser();
-        JsonObject queriesObject = parser.parse(customQueryJson).getAsJsonObject();
+        JsonObject queriesObject = JsonParser.parseString(customQueryJson).getAsJsonObject();
         if (queriesObject.has(STORED_QUERIES_CONFIG)) {
 
             storedQueries = queriesObject.getAsJsonArray(STORED_QUERIES_CONFIG);

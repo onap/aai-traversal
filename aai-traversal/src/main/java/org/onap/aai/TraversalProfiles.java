@@ -19,7 +19,7 @@
  */
 package org.onap.aai;
 
-public final class Profiles {
+public final class TraversalProfiles {
 
     public static final String DMAAP = "dmaap";
     public static final String DME2 = "dme2";
@@ -31,6 +31,6 @@ public final class Profiles {
     public static final String AAF_CERT_AUTHENTICATION = "aaf-cert-auth";
     public static final String TWO_WAY_SSL = "two-way-ssl";
 
-    private Profiles() {
+    private TraversalProfiles() {
     }
 }

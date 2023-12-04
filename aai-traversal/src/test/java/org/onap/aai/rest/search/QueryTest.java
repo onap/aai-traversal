@@ -157,9 +157,9 @@ public abstract class QueryTest {
         addParam(params);
         when(dbEngine.getQueryBuilder(any(QueryStyle.class)))
             .thenReturn(new GremlinTraversal<>(loader, graph.traversal()));
-        logger.info("Stored query in abstraction form {}", query);
+        logger.debug("Stored query in abstraction form {}", query);
         query = new GroovyQueryBuilder().executeTraversal(dbEngine, query, params);
-        logger.info("After converting to gremlin query {}", query);
+        logger.debug("After converting to gremlin query {}", query);
         query = "g" + query;
         GraphTraversal<Vertex, Vertex> g = graph.traversal().V();
         addStartNode(g);
@@ -173,8 +173,8 @@ public abstract class QueryTest {
 
         List<Vertex> vertices = result.toList();
 
-        logger.info("Expected result set of vertexes [{}]", convert(expectedResult));
-        logger.info("Actual Result set of vertexes [{}]", convert(vertices));
+        logger.debug("Expected result set of vertexes [{}]", convert(expectedResult));
+        logger.debug("Actual Result set of vertexes [{}]", convert(vertices));
 
         List<Vertex> nonDuplicateExpectedResult = new ArrayList<>(new HashSet<>(expectedResult));
         vertices = new ArrayList<>(new HashSet<>(vertices));
