@@ -140,7 +140,7 @@ public class DslQueryProcessor {
             } else if (e.getTargetException() instanceof AAIException) {
                 AAIException ex = (AAIException) e.getTargetException();
                 throw new AAIException((ex.getCode().isEmpty() ? "AAI_6149" : ex.getCode()),
-                    "DSL Error  while processing the query :" + ex.getMessage());
+                    "DSL Error while processing the query :" + ex.getMessage());
             } else {
                 throw new AAIException("AAI_6152", "Exception while processing DSL query");
             }

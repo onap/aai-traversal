@@ -40,6 +40,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.onap.aai.PayloadUtil;
 import org.onap.aai.dbmap.AAIGraph;
+import org.onap.aai.entities.AAIErrorResponse;
+import org.onap.aai.entities.ServiceException;
 import org.onap.aai.util.AAIConfig;
 import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
@@ -50,6 +52,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -58,6 +61,8 @@ import com.google.gson.JsonParser;
 public class DslConsumerTest extends AbstractSpringRestTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslConsumerTest.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Override
     public void createTestGraph() {
@@ -175,18 +180,16 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query", "pserver*('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         headers.add("X-Dsl-Version", "V1");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        LOGGER.debug("Response for PUT request with uri {} : {}", baseUrl + endpoint,
-            responseEntity.getBody());
-        System.out.println(responseEntity.getBody());
+
         assertNotNull("Response from /aai/v14/dsl is not null", responseEntity);
         assertEquals("Expected the response to be 200", HttpStatus.OK,
             responseEntity.getStatusCode());
 
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
-        httpEntity = new HttpEntity(payload, headers);
+        httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         LOGGER.debug("Response for PUT request with uri {} : {}", baseUrl + endpoint,
@@ -209,21 +212,19 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query", "pserver*('hostname','test-pserver-dsl') > complex*");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         headers.add("X-Dsl-Version", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        LOGGER.debug("Response for PUT request with uri {} : {}", baseUrl + endpoint,
-            responseEntity.getBody());
+
         assertNotNull("Response from /aai/v14/dsl is not null", responseEntity);
         assertEquals("Expected the response to be 200", HttpStatus.OK,
             responseEntity.getStatusCode());
 
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
-        httpEntity = new HttpEntity(payload, headers);
+        httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        LOGGER.debug("Response for PUT request with uri {} : {}", baseUrl + endpoint,
-            responseEntity.getBody());
+
         assertNotNull("Response from /aai/v14/dsl is not null", responseEntity);
         assertEquals("Expected the response to be 200", HttpStatus.OK,
             responseEntity.getStatusCode());
@@ -242,12 +243,10 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         System.out.println("Payload" + payload);
         headers.add("X-Dsl-Version", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        LOGGER.debug("Response for PUT request with uri {} : {}", baseUrl + endpoint,
-            responseEntity.getBody());
-        System.out.println(responseEntity.getBody());
+
         assertNotNull("Response from /aai/v17/dsl is not null", responseEntity);
         assertEquals("Expected the response to be 200", HttpStatus.OK,
             responseEntity.getStatusCode());
@@ -257,35 +256,30 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQueryException() throws Exception {
         Map<String, String> dslQuerymap = new HashMap<>();
         dslQuerymap.put("dsl-query", "xserver");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQuerymap);
-
-        ResponseEntity responseEntity = null;
-
         String endpoint = "/aai/v11/dsl?format=console";
+        httpEntity = new HttpEntity<String>(payload, headers);
 
-        httpEntity = new HttpEntity(payload, headers);
-        responseEntity =
-            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity<AAIErrorResponse> response =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, AAIErrorResponse.class);
         assertEquals("Expected the response to be 404", HttpStatus.BAD_REQUEST,
-            responseEntity.getStatusCode());
+            response.getStatusCode());
+        assertEquals("SVC6152", response.getBody().getRequestError().getServiceException().getMessageId());
+        assertEquals("DSL Generic Error (msg=%1) (ec=%2)", response.getBody().getRequestError().getServiceException().getText());
+        assertEquals("DSL Generic Error:Error while processing the query: org.onap.aai.exceptions.AAIException: No nodes marked for output", response.getBody().getRequestError().getServiceException().getVariables().get(0));
     }
 
     @Test
     public void testDslQueryOverride() throws Exception {
         Map<String, String> dslQuerymap = new HashMap<>();
         dslQuerymap.put("dsl-query", "pserver*");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQuerymap);
-
-        ResponseEntity responseEntity = null;
-
         String endpoint = "/aai/v11/dsl?format=console";
-
         headers.add("X-DslOverride", AAIConfig.get(TraversalConstants.DSL_OVERRIDE));
-        httpEntity = new HttpEntity(payload, headers);
-        responseEntity =
-            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        httpEntity = new HttpEntity<String>(payload, headers);
+
+        ResponseEntity<AAIErrorResponse> responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, AAIErrorResponse.class);
         assertEquals("Expected the response to be 404", HttpStatus.BAD_REQUEST,
             responseEntity.getStatusCode());
     }
@@ -294,13 +288,11 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testSelectedPropertiesNotRequiredOnDSLStartNode() throws Exception {
         Map<String, String> dslQuerymap = new HashMap<>();
         dslQuerymap.put("dsl-query", "pserver*('equip-model','abc')");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQuerymap);
-
         String endpoint = "/aai/v11/dsl?format=console";
+        httpEntity = new HttpEntity<String>(payload, headers);
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
 
         assertEquals("Expected the response to be " + HttpStatus.OK, HttpStatus.OK,
@@ -311,17 +303,19 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testAPropertyIsRequiredOnDSLStartNode() throws Exception {
         Map<String, String> dslQuerymap = new HashMap<>();
         dslQuerymap.put("dsl-query", "pserver*");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQuerymap);
-
         String endpoint = "/aai/v11/dsl?format=console";
+        httpEntity = new HttpEntity<String>(payload, headers);
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
-            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity<AAIErrorResponse> responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, AAIErrorResponse.class);
 
         assertEquals("Expected the response to be " + HttpStatus.BAD_REQUEST,
             HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        ServiceException serviceException = responseEntity.getBody().getRequestError().getServiceException();
+        assertEquals("SVC6149", serviceException.getMessageId());
+        assertEquals("DSL Query/Schema Error (msg=%1) (ec=%2)", serviceException.getText());
+        assertEquals("DSL Query/Schema Error:DSL Error while processing the query :No keys sent. Valid keys for pserver are hostname,pserver-id,pserver-name2,inv-status,fqdn,prov-status,ptnii-equip-name,equip-model,equip-vendor,function,data-owner,data-source,data-source-version,role", serviceException.getVariables().get(0));
     }
 
     @Test
@@ -335,8 +329,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -357,16 +351,17 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=simple&depth=0&nodesOnly=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
+
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -384,14 +379,13 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=resource&depth=0&nodesOnly=true&as-tree=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -412,14 +406,13 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=resource&depth=0&nodesOnly=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -440,15 +433,14 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint =
             "/aai/v16/dsl?format=resource_and_url&depth=0&nodesOnly=true&as-tree=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -469,14 +461,13 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
-
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=resource_and_url&depth=0&nodesOnly=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -502,8 +493,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
@@ -545,8 +536,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
@@ -590,8 +581,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
@@ -623,8 +614,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
@@ -650,8 +641,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Extract the properties array from the response and compare in assert statements
@@ -674,8 +665,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=simple";
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         Assert.assertTrue(responseString.contains(
@@ -692,8 +683,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=resource";
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -714,8 +705,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=resource";
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -745,8 +736,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=resource";
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString(); // pnf should have no results
 
@@ -783,8 +774,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint = "/aai/v16/dsl?format=resource";
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -814,8 +805,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', 1)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -830,7 +821,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', 'false')");
         payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
+        httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         responseString = responseEntity.getBody().toString();
@@ -849,8 +840,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', 'bogusBoolean')>l-interface*('priority', 123)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Confirm that the l-interface was returned in the response
@@ -868,8 +859,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', 0)>l-interface*('priority', 123)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Confirm that the l-interface was returned in the response
@@ -887,8 +878,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', 1)>l-interface*('priority', 123)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Confirm that the l-interface was returned in the response
@@ -907,8 +898,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', true)>l-interface*('priority', 123)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Confirm that the l-interface was returned in the response
@@ -927,8 +918,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', 'true')>l-interface*('priority', 123)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
         // Confirm that the l-interface was returned in the response
@@ -946,8 +937,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', false)>l-interface*('priority', '00123')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -961,7 +952,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>tenant*>vserver*('in-maint', 'false')>l-interface*('priority', 00123)");
         payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
+        httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         responseString = responseEntity.getBody().toString();
@@ -980,8 +971,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>oam-network*('cvlan-tag', '456')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -994,7 +985,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "cloud-region*('cloud-owner', 'test-cloud-owner-02')>oam-network*('cvlan-tag', 456)");
         payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
+        httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         responseString = responseEntity.getBody().toString();
@@ -1013,8 +1004,8 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "complex('state')>pserver*('number-of-cpus', '234', '364', 2342)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         String responseString = responseEntity.getBody().toString();
 
@@ -1027,7 +1018,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "complex('state')>pserver*('number-of-cpus', '234', 364, 2342)");
         payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
 
-        httpEntity = new HttpEntity(payload, headers);
+        httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         responseString = responseEntity.getBody().toString();
