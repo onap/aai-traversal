@@ -3,6 +3,7 @@
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
+ * Modifications Copyright (C) 2023 Deutsche Telekom SA.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +25,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sun.istack.SAXParseException2;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -54,71 +54,65 @@ public class ExceptionHandler implements ExceptionMapper<Exception> {
 
     @Override
     public Response toResponse(Exception exception) {
-
-        Response response = null;
-        ArrayList<String> templateVars = new ArrayList<>();
-
         // the general case is that cxf will give us a WebApplicationException
         // with a linked exception
         if (exception instanceof WebApplicationException) {
-            WebApplicationException e = (WebApplicationException) exception;
-            if (e.getCause() instanceof SAXParseException2) {
-                templateVars.add("UnmarshalException");
-                AAIException ex = new AAIException(AAI_4007, exception);
-                response = Response.status(400).entity(ErrorLogHelper
-                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-                    .build();
-
+            if (exception.getCause() instanceof SAXParseException2) {
+                return buildInputParsingErrorResponse(exception, "UnmarshalException");
+            } else {
+                return ((WebApplicationException)exception).getResponse();
             }
         } else if (exception instanceof JsonParseException) {
             // jackson does it differently so we get the direct JsonParseException
-            templateVars.add("JsonParseException");
-            AAIException ex = new AAIException(AAI_4007, exception);
-            response = Response
-                .status(400).entity(ErrorLogHelper
-                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-                .build();
+            return buildInputParsingErrorResponse(exception);
         } else if (exception instanceof JsonMappingException) {
             // jackson does it differently so we get the direct JsonParseException
-            templateVars.add("JsonMappingException");
-            AAIException ex = new AAIException(AAI_4007, exception);
-            response = Response
-                .status(400).entity(ErrorLogHelper
-                    .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-                .build();
-        }
-
+            return buildInputParsingErrorResponse(exception);
         // it didn't get set above, we wrap a general fault here
-        if (response == null) {
-
-            Exception actual_e = exception;
-            if (exception instanceof WebApplicationException) {
-                WebApplicationException e = (WebApplicationException) exception;
-                response = e.getResponse();
-            } else {
-                templateVars.add(request.getMethod());
-                templateVars.add("unknown");
-                AAIException ex = new AAIException("AAI_4000", actual_e);
-                List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
-                int setError = 0;
-
-                for (MediaType mediaType : mediaTypes) {
-                    if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType)) {
-                        response = Response.status(400).type(MediaType.APPLICATION_XML_TYPE)
-                            .entity(ErrorLogHelper.getRESTAPIErrorResponse(
-                                headers.getAcceptableMediaTypes(), ex, templateVars))
-                            .build();
-                        setError = 1;
-                    }
-                }
-                if (setError == 0) {
-                    response = Response.status(400).type(MediaType.APPLICATION_JSON_TYPE)
-                        .entity(ErrorLogHelper.getRESTAPIErrorResponse(
-                            headers.getAcceptableMediaTypes(), ex, templateVars))
-                        .build();
-                }
-            }
+        } else {
+            return defaultException(exception);
         }
-        return response;
+    }
+
+    private Response buildInputParsingErrorResponse(Exception exception) {
+        ArrayList<String> templateVars = new ArrayList<>();
+        templateVars.add(exception.getClass().getSimpleName());
+        return buildInputParsingErrorResponse(exception, templateVars);
+    }
+
+    private Response buildInputParsingErrorResponse(Exception exception, String customExceptionName) {
+        ArrayList<String> templateVars = new ArrayList<>();
+        templateVars.add(customExceptionName);
+        return buildInputParsingErrorResponse(exception, templateVars);
+    }
+
+    private Response buildInputParsingErrorResponse(Exception exception, ArrayList<String> templateVars) {
+        AAIException ex = new AAIException(AAI_4007, exception);
+        return Response
+            .status(400).entity(ErrorLogHelper
+                .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
+            .build();
+    }
+
+    private Response defaultException(Exception exception) {
+        ArrayList<String> templateVars = new ArrayList<>();
+        templateVars.add(request.getMethod());
+        templateVars.add("unknown");
+        AAIException ex = new AAIException("AAI_4000", exception);
+
+        // prefer xml, use json otherwise
+        return headers.getAcceptableMediaTypes().stream()
+            .filter(MediaType.APPLICATION_ATOM_XML_TYPE::isCompatible)
+            .findAny()
+            .map(xmlType -> 
+                Response.status(400).type(MediaType.APPLICATION_XML_TYPE)
+                    .entity(ErrorLogHelper.getRESTAPIErrorResponse(
+                        headers.getAcceptableMediaTypes(), ex, templateVars))
+                    .build())
+            .orElseGet(() -> 
+                Response.status(400).type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(ErrorLogHelper.getRESTAPIErrorResponse(
+                    headers.getAcceptableMediaTypes(), ex, templateVars))
+                .build());
     }
 }
