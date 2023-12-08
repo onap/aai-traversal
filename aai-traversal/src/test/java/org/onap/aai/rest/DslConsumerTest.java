@@ -267,6 +267,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         assertEquals("SVC6152", response.getBody().getRequestError().getServiceException().getMessageId());
         assertEquals("DSL Generic Error (msg=%1) (ec=%2)", response.getBody().getRequestError().getServiceException().getText());
         assertEquals("DSL Generic Error:Error while processing the query: org.onap.aai.exceptions.AAIException: No nodes marked for output", response.getBody().getRequestError().getServiceException().getVariables().get(0));
+        assertEquals("/aai/v11/dsl", response.getBody().getRequestError().getServiceException().getVariables().get(3));
     }
 
     @Test

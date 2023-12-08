@@ -81,6 +81,7 @@ public class ExceptionHandlerTest {
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
         when(request.getMethod()).thenReturn("PUT");
+        when(request.getRequestURI()).thenReturn("/aai/v14/dsl");
     }
 
     @Test
@@ -108,8 +109,8 @@ public class ExceptionHandlerTest {
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertEquals("SVC3102",responseEntity.getRequestError().getServiceException().getMessageId());
         assertEquals("Error parsing input performing %1 on %2 (msg=%3) (ec=%4)",responseEntity.getRequestError().getServiceException().getText());
-        assertEquals("UnmarshalException",responseEntity.getRequestError().getServiceException().getVariables().get(0));
-        assertEquals("null",responseEntity.getRequestError().getServiceException().getVariables().get(1));
+        assertEquals("PUT",responseEntity.getRequestError().getServiceException().getVariables().get(0));
+        assertEquals("/aai/v14/dsl",responseEntity.getRequestError().getServiceException().getVariables().get(1));
         assertEquals("Input parsing error:javax.ws.rs.WebApplicationException: HTTP 500 Internal Server Error",responseEntity.getRequestError().getServiceException().getVariables().get(2));
         assertEquals("ERR.5.4.4007",responseEntity.getRequestError().getServiceException().getVariables().get(3));
     }
@@ -127,8 +128,8 @@ public class ExceptionHandlerTest {
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertEquals("SVC3102",responseEntity.getRequestError().getServiceException().getMessageId());
         assertEquals("Error parsing input performing %1 on %2 (msg=%3) (ec=%4)",responseEntity.getRequestError().getServiceException().getText());
-        assertEquals("JsonParseException",responseEntity.getRequestError().getServiceException().getVariables().get(0));
-        assertEquals("null",responseEntity.getRequestError().getServiceException().getVariables().get(1));
+        assertEquals("PUT",responseEntity.getRequestError().getServiceException().getVariables().get(0));
+        assertEquals("/aai/v14/dsl",responseEntity.getRequestError().getServiceException().getVariables().get(1));
         assertEquals("Input parsing error:com.fasterxml.jackson.core.JsonParseException: ",responseEntity.getRequestError().getServiceException().getVariables().get(2));
         assertEquals("ERR.5.4.4007",responseEntity.getRequestError().getServiceException().getVariables().get(3));
     }
@@ -145,8 +146,8 @@ public class ExceptionHandlerTest {
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertEquals("SVC3102",responseEntity.getRequestError().getServiceException().getMessageId());
         assertEquals("Error parsing input performing %1 on %2 (msg=%3) (ec=%4)",responseEntity.getRequestError().getServiceException().getText());
-        assertEquals("JsonMappingException",responseEntity.getRequestError().getServiceException().getVariables().get(0));
-        assertEquals("null",responseEntity.getRequestError().getServiceException().getVariables().get(1));
+        assertEquals("PUT",responseEntity.getRequestError().getServiceException().getVariables().get(0));
+        assertEquals("/aai/v14/dsl",responseEntity.getRequestError().getServiceException().getVariables().get(1));
         assertEquals("Input parsing error:com.fasterxml.jackson.databind.JsonMappingException: ",responseEntity.getRequestError().getServiceException().getVariables().get(2));
         assertEquals("ERR.5.4.4007",responseEntity.getRequestError().getServiceException().getVariables().get(3));
     }
@@ -164,7 +165,7 @@ public class ExceptionHandlerTest {
         assertEquals("SVC3002",responseEntity.getRequestError().getServiceException().getMessageId());
         assertEquals("Error writing output performing %1 on %2 (msg=%3) (ec=%4)",responseEntity.getRequestError().getServiceException().getText());
         assertEquals("PUT",responseEntity.getRequestError().getServiceException().getVariables().get(0));
-        assertEquals("unknown",responseEntity.getRequestError().getServiceException().getVariables().get(1));
+        assertEquals("/aai/v14/dsl",responseEntity.getRequestError().getServiceException().getVariables().get(1));
         assertEquals("Internal Error:java.lang.Exception",responseEntity.getRequestError().getServiceException().getVariables().get(2));
         assertEquals("ERR.5.4.4000",responseEntity.getRequestError().getServiceException().getVariables().get(3));
     }
@@ -186,7 +187,7 @@ public class ExceptionHandlerTest {
         assertEquals("SVC3002",responseEntity.getRequestError().getServiceException().getMessageId());
         assertEquals("Error writing output performing %1 on %2 (msg=%3) (ec=%4)",responseEntity.getRequestError().getServiceException().getText());
         assertEquals("PUT",responseEntity.getRequestError().getServiceException().getVariables().get(0));
-        assertEquals("unknown",responseEntity.getRequestError().getServiceException().getVariables().get(1));
+        assertEquals("/aai/v14/dsl",responseEntity.getRequestError().getServiceException().getVariables().get(1));
         assertEquals("Internal Error:java.lang.Exception",responseEntity.getRequestError().getServiceException().getVariables().get(2));
         assertEquals("ERR.5.4.4000",responseEntity.getRequestError().getServiceException().getVariables().get(3));
     }

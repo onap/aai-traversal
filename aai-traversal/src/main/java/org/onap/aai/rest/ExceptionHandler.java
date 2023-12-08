@@ -26,6 +26,7 @@ import com.sun.istack.SAXParseException2;
 
 import java.util.ArrayList;
 
+import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -35,6 +36,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.janusgraph.core.SchemaViolationException;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.logging.ErrorLogHelper;
 
@@ -42,6 +44,7 @@ import org.onap.aai.logging.ErrorLogHelper;
  * The Class ExceptionHandler.
  */
 @Provider
+@Priority(10000)
 public class ExceptionHandler implements ExceptionMapper<Exception> {
 
     private static final String AAI_4007 = "AAI_4007";
@@ -58,47 +61,30 @@ public class ExceptionHandler implements ExceptionMapper<Exception> {
         // with a linked exception
         if (exception instanceof WebApplicationException) {
             if (exception.getCause() instanceof SAXParseException2) {
-                return buildInputParsingErrorResponse(exception, "UnmarshalException");
+                return buildAAIExceptionResponse(new AAIException(AAI_4007, exception));
             } else {
-                return ((WebApplicationException)exception).getResponse();
+                return ((WebApplicationException) exception).getResponse();
             }
         } else if (exception instanceof JsonParseException) {
             // jackson does it differently so we get the direct JsonParseException
-            return buildInputParsingErrorResponse(exception);
+            return buildAAIExceptionResponse(new AAIException(AAI_4007, exception));
         } else if (exception instanceof JsonMappingException) {
             // jackson does it differently so we get the direct JsonParseException
-            return buildInputParsingErrorResponse(exception);
+            return buildAAIExceptionResponse(new AAIException(AAI_4007, exception));
+        } else if (exception instanceof SchemaViolationException) {
+            return buildAAIExceptionResponse(new AAIException("AAI_4020", exception));
         // it didn't get set above, we wrap a general fault here
+        } else if (exception instanceof AAIException) {
+            return buildAAIExceptionResponse((AAIException) exception);
         } else {
             return defaultException(exception);
         }
     }
 
-    private Response buildInputParsingErrorResponse(Exception exception) {
-        ArrayList<String> templateVars = new ArrayList<>();
-        templateVars.add(exception.getClass().getSimpleName());
-        return buildInputParsingErrorResponse(exception, templateVars);
-    }
-
-    private Response buildInputParsingErrorResponse(Exception exception, String customExceptionName) {
-        ArrayList<String> templateVars = new ArrayList<>();
-        templateVars.add(customExceptionName);
-        return buildInputParsingErrorResponse(exception, templateVars);
-    }
-
-    private Response buildInputParsingErrorResponse(Exception exception, ArrayList<String> templateVars) {
-        AAIException ex = new AAIException(AAI_4007, exception);
-        return Response
-            .status(400).entity(ErrorLogHelper
-                .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), ex, templateVars))
-            .build();
-    }
-
-    private Response defaultException(Exception exception) {
+    private Response buildAAIExceptionResponse(AAIException exception) {
         ArrayList<String> templateVars = new ArrayList<>();
         templateVars.add(request.getMethod());
-        templateVars.add("unknown");
-        AAIException ex = new AAIException("AAI_4000", exception);
+        templateVars.add(request.getRequestURI());
 
         // prefer xml, use json otherwise
         return headers.getAcceptableMediaTypes().stream()
@@ -107,12 +93,16 @@ public class ExceptionHandler implements ExceptionMapper<Exception> {
             .map(xmlType -> 
                 Response.status(400).type(MediaType.APPLICATION_XML_TYPE)
                     .entity(ErrorLogHelper.getRESTAPIErrorResponse(
-                        headers.getAcceptableMediaTypes(), ex, templateVars))
+                        headers.getAcceptableMediaTypes(), exception, templateVars))
                     .build())
             .orElseGet(() -> 
                 Response.status(400).type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(ErrorLogHelper.getRESTAPIErrorResponse(
-                    headers.getAcceptableMediaTypes(), ex, templateVars))
+                    headers.getAcceptableMediaTypes(), exception, templateVars))
                 .build());
+    }
+
+    private Response defaultException(Exception exception) {
+        return buildAAIExceptionResponse(new AAIException("AAI_4000", exception));
     }
 }
