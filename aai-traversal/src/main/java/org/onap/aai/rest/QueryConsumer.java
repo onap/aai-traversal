@@ -215,7 +215,7 @@ public class QueryConsumer extends TraversalConsumer {
                 validateHistoryParams(format, info.getQueryParameters());
             }
             GraphTraversalSource traversalSource =
-                getTraversalSource(dbEngine, format, info, roles);
+                getTraversalSource(dbEngine, format, info.getQueryParameters(), roles);
             QueryStyle queryStyle = getQueryStyle(format, traversalUriHttpEntry);
 
             if (!startURIs.isEmpty()) {
