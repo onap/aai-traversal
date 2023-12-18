@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import javax.annotation.Priority;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletProperties;
 import org.onap.aai.rest.*;
 import org.onap.aai.rest.search.ModelAndNamedQueryRestProvider;
 import org.onap.aai.rest.search.SearchProvider;
@@ -63,11 +64,12 @@ public class JerseyConfiguration {
     public ResourceConfig resourceConfig() {
         ResourceConfig resourceConfig = new ResourceConfig();
 
+        resourceConfig.property(ServletProperties.FILTER_FORWARD_ON_404, true);
         Set<Class<?>> classes = Sets.newHashSet(SearchProvider.class,
-            ModelAndNamedQueryRestProvider.class, QueryConsumer.class, RecentAPIConsumer.class,
-            DslConsumer.class, EchoResponse.class, CQ2Gremlin.class, CQ2GremlinTest.class);
+            ModelAndNamedQueryRestProvider.class, QueryConsumer.class, RecentAPIConsumer.class, EchoResponse.class, CQ2Gremlin.class, CQ2GremlinTest.class);
         Set<Class<?>> filterClasses =
-            Sets.newHashSet(org.onap.aai.interceptors.pre.RequestTransactionLogging.class,
+            Sets.newHashSet(
+                org.onap.aai.interceptors.pre.RequestTransactionLogging.class,
                 org.onap.aai.interceptors.pre.HeaderValidation.class,
                 org.onap.aai.interceptors.pre.HttpHeaderInterceptor.class,
                 org.onap.aai.interceptors.pre.OneWaySslAuthorization.class,
@@ -77,9 +79,10 @@ public class JerseyConfiguration {
                 org.onap.aai.interceptors.pre.RequestHeaderManipulation.class,
                 org.onap.aai.interceptors.pre.RequestModification.class,
                 org.onap.aai.interceptors.post.InvalidResponseStatus.class,
+                
                 org.onap.aai.interceptors.post.ResponseTransactionLogging.class,
-                org.onap.aai.rest.ExceptionHandler.class,
-                org.onap.aai.interceptors.post.ResponseHeaderManipulation.class);
+                org.onap.aai.interceptors.post.ResponseHeaderManipulation.class
+                );
         resourceConfig.registerClasses(classes);
         logger.debug("REGISTERED CLASSES " + classes.toString());
 
@@ -93,7 +96,7 @@ public class JerseyConfiguration {
     }
 
     private <T> void throwIfPriorityAnnotationAbsent(Collection<Class<? extends T>> classes) {
-        for (Class clazz : classes) {
+        for (Class<? extends T> clazz : classes) {
             if (!clazz.isAnnotationPresent(Priority.class)) {
                 logger.debug("throwIfPriorityAnnotationAbsent: missing filter priority for : "
                     + clazz.getName());

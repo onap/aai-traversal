@@ -29,8 +29,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -199,9 +202,26 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             responseEntity.getStatusCode());
 
         // Make sure that there are no two result <result><result>
-        assertThat(responseEntity.getBody().toString(),
+        assertThat(responseEntity.getBody(),
             is(not(containsString("<result><result>"))));
-        assertThat(responseEntity.getBody().toString(), is(containsString("<results><result>")));
+        assertThat(responseEntity.getBody(), is(containsString("<results><result>")));
+    }
+
+    @Test
+    public void thatWildcardContentTypeCanBeUsed() throws Exception {
+
+        String endpoint = "/aai/v14/dsl?format=console";
+        Map<String, String> dslQueryMap = new HashMap<>();
+        dslQueryMap.put("dsl-query", "pserver*('hostname','test-pserver-dsl')");
+        String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
+        headers.add("X-Dsl-Version", "V1");
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> responseEntity =
+            restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
+
+        JsonObject result = JsonParser.parseString(responseEntity.getBody()).getAsJsonObject();
+        assertEquals(1, result.get("results").getAsJsonArray().size());
     }
 
     @Test
@@ -230,9 +250,9 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             responseEntity.getStatusCode());
 
         // Make sure that there are no two result <result><result>
-        assertThat(responseEntity.getBody().toString(),
+        assertThat(responseEntity.getBody(),
             is(not(containsString("<result><result>"))));
-        assertThat(responseEntity.getBody().toString(), is(containsString("<results><result>")));
+        assertThat(responseEntity.getBody(), is(containsString("<results><result>")));
     }
 
     @Test
@@ -333,7 +353,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -361,7 +381,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -388,7 +408,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -415,7 +435,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -443,7 +463,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -470,7 +490,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -497,7 +517,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -540,7 +560,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -585,7 +605,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -618,7 +638,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -645,7 +665,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -669,7 +689,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         Assert.assertTrue(responseString.contains(
             "Value ['test'] is not an instance of the expected data type for property key ['number-of-cpus'] and cannot be converted. "
                 + "Expected: class java.lang.Integer, found: class java.lang.String"));
@@ -687,7 +707,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -709,7 +729,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Extract the properties array from the response and compare in assert statements
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
@@ -740,7 +760,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString(); // pnf should have no results
+        String responseString = responseEntity.getBody(); // pnf should have no results
 
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -778,7 +798,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
@@ -809,7 +829,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Confirm that the vserver was returned in the response
         Assert.assertTrue(responseString.contains("\"vserver-id\":\"test-vserver-id-2\""));
@@ -825,7 +845,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        responseString = responseEntity.getBody().toString();
+        responseString = responseEntity.getBody();
         // Confirm that the vserver was returned in the response
         Assert.assertTrue(responseString.contains("\"vserver-id\":\"test-vserver-id-2\""));
     }
@@ -844,7 +864,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Confirm that the l-interface was returned in the response
         Assert.assertTrue(responseString.contains("\"interface-name\":\"test-interface-name-02\""));
     }
@@ -863,7 +883,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Confirm that the l-interface was returned in the response
         Assert.assertTrue(responseString.contains("\"interface-name\":\"test-interface-name-02\""));
     }
@@ -882,7 +902,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Confirm that the l-interface was returned in the response
         Assert
             .assertTrue(!responseString.contains("\"interface-name\":\"test-interface-name-02\""));
@@ -902,7 +922,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Confirm that the l-interface was returned in the response
         Assert
             .assertTrue(!responseString.contains("\"interface-name\":\"test-interface-name-02\""));
@@ -922,7 +942,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
         // Confirm that the l-interface was returned in the response
         Assert
             .assertTrue(!responseString.contains("\"interface-name\":\"test-interface-name-02\""));
@@ -941,7 +961,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Confirm that the l-interface was returned in the response
         Assert.assertTrue(responseString.contains("\"interface-name\":\"test-interface-name-02\""));
@@ -956,7 +976,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        responseString = responseEntity.getBody().toString();
+        responseString = responseEntity.getBody();
 
         // Confirm that the l-interface was returned in the response
         Assert.assertTrue(responseString.contains("\"interface-name\":\"test-interface-name-02\""));
@@ -975,7 +995,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Confirm that the oam-network was returned in the response
         Assert.assertTrue(responseString.contains("\"cvlan-tag\":456"));
@@ -989,7 +1009,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        responseString = responseEntity.getBody().toString();
+        responseString = responseEntity.getBody();
 
         // Confirm that the oam-network was returned in the response
         Assert.assertTrue(responseString.contains("\"cvlan-tag\":456"));
@@ -1008,7 +1028,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        String responseString = responseEntity.getBody().toString();
+        String responseString = responseEntity.getBody();
 
         // Confirm that the pserver was returned in the response
         Assert.assertTrue(responseString.contains("\"number-of-cpus\":364"));
@@ -1022,7 +1042,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(payload, headers);
         responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
-        responseString = responseEntity.getBody().toString();
+        responseString = responseEntity.getBody();
 
         // Confirm that the pserver was returned in the response
         Assert.assertTrue(responseString.contains("\"number-of-cpus\":364"));

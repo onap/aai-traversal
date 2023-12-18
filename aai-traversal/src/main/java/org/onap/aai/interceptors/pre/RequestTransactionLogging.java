@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
@@ -38,6 +39,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.message.internal.ReaderWriter;
 import org.glassfish.jersey.server.ContainerException;
 import org.onap.aai.exceptions.AAIException;
@@ -46,16 +49,13 @@ import org.onap.aai.interceptors.AAIHeaderProperties;
 import org.onap.aai.util.AAIConfig;
 import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.HbaseSaltPrefixer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+// Here
 @PreMatching
 @Priority(AAIRequestFilterPriority.REQUEST_TRANS_LOGGING)
 public class RequestTransactionLogging extends AAIContainerFilter
     implements ContainerRequestFilter {
-
-    @Autowired
-    private HttpServletRequest httpServletRequest;
 
     private static final String DEFAULT_CONTENT_TYPE = MediaType.APPLICATION_JSON;
     private static final String DEFAULT_RESPONSE_TYPE = MediaType.APPLICATION_XML;
@@ -67,21 +67,13 @@ public class RequestTransactionLogging extends AAIContainerFilter
     private static final String APPLICATION_JSON = "application/json";
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
-
+    public void filter(ContainerRequestContext requestContext) throws IOException { 
         String currentTimeStamp = genDate();
         String fullId = this.getAAITxIdToHeader(currentTimeStamp);
-        this.addToRequestContext(requestContext, AAIHeaderProperties.AAI_TX_ID, fullId);
-        this.addToRequestContext(requestContext, AAIHeaderProperties.AAI_REQUEST,
-            this.getRequest(requestContext, fullId));
-        this.addToRequestContext(requestContext, AAIHeaderProperties.AAI_REQUEST_TS,
-            currentTimeStamp);
+        requestContext.setProperty(AAIHeaderProperties.AAI_TX_ID, fullId);
+        requestContext.setProperty(AAIHeaderProperties.AAI_REQUEST, this.getRequest(requestContext, fullId));
+        requestContext.setProperty(AAIHeaderProperties.AAI_REQUEST_TS, currentTimeStamp);
         this.addDefaultContentType(requestContext);
-    }
-
-    private void addToRequestContext(ContainerRequestContext requestContext, String name,
-        String aaiTxIdToHeader) {
-        requestContext.setProperty(name, aaiTxIdToHeader);
     }
 
     private void addDefaultContentType(ContainerRequestContext requestContext) {
@@ -124,27 +116,16 @@ public class RequestTransactionLogging extends AAIContainerFilter
         return txId;
     }
 
-    private String getRequest(ContainerRequestContext requestContext, String fullId) {
+    private String getRequest(ContainerRequestContext requestContext, String fullId) throws IOException {
 
         JsonObject request = new JsonObject();
         request.addProperty("ID", fullId);
         request.addProperty("Http-Method", requestContext.getMethod());
-        request.addProperty(CONTENT_TYPE, httpServletRequest.getContentType());
         request.addProperty("Headers", requestContext.getHeaders().toString());
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        InputStream in = requestContext.getEntityStream();
-
-        try {
-            if (in.available() > 0) {
-                ReaderWriter.writeTo(in, out);
-                byte[] requestEntity = out.toByteArray();
-                request.addProperty("Payload", new String(requestEntity, "UTF-8"));
-                requestContext.setEntityStream(new ByteArrayInputStream(requestEntity));
-            }
-        } catch (IOException ex) {
-            throw new ContainerException(ex);
-        }
+        // String requestEntity = IOUtils.toString(requestContext.getEntityStream(), Charsets.UTF_8);
+        // InputStream in = IOUtils.toInputStream(requestEntity, Charset.defaultCharset());
+        // requestContext.setEntityStream(in);
 
         return request.toString();
     }

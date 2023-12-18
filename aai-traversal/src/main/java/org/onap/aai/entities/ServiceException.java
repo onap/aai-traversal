@@ -24,9 +24,11 @@ import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 @Data
 @Builder
+@Jacksonized
 public class ServiceException {
     private String messageId;
     private String text;

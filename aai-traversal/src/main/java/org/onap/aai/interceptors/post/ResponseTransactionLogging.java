@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.*;
 
 import javax.annotation.Priority;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -38,8 +37,6 @@ import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.util.AAIConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 @Priority(AAIResponseFilterPriority.RESPONSE_TRANS_LOGGING)
 public class ResponseTransactionLogging extends AAIContainerFilter
     implements ContainerResponseFilter {
@@ -53,9 +50,6 @@ public class ResponseTransactionLogging extends AAIContainerFilter
     private final static String DSL_API_PATH_SEGMENT = "dsl";
     private final static String RECENTS_API_PATH_SEGMENT = "recents";
     private final static Set<String> READ_ONLY_QUERIES = getReadOnlyQueries();
-
-    @Autowired
-    private HttpServletResponse httpServletResponse;
 
     @Override
     public void filter(ContainerRequestContext requestContext,
@@ -80,22 +74,21 @@ public class ResponseTransactionLogging extends AAIContainerFilter
         } catch (AAIException e) {
             return;
         }
-
-        String transId = requestContext.getHeaderString(AAIHeaderProperties.TRANSACTION_ID);
-        String fromAppId = requestContext.getHeaderString(AAIHeaderProperties.FROM_APP_ID);
-        String fullUri = requestContext.getUriInfo().getRequestUri().toString();
-        String requestTs = (String) requestContext.getProperty(AAIHeaderProperties.AAI_REQUEST_TS);
-
         String httpMethod = requestContext.getMethod();
-
-        String status = Integer.toString(responseContext.getStatus());
-
-        String request = (String) requestContext.getProperty(AAIHeaderProperties.AAI_REQUEST);
-        String response = this.getResponseString(responseContext);
 
         if (!Boolean.parseBoolean(logValue)) {
         } else if (!Boolean.parseBoolean(postValue) && "POST".equals(httpMethod)) {
         } else {
+
+            String transId = requestContext.getHeaderString(AAIHeaderProperties.TRANSACTION_ID);
+            String fromAppId = requestContext.getHeaderString(AAIHeaderProperties.FROM_APP_ID);
+            String fullUri = requestContext.getUriInfo().getRequestUri().toString();
+            String requestTs = (String) requestContext.getProperty(AAIHeaderProperties.AAI_REQUEST_TS);
+
+            String status = Integer.toString(responseContext.getStatus());
+
+            String request = (String) requestContext.getProperty(AAIHeaderProperties.AAI_REQUEST);
+            String response = this.getResponseString(responseContext);
 
             JsonObject logEntry = new JsonObject();
             logEntry.addProperty("transactionId", transId);
@@ -141,7 +134,7 @@ public class ResponseTransactionLogging extends AAIContainerFilter
     private String getResponseString(ContainerResponseContext responseContext) {
         JsonObject response = new JsonObject();
         response.addProperty("ID", responseContext.getHeaderString(AAIHeaderProperties.AAI_TX_ID));
-        response.addProperty("Content-Type", this.httpServletResponse.getContentType());
+        response.addProperty("Content-Type", responseContext.getHeaders().getFirst("Content-Type").toString());
         response.addProperty("Response-Code", responseContext.getStatus());
         response.addProperty("Headers", responseContext.getHeaders().toString());
         Optional<Object> entityOptional = Optional.ofNullable(responseContext.getEntity());

@@ -22,9 +22,11 @@ package org.onap.aai.entities;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 @Data
 @Builder
+@Jacksonized
 public class AAIErrorResponse {
-    private RequestError requestError;
+    private final RequestError requestError;
 }
