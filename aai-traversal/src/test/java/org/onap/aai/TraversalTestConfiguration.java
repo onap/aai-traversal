@@ -37,6 +37,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -61,7 +62,7 @@ public class TraversalTestConfiguration {
 
         RestTemplate restTemplate = null;
 
-        if (env.acceptsProfiles("one-way-ssl", "two-way-ssl")) {
+        if (env.acceptsProfiles(Profiles.of("one-way-ssl", "two-way-ssl"))) {
             char[] trustStorePassword =
                 env.getProperty("server.ssl.trust-store-password").toCharArray();
             char[] keyStorePassword =
@@ -71,7 +72,7 @@ public class TraversalTestConfiguration {
             String trustStore = env.getProperty("server.ssl.trust-store");
             SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
 
-            if (env.acceptsProfiles("two-way-ssl")) {
+            if (env.acceptsProfiles(Profiles.of("two-way-ssl"))) {
                 sslContextBuilder = sslContextBuilder
                     .loadKeyMaterial(loadPfx(keyStore, keyStorePassword), keyStorePassword);
             }
