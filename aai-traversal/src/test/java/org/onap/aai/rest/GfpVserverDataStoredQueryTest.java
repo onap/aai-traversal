@@ -23,22 +23,26 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.jayway.jsonpath.JsonPath;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -54,41 +58,43 @@ import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
 import org.onap.aai.HttpTestUtil;
 import org.onap.aai.PayloadUtil;
+import org.onap.aai.TraversalTestConfiguration;
 import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
+import org.onap.aai.entities.AAIErrorResponse;
+import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.setup.SchemaVersion;
-import org.onap.aai.transforms.XmlFormatTransformer;
+import org.onap.aai.setup.SchemaVersions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.RestTemplate;
 
 @ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
-public class GfpVserverDataStoredQueryTest extends AAISetup {
+@Import(TraversalTestConfiguration.class)
+public class GfpVserverDataStoredQueryTest extends AbstractSpringRestTest {
+
+    @Autowired
+    SchemaVersions schemaVersions;
+
+    @Autowired
+    protected RestTemplate restTemplate;
 
     private static final Logger logger =
         LoggerFactory.getLogger(GfpVserverDataStoredQueryTest.class);
 
-    protected static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
-
-    private HttpHeaders httpHeaders;
-
-    private MultivaluedMap<String, String> headersMultiMap;
-    private MultivaluedMap<String, String> queryParameters;
-
-    private List<String> aaiRequestContextList;
-
-    private List<MediaType> outputMediaTypes;
-
     private HttpTestUtil httpTestUtil;
-
-    private QueryConsumer queryConsumer;
 
     private SchemaVersion version;
     private String cloudRegionUri;
 
-    @Before
-    public void setup() throws Exception {
-
+    @Override
+    public void createTestGraph() {
         version = schemaVersions.getDefaultVersion();
 
         cloudRegionUri = "/aai/" + version.toString() + "/cloud-infrastructure/cloud-regions/"
@@ -108,45 +114,22 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         templateValues.put("ipv6-address", "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
         templateValues.put("vlan-interface", "vlan-interface1");
 
-        String cloudRegionPayload =
-            PayloadUtil.getTemplatePayload("cloud-region-with-linterface.json", templateValues);
+        String cloudRegionPayload;
+        try {
+            cloudRegionPayload = PayloadUtil.getTemplatePayload("cloud-region-with-linterface.json", templateValues);
+        } catch (IOException e) {
+            cloudRegionPayload = "";
+        }
 
-        Response response = httpTestUtil.doPut(cloudRegionUri, cloudRegionPayload);
+        Response response = null;
+        try {
+            response = httpTestUtil.doPut(cloudRegionUri, cloudRegionPayload);
+        } catch (UnsupportedEncodingException | AAIException e) {}
         logger.info("Response status received {}", response.getEntity());
 
         assertNotNull("Expected the response to be not null", response);
         assertEquals("Expecting the cloud region to be created", 201, response.getStatus());
         logger.info("Successfully created the cloud region with linterface");
-
-        queryConsumer = new QueryConsumer(traversalUriHttpEntry, schemaVersions,
-            gremlinServerSingleton, new XmlFormatTransformer(), basePath);
-
-        httpHeaders = mock(HttpHeaders.class);
-
-        headersMultiMap = new MultivaluedHashMap<>();
-        queryParameters = Mockito.spy(new MultivaluedHashMap<>());
-
-        headersMultiMap.add("X-FromAppId", "JUNIT");
-        headersMultiMap.add("X-TransactionId", UUID.randomUUID().toString());
-        headersMultiMap.add("Real-Time", "true");
-        headersMultiMap.add("Accept", "application/json");
-        headersMultiMap.add("aai-request-context", "");
-
-        outputMediaTypes = new ArrayList<>();
-        outputMediaTypes.add(APPLICATION_JSON);
-
-        aaiRequestContextList = new ArrayList<>();
-        aaiRequestContextList.add("");
-
-        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
-        when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenReturn(Arrays.asList("JUNIT"));
-        when(httpHeaders.getRequestHeader("X-TransactionId")).thenReturn(Arrays.asList("JUNIT"));
-        when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
-
-        Mockito.doReturn(null).when(queryParameters).remove(anyObject());
-
-        when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
     }
 
     @Test
@@ -172,21 +155,13 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", templateValues);
         String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
-        UriInfo uriInfo = Mockito.mock(UriInfo.class);
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<String> response =
+            restTemplate.exchange(baseUrl + query, HttpMethod.PUT, httpEntity, String.class);
 
-        queryParameters.add("format", "resource_and_url");
-        Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
-        when(uriInfo.getPath()).thenReturn(query);
-        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL())
-            .thenReturn(new StringBuffer("https://localhost:8446" + query));
-
-        Response response = queryConsumer.executeQuery(payload, version.toString(),
-            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
-
-        String entity = response.getEntity().toString();
+        String entity = response.getBody();
         assertEquals("Expected the response to be 200 but got this returned: "
-            + response.getEntity().toString(), 200, response.getStatus());
+            + response.getBody(), 200, response.getStatusCodeValue());
         List<String> urls = JsonPath.read(entity, "$.results[*].url");
         assertEquals("Expected the urls to be 3", 3, urls.size());
         removeVertexes();
@@ -196,33 +171,19 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
     public void testStoredQueryWhenQueryDoesNotExistShouldReturnBadRequest() throws Exception {
 
         Map<String, String> templateValues = new HashMap<>();
-
         templateValues.put("start", "nodes/vservers");
         templateValues.put("query", "fake-query");
-
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", templateValues);
         String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
 
-        UriInfo uriInfo = Mockito.mock(UriInfo.class);
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<AAIErrorResponse> response =
+            restTemplate.exchange(baseUrl + query, HttpMethod.PUT, httpEntity, AAIErrorResponse.class);
 
-        queryParameters.add("format", "resource_and_url");
-        Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
-        when(uriInfo.getPath()).thenReturn(query);
-
-        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL())
-            .thenReturn(new StringBuffer("https://localhost:8446" + query));
-
-        Response response = queryConsumer.executeQuery(payload, version.toString(),
-            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
-
-        String entity = response.getEntity().toString();
-
+        AAIErrorResponse entity = response.getBody();
         assertEquals("Expected the response to be 400 but got this returned: " + entity, 400,
-            response.getStatus());
-
-        assertThat("Expecting error message since query doesn't exist", entity,
-            containsString("Query payload is invalid"));
+            response.getStatusCodeValue());
+        assertEquals("Query payload is invalid %1", entity.getRequestError().getServiceException().getVariables().get(1));
     }
 
     @Test
@@ -230,32 +191,19 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         throws Exception {
 
         Map<String, String> templateValues = new HashMap<>();
-
         templateValues.put("start", "nodes/vservers?vserver-name=nonexistent-filter");
         templateValues.put("query", "gfp-vserver-data");
 
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", templateValues);
         String query = String.format("/aai/%s/query?format=resource_and_url", version.toString());
+        httpEntity = new HttpEntity<String>(payload, headers);
+        ResponseEntity<AAIErrorResponse> response =
+            restTemplate.exchange(baseUrl + query, HttpMethod.PUT, httpEntity, AAIErrorResponse.class);
 
-        UriInfo uriInfo = Mockito.mock(UriInfo.class);
-
-        queryParameters.add("format", "resource_and_url");
-        Mockito.when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
-        when(uriInfo.getPath()).thenReturn(query);
-        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL())
-            .thenReturn(new StringBuffer("https://localhost:8446" + query));
-
-        Response response = queryConsumer.executeQuery(payload, version.toString(),
-            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
-
-        String entity = response.getEntity().toString();
-
+        AAIErrorResponse entity = response.getBody();
         assertEquals("Expected the response to be 404 but got this returned: " + entity, 404,
-            response.getStatus());
-
-        assertThat(entity,
-            containsString("Start URI returned no vertexes, please check the start URI"));
+            response.getStatusCodeValue());
+        assertEquals("Node Not Found. Start URI returned no vertexes, please check the start URI", entity.getRequestError().getServiceException().getVariables().get(2));
     }
 
     @After

@@ -19,44 +19,33 @@
  */
 package org.onap.aai.rest;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.onap.aai.concurrent.AaiCallable;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
-import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.parsers.query.QueryParser;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.search.CustomQueryConfig;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.rest.search.QueryProcessorType;
-import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.QueryStyle;
@@ -68,11 +57,20 @@ import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.transforms.XmlFormatTransformer;
-import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -80,8 +78,9 @@ import com.google.gson.JsonParser;
 
 import io.micrometer.core.annotation.Timed;
 
-@Path("{version: v[1-9][0-9]*|latest}/query")
 @Timed
+@RestController
+@RequestMapping("/{version:v[1-9][0-9]*|latest}/query")
 public class QueryConsumer extends TraversalConsumer {
 
     private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
@@ -100,8 +99,8 @@ public class QueryConsumer extends TraversalConsumer {
 
     @Autowired
     public QueryConsumer(HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
-        GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
-        @Value("${schema.uri.base.path}") String basePath) {
+            GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
+            @Value("${schema.uri.base.path}") String basePath) {
         this.traversalUriHttpEntry = traversalUriHttpEntry;
         this.schemaVersions = schemaVersions;
         this.gremlinServerSingleton = gremlinServerSingleton;
@@ -109,188 +108,162 @@ public class QueryConsumer extends TraversalConsumer {
         this.xmlFormatTransformer = xmlFormatTransformer;
     }
 
-    @PUT
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response executeQuery(String content, @PathParam("version") String versionParam,
-        @DefaultValue("graphson") @QueryParam("format") String queryFormat,
-        @DefaultValue("no_op") @QueryParam("subgraph") String subgraph,
-        @Context HttpHeaders headers, @Context HttpServletRequest req, @Context UriInfo info,
-        @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
-        @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
-        Set<String> roles = this.getRoles(req.getUserPrincipal());
+    @PutMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    public ResponseEntity<String> executeQuery(@RequestBody String content,
+            @PathVariable("version") String versionParam,
+            @RequestParam(defaultValue = "graphson") String format,
+            @RequestParam(defaultValue = "no_op") String subgraph,
+            @RequestParam(defaultValue = "-1") String resultIndex,
+            @RequestParam(defaultValue = "-1") String resultSize,
+            @RequestHeader HttpHeaders headers,
+            HttpServletRequest request) throws FileNotFoundException, UnsupportedEncodingException, AAIException, URISyntaxException {
+        Set<String> roles = this.getRoles(request.getUserPrincipal());
 
-        return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
-            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,
-            TraversalConstants.AAI_TRAVERSAL_TIMEOUT_LIMIT, headers, info, HttpMethod.GET,
-            new AaiCallable<Response>() {
-                @Override
-                public Response process() {
-                    return processExecuteQuery(content, req, versionParam, queryFormat, subgraph,
-                        headers, info, resultIndex, resultSize, roles);
-                }
-            });
+        return processExecuteQuery(content, request, versionParam, format, subgraph,
+                headers, resultIndex, resultSize, roles);
     }
 
-    public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam,
-        String queryFormat, String subgraph, HttpHeaders headers, UriInfo info, String resultIndex,
-        String resultSize, Set<String> roles) {
+    public ResponseEntity<String> processExecuteQuery(String content, HttpServletRequest request, String versionParam,
+            String queryFormat, String subgraph, HttpHeaders headers, String resultIndex,
+            String resultSize, Set<String> roles) throws FileNotFoundException, AAIException, UnsupportedEncodingException, URISyntaxException {
 
-        String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-        String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
+        String sourceOfTruth = headers.getFirst("X-FromAppId");
+        String queryProcessor = headers.getFirst("QueryProcessor");
+        final MultivaluedMap<String, String> queryParams = toMultivaluedMap(request.getParameterMap());
         QueryProcessorType processorType = this.processorType;
-        Response response;
+        ResponseEntity<String> response;
         TransactionalGraphEngine dbEngine = null;
 
-        try {
-            this.checkQueryParams(info.getQueryParameters());
-            Format format = Format.getFormat(queryFormat);
-            if (queryProcessor != null) {
-                processorType = QueryProcessorType.valueOf(queryProcessor);
-            }
-            SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
+        this.checkQueryParams(queryParams);
+        Format format = Format.getFormat(queryFormat);
+        if (queryProcessor != null) {
+            processorType = QueryProcessorType.valueOf(queryProcessor);
+        }
+        SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
 
-            JsonObject input = JsonParser.parseString(content).getAsJsonObject();
-            JsonElement startElement = input.get("start");
-            JsonElement queryElement = input.get("query");
-            JsonElement gremlinElement = input.get("gremlin");
-            List<URI> startURIs = new ArrayList<>();
-            String queryURI = "";
-            String gremlin = "";
+        JsonObject input = JsonParser.parseString(content).getAsJsonObject();
+        JsonElement startElement = input.get("start");
+        JsonElement queryElement = input.get("query");
+        JsonElement gremlinElement = input.get("gremlin");
+        List<URI> startURIs = new ArrayList<>();
+        String queryURI = "";
+        String gremlin = "";
 
-            SchemaVersion version = new SchemaVersion(versionParam);
-            String serverBase =
-                req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
-            traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
-            /*
-             * Changes for Pagination
-             */
+        SchemaVersion version = new SchemaVersion(versionParam);
+        String serverBase = request.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
+        traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
+        /*
+         * Changes for Pagination
+         */
 
-            traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
-            dbEngine = traversalUriHttpEntry.getDbEngine();
+        traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
+        dbEngine = traversalUriHttpEntry.getDbEngine();
 
-            if (startElement != null) {
+        if (startElement != null) {
 
-                if (startElement.isJsonArray()) {
-                    for (JsonElement element : startElement.getAsJsonArray()) {
-                        startURIs.add(new URI(element.getAsString()));
-                    }
-                } else {
-                    startURIs.add(new URI(startElement.getAsString()));
+            if (startElement.isJsonArray()) {
+                for (JsonElement element : startElement.getAsJsonArray()) {
+                    startURIs.add(new URI(element.getAsString()));
                 }
+            } else {
+                startURIs.add(new URI(startElement.getAsString()));
             }
-            if (queryElement != null) {
-                queryURI = queryElement.getAsString();
+        }
+        if (queryElement != null) {
+            queryURI = queryElement.getAsString();
+        }
+        if (gremlinElement != null) {
+            gremlin = gremlinElement.getAsString();
+        }
+        URI queryURIObj = new URI(queryURI);
+
+        CustomQueryConfig customQueryConfig = getCustomQueryConfig(queryURIObj);
+        if (customQueryConfig != null) {
+            List<String> missingRequiredQueryParameters = checkForMissingQueryParameters(
+                    customQueryConfig.getQueryRequiredProperties(),
+                    URITools.getQueryMap(queryURIObj));
+
+            if (!missingRequiredQueryParameters.isEmpty()) {
+                throw new AAIException("AAI_3013");
             }
-            if (gremlinElement != null) {
-                gremlin = gremlinElement.getAsString();
-            }
-            URI queryURIObj = new URI(queryURI);
 
-            CustomQueryConfig customQueryConfig = getCustomQueryConfig(queryURIObj);
-            if (customQueryConfig != null) {
-                List<String> missingRequiredQueryParameters =
-                    checkForMissingQueryParameters(customQueryConfig.getQueryRequiredProperties(),
-                        URITools.getQueryMap(queryURIObj));
-
-                if (!missingRequiredQueryParameters.isEmpty()) {
-                    return (createMessageMissingQueryRequiredParameters(
-                        missingRequiredQueryParameters, headers));
-                }
-
-                List<String> invalidQueryParameters = checkForInvalidQueryParameters(
+            List<String> invalidQueryParameters = checkForInvalidQueryParameters(
                     customQueryConfig, URITools.getQueryMap(queryURIObj));
 
-                if (!invalidQueryParameters.isEmpty()) {
-                    return (createMessageInvalidQueryParameters(invalidQueryParameters, headers));
-                }
-
-            } else if (queryElement != null) {
-                return (createMessageInvalidQuerySection(queryURI, headers));
+            if (!invalidQueryParameters.isEmpty()) {
+                throw new AAIException("AAI_3022");
             }
 
-            GenericQueryProcessor processor;
+        } else if (queryElement != null) {
+            throw new AAIException("AAI_3014");
+        }
 
-            if (isHistory(format)) {
-                validateHistoryParams(format, info.getQueryParameters());
-            }
-            GraphTraversalSource traversalSource =
-                getTraversalSource(dbEngine, format, info.getQueryParameters(), roles);
-            QueryStyle queryStyle = getQueryStyle(format, traversalUriHttpEntry);
+        GenericQueryProcessor processor;
 
-            if (!startURIs.isEmpty()) {
-                Set<Vertex> vertexSet = new LinkedHashSet<>();
-                QueryParser uriQuery;
-                List<Vertex> vertices;
-                for (URI startUri : startURIs) {
-                    uriQuery = dbEngine.getQueryBuilder(queryStyle, traversalSource)
+        if (isHistory(format)) {
+            validateHistoryParams(format, queryParams);
+        }
+        GraphTraversalSource traversalSource = getTraversalSource(dbEngine, format, queryParams, roles);
+        QueryStyle queryStyle = getQueryStyle(format, traversalUriHttpEntry);
+
+        if (!startURIs.isEmpty()) {
+            Set<Vertex> vertexSet = new LinkedHashSet<>();
+            QueryParser uriQuery;
+            List<Vertex> vertices;
+            for (URI startUri : startURIs) {
+                uriQuery = dbEngine.getQueryBuilder(queryStyle, traversalSource)
                         .createQueryFromURI(startUri, URITools.getQueryMap(startUri));
-                    vertices = uriQuery.getQueryBuilder().toList();
-                    vertexSet.addAll(vertices);
-                }
+                vertices = uriQuery.getQueryBuilder().toList();
+                vertexSet.addAll(vertices);
+            }
 
-                processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
+            processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
                     .startFrom(vertexSet).queryFrom(queryURIObj).format(format)
                     .processWith(processorType).traversalSource(isHistory(format), traversalSource)
                     .create();
-            } else if (!queryURI.equals("")) {
-                processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
+        } else if (!queryURI.equals("")) {
+            processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
                     .queryFrom(queryURIObj).processWith(processorType)
                     .traversalSource(isHistory(format), traversalSource).create();
-            } else {
-                processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
+        } else {
+            processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
                     .queryFrom(gremlin, "gremlin").processWith(processorType)
                     .traversalSource(isHistory(format), traversalSource).create();
-            }
-            List<Object> vertTemp = processor.execute(subGraphStyle);
-            List<Object> vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
+        }
+        List<Object> vertTemp = processor.execute(subGraphStyle);
+        List<Object> vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
 
-            DBSerializer serializer =
-                new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
-            FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer,
+        DBSerializer serializer = new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
+        FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer,
                 schemaVersions, this.basePath, serverBase);
 
-            MultivaluedMap<String, String> mvm = new MultivaluedHashMap<>();
-            mvm.putAll(info.getQueryParameters());
-            if (isHistory(format)) {
-                mvm.putSingle("startTs", Long.toString(getStartTime(format, mvm)));
-                mvm.putSingle("endTs", Long.toString(getEndTime(mvm)));
-            }
-            Formatter formatter = ff.get(format, mvm);
+        MultivaluedMap<String, String> mvm = new MultivaluedHashMap<>();
+        mvm.putAll(queryParams);
+        if (isHistory(format)) {
+            mvm.putSingle("startTs", Long.toString(getStartTime(format, mvm)));
+            mvm.putSingle("endTs", Long.toString(getEndTime(mvm)));
+        }
+        Formatter formatter = ff.get(format, mvm);
 
-            String result = formatter.output(vertices).toString();
+        String result = formatter.output(vertices).toString();
 
-            String acceptType = headers.getHeaderString("Accept");
+        MediaType acceptType = headers.getAccept().stream()
+                .filter(Objects::nonNull)
+                .filter(header -> !header.equals(MediaType.ALL))
+                .findAny()
+                .orElse(MediaType.APPLICATION_JSON);
 
-            if (acceptType == null) {
-                acceptType = MediaType.APPLICATION_JSON;
-            }
-
-            if (MediaType.APPLICATION_XML_TYPE.isCompatible(MediaType.valueOf(acceptType))) {
-                result = xmlFormatTransformer.transform(result);
-            }
-
-            if (traversalUriHttpEntry.isPaginated()) {
-                response = Response.status(Status.OK).type(acceptType)
-                    .header("total-results", traversalUriHttpEntry.getTotalVertices())
-                    .header("total-pages", traversalUriHttpEntry.getTotalPaginationBuckets())
-                    .entity(result).build();
-            } else {
-                response = Response.status(Status.OK).type(acceptType).entity(result).build();
-            }
-        } catch (AAIException e) {
-            response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, e);
-        } catch (Exception e) {
-            AAIException ex = new AAIException("AAI_4000", e);
-            response = consumerExceptionResponseGenerator(headers, info, HttpMethod.GET, ex);
-        } finally {
-            if (dbEngine != null) {
-                dbEngine.rollback();
-            }
-
+        if (MediaType.APPLICATION_XML.isCompatibleWith(acceptType)) {
+            result = xmlFormatTransformer.transform(result);
         }
 
-        return response;
+        if (traversalUriHttpEntry.isPaginated()) {
+            return ResponseEntity.ok()
+                    .header("total-results", String.valueOf(traversalUriHttpEntry.getTotalVertices()))
+                    .header("total-pages", String.valueOf(traversalUriHttpEntry.getTotalPaginationBuckets()))
+                    .body(result);
+        } 
+        return ResponseEntity.ok(result);
     }
 
     public void checkQueryParams(MultivaluedMap<String, String> params) throws AAIException {
@@ -306,7 +279,7 @@ public class QueryConsumer extends TraversalConsumer {
     }
 
     private List<String> checkForMissingQueryParameters(List<String> requiredParameters,
-        MultivaluedMap<String, String> queryParams) {
+            MultivaluedMap<String, String> queryParams) {
         List<String> result = new ArrayList<>();
 
         for (String param : requiredParameters) {
@@ -335,62 +308,34 @@ public class QueryConsumer extends TraversalConsumer {
 
     }
 
-    private Response createMessageMissingQueryRequiredParameters(
-        List<String> missingRequiredQueryParams, HttpHeaders headers) {
-        AAIException e = new AAIException("AAI_3013");
-
-        ArrayList<String> templateVars = new ArrayList<>();
-        templateVars.add(missingRequiredQueryParams.toString());
-
-        return Response
-            .status(e.getErrorObject().getHTTPResponseCode()).entity(ErrorLogHelper
-                .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-            .build();
-    }
-
-    private Response createMessageInvalidQuerySection(String invalidQuery, HttpHeaders headers) {
-        AAIException e = new AAIException("AAI_3014");
-
-        ArrayList<String> templateVars = new ArrayList<>();
-        templateVars.add(invalidQuery);
-
-        return Response
-            .status(e.getErrorObject().getHTTPResponseCode()).entity(ErrorLogHelper
-                .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-            .build();
-    }
-
     private List<String> checkForInvalidQueryParameters(CustomQueryConfig customQueryConfig,
-        MultivaluedMap<String, String> queryParams) {
+            MultivaluedMap<String, String> queryParams) {
 
         List<String> allParameters = new ArrayList<>();
         /*
          * Add potential Required and Optional to allParameters
          */
         Optional.ofNullable(customQueryConfig.getQueryOptionalProperties())
-            .ifPresent(allParameters::addAll);
+                .ifPresent(allParameters::addAll);
         Optional.ofNullable(customQueryConfig.getQueryRequiredProperties())
-            .ifPresent(allParameters::addAll);
+                .ifPresent(allParameters::addAll);
 
         if (queryParams.isEmpty()) {
             return new ArrayList<>();
         }
         return queryParams.keySet().stream().filter(param -> !allParameters.contains(param))
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
-    private Response createMessageInvalidQueryParameters(List<String> invalidQueryParams,
-        HttpHeaders headers) {
-        AAIException e = new AAIException("AAI_3022");
+    private MultivaluedMap<String, String> toMultivaluedMap(Map<String, String[]> map) {
+        MultivaluedMap<String, String> multivaluedMap = new MultivaluedHashMap<>();
 
-        ArrayList<String> templateVars = new ArrayList<>();
-        templateVars.add(invalidQueryParams.toString());
+        for (Map.Entry<String, String[]> entry : map.entrySet()) {
+            for (String val : entry.getValue())
+                multivaluedMap.add(entry.getKey(), val);
+        }
 
-        return Response
-            .status(e.getErrorObject().getHTTPResponseCode()).entity(ErrorLogHelper
-                .getRESTAPIErrorResponse(headers.getAcceptableMediaTypes(), e, templateVars))
-            .build();
-
+        return multivaluedMap;
     }
 
 }

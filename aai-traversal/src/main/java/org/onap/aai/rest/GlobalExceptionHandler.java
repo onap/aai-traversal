@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+  private static final String NODE_NODE_FOUND_CODE = "AAI_6148";
   private static final String AAI_4007 = "AAI_4007";
 
   @ExceptionHandler({JsonParseException.class, JsonMappingException.class})
@@ -68,11 +69,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler({AAIException.class})
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<String> handleAAIException(
   AAIException exception,
   WebRequest request
   ){
+    // This specific error code should result in a 404 error response
+    if (NODE_NODE_FOUND_CODE.equals(exception.getCode())) {
+      return buildAAIExceptionResponse(exception, HttpStatus.NOT_FOUND);
+    }
     return buildAAIExceptionResponse(exception);
   }
 
@@ -85,9 +89,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   private ResponseEntity<String> buildAAIExceptionResponse(AAIException exception) {
-    
+    return buildAAIExceptionResponse(exception, HttpStatus.BAD_REQUEST);
+  }
+
+  private ResponseEntity<String> buildAAIExceptionResponse(AAIException exception, HttpStatus status) {
     String body = getResponseBody(exception);
-    return new ResponseEntity<>(body, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(body, new HttpHeaders(), status);
   }
 
   private String getResponseBody(AAIException exception) {
