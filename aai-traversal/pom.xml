@@ -96,8 +96,8 @@
 		<schema.uri.base.path>/aai</schema.uri.base.path>
 		
 		<!-- versions -->
-		<spring.boot.version>2.2.0.RELEASE</spring.boot.version>
-		<spring.version>5.2.0.RELEASE</spring.version>
+		<spring.boot.version>2.3.12.RELEASE</spring.boot.version>
+		<spring.version>5.2.15.RELEASE</spring.version>
 		<spring.test.version>${spring.version}</spring.test.version>
 		<spring.jms.version>${spring.version}</spring.jms.version>
 		<keycloak.version>11.0.2</keycloak.version>
