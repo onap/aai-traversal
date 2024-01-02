@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -63,8 +64,7 @@ public class PayloadUtil {
         return resource;
     }
 
-    public static String getTemplatePayload(String fileName, Map<String, String> templateValueMap)
-        throws Exception {
+    public static String getTemplatePayload(String fileName, Map<String, String> templateValueMap) throws IOException {
 
         InputStream inputStream = PayloadUtil.class.getClassLoader()
             .getResourceAsStream("payloads/templates/" + fileName);
@@ -77,7 +77,7 @@ public class PayloadUtil {
         if (cache.containsKey(fileName)) {
             resource = cache.get(fileName);
         } else {
-            resource = IOUtils.toString(inputStream);
+            resource = IOUtils.toString(inputStream, Charset.defaultCharset());
             cache.put(fileName, resource);
         }
 

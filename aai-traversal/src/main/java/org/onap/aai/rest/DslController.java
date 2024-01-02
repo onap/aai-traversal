@@ -82,9 +82,9 @@ import io.micrometer.core.annotation.Timed;
 @Timed
 @RestController
 @RequestMapping("/{version:v[1-9][0-9]*|latest}/dsl")
-public class DslConsumer extends TraversalConsumer {
+public class DslController extends TraversalConsumer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DslConsumer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DslController.class);
     private static final QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
     private static final QueryVersion DEFAULT_VERSION = QueryVersion.V1;
 
@@ -100,7 +100,7 @@ public class DslConsumer extends TraversalConsumer {
     private QueryVersion dslApiVersion = DEFAULT_VERSION;
 
     @Autowired
-    public DslConsumer(HttpEntry traversalUriHttpEntry,
+    public DslController(HttpEntry traversalUriHttpEntry,
             SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
             XmlFormatTransformer xmlFormatTransformer,
             EdgeIngestor edgeIngestor, LoaderFactory loaderFactory,

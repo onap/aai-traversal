@@ -66,7 +66,7 @@ public class JerseyConfiguration {
 
         resourceConfig.property(ServletProperties.FILTER_FORWARD_ON_404, true);
         Set<Class<?>> classes = Sets.newHashSet(SearchProvider.class,
-            ModelAndNamedQueryRestProvider.class, QueryConsumer.class, RecentAPIConsumer.class, EchoResponse.class, CQ2Gremlin.class, CQ2GremlinTest.class);
+            ModelAndNamedQueryRestProvider.class, RecentAPIConsumer.class, EchoResponse.class, CQ2Gremlin.class, CQ2GremlinTest.class);
         Set<Class<?>> filterClasses =
             Sets.newHashSet(
                 org.onap.aai.interceptors.pre.RequestTransactionLogging.class,

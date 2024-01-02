@@ -74,7 +74,7 @@ public abstract class AbstractSpringRestTest {
     @LocalServerPort
     protected int randomPort;
 
-    protected HttpEntity httpEntity;
+    protected HttpEntity<String> httpEntity;
 
     protected String baseUrl;
     protected HttpHeaders headers;
@@ -102,7 +102,7 @@ public abstract class AbstractSpringRestTest {
         String authorization =
             Base64.getEncoder().encodeToString("AAI:AAI".getBytes(StandardCharsets.UTF_8));
         headers.add("Authorization", "Basic " + authorization);
-        httpEntity = new HttpEntity(headers);
+        httpEntity = new HttpEntity<String>(headers);
         baseUrl = "http://localhost:" + randomPort;
     }
 
