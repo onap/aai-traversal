@@ -70,7 +70,7 @@ public class SimpleFormatTest extends AAISetup {
 
     @Before
     public void setUp() throws AAIException, NoEdgeRuleFoundException {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         graph = TinkerGraph.open();
         loader = loaderFactory.createLoaderForVersion(ModelType.MOXY,
             schemaVersions.getRelatedLinkVersion());

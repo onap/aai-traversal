@@ -40,8 +40,7 @@ package org.onap.aai.rest.search;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 public class CustomQueryConfigDTO {
 
@@ -53,7 +52,7 @@ public class CustomQueryConfigDTO {
     public CustomQueryDTO getQueryDTO() {
         if (queryDTO == null)
             queryDTO = new CustomQueryDTO();
-        if (!StringUtils.isEmpty(storedQuery)) {
+        if (!ObjectUtils.isEmpty(storedQuery)) {
             queryDTO.setQuery(storedQuery);
         }
         return queryDTO;

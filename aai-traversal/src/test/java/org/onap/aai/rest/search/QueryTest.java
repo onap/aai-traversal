@@ -142,7 +142,7 @@ public abstract class QueryTest {
         System.setProperty("AJSC_HOME", ".");
         System.setProperty("BUNDLECONFIG_DIR", "src/main/resources");
         logger = LoggerFactory.getLogger(getClass());
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         graph = TinkerGraph.open();
         gts = graph.traversal();
         createGraph();

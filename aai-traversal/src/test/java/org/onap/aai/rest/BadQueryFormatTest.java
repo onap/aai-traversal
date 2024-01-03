@@ -19,9 +19,9 @@
  */
 package org.onap.aai.rest;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.junit.MatcherAssert.assertThat;
 
 import java.util.Base64;
 import java.util.Collections;

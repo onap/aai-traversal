@@ -82,7 +82,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         loader = loaderFactory.createLoaderForVersion(ModelType.MOXY,
             schemaVersions.getDefaultVersion());
         processor = new ModelBasedProcessing(loader, dbEngine, serializer);

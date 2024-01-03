@@ -35,6 +35,7 @@ import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.restclient.PropertyPasswordConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
@@ -42,9 +43,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
+import io.prometheus.client.exporter.common.TextFormat;
+
 /**
  * Test REST requests against configuration resource
  */
+@AutoConfigureMetrics
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(
     initializers = PropertyPasswordConfiguration.class,
@@ -69,7 +73,6 @@ public class ConfigurationTest extends AbstractSpringRestTest {
 
         headers = new HttpHeaders();
 
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.set("Accept", "text/plain");
         headers.add("Real-Time", "true");
         headers.add("X-FromAppId", "JUNIT");
@@ -85,13 +88,13 @@ public class ConfigurationTest extends AbstractSpringRestTest {
 
     @Test
     public void TestManagementEndpointConfiguration() {
-        ResponseEntity responseEntity = null;
+        ResponseEntity<String> responseEntity = null;
         String responseBody = null;
 
         // set Accept as text/plain in order to get access of endpoint "/actuator/prometheus"
         responseEntity = restTemplate.exchange(actuatorurl + "/actuator/prometheus", HttpMethod.GET,
             httpEntity, String.class);
-        responseBody = (String) responseEntity.getBody();
+        responseBody = responseEntity.getBody();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         System.out.println("responseBody---------" + responseBody);
         assertFalse(responseBody.contains("aai_uri"));

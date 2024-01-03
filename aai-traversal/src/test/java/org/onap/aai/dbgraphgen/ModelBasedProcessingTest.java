@@ -98,7 +98,7 @@ public class ModelBasedProcessingTest extends AAISetup {
 
     @Before
     public void init() throws AAIException {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         version = schemaVersions.getDefaultVersion();
         loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);
         TransactionalGraphEngine newDbEngine = new JanusGraphDBEngine(queryStyle, loader);

@@ -31,27 +31,20 @@ import java.util.Random;
 import java.util.UUID;
 
 import javax.annotation.Priority;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.message.internal.ReaderWriter;
-import org.glassfish.jersey.server.ContainerException;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.interceptors.AAIContainerFilter;
 import org.onap.aai.interceptors.AAIHeaderProperties;
 import org.onap.aai.util.AAIConfig;
 import org.onap.aai.util.AAIConstants;
 import org.onap.aai.util.HbaseSaltPrefixer;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
-// Here
 @PreMatching
 @Priority(AAIRequestFilterPriority.REQUEST_TRANS_LOGGING)
 public class RequestTransactionLogging extends AAIContainerFilter
@@ -85,7 +78,7 @@ public class RequestTransactionLogging extends AAIContainerFilter
             requestContext.getHeaders().putSingle(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
         }
 
-        if (WILDCARD.equals(acceptType) || StringUtils.isEmpty(acceptType)
+        if (WILDCARD.equals(acceptType) || ObjectUtils.isEmpty(acceptType)
             || acceptType.contains(TEXT_PLAIN)) {
             UriInfo uriInfo = requestContext.getUriInfo();
             if (uriInfo != null) {

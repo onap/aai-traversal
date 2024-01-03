@@ -47,7 +47,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class SpringExceptionHandlerTest {
+public class GlobalExceptionHandlerTest {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -61,7 +61,7 @@ public class SpringExceptionHandlerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getMethod()).thenReturn("PUT");
         when(request.getRequestURI()).thenReturn("/aai/v14/dsl");
