@@ -48,9 +48,7 @@ public class EchoResponse extends RESTAPI {
 
 	protected static String authPolicyFunctionName = "util";
 
-	public static final String ECHO_PATH = "/echo";
-
-	private AaiGraphChecker aaiGraphChecker;
+	private final AaiGraphChecker aaiGraphChecker;
 
 	@Autowired
 	public EchoResponse(AaiGraphChecker aaiGraphChecker) {
@@ -69,7 +67,7 @@ public class EchoResponse extends RESTAPI {
 	 */
 	@GET
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Path(ECHO_PATH)
+	@Path("/echo")
 	public Response echoResult(@Context HttpHeaders headers, @Context HttpServletRequest req,
 			@QueryParam("action") String myAction) {
 

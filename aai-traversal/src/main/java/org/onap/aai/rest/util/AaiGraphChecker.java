@@ -30,8 +30,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Iterators;
-
 /**
  * Singleton class responsible to check that AAI service is able to connect to its back-end
  * database.
@@ -57,12 +55,7 @@ public class AaiGraphChecker {
         try {
             transaction = AAIGraph.getInstance().getGraph().newTransaction();
             final Iterator<?> vertexIterator = transaction.query().limit(1).vertices().iterator();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Number of vertices retrieved while checking db: {}",
-                    Iterators.size(vertexIterator));
-            }
             vertexIterator.hasNext();
-            LOGGER.debug("Database is available");
             dbAvailable = Boolean.TRUE;
         } catch (JanusGraphException e) {
             String message = "Database is not available (after JanusGraph exception)";
