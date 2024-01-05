@@ -134,7 +134,7 @@ public abstract class GenericQueryProcessor {
         return resultVertices;
     }
 
-    public List<Object> execute(SubGraphStyle style) throws FileNotFoundException, AAIException {
+    public List<Object> execute(SubGraphStyle style) throws AAIException {
         final List<Object> resultVertices;
 
         Pair<String, Map<String, Object>> tuple = this.createQuery();
