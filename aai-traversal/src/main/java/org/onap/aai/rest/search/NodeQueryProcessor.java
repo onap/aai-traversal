@@ -96,7 +96,7 @@ public class NodeQueryProcessor extends GroovyShellImpl {
         return new Pair<>(query, params);
     }
 
-    public List<Object> execute(SubGraphStyle style) throws FileNotFoundException, AAIException {
+    public List<Object> execute(SubGraphStyle style) throws AAIException {
         final List<Object> resultVertices = new Vector<>();
 
         Pair<String, Map<String, Object>> tuple = this.createQuery();
