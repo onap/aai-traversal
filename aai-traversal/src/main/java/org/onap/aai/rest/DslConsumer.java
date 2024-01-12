@@ -61,6 +61,7 @@ import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -88,7 +89,7 @@ public class DslConsumer extends TraversalConsumer {
     private static final QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
     private static final QueryVersion DEFAULT_VERSION = QueryVersion.V1;
 
-    private final HttpEntry traversalUriHttpEntry;
+    private final HttpEntry httpEntry;
     private final SchemaVersions schemaVersions;
     private final String basePath;
     private final GremlinServerSingleton gremlinServerSingleton;
@@ -100,12 +101,12 @@ public class DslConsumer extends TraversalConsumer {
     private QueryVersion dslApiVersion = DEFAULT_VERSION;
 
     @Autowired
-    public DslConsumer(HttpEntry traversalUriHttpEntry,
+    public DslConsumer(@Qualifier("requestScopedTraversalUriHttpEntry") HttpEntry requestScopedTraversalUriHttpEntry,
             SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
             XmlFormatTransformer xmlFormatTransformer,
             EdgeIngestor edgeIngestor, LoaderFactory loaderFactory,
             @Value("${schema.uri.base.path}") String basePath) {
-        this.traversalUriHttpEntry = traversalUriHttpEntry;
+        this.httpEntry = requestScopedTraversalUriHttpEntry;
         this.schemaVersions = schemaVersions;
         this.gremlinServerSingleton = gremlinServerSingleton;
         this.xmlFormatTransformer = xmlFormatTransformer;
@@ -161,10 +162,10 @@ public class DslConsumer extends TraversalConsumer {
             result = xmlFormatTransformer.transform(result);
         }
 
-        if (traversalUriHttpEntry.isPaginated()) {
+        if (httpEntry.isPaginated()) {
             return ResponseEntity.ok()
-                .header("total-results", String.valueOf(traversalUriHttpEntry.getTotalVertices()))
-                .header("total-pages", String.valueOf(traversalUriHttpEntry.getTotalPaginationBuckets()))
+                .header("total-results", String.valueOf(httpEntry.getTotalVertices()))
+                .header("total-pages", String.valueOf(httpEntry.getTotalPaginationBuckets()))
                 .body(result);
         } else {
             return ResponseEntity.ok(result);
@@ -177,8 +178,8 @@ public class DslConsumer extends TraversalConsumer {
             throws AAIException, FileNotFoundException {
         final String serverBase =
             req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
-        traversalUriHttpEntry.setHttpEntryProperties(version, serverBase);
-        traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
+        httpEntry.setHttpEntryProperties(version, serverBase);
+        httpEntry.setPaginationParameters(resultIndex, resultSize);
 
         JsonObject input = JsonParser.parseString(content).getAsJsonObject();
         JsonElement dslElement = input.get("dsl");
@@ -213,7 +214,7 @@ public class DslConsumer extends TraversalConsumer {
             validateHistoryParams(format, queryParameters);
         }
 
-        final TransactionalGraphEngine dbEngine = traversalUriHttpEntry.getDbEngine();
+        final TransactionalGraphEngine dbEngine = httpEntry.getDbEngine();
         GraphTraversalSource traversalSource =
             getTraversalSource(dbEngine, format, queryParameters, roles);
         
@@ -231,15 +232,15 @@ public class DslConsumer extends TraversalConsumer {
             // Dedup if duplicate objects are returned in each array in the aggregate format
             // scenario.
             List<Object> vertTempDedupedObjectList = dedupObjectInAggregateFormatResult(vertTemp);
-            vertices = traversalUriHttpEntry
+            vertices = httpEntry
                     .getPaginatedVertexListForAggregateFormat(vertTempDedupedObjectList);
         } else {
-            vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
+            vertices = httpEntry.getPaginatedVertexList(vertTemp);
         }
 
         DBSerializer serializer =
             new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);
-        FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer,
+        FormatFactory ff = new FormatFactory(httpEntry.getLoader(), serializer,
                 schemaVersions, this.basePath, serverBase);
 
         MultivaluedMap<String, String> mvm = new MultivaluedHashMap<>();

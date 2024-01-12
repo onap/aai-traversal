@@ -19,10 +19,9 @@
  */
 package org.onap.aai.rest.search;
 
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
-
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.core.MultivaluedHashMap;
