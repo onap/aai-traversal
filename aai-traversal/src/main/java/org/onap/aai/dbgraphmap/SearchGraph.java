@@ -22,8 +22,6 @@ package org.onap.aai.dbgraphmap;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Multimap;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.*;
