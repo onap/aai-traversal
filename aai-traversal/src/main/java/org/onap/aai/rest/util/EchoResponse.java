@@ -111,7 +111,7 @@ public class EchoResponse extends RESTAPI {
 		try {
 			return Response.status(Status.OK)
 					.entity(
-							ErrorLogHelper.getRESTAPIInfoResponse(headers.getAcceptableMediaTypes(), exceptionList))
+							ErrorLogHelper.getRESTAPIInfoResponse(new ArrayList<>(headers.getAcceptableMediaTypes()), exceptionList))
 					.build();
 		} catch (Exception e) {
 			AAIException aaiException = new AAIException("AAI_4000", e);
