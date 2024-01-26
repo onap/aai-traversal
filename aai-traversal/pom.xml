@@ -45,7 +45,6 @@
 
 		<!-- Default docker registry that maven fabric plugin will try to pull 
 			from -->
-		<gremlin.version>3.2.3</gremlin.version>
 		<docker.registry>docker.io</docker.registry>
 		<!-- Specifying the docker push registry where the image should be pushed -->
 		<!-- This value should be overwritten at runtime to wherever need to be 
@@ -60,7 +59,7 @@
 		<aai.docker.version>1.0.0</aai.docker.version>
 		<aai.docker.namespace>onap</aai.docker.namespace>
 		<aai.base.image>alpine</aai.base.image>
-		<aai.base.image.version>1.13.1</aai.base.image.version>
+		<aai.base.image.version>${aai.common.version}</aai.base.image.version>
 
 		<!-- Nexus Proxy Properties and Snapshot Locations Ideally this can be 
 			overwritten at runtime per internal environment specific values at runtime -->
