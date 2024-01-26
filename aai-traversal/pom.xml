@@ -59,7 +59,8 @@
 		<aai.docker.version>1.0.0</aai.docker.version>
 		<aai.docker.namespace>onap</aai.docker.namespace>
 		<aai.base.image>alpine</aai.base.image>
-		<aai.base.image.version>${aai.common.version}</aai.base.image.version>
+		<!-- image versions > 1.6.0 are based on Java 11 -->
+		<aai.base.image.version>1.6.0</aai.base.image.version>
 
 		<!-- Nexus Proxy Properties and Snapshot Locations Ideally this can be 
 			overwritten at runtime per internal environment specific values at runtime -->
