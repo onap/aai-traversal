@@ -1,30 +1,20 @@
 FROM @aai.docker.namespace@/aai-common-@aai.base.image@:@aai.base.image.version@
 
-USER root
-# RUN addgroup aaiadmin -g 1000
-# RUN adduser -u 1000 -h /opt/aaihome/aaiadmin -S -D -G aaiadmin -s /bin/bash aaiadmin
-# RUN groupadd aaiadmin -g 1000 \
-#   && adduser -u 1000 -h /opt/aaihome/aaiadmin -S -D -G aaiadmin -s /bin/bash aaiadmin \
-#   && mkdir -p /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ \
-#   && chown -R aaiadmin:aaiadmin /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ \
-#   && chown -R aaiadmin:aaiadmin /opt/app/aai-traversal /etc/profile.d /opt/app /opt/aai/logroot
-RUN mkdir -p \
-    /opt/aaihome/aaiadmin \
-    /opt/aai/logroot/AAI-GQ \
-    /opt/app/aai-traversal \
-    /opt/aai/logroot \
-  && chown -R aaiadmin:aaiadmin \
-    /opt/app/aai-traversal \
-    /etc/profile.d \
-    /opt/app \
-    /opt/aai/logroot
+RUN  mkdir -p /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ
+
 VOLUME /tmp
 VOLUME /opt/tools
 
 HEALTHCHECK --interval=40s --timeout=10s --retries=3 CMD nc -z -v localhost 8446 || exit 1
 
+RUN groupadd aaiadmin -g 1000
+
+RUN adduser -u 1000 -h /opt/aaihome/aaiadmin -S -D -G aaiadmin -s /bin/bash aaiadmin
+
 # Add the proper files into the docker image from your build
 WORKDIR /opt/app/aai-traversal
+
+RUN chown -R aaiadmin:aaiadmin /opt/app/aai-traversal /etc/profile.d /opt/aai/logroot/AAI-GQ /opt/app /opt/aai/logroot
 
 COPY --chown=aaiadmin:aaiadmin /maven/aai-traversal/ .
 
