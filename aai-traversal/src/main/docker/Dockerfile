@@ -1,23 +1,16 @@
 FROM @aai.docker.namespace@/aai-common-@aai.base.image@:@aai.base.image.version@
 
 USER root
-# RUN addgroup aaiadmin -g 1000
-# RUN adduser -u 1000 -h /opt/aaihome/aaiadmin -S -D -G aaiadmin -s /bin/bash aaiadmin
-# RUN groupadd aaiadmin -g 1000 \
-#   && adduser -u 1000 -h /opt/aaihome/aaiadmin -S -D -G aaiadmin -s /bin/bash aaiadmin \
-#   && mkdir -p /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ \
-#   && chown -R aaiadmin:aaiadmin /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ \
-#   && chown -R aaiadmin:aaiadmin /opt/app/aai-traversal /etc/profile.d /opt/app /opt/aai/logroot
-RUN mkdir -p \
-    /opt/aaihome/aaiadmin \
-    /opt/aai/logroot/AAI-GQ \
-    /opt/app/aai-traversal \
-    /opt/aai/logroot \
-  && chown -R aaiadmin:aaiadmin \
-    /opt/app/aai-traversal \
-    /etc/profile.d \
-    /opt/app \
-    /opt/aai/logroot
+
+RUN groupadd aaiadmin -g 1000 \
+  && adduser -u 1000 -h /opt/aaihome/aaiadmin -S -D -G aaiadmin -s /bin/bash aaiadmin \
+  && mkdir -p /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ \
+      /opt/app/aai-traversal \
+  && chown -R aaiadmin:aaiadmin /opt/aaihome/aaiadmin /opt/aai/logroot/AAI-GQ \
+      /opt/app/aai-traversal /etc/profile.d /opt/app /opt/aai/logroot \
+      /etc/profile.d \
+      /opt/app
+
 VOLUME /tmp
 VOLUME /opt/tools
 
