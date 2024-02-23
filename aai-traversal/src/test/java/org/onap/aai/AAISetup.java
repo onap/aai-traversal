@@ -37,6 +37,8 @@ import org.onap.aai.introspection.MoxyLoader;
 import org.onap.aai.nodes.NodeIngestor;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
+import org.onap.aai.rest.dsl.V1DslQueryProcessor;
+import org.onap.aai.rest.dsl.V2DslQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.serialization.db.EdgeSerializer;
 import org.onap.aai.setup.AAIConfigTranslator;
@@ -53,9 +55,8 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 @ContextConfiguration(
     classes = {ConfigConfiguration.class, AAIConfigTranslator.class, EdgeIngestor.class,
         EdgeSerializer.class, NodeIngestor.class, SpringContextAware.class,
-        IntrospectionConfig.class, RestBeanConfig.class, SearchConfiguration.class,
-        DslConfiguration.class, XmlFormatTransformerConfiguration.class,
-        GremlinServerSingleton.class})
+        IntrospectionConfig.class, RestBeanConfig.class, SearchConfiguration.class, XmlFormatTransformerConfiguration.class,
+        GremlinServerSingleton.class, V1DslQueryProcessor.class, V2DslQueryProcessor.class})
 @TestPropertySource(
     properties = {"schema.uri.base.path = /aai",
         "schema.ingest.file = src/test/resources/application-test.properties"})

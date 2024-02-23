@@ -39,10 +39,12 @@ import org.onap.aai.rest.dsl.validation.DslValidatorRule;
 import org.onap.aai.setup.SchemaVersions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * The Class DslListener.
  */
+@Component
 public class DslListener extends AAIDslBaseListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslListener.class);
