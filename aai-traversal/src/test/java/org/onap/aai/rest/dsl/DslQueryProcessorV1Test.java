@@ -22,10 +22,6 @@ package org.onap.aai.rest.dsl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,11 +29,16 @@ import org.junit.rules.ExpectedException;
 import org.onap.aai.AAISetup;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.rest.enums.QueryVersion;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The Class DslMain.
  */
 public class DslQueryProcessorV1Test extends AAISetup {
+
+    @Autowired
+    V1DslQueryProcessor dslQueryProcessor;
+
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 

@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.exceptions.AAIException;
@@ -43,6 +42,9 @@ import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
+import org.onap.aai.rest.dsl.V1DslQueryProcessor;
+import org.onap.aai.rest.dsl.V2DslQueryProcessor;
+import org.onap.aai.rest.dsl.v1.DslListener;
 import org.onap.aai.rest.enums.QueryVersion;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
@@ -94,25 +96,24 @@ public class DslConsumer extends TraversalConsumer {
     private final String basePath;
     private final GremlinServerSingleton gremlinServerSingleton;
     private final XmlFormatTransformer xmlFormatTransformer;
-    // private final Map<QueryVersion, ParseTreeListener> dslListeners;
-    private final EdgeIngestor edgeIngestor;
-    private final LoaderFactory loaderFactory;
+    private final DslListener v1DslListener;
+    private final org.onap.aai.rest.dsl.v2.DslListener v2DslListener;
 
     private QueryVersion dslApiVersion = DEFAULT_VERSION;
+    Map<QueryVersion, DslQueryProcessor> dslQueryProcessors;
 
     @Autowired
     public DslConsumer(@Qualifier("requestScopedTraversalUriHttpEntry") HttpEntry requestScopedTraversalUriHttpEntry,
             SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
             XmlFormatTransformer xmlFormatTransformer,
-            EdgeIngestor edgeIngestor, LoaderFactory loaderFactory,
-            @Value("${schema.uri.base.path}") String basePath) {
+            @Value("${schema.uri.base.path}") String basePath, DslListener v1DslListener, org.onap.aai.rest.dsl.v2.DslListener v2DslListener) {
         this.httpEntry = requestScopedTraversalUriHttpEntry;
         this.schemaVersions = schemaVersions;
         this.gremlinServerSingleton = gremlinServerSingleton;
         this.xmlFormatTransformer = xmlFormatTransformer;
         this.basePath = basePath;
-        this.edgeIngestor = edgeIngestor;
-        this.loaderFactory = loaderFactory;
+        this.v1DslListener = v1DslListener;
+        this.v2DslListener = v2DslListener;
     }
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -192,12 +193,9 @@ public class DslConsumer extends TraversalConsumer {
                 && !AAIConfig.get(TraversalConstants.DSL_OVERRIDE).equals("false")
                 && dslOverride.equals(AAIConfig.get(TraversalConstants.DSL_OVERRIDE));
 
-        Map<QueryVersion, ParseTreeListener> dslListeners = new HashMap<>();
-        dslListeners.put(QueryVersion.V1,
-            new org.onap.aai.rest.dsl.v1.DslListener(edgeIngestor, schemaVersions, loaderFactory));
-        dslListeners.put(QueryVersion.V2,
-            new org.onap.aai.rest.dsl.v2.DslListener(edgeIngestor, schemaVersions, loaderFactory));
-        DslQueryProcessor dslQueryProcessor = new DslQueryProcessor(dslListeners);
+        DslQueryProcessor dslQueryProcessor = dslApiVersion.equals(QueryVersion.V1)
+            ? new V1DslQueryProcessor()
+            : new V2DslQueryProcessor();
         if (isDslOverride) {
             dslQueryProcessor.setStartNodeValidationFlag(false);
         }

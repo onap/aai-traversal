@@ -28,11 +28,16 @@ import org.junit.rules.ExpectedException;
 import org.onap.aai.AAISetup;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.rest.enums.QueryVersion;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The Class DslMain.
  */
 public class DslQueryProcessorV2Test extends AAISetup {
+
+    @Autowired
+    V2DslQueryProcessor dslQueryProcessor;
+
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 

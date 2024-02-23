@@ -19,8 +19,6 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.*;

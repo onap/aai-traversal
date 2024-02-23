@@ -31,8 +31,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 @Service
-@PropertySource("classpath:retired.properties")
-@PropertySource(value = "file:${server.local.startpath}/retired.properties")
+@PropertySource(value = "classpath:retired.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "file:${server.local.startpath}/retired.properties", ignoreResourceNotFound = true)
 public class RetiredService {
 
     private String retiredPatterns;
