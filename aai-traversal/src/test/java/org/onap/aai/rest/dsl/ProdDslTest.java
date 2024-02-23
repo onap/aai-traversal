@@ -26,11 +26,16 @@ import org.junit.Test;
 import org.onap.aai.AAISetup;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.rest.enums.QueryVersion;
+import org.springframework.beans.factory.annotation.Autowired;
 
 // TODO: Change this to read queries and their builder equivalent from a file
 // TODO: Add queries run by SEs
 
 public class ProdDslTest extends AAISetup {
+
+    @Autowired
+    protected V1DslQueryProcessor dslQueryProcessor;
+
     @Ignore
     @Test
     public void msoQueryTest1() throws AAIException {

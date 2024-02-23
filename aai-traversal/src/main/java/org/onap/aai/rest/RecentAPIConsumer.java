@@ -103,7 +103,7 @@ public class RecentAPIConsumer extends RESTAPI {
     @Path("/{nodeType: .+}")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response getRecentData(String content, @PathParam("version") String versionParam,
+    public Response getRecentData(@PathParam("version") String versionParam,
         @PathParam("nodeType") String nodeType, @Context HttpHeaders headers,
         @Context HttpServletRequest req, @Context UriInfo info) {
 
@@ -113,13 +113,13 @@ public class RecentAPIConsumer extends RESTAPI {
             new AaiCallable<Response>() {
                 @Override
                 public Response process() {
-                    return processRecentData(content, req, versionParam, nodeType, info, headers);
+                    return processRecentData(req, versionParam, nodeType, info, headers);
                 }
             });
 
     }
 
-    public Response processRecentData(String content, HttpServletRequest req,
+    public Response processRecentData(HttpServletRequest req,
         @PathParam("version") String versionParam, @PathParam("nodeType") String nodeType,
         @Context UriInfo info, @Context HttpHeaders headers) {
 
