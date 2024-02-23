@@ -39,10 +39,15 @@ import org.onap.aai.rest.dsl.validation.DslValidatorRule;
 import org.onap.aai.setup.SchemaVersions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
 
 /**
  * The Class DslListener.
  */
+@Scope(value = "prototype")
+@Component(value = "v1DslListener")
 public class DslListener extends AAIDslBaseListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslListener.class);
