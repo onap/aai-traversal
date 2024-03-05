@@ -1,0 +1,4 @@
+distribution_type: maven
+log_dir: aai-traversal-maven-stage-master/1398/
+project: traversal
+version: 1.13.3
