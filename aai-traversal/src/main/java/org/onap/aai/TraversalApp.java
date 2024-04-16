@@ -46,10 +46,11 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration;
 
 @SpringBootApplication(
     exclude = {DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
+        DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class, JmsAutoConfiguration.class})
 // Component Scan provides a way to look for spring beans
 // It only searches beans in the following packages
 // Any method annotated with @Bean annotation or any class
