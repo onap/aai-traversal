@@ -26,7 +26,6 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.onap.aai.aailog.logs.AaiDebugLog;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
@@ -57,7 +56,7 @@ import org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration;
 // with @Component, @Configuration, @Service will be picked up
 @ComponentScan(
     basePackages = {"org.onap.aai.config", "org.onap.aai.web", "org.onap.aai.setup",
-        "org.onap.aai.tasks", "org.onap.aai.service", "org.onap.aai.rest", "org.onap.aai.aaf",
+        "org.onap.aai.tasks", "org.onap.aai.service", "org.onap.aai.rest",
         "org.onap.aai.aailog"})
 public class TraversalApp {
 
@@ -98,11 +97,6 @@ public class TraversalApp {
 
         logger.debug("Starting AAIGraph connections and the NodeInjestor");
 
-        if (env.acceptsProfiles(Profiles.of(TraversalProfiles.TWO_WAY_SSL))
-            && env.acceptsProfiles(Profiles.of(TraversalProfiles.ONE_WAY_SSL))) {
-            logger.debug("You have seriously misconfigured your application");
-        }
-
         AAIConfig.init();
 
         AAIGraph.getInstance();
@@ -126,7 +120,6 @@ public class TraversalApp {
             SpringApplication app = new SpringApplication(TraversalApp.class);
             app.setLogStartupInfo(false);
             app.setRegisterShutdownHook(true);
-            app.addInitializers(new PropertyPasswordConfiguration());
             env = app.run(args).getEnvironment();
         } catch (Exception ex) {
             AAIException aai = schemaServiceExceptionTranslator(ex);

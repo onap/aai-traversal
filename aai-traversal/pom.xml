@@ -710,10 +710,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.onap.aaf.authz</groupId>
-			<artifactId>aaf-cadi-aaf</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<version>${netty.version}</version>
@@ -852,16 +848,6 @@
 				</includes>
 				<targetPath>${project.build.directory}/swm/package/nix/dist_files/opt/app/${project.artifactId}/appconfig</targetPath>
 				<filtering>false</filtering>
-			</resource>
-			<resource>
-				<directory>${project.basedir}/src/main/resources/etc/auth/</directory>
-				<includes>
-					<include>aai-client-cert.p12</include>
-					<include>tomcat_keystore</include>
-					<include>aai_policy.json</include>
-				</includes>
-				<targetPath>${project.build.directory}/swm/package/nix/dist_files/opt/app/${project.artifactId}/appconfig</targetPath>
-				<filtering>true</filtering>
 			</resource>
 			<resource>
 				<directory>${project.basedir}/src/main/resources/</directory>

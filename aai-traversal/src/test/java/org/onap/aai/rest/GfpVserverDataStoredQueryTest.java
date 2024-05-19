@@ -54,7 +54,6 @@ import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
 import org.onap.aai.HttpTestUtil;
 import org.onap.aai.PayloadUtil;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.transforms.XmlFormatTransformer;
@@ -62,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 public class GfpVserverDataStoredQueryTest extends AAISetup {
 
     private static final Logger logger =
@@ -179,7 +177,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         when(uriInfo.getPath()).thenReturn(query);
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
         when(mockRequest.getRequestURL())
-            .thenReturn(new StringBuffer("https://localhost:8446" + query));
+            .thenReturn(new StringBuffer("http://localhost:8446" + query));
 
         Response response = queryConsumer.executeQuery(payload, version.toString(),
             "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
@@ -211,7 +209,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
 
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
         when(mockRequest.getRequestURL())
-            .thenReturn(new StringBuffer("https://localhost:8446" + query));
+            .thenReturn(new StringBuffer("http://localhost:8446" + query));
 
         Response response = queryConsumer.executeQuery(payload, version.toString(),
             "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
@@ -244,7 +242,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
         when(uriInfo.getPath()).thenReturn(query);
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
         when(mockRequest.getRequestURL())
-            .thenReturn(new StringBuffer("https://localhost:8446" + query));
+            .thenReturn(new StringBuffer("http://localhost:8446" + query));
 
         Response response = queryConsumer.executeQuery(payload, version.toString(),
             "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");

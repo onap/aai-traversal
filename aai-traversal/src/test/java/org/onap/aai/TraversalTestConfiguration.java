@@ -25,11 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +32,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
@@ -60,34 +53,7 @@ public class TraversalTestConfiguration {
     @Bean
     RestTemplate restTemplate(RestTemplateBuilder builder) throws Exception {
 
-        RestTemplate restTemplate = null;
-
-        if (env.acceptsProfiles(Profiles.of("one-way-ssl", "two-way-ssl"))) {
-            char[] trustStorePassword =
-                env.getProperty("server.ssl.trust-store-password").toCharArray();
-            char[] keyStorePassword =
-                env.getProperty("server.ssl.key-store-password").toCharArray();
-
-            String keyStore = env.getProperty("server.ssl.key-store");
-            String trustStore = env.getProperty("server.ssl.trust-store");
-            SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
-
-            if (env.acceptsProfiles(Profiles.of("two-way-ssl"))) {
-                sslContextBuilder = sslContextBuilder
-                    .loadKeyMaterial(loadPfx(keyStore, keyStorePassword), keyStorePassword);
-            }
-
-            SSLContext sslContext = sslContextBuilder
-                .loadTrustMaterial(ResourceUtils.getFile(trustStore), trustStorePassword).build();
-
-            HttpClient client = HttpClients.custom().setSSLContext(sslContext)
-                .setSSLHostnameVerifier((s, sslSession) -> true).build();
-
-            restTemplate = builder
-                .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(client)).build();
-        } else {
-            restTemplate = builder.build();
-        }
+        RestTemplate restTemplate = builder.build();
 
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override
@@ -116,14 +82,5 @@ public class TraversalTestConfiguration {
         });
 
         return restTemplate;
-    }
-
-    private KeyStore loadPfx(String file, char[] password) throws Exception {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        File key = ResourceUtils.getFile(file);
-        try (InputStream in = new FileInputStream(key)) {
-            keyStore.load(in, password);
-        }
-        return keyStore;
     }
 }

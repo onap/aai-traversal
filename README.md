@@ -29,7 +29,7 @@ mvn -N -P runAjsc
 Make sure to be in `aai-traversal` before executing it!
 
 ## Accessing AAI APIs
-Most of the AAI features within OpenECOMP are triggered by using **RESTful interfaces**. AAI  is configured on this release with HTTPS only using Basic Authentication. Two way SSL using client certificates should be considered and used for non demo use case deployments.
+Most of the AAI features within OpenECOMP are triggered by using **RESTful interfaces**
 
 The MSO APIs are configured to accept requests having a **basic auth. header** set with various **username and password** depending on which client is triggering the request. The realm.properties contains the credentials for the OpenECOMP components and these should be changed as appropriate.
 

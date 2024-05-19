@@ -304,9 +304,6 @@
 		<appender-ref ref="asyncSANE" />
 		<appender-ref ref="STDOUT" />
 	</logger>
-	<logger name="org.onap.aai.aaf.auth" level="DEBUG" additivity="false">
-		<appender-ref ref="asyncAUTH" />
-	</logger>
 	<logger name="org.onap.aai.aailog.logs.AaiScheduledTaskAuditLog" level="INFO">
 		<appender-ref ref="asyncAUDIT"/>
 	</logger>

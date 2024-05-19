@@ -355,10 +355,6 @@
 		<appender-ref ref="asyncSANE" />
 		<appender-ref ref="STDOUT" />
 	</logger>
-	<logger name="org.onap.aai.aaf" level="DEBUG" additivity="false">
-		<appender-ref ref="asyncAUTH" />
-		<appender-ref ref="STDOUT" />
-	</logger>
 	<logger name="org.onap.logging.filter.base.AbstractAuditLogFilter" level="INFO" additivity="false">
     	<appender-ref ref="asyncAUDIT"/>
 		<appender-ref ref="STDOUT" />

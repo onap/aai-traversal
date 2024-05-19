@@ -42,7 +42,6 @@ import org.onap.aai.HttpTestUtil;
 import org.onap.aai.PayloadUtil;
 import org.onap.aai.TraversalApp;
 import org.onap.aai.TraversalTestConfiguration;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
 import org.slf4j.Logger;
@@ -62,7 +61,6 @@ import org.springframework.web.client.RestTemplate;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @Import(TraversalTestConfiguration.class)
 public class QueryConsumerTest {
 

@@ -39,7 +39,6 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.serialization.queryformats.Format;
@@ -79,7 +78,6 @@ import com.jayway.jsonpath.JsonPath;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @Import(TraversalTestConfiguration.class)
 public class AAIGremlinQueryTest {
 
