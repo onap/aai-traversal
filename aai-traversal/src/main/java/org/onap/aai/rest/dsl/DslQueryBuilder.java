@@ -88,7 +88,7 @@ public class DslQueryBuilder {
         if (selectCounter <= 0) {
             return this.end();
         } else {
-            query.append(".select('stepMain').fold().dedup()");
+            query.append(".select(Pop.mixed,'stepMain').fold().dedup()");
         }
         return this;
     }
@@ -244,14 +244,15 @@ public class DslQueryBuilder {
 
     }
 
+    private static final Pattern AAI_NODE_TYPE_PATTERN = Pattern.compile("aai-node-type");
+
     public DslQueryBuilder select(long selectCounter, List<String> keys) {
         /*
          * TODO : isNot should look at the vertex properties and include everything except the
          * notKeys
          */
 
-        Pattern p = Pattern.compile("aai-node-type");
-        Matcher m = p.matcher(query);
+        Matcher m = AAI_NODE_TYPE_PATTERN.matcher(query);
         int count = 0;
         while (m.find()) {
             count++;
@@ -260,7 +261,7 @@ public class DslQueryBuilder {
         if (selectCounter == count || keys == null) {
             String selectStep = "step" + selectCounter;
             // String keysArray = String.join(",", keys);
-            query.append(".as('").append(selectStep).append("')").append(".as('stepMain').select('")
+            query.append(".as('").append(selectStep).append("')").append(".as('stepMain').select(Pop.mixed,'")
                 .append(selectStep).append("')");
         }
         return this;
