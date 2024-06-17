@@ -26,6 +26,7 @@ import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -380,7 +381,7 @@ public class ModelBasedProcessing {
         }
 
         List<ResultSet> resultList = new ArrayList<>();
-        TimeLimiter limiter = new SimpleTimeLimiter();
+        TimeLimiter limiter = SimpleTimeLimiter.create(Executors.newCachedThreadPool());
         try {
 
             resultList = limiter.callWithTimeout(new AaiCallable<List<ResultSet>>() {
@@ -389,7 +390,7 @@ public class ModelBasedProcessing {
                         modelInvId_f, modelName_f, topNodeType_f, startNodeFilterArrayOfHashes_f,
                         apiVer_f);
                 }
-            }, timeLimitSec, TimeUnit.SECONDS, true);
+            }, timeLimitSec, TimeUnit.SECONDS);
         } catch (AAIException ae) {
             // Re-throw AAIException so we get can tell what happened internally
             throw ae;
@@ -1036,7 +1037,7 @@ public class ModelBasedProcessing {
         }
 
         List<ResultSet> resultList = new ArrayList<>();
-        TimeLimiter limiter = new SimpleTimeLimiter();
+        TimeLimiter limiter = SimpleTimeLimiter.create(Executors.newCachedThreadPool());
         try {
             resultList = limiter.callWithTimeout(new AaiCallable<List<ResultSet>>() {
                 public List<ResultSet> process() throws AAIException {
@@ -1044,11 +1045,7 @@ public class ModelBasedProcessing {
                         startNodeFilterArrayOfHashes_f, apiVer_f, secondaryFilterCutPoint_f,
                         secondaryFilterHash_f);
                 }
-            }, timeLimitSec, TimeUnit.SECONDS, true);
-
-        } catch (AAIException ae) {
-            // Re-throw AAIException so we get can tell what happened internally
-            throw ae;
+            }, timeLimitSec, TimeUnit.SECONDS);
         } catch (UncheckedTimeoutException ute) {
             throw new AAIException("AAI_6140",
                 "Query Processing Limit exceeded. (limit = " + timeLimitSec + " seconds)");

@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.0-SNAPSHOT</version>
+		<version>1.14.1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -43,17 +43,17 @@
 
 		<!-- End of the jacoco plugin properties -->
 
-		<!-- Default docker registry that maven fabric plugin will try to pull 
+		<!-- Default docker registry that maven fabric plugin will try to pull
 			from -->
 		<docker.registry>docker.io</docker.registry>
 		<!-- Specifying the docker push registry where the image should be pushed -->
-		<!-- This value should be overwritten at runtime to wherever need to be 
+		<!-- This value should be overwritten at runtime to wherever need to be
 			pushed to -->
 		<docker.push.registry>localhost:5000</docker.push.registry>
 		<aai.docker.version>1.0.0</aai.docker.version>
 
-		<!-- Location where assembly of our scripts, resources and main jar will 
-			be held Check the ${project.artifactId}/src/main/assembly/descriptor.xml 
+		<!-- Location where assembly of our scripts, resources and main jar will
+			be held Check the ${project.artifactId}/src/main/assembly/descriptor.xml
 			for more info -->
 		<aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
 		<aai.docker.version>1.0.0</aai.docker.version>
@@ -61,14 +61,14 @@
 		<aai.base.image>alpine</aai.base.image>
 		<aai.base.image.version>1.13.4</aai.base.image.version>
 
-		<!-- Nexus Proxy Properties and Snapshot Locations Ideally this can be 
+		<!-- Nexus Proxy Properties and Snapshot Locations Ideally this can be
 			overwritten at runtime per internal environment specific values at runtime -->
 		<nexusproxy>https://nexus.onap.org</nexusproxy>
 		<site.path>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
 		<release.path>/content/repositories/releases/</release.path>
 		<snapshot.path>/content/repositories/snapshots/</snapshot.path>
 
-		<!-- This will be used for the docker images as the default format of maven 
+		<!-- This will be used for the docker images as the default format of maven
 			build has issues -->
 		<maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
 
@@ -91,7 +91,7 @@
 		<schema.version.api.default>v29</schema.version.api.default>
 		<schema.version.list>v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,v21,v22,v23,v24,v25,v26,v27,v28,v29</schema.version.list>
 		<schema.uri.base.path>/aai</schema.uri.base.path>
-		
+
 		<!-- versions -->
 		<spring.boot.version>2.4.13</spring.boot.version>
 		<spring.version>5.3.13</spring.version>
@@ -115,7 +115,7 @@
 		<skipITs>true</skipITs>
 	</properties>
 	<profiles>
-		<!-- Docker profile to be used for building docker image and pushing to 
+		<!-- Docker profile to be used for building docker image and pushing to
 			nexus -->
 		<profile>
 			<id>docker</id>
@@ -559,8 +559,8 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
-		<!-- Do not use activemq-all because they force you to use a specific logging 
-			and they shade it so you can't simply exclude it and when you deploy the 
+		<!-- Do not use activemq-all because they force you to use a specific logging
+			and they shade it so you can't simply exclude it and when you deploy the
 			jar, you will notice failure -->
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -618,7 +618,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Do not use the jersey-client since jersey client 1.0 version clashes 
+		<!-- Do not use the jersey-client since jersey client 1.0 version clashes
 			with jersey 2 which we are using -->
 		<!-- Use this to make http requests instead of jersey 1.0 client -->
 		<dependency>
@@ -646,10 +646,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Explicitly stating the security spring framework and exclude the bouncy 
-			castle since that is somehow overwriting our p12 file decryption that's built 
-			into java security This will cause the password is incorrect This needs to 
-			be added back if org.bouncy castle dependency sneaks backs in and causing 
+		<!-- Explicitly stating the security spring framework and exclude the bouncy
+			castle since that is somehow overwriting our p12 file decryption that's built
+			into java security This will cause the password is incorrect This needs to
+			be added back if org.bouncy castle dependency sneaks backs in and causing
 			issues with the two way ssl -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -808,13 +808,10 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- Keeping guava at 19 is necessary here, since the janusgraph-cql driver in version
-			     2.3 has a dependency on it. Remove this override, once we are using janusgraph > 0.2.3/tinkerpop > 3.2.3
-			-->
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>19.0</version>
+				<version>25.0-jre</version>
 		</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -992,16 +989,13 @@
 			<plugin>
 				<artifactId>exec-maven-plugin</artifactId>
 				<groupId>org.codehaus.mojo</groupId>
+				<version>1.6.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
 			</plugin>
-			<plugin>
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -1009,12 +1003,10 @@
 					<runOrder>alphabetical</runOrder>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.codehaus.groovy.maven</groupId>
 				<artifactId>gmaven-plugin</artifactId>
 			</plugin>
-
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
@@ -1071,7 +1063,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
