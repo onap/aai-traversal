@@ -26,6 +26,8 @@ import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -44,6 +46,8 @@ import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
 import org.onap.aai.logging.ErrorLogHelper;
+import org.onap.aai.parsers.exceptions.AAIIdentityMapParseException;
+import org.onap.aai.parsers.exceptions.AmbiguousMapAAIException;
 import org.onap.aai.query.builder.QueryBuilder;
 import org.onap.aai.schema.enums.PropertyMetadata;
 import org.onap.aai.serialization.db.DBSerializer;
@@ -380,7 +384,7 @@ public class ModelBasedProcessing {
         }
 
         List<ResultSet> resultList = new ArrayList<>();
-        TimeLimiter limiter = new SimpleTimeLimiter();
+        TimeLimiter limiter = SimpleTimeLimiter.create(Executors.newCachedThreadPool());
         try {
 
             resultList = limiter.callWithTimeout(new AaiCallable<List<ResultSet>>() {
@@ -389,10 +393,17 @@ public class ModelBasedProcessing {
                         modelInvId_f, modelName_f, topNodeType_f, startNodeFilterArrayOfHashes_f,
                         apiVer_f);
                 }
-            }, timeLimitSec, TimeUnit.SECONDS, true);
-        } catch (AAIException ae) {
-            // Re-throw AAIException so we get can tell what happened internally
-            throw ae;
+            }, timeLimitSec, TimeUnit.SECONDS);
+        } catch (ExecutionException ex) {
+            if(ex.getCause() instanceof AAIIdentityMapParseException) {
+                throw (AAIIdentityMapParseException) ex.getCause();
+            }
+            if(ex.getCause() instanceof AmbiguousMapAAIException) {
+                throw (AmbiguousMapAAIException) ex.getCause();
+            }
+            if(ex.getCause() instanceof AAIException) {
+                throw (AAIException) ex.getCause();
+            }
         } catch (UncheckedTimeoutException ute) {
             throw new AAIException("AAI_6140",
                 "Query Processing Limit exceeded. (limit = " + timeLimitSec + " seconds)");
@@ -1036,7 +1047,7 @@ public class ModelBasedProcessing {
         }
 
         List<ResultSet> resultList = new ArrayList<>();
-        TimeLimiter limiter = new SimpleTimeLimiter();
+        TimeLimiter limiter = SimpleTimeLimiter.create(Executors.newCachedThreadPool());
         try {
             resultList = limiter.callWithTimeout(new AaiCallable<List<ResultSet>>() {
                 public List<ResultSet> process() throws AAIException {
@@ -1044,11 +1055,17 @@ public class ModelBasedProcessing {
                         startNodeFilterArrayOfHashes_f, apiVer_f, secondaryFilterCutPoint_f,
                         secondaryFilterHash_f);
                 }
-            }, timeLimitSec, TimeUnit.SECONDS, true);
-
-        } catch (AAIException ae) {
-            // Re-throw AAIException so we get can tell what happened internally
-            throw ae;
+            }, timeLimitSec, TimeUnit.SECONDS);
+        } catch (ExecutionException ex) {
+            if(ex.getCause() instanceof AAIIdentityMapParseException) {
+                throw (AAIIdentityMapParseException) ex.getCause();
+            }
+            if(ex.getCause() instanceof AmbiguousMapAAIException) {
+                throw (AmbiguousMapAAIException) ex.getCause();
+            }
+            if(ex.getCause() instanceof AAIException) {
+                throw (AAIException) ex.getCause();
+            }
         } catch (UncheckedTimeoutException ute) {
             throw new AAIException("AAI_6140",
                 "Query Processing Limit exceeded. (limit = " + timeLimitSec + " seconds)");
