@@ -41,7 +41,7 @@
             Nexus Proxy Properties and Snapshot Locations
             Ideally this can be overwritten at runtime per internal environment specific values at runtime
         -->
-        <aai.common.version>1.14.2-SNAPSHOT</aai.common.version>
+        <aai.common.version>1.14.2</aai.common.version>
         <nexusproxy>https://nexus.onap.org</nexusproxy>
         <site.path>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
         <release.path>/content/repositories/releases/</release.path>
