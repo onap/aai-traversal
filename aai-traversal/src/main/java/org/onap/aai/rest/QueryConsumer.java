@@ -51,11 +51,13 @@ import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.parsers.query.QueryParser;
+import org.onap.aai.query.builder.Pageable;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.search.CustomQueryConfig;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.rest.search.QueryProcessorType;
+import org.onap.aai.rest.util.PaginationUtil;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.serialization.db.DBSerializer;
@@ -80,8 +82,8 @@ import com.google.gson.JsonParser;
 
 import io.micrometer.core.annotation.Timed;
 
-@Path("{version: v[1-9][0-9]*|latest}/query")
 @Timed
+@Path("{version: v[1-9][0-9]*|latest}/query")
 public class QueryConsumer extends TraversalConsumer {
 
     private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
@@ -112,12 +114,16 @@ public class QueryConsumer extends TraversalConsumer {
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response executeQuery(String content, @PathParam("version") String versionParam,
+    public Response executeQuery(
+        String content,
+        @PathParam("version") String versionParam,
         @DefaultValue("graphson") @QueryParam("format") String queryFormat,
         @DefaultValue("no_op") @QueryParam("subgraph") String subgraph,
-        @Context HttpHeaders headers, @Context HttpServletRequest req, @Context UriInfo info,
-        @DefaultValue("-1") @QueryParam("resultIndex") String resultIndex,
-        @DefaultValue("-1") @QueryParam("resultSize") String resultSize) {
+        @DefaultValue("-1") @QueryParam("resultIndex") int resultIndex,
+        @DefaultValue("-1") @QueryParam("resultSize") int resultSize,
+        @Context HttpHeaders headers,
+        @Context HttpServletRequest req,
+        @Context UriInfo info) {
         Set<String> roles = this.getRoles(req.getUserPrincipal());
 
         return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
@@ -127,14 +133,13 @@ public class QueryConsumer extends TraversalConsumer {
                 @Override
                 public Response process() {
                     return processExecuteQuery(content, req, versionParam, queryFormat, subgraph,
-                        headers, info, resultIndex, resultSize, roles);
+                        headers, info, new Pageable(resultIndex, resultSize), roles);
                 }
             });
     }
 
     public Response processExecuteQuery(String content, HttpServletRequest req, String versionParam,
-        String queryFormat, String subgraph, HttpHeaders headers, UriInfo info, String resultIndex,
-        String resultSize, Set<String> roles) {
+        String queryFormat, String subgraph, HttpHeaders headers, UriInfo info, Pageable pageable, Set<String> roles) {
 
         String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
         String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
@@ -166,7 +171,6 @@ public class QueryConsumer extends TraversalConsumer {
              * Changes for Pagination
              */
 
-            traversalUriHttpEntry.setPaginationParameters(resultIndex, resultSize);
             dbEngine = traversalUriHttpEntry.getDbEngine();
 
             if (startElement != null) {
@@ -243,7 +247,10 @@ public class QueryConsumer extends TraversalConsumer {
                     .traversalSource(isHistory(format), traversalSource).create();
             }
             List<Object> vertTemp = processor.execute(subGraphStyle);
-            List<Object> vertices = traversalUriHttpEntry.getPaginatedVertexList(vertTemp);
+            int fromIndex = pageable.getPage() * pageable.getPageSize();
+            List<Object> vertices = PaginationUtil.hasValidPaginationParams(pageable)
+                ? vertTemp.subList(fromIndex, fromIndex + pageable.getPageSize())
+                : vertTemp;
 
             DBSerializer serializer =
                 new DBSerializer(version, dbEngine, ModelType.MOXY, sourceOfTruth);

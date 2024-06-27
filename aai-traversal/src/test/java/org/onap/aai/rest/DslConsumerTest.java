@@ -29,11 +29,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -42,6 +40,7 @@ import org.janusgraph.core.JanusGraphTransaction;
 import org.junit.Assert;
 import org.junit.Test;
 import org.onap.aai.PayloadUtil;
+import org.onap.aai.WebClientConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.entities.AAIErrorResponse;
 import org.onap.aai.entities.ServiceException;
@@ -49,23 +48,26 @@ import org.onap.aai.util.AAIConfig;
 import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@Import(WebClientConfiguration.class)
 public class DslConsumerTest extends AbstractSpringRestTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslConsumerTest.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired WebTestClient webClient;
 
     @Override
     public void createTestGraph() {
@@ -205,6 +207,42 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         assertThat(responseEntity.getBody(),
             is(not(containsString("<result><result>"))));
         assertThat(responseEntity.getBody(), is(containsString("<results><result>")));
+    }
+
+    @Test
+    public void thatResultsCanBePaginated() throws Exception {
+        String path = "/aai/v14/dsl";
+        Map<String, String> dslQueryMap = Collections.singletonMap("dsl-query", "pserver*('hostname','test-pserver-dsl')");
+
+        String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
+
+        webClient.put()
+            .uri(uriBuilder -> uriBuilder
+                .path(path)
+                .queryParam("format", "console")
+                .build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(payload)
+            .exchange()
+            .expectStatus().isOk();
+
+        String responseEntity = webClient.put()
+            .uri(uriBuilder -> uriBuilder
+                .path(path)
+                .queryParam("format", "console")
+                .build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_XML)
+            .bodyValue(payload)
+            .exchange()
+            .expectStatus().isOk()
+            .returnResult(String.class)
+            .getResponseBody()
+            .blockFirst();
+
+        assertThat(responseEntity,
+            is(not(containsString("<result><result>"))));
+        assertThat(responseEntity, is(containsString("<results><result>")));
     }
 
     @Test

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -43,7 +44,7 @@ public class PayloadUtil {
         String message = String.format("Unable to find the %s in src/test/resources", fileName);
         assertNotNull(message, inputStream);
 
-        String resource = IOUtils.toString(inputStream);
+        String resource = IOUtils.toString(inputStream, Charset.defaultCharset());
 
         inputStream.close();
         return resource;
@@ -57,7 +58,7 @@ public class PayloadUtil {
         String message = String.format("Unable to find the %s in src/test/resources", fileName);
         assertNotNull(message, inputStream);
 
-        String resource = IOUtils.toString(inputStream);
+        String resource = IOUtils.toString(inputStream, Charset.defaultCharset());
 
         inputStream.close();
         return resource;
@@ -77,7 +78,7 @@ public class PayloadUtil {
         if (cache.containsKey(fileName)) {
             resource = cache.get(fileName);
         } else {
-            resource = IOUtils.toString(inputStream);
+            resource = IOUtils.toString(inputStream, Charset.defaultCharset());
             cache.put(fileName, resource);
         }
 
@@ -112,7 +113,7 @@ public class PayloadUtil {
             .format("Unable to find the %s in src/test/resources/payloads/named-queries", fileName);
         assertNotNull(message, inputStream);
 
-        String resource = IOUtils.toString(inputStream);
+        String resource = IOUtils.toString(inputStream, Charset.defaultCharset());
 
         inputStream.close();
         return resource;

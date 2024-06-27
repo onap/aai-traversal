@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.2-SNAPSHOT</version>
+		<version>1.14.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -472,6 +472,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.janusgraph</groupId>
+			<artifactId>janusgraph-inmemory</artifactId>
+			<version>${janusgraph.version}</version>
+	</dependency>
+		<dependency>
 			<groupId>com.github.jnr</groupId>
 			<artifactId>jnr-ffi</artifactId>
 		</dependency>
@@ -679,6 +684,11 @@
 					<artifactId>log4j-over-slf4j</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

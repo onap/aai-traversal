@@ -124,7 +124,7 @@ public class QueryConsumerTest {
         Response response = httpTestUtil.doPut(complexUri, complexPayload);
     }
 
-    // @Test
+    @Test
     public void testRequiredAGood() throws Exception {
         String endpoint = "/aai/v14/query?format=pathed";
         Map<String, String> cloudRegionMap = new HashMap<>();
@@ -152,7 +152,7 @@ public class QueryConsumerTest {
 
         String payload = PayloadUtil.getTemplatePayload("custom-query.json", customQueryMap);
         httpEntity = new HttpEntity(payload, headers);
-        ResponseEntity responseEntity =
+        ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
         LOGGER.info("Response of custom query : {}", responseEntity.getBody().toString());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));

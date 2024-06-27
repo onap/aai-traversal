@@ -22,6 +22,7 @@ package org.onap.aai.rest;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.onap.aai.edges.EdgeIngestor;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.ModelType;
+import org.onap.aai.query.builder.Pageable;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.dsl.DslQueryProcessor;
 import org.onap.aai.rest.dsl.V1DslQueryProcessor;
@@ -49,6 +51,7 @@ import org.onap.aai.rest.enums.QueryVersion;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.rest.search.QueryProcessorType;
+import org.onap.aai.rest.util.PaginationUtil;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.Format;
@@ -122,19 +125,19 @@ public class DslConsumer extends TraversalConsumer {
                                                @RequestParam(defaultValue = "graphson") String format,
                                                @RequestParam(defaultValue = "no_op") String subgraph,
                                                @RequestParam(defaultValue = "all") String validate,
-                                               @RequestParam(defaultValue = "-1") String resultIndex,
-                                               @RequestParam(defaultValue = "-1") String resultSize,
+                                               @RequestParam(defaultValue = "-1") int resultIndex,
+                                               @RequestParam(defaultValue = "-1") int resultSize,
                                                @RequestHeader HttpHeaders headers,
                                                HttpServletRequest request) throws FileNotFoundException, AAIException {
         Set<String> roles = this.getRoles(request.getUserPrincipal());
 
         return processExecuteQuery(dslQuery, request, versionParam, format, subgraph,
-                validate, headers, resultIndex, resultSize, roles);
+                validate, headers, new Pageable(resultIndex, resultSize), roles);
     }
 
     public ResponseEntity<String> processExecuteQuery(String dslQuery, HttpServletRequest request, String versionParam,
             String queryFormat, String subgraph, String validate, HttpHeaders headers,
-            String resultIndex, String resultSize, Set<String> roles) throws FileNotFoundException, AAIException {
+           Pageable pageable, Set<String> roles) throws FileNotFoundException, AAIException {
 
         final SchemaVersion version = new SchemaVersion(versionParam);
         final String sourceOfTruth = headers.getFirst("X-FromAppId");
@@ -151,7 +154,7 @@ public class DslConsumer extends TraversalConsumer {
             }
         }
 
-        String result = executeQuery(dslQuery, request, queryFormat, subgraph, validate, queryParams, resultIndex, resultSize,
+        String result = executeQuery(dslQuery, request, queryFormat, subgraph, validate, queryParams, pageable,
                 roles, version, sourceOfTruth, dslOverride);
         MediaType acceptType = headers.getAccept().stream()
             .filter(Objects::nonNull)
@@ -174,13 +177,12 @@ public class DslConsumer extends TraversalConsumer {
     }
 
     private String executeQuery(String content, HttpServletRequest req, String queryFormat, String subgraph,
-            String validate, MultivaluedMap<String, String> queryParameters, String resultIndex, String resultSize, Set<String> roles,
+            String validate, MultivaluedMap<String, String> queryParameters, Pageable pageable, Set<String> roles,
             final SchemaVersion version, final String sourceOfTruth, final String dslOverride)
             throws AAIException, FileNotFoundException {
         final String serverBase =
             req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
         httpEntry.setHttpEntryProperties(version, serverBase);
-        httpEntry.setPaginationParameters(resultIndex, resultSize);
 
         JsonObject input = JsonParser.parseString(content).getAsJsonObject();
         JsonElement dslElement = input.get("dsl");
@@ -215,7 +217,7 @@ public class DslConsumer extends TraversalConsumer {
         final TransactionalGraphEngine dbEngine = httpEntry.getDbEngine();
         GraphTraversalSource traversalSource =
             getTraversalSource(dbEngine, format, queryParameters, roles);
-        
+
         GenericQueryProcessor processor =
             new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
                 .queryFrom(dsl, "dsl").queryProcessor(dslQueryProcessor).version(dslApiVersion)
@@ -229,11 +231,15 @@ public class DslConsumer extends TraversalConsumer {
         if (isAggregate(format)) {
             // Dedup if duplicate objects are returned in each array in the aggregate format
             // scenario.
-            List<Object> vertTempDedupedObjectList = dedupObjectInAggregateFormatResult(vertTemp);
-            vertices = httpEntry
-                    .getPaginatedVertexListForAggregateFormat(vertTempDedupedObjectList);
+            List<Object> vertTempDedupedObjectList = dedupObjectInAggregateFormatResultStreams(vertTemp);
+            vertices = PaginationUtil.hasValidPaginationParams(pageable)
+                ? vertices = PaginationUtil.getPaginatedVertexListForAggregateFormat(vertTempDedupedObjectList, pageable)
+                : vertTempDedupedObjectList;
         } else {
-            vertices = httpEntry.getPaginatedVertexList(vertTemp);
+            int startIndex = pageable.getPage() * pageable.getPageSize();
+            vertices = PaginationUtil.hasValidPaginationParams(pageable)
+                ? vertTemp.subList(startIndex, startIndex + pageable.getPageSize())
+                : vertTemp;
         }
 
         DBSerializer serializer =
@@ -264,18 +270,6 @@ public class DslConsumer extends TraversalConsumer {
             .filter(o -> o instanceof ArrayList)
             .map(o -> ((ArrayList<?>) o).stream().distinct().collect(Collectors.toList()))
             .collect(Collectors.toList());
-    }
-    private List<Object> dedupObjectInAggregateFormatResult(List<Object> vertTemp) {
-        List<Object> vertTempDedupedObjectList = new ArrayList<Object>();
-        Iterator<Object> itr = vertTemp.listIterator();
-        while (itr.hasNext()) {
-            Object o = itr.next();
-            if (o instanceof ArrayList) {
-                vertTempDedupedObjectList
-                        .add(((ArrayList) o).stream().distinct().collect(Collectors.toList()));
-            }
-        }
-        return vertTempDedupedObjectList;
     }
 
     private MultivaluedMap<String, String> toMultivaluedMap(Map<String, String[]> map) {
