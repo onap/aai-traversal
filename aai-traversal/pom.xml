@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.2-SNAPSHOT</version>
+		<version>1.14.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -94,18 +94,17 @@
 
 		<!-- versions -->
 		<spring.boot.version>2.4.13</spring.boot.version>
-		<spring.version>5.3.13</spring.version>
+		<janusgraph.version>0.5.0</janusgraph.version>
+		<gremlin.version>3.4.13</gremlin.version>
+
 		<spring-cloud.version>2020.0.2</spring-cloud.version>
-		<spring.test.version>${spring.version}</spring.test.version>
-		<spring.jms.version>${spring.version}</spring.jms.version>
+
 		<javax.servlet.version>4.0.1</javax.servlet.version>
 		<antlr.version>4.9.3</antlr.version>
 		<keycloak.version>11.0.2</keycloak.version>
-		<micrometer-spring-legacy.version>1.3.19</micrometer-spring-legacy.version>
-		<micrometer-core.version>1.6.6</micrometer-core.version>
-		<micrometer-jersey2>1.6.6</micrometer-jersey2>
+
+		<micrometer.version>1.6.6</micrometer.version>
 		<mockito.core.version>3.4.0</mockito.core.version>
-		<powermock.version>2.0.9</powermock.version>
 		<testcontainers.version>1.6.1</testcontainers.version>
 		<netty.handler.version>4.1.63.Final</netty.handler.version>
 		<netty.version>4.1.63.Final</netty.version>
@@ -324,23 +323,18 @@
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
-			<artifactId>micrometer-spring-legacy</artifactId>
-			<version>${micrometer-spring-legacy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
-			<version>${micrometer-core.version}</version>
+			<version>${micrometer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
-			<!-- <version>${micrometer-registry-prometheus.version}</version> -->
+			<version>${micrometer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-jersey2</artifactId>
-			<version>${micrometer-jersey2}</version>
+			<version>${micrometer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.jms</groupId>
@@ -472,6 +466,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.janusgraph</groupId>
+			<artifactId>janusgraph-inmemory</artifactId>
+			<version>${janusgraph.version}</version>
+	</dependency>
+		<dependency>
 			<groupId>com.github.jnr</groupId>
 			<artifactId>jnr-ffi</artifactId>
 		</dependency>
@@ -492,34 +491,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito2</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-javaagent</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4-rule-agent</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.beust</groupId>
-			<artifactId>jcommander</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -679,6 +650,11 @@
 					<artifactId>log4j-over-slf4j</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

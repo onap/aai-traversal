@@ -103,7 +103,6 @@ public class CQ2Gremlin extends RESTAPI {
 
             SchemaVersions schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
             traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion());
-            traversalUriHttpEntry.setPaginationParameters("-1", "-1");
 
             TransactionalGraphEngine dbEngine = traversalUriHttpEntry.getDbEngine();
 

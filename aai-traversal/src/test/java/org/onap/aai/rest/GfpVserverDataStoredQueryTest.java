@@ -182,7 +182,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
             .thenReturn(new StringBuffer("https://localhost:8446" + query));
 
         Response response = queryConsumer.executeQuery(payload, version.toString(),
-            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
+            "resource_and_url", "" + "no_op", -1, -1, httpHeaders, mockRequest, uriInfo);
 
         String entity = response.getEntity().toString();
         assertEquals("Expected the response to be 200 but got this returned: "
@@ -214,7 +214,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
             .thenReturn(new StringBuffer("https://localhost:8446" + query));
 
         Response response = queryConsumer.executeQuery(payload, version.toString(),
-            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
+            "resource_and_url", "" + "no_op", -1, -1, httpHeaders, mockRequest, uriInfo);
 
         String entity = response.getEntity().toString();
 
@@ -247,7 +247,7 @@ public class GfpVserverDataStoredQueryTest extends AAISetup {
             .thenReturn(new StringBuffer("https://localhost:8446" + query));
 
         Response response = queryConsumer.executeQuery(payload, version.toString(),
-            "resource_and_url", "" + "no_op", httpHeaders, mockRequest, uriInfo, "-1", "-1");
+            "resource_and_url", "" + "no_op", -1, -1, httpHeaders, mockRequest, uriInfo);
 
         String entity = response.getEntity().toString();
 

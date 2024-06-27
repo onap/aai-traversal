@@ -66,9 +66,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Maps;
-
 @Path("/cq2gremlintest")
 public class CQ2GremlinTest extends RESTAPI {
 
@@ -106,7 +103,6 @@ public class CQ2GremlinTest extends RESTAPI {
         String realTime = headers.getRequestHeaders().getFirst("Real-Time");
         SchemaVersions schemaVersions = SpringContextAware.getBean(SchemaVersions.class);
         traversalUriHttpEntry.setHttpEntryProperties(schemaVersions.getDefaultVersion());
-        traversalUriHttpEntry.setPaginationParameters("-1", "-1");
         return processC2UnitTest(content);
     }
 
@@ -159,11 +155,11 @@ public class CQ2GremlinTest extends RESTAPI {
     }
 
     private List<Vertex> createGraph(CustomQueryTestDTO content, Graph graph) {
-        Map<String, Vertex> verticesMap = Maps.newLinkedHashMap();
+        Map<String, Vertex> verticesMap = new LinkedHashMap<>();
         // Creating all the Vertices
         content.getVerticesDtos().forEach(vertex -> {
             StringBuilder vertexIdentifier = new StringBuilder();
-            List<String> keyValues = Lists.newArrayList();
+            List<String> keyValues = new ArrayList<>();
             keyValues.add(T.id.toString());
             keyValues.add(String.format("%02d", verticesMap.size() * 10));
             AtomicInteger index = new AtomicInteger(0);
@@ -199,7 +195,7 @@ public class CQ2GremlinTest extends RESTAPI {
 
         });
 
-        List<Vertex> expectedVertices = Lists.newArrayList();
+        List<Vertex> expectedVertices = new ArrayList<>();
         content.getExpectedResultsDtos().getIds()
             .forEach(vertexId -> expectedVertices.add(verticesMap.get(vertexId)));
         return expectedVertices;
