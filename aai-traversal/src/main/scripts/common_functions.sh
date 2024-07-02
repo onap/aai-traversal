@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 
 # Common functions that can be used throughout multiple scripts
 # In order to call these functions, this file needs to be sourced
