@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #
 # ============LICENSE_START=======================================================
 # org.onap.aai
@@ -36,7 +36,7 @@ userid=$( id | cut -f2 -d"(" | cut -f1 -d")" )
 if [ "${userid}" != $CHECK_USER ]; then
     echo "You must be  $CHECK_USER to run $0. The id used $userid."
     exit 1
-fi 
+fi
 
 error_exit () {
 	echo "${PROGNAME}: failed for ${1:-"Unknown error"} on cmd $2" 1>&2

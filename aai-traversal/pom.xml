@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.3-SNAPSHOT</version>
+		<version>1.14.4-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -102,12 +102,11 @@
 		<javax.servlet.version>4.0.1</javax.servlet.version>
 		<antlr.version>4.9.3</antlr.version>
 		<keycloak.version>11.0.2</keycloak.version>
+		<activemq.version>5.16.7</activemq.version>
 
 		<micrometer.version>1.6.6</micrometer.version>
 		<mockito.core.version>3.4.0</mockito.core.version>
 		<testcontainers.version>1.6.1</testcontainers.version>
-		<netty.handler.version>4.1.63.Final</netty.handler.version>
-		<netty.version>4.1.63.Final</netty.version>
 		<!-- End of Default ONAP Schema Properties -->
 
 		<!-- Integration tests will be skipped by default. Could be enabled here or by -DskipITs=false-->
@@ -448,14 +447,6 @@
 			<version>6.6</version>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.janino</groupId>
-			<artifactId>janino</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.janusgraph</groupId>
 			<artifactId>janusgraph-cql</artifactId>
 			<exclusions>
@@ -633,11 +624,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-handler</artifactId>
-			<version>${netty.handler.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
@@ -688,11 +674,6 @@
 		<dependency>
 			<groupId>org.onap.aaf.authz</groupId>
 			<artifactId>aaf-cadi-aaf</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-			<version>${netty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

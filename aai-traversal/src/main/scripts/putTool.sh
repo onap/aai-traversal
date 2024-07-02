@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #
 # ============LICENSE_START=======================================================
 # org.onap.aai
@@ -181,7 +181,7 @@ if [ $MISSING_PROP = false ]; then
                 echo "FAILED to send request to $RESTURL"
                 RC=-1
         	fi
-        fi	
+        fi
 else
         echo "usage: $0 resource file [expected-failure-codes]"
         RC=-1
