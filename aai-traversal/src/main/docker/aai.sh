@@ -30,7 +30,8 @@ if [ -z $JAVA_HOME ] && [ $(grep -i "ID=ubuntu" /etc/os-release | wc -w) -eq 1 ]
 fi
 
 # set app related env
-export PROJECT_HOME=/opt/app/aai-traversal
+: ${PROJECT_HOME:=/opt/app/aai-traversal}
+export PROJECT_HOME=$PROJECT_HOME
 export AAIENV=dev
 export PROJECT_OWNER=aaiadmin
 export PROJECT_GROUP=aaiadmin

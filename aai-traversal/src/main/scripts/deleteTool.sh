@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #
 # ============LICENSE_START=======================================================
 # org.onap.aai
@@ -23,7 +23,7 @@
 
 #
 # The script is called with a resource to be deleted.
-# Uses aaiconfig.properties for authorization type and url. 
+# Uses aaiconfig.properties for authorization type and url.
 # It invokes a GET on the resource using curl and parses the resource-version.
 # If found, prompts the user to continue and invokes DELETE using curl.
 # responses in the range of 200 to 299 are considered successful
@@ -39,17 +39,11 @@ fi
 echo `date` "   Starting $0 for resource $RESOURCE"
 
 XFROMAPPID="AAI-TOOLS"
-XTRANSID=`uuidgen`
-XTRANSID1=`uuidgen`
-
-userid=$( id | cut -f2 -d"(" | cut -f1 -d")" )
-if [ "${userid}" != "aaiadmin" ]; then
-    echo "You must be aaiadmin to run $0. The id used $userid."
-    exit 1
-fi
+XTRANSID="someUUID"
+XTRANSID1="someUUID"
 
 
-PROJECT_HOME=/opt/app/aai-traversal
+: ${PROJECT_HOME:=/opt/app/aai-traversal}
 prop_file=$PROJECT_HOME/resources/etc/appprops/aaiconfig.properties
 log_dir=$PROJECT_HOME/logs/misc
 today=$(date +\%Y-\%m-\%d)
@@ -98,7 +92,7 @@ if [ $MISSING_PROP = false ]; then
 			echo `date` "   Done $0, returning -1"
 			exit -1
         fi
-			
+
         result=`curl --request DELETE -sL -w "%{http_code}" -o /dev/null -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" $RESTURL$RESOURCE?resource-version=$RESOURCEVERSION`
         echo "result is $result."
         RC=0;

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #
 # ============LICENSE_START=======================================================
 # org.onap.aai
@@ -78,16 +78,11 @@ echo `date` "   Starting $0 for resource $RESOURCE"
 ALLOWHTTPRESPONSES=$3
 
 XFROMAPPID="AAI-TOOLS"
-XTRANSID=`uuidgen`
-
-userid=$( id | cut -f2 -d"(" | cut -f1 -d")" )
-if [ "${userid}" != "aaiadmin" ]; then
-    echo "You must be aaiadmin to run $0. The id used $userid."
-    exit 1
-fi
+XTRANSID="someUUID"
 
 
-PROJECT_HOME=/opt/app/aai-traversal
+
+: ${PROJECT_HOME:=/opt/app/aai-traversal}
 prop_file=$PROJECT_HOME/resources/etc/appprops/aaiconfig.properties
 log_dir=$PROJECT_HOME/logs/misc
 today=$(date +\%Y-\%m-\%d)
@@ -130,61 +125,68 @@ fi
 
 fname=$JSONFILE
 if [ -f /tmp/$(basename $JSONFILE) ]; then
-	fname=/tmp/$(basename $JSONFILE)
+    fname=/tmp/$(basename $JSONFILE)
 elif [ ! -f $JSONFILE ]; then
-	echo "The file $JSONFILE does not exist"
-	exit -1
+    echo "The file $JSONFILE does not exist"
+    exit -1
 fi
 
 if [ $MISSING_PROP = false ]; then
-        if [ $USEBASICAUTH = false ]; then
-                AUTHSTRING="--cert $PROJECT_HOME/resources/etc/auth/aaiClientPublicCert.pem --key $PROJECT_HOME/resources/etc/auth/aaiClientPrivateKey.pem"
-        else
-                AUTHSTRING="-u $CURLUSER:$CURLPASSWORD"
-        fi
-        if [ $RETURNRESPONSE = true ]; then
-			curl --request PUT -sL -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -H "Content-Type: application/json" -T $fname $RESTURL$RESOURCE | jq '.'
-			RC=$?
-		else
-        	result=`curl --request PUT -w "%{http_code}" -o /dev/null -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -H "Content-Type: application/json" -T $fname $RESTURL$RESOURCE`
-        	#echo "result is $result."
-        	RC=0;
-        	if [ $? -eq 0 ]; then
-                case $result in
-                        +([0-9])?)
-                                if [[ "$result" -ge 200 && $result -lt 300 ]]
-                                then
-                                        echo "PUT result is OK,  $result"
-                                else
-                                        if [ -z $ALLOWHTTPRESPONSES ]; then
-                                                echo "PUT request failed, response code was  $result"
-                                                RC=$result
-                                        else
-                                                contains $ALLOWHTTPRESPONSES $result
-                                                if [ $? -ne 0 ]
-                                                then
-                                                        echo "PUT request failed, unexpected response code was  $result"
-                                                        RC=$result
-                                                else
-                                                        echo "PUT result is expected,  $result"
-                                                fi
-                                        fi
-                                fi
-                                ;;
-                        *)
-                                echo "PUT request failed, response was $result"
-                                RC=-1
-                                ;;
-
+    if [ $USEBASICAUTH = false ]; then
+        AUTHSTRING="--cert $PROJECT_HOME/resources/etc/auth/aaiClientPublicCert.pem --key $PROJECT_HOME/resources/etc/auth/aaiClientPrivateKey.pem"
+    else
+        AUTHSTRING="-u $CURLUSER:$CURLPASSWORD"
+    fi
+    if [ $RETURNRESPONSE = true ]; then
+        curl --request PUT -sL -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -H "Content-Type: application/json" -T $fname $RESTURL$RESOURCE | jq '.'
+        RC=$?
+    else
+        result=`curl --request PUT -w "%{http_code}" -o /dev/null -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" -H "Content-Type: application/json" -T $fname $RESTURL$RESOURCE`
+        #echo "result is $result."
+        RC=0;
+        if [ $? -eq 0 ]; then
+            case $result in
+                # Match one or more digits optionally followed by another character
+                *[0-9]*)
+                    if [ "$result" -ge 200 ] && [ "$result" -lt 300 ]; then
+                        echo "PUT result is OK,  $result"
+                    else
+                        if [ -z "$ALLOWHTTPRESPONSES" ]; then
+                            echo "PUT request failed, response code was  $result"
+                            RC=$result
+                        else
+                            # Function to check if a string is in a list of strings
+                            contains() {
+                                for item in $1; do
+                                    if [ "$item" = "$2" ]; then
+                                        return 0
+                                    fi
+                                done
+                                return 1
+                            }
+                            contains "$ALLOWHTTPRESPONSES" "$result"
+                            if [ $? -ne 0 ]; then
+                                echo "PUT request failed, unexpected response code was  $result"
+                                RC=$result
+                            else
+                                echo "PUT result is expected,  $result"
+                            fi
+                        fi
+                    fi
+                    ;;
+                *)
+                    echo "PUT request failed, response was $result"
+                    RC=-1
+                    ;;
                 esac
-        	else
+        else
                 echo "FAILED to send request to $RESTURL"
                 RC=-1
-        	fi
-        fi	
+        fi
+    fi
 else
-        echo "usage: $0 resource file [expected-failure-codes]"
-        RC=-1
+    echo "usage: $0 resource file [expected-failure-codes]"
+    RC=-1
 fi
 
 echo `date` "   Done $0, returning $RC"

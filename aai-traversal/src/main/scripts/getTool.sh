@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #
 # ============LICENSE_START=======================================================
 # org.onap.aai
@@ -36,16 +36,10 @@ fi
 echo `date` "   Starting $0 for resource $RESOURCE"
 
 XFROMAPPID="AAI-TOOLS"
-XTRANSID=`uuidgen`
-
-userid=$( id | cut -f2 -d"(" | cut -f1 -d")" )
-if [ "${userid}" != "aaiadmin" ]; then
-    echo "You must be aaiadmin to run $0. The id used $userid."
-    exit 1
-fi
+XTRANSID="someUUID"
 
 
-PROJECT_HOME=/opt/app/aai-traversal
+: ${PROJECT_HOME:=/opt/app/aai-traversal}
 prop_file=$PROJECT_HOME/resources/etc/appprops/aaiconfig.properties
 log_dir=$PROJECT_HOME/logs/misc
 today=$(date +\%Y-\%m-\%d)
