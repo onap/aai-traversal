@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.3-SNAPSHOT</version>
+		<version>1.14.4-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -102,12 +102,11 @@
 		<javax.servlet.version>4.0.1</javax.servlet.version>
 		<antlr.version>4.9.3</antlr.version>
 		<keycloak.version>11.0.2</keycloak.version>
+		<activemq.version>5.16.7</activemq.version>
 
 		<micrometer.version>1.6.6</micrometer.version>
 		<mockito.core.version>3.4.0</mockito.core.version>
 		<testcontainers.version>1.6.1</testcontainers.version>
-		<netty.handler.version>4.1.63.Final</netty.handler.version>
-		<netty.version>4.1.63.Final</netty.version>
 		<!-- End of Default ONAP Schema Properties -->
 
 		<!-- Integration tests will be skipped by default. Could be enabled here or by -DskipITs=false-->
@@ -448,14 +447,6 @@
 			<version>6.6</version>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.janino</groupId>
-			<artifactId>janino</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.janusgraph</groupId>
 			<artifactId>janusgraph-cql</artifactId>
 			<exclusions>
@@ -589,13 +580,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Do not use the jersey-client since jersey client 1.0 version clashes
-			with jersey 2 which we are using -->
-		<!-- Use this to make http requests instead of jersey 1.0 client -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.onap.aai.aai-common</groupId>
 			<artifactId>aai-rest</artifactId>
@@ -603,17 +587,6 @@
 				<exclusion>
 					<groupId>org.onap.aai.aai-common</groupId>
 					<artifactId>aai-aaf-auth</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.vaadin.external.google</groupId>
-					<artifactId>android-json</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -631,11 +604,6 @@
 					<artifactId>bcpkix-jdk15on</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-handler</artifactId>
-			<version>${netty.handler.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -672,38 +640,13 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-    </dependency>
-		<!-- TODO: Migrate tests to junit 5 and remove this dependency -->
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<scope>test</scope>
 			<exclusions>
-					<exclusion>
-							<groupId>org.hamcrest</groupId>
-							<artifactId>hamcrest-core</artifactId>
-					</exclusion>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.onap.aaf.authz</groupId>
-			<artifactId>aaf-cadi-aaf</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-			<version>${netty.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+    </dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
@@ -759,6 +702,12 @@
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
 			<version>${keycloak.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- TODO: Migrate tests to junit 5 and remove this dependency -->
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
