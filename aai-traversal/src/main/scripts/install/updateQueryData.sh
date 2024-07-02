@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #
 # ============LICENSE_START=======================================================
 # org.onap.aai
@@ -36,7 +36,7 @@ userid=$( id | cut -f2 -d"(" | cut -f1 -d")" )
 if [ "${userid}" != $CHECK_USER ]; then
     echo "You must be  $CHECK_USER to run $0. The id used $userid."
     exit 1
-fi 
+fi
 
 error_exit () {
 	echo "${PROGNAME}: failed for ${1:-"Unknown error"} on cmd $2" 1>&2
@@ -55,7 +55,7 @@ vers=`grep model-invariant-id $filepath|cut -d':' -f2|cut -d'"' -f2`
 resource=service-design-and-creation/models/model/$vers
 if [ "$1" = "--debug" ]; then
   bash -x $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
-else 
+else
   $PROJECT_HOME/scripts/putTool.sh $resource $filepath 412 >> $OUTFILE 2>&1 || error_exit "$resource $filepath" $j
 fi;
 echo "End putTool for widget $filename" | tee -a $OUTFILE
