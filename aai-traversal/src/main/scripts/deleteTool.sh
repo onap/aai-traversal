@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #
 # ============LICENSE_START=======================================================
 # org.onap.aai
@@ -23,7 +23,7 @@
 
 #
 # The script is called with a resource to be deleted.
-# Uses aaiconfig.properties for authorization type and url. 
+# Uses aaiconfig.properties for authorization type and url.
 # It invokes a GET on the resource using curl and parses the resource-version.
 # If found, prompts the user to continue and invokes DELETE using curl.
 # responses in the range of 200 to 299 are considered successful
@@ -98,7 +98,7 @@ if [ $MISSING_PROP = false ]; then
 			echo `date` "   Done $0, returning -1"
 			exit -1
         fi
-			
+
         result=`curl --request DELETE -sL -w "%{http_code}" -o /dev/null -k $AUTHSTRING -H "X-FromAppId: $XFROMAPPID" -H "X-TransactionId: $XTRANSID" -H "Accept: application/json" $RESTURL$RESOURCE?resource-version=$RESOURCEVERSION`
         echo "result is $result."
         RC=0;
