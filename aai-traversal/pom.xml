@@ -94,7 +94,7 @@
 
 		<!-- versions -->
 		<spring.boot.version>2.4.13</spring.boot.version>
-		<janusgraph.version>0.5.0</janusgraph.version>
+		<janusgraph.version>0.5.3</janusgraph.version>
 		<gremlin.version>3.4.13</gremlin.version>
 
 		<spring-cloud.version>2020.0.2</spring-cloud.version>
