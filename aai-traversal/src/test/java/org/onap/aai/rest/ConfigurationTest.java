@@ -35,6 +35,9 @@ import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.restclient.PropertyPasswordConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -57,6 +60,7 @@ import io.prometheus.client.exporter.common.TextFormat;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = {SpringContextAware.class, TraversalApp.class})
+@EnableAutoConfiguration(exclude={CassandraDataAutoConfiguration.class, CassandraAutoConfiguration.class}) // there is no running cassandra instance for the test
 public class ConfigurationTest extends AbstractSpringRestTest {
     @Autowired
     RestTemplate restTemplate;

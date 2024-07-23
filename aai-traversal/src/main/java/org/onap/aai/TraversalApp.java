@@ -58,7 +58,7 @@ import org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration;
 @ComponentScan(
     basePackages = {"org.onap.aai.config", "org.onap.aai.web", "org.onap.aai.setup",
         "org.onap.aai.tasks", "org.onap.aai.service", "org.onap.aai.rest", "org.onap.aai.aaf",
-        "org.onap.aai.aailog"})
+        "org.onap.aai.aailog", "org.onap.aai.introspection", "org.onap.aai.rest.notification"})
 public class TraversalApp {
 
     private static final Logger logger = LoggerFactory.getLogger(TraversalApp.class.getName());
