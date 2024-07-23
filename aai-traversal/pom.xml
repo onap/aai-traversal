@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.4-SNAPSHOT</version>
+		<version>1.14.5-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -58,8 +58,6 @@
 		<aai.build.directory>${project.build.directory}/${project.artifactId}-${project.version}-build/</aai.build.directory>
 		<aai.docker.version>1.0.0</aai.docker.version>
 		<aai.docker.namespace>onap</aai.docker.namespace>
-		<aai.base.image>alpine</aai.base.image>
-		<aai.base.image.version>1.13.4</aai.base.image.version>
 
 		<!-- Nexus Proxy Properties and Snapshot Locations Ideally this can be
 			overwritten at runtime per internal environment specific values at runtime -->
@@ -94,8 +92,8 @@
 
 		<!-- versions -->
 		<spring.boot.version>2.4.13</spring.boot.version>
-		<janusgraph.version>0.5.3</janusgraph.version>
-		<gremlin.version>3.4.13</gremlin.version>
+		<janusgraph.version>0.6.0</janusgraph.version>
+		<gremlin.version>3.5.1</gremlin.version>
 
 		<spring-cloud.version>2020.0.2</spring-cloud.version>
 
@@ -119,41 +117,6 @@
 			<id>docker</id>
 			<build>
 				<plugins>
-					<plugin>
-						<groupId>org.codehaus.groovy.maven</groupId>
-						<artifactId>gmaven-plugin</artifactId>
-						<version>1.0</version>
-						<executions>
-							<execution>
-								<phase>pre-clean</phase>
-							</execution>
-							<execution>
-								<id>parse-base</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>execute</goal>
-								</goals>
-								<configuration>
-									<source>
-										def userAaiBaseImage = session.userProperties['aai.base.image'];
-										def userAaiCommonVersion =
-										session.userProperties['aai.base.image.version'];
-										if (userAaiCommonVersion != null) {
-										project.properties['aai.base.image.version'] =
-										userAaiCommonVersion;
-										}
-										if (userAaiBaseImage != null) {
-										project.properties['aai.base.image'] = userAaiBaseImage;
-										}
-										log.info 'Base image flavour: ' +
-										project.properties['aai.base.image'];
-										log.info 'Base image version: ' +
-										project.properties['aai.base.image.version'];
-									</source>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>io.fabric8</groupId>
 						<artifactId>docker-maven-plugin</artifactId>
@@ -411,16 +374,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>commons-configuration</groupId>
-			<artifactId>commons-configuration</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-lang3</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
@@ -458,6 +411,10 @@
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-validator</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
