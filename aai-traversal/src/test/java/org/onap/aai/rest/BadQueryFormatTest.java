@@ -37,6 +37,9 @@ import org.onap.aai.TraversalApp;
 import org.onap.aai.TraversalTestConfiguration;
 import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
@@ -52,6 +55,7 @@ import org.springframework.web.client.RestTemplate;
     classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
+@EnableAutoConfiguration(exclude={CassandraDataAutoConfiguration.class, CassandraAutoConfiguration.class}) // there is no running cassandra instance for the test
 @Import(TraversalTestConfiguration.class)
 public class BadQueryFormatTest {
 
