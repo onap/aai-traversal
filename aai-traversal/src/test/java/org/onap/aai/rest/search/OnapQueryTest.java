@@ -80,7 +80,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 @ContextConfiguration(
     classes = {ConfigConfiguration.class, AAIConfigTranslator.class, EdgeIngestor.class,
         EdgeSerializer.class, NodeIngestor.class, SpringContextAware.class,
-        SearchConfiguration.class, IntrospectionConfig.class})
+        SearchConfiguration.class, IntrospectionConfig.class, LoaderFactory.class})
 @TestPropertySource(
     properties = {"schema.uri.base.path = /aai",
         "schema.ingest.file = src/test/resources/application-onap-test.properties"})
