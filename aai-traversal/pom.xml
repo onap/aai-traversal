@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.4-SNAPSHOT</version>
+		<version>1.14.5-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -94,8 +94,8 @@
 
 		<!-- versions -->
 		<spring.boot.version>2.4.13</spring.boot.version>
-		<janusgraph.version>0.5.3</janusgraph.version>
-		<gremlin.version>3.4.13</gremlin.version>
+		<janusgraph.version>0.6.0</janusgraph.version>
+		<gremlin.version>3.5.1</gremlin.version>
 
 		<spring-cloud.version>2020.0.2</spring-cloud.version>
 
@@ -458,6 +458,10 @@
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-validator</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
