@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.14.5-SNAPSHOT</version>
+		<version>1.14.6-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -92,10 +92,18 @@
 
 		<!-- versions -->
 		<spring.boot.version>2.4.13</spring.boot.version>
-		<janusgraph.version>0.6.0</janusgraph.version>
-		<gremlin.version>3.5.1</gremlin.version>
+		<janusgraph.version>0.6.4</janusgraph.version>
+		<gremlin.version>3.5.8</gremlin.version>
 
-		<spring-cloud.version>2020.0.2</spring-cloud.version>
+		<spring-cloud.version>2020.0.6</spring-cloud.version>
+
+		<!-- fix the driver version to match the one defined in janusgraph-cql
+				spring-boot (2.4) is otherwise downgrading it to 4.9.0 -->
+		<!-- see https://github.com/spring-projects/spring-boot/blob/d336a96b7f204a398b8237560c5dfa7095c53460/spring-boot-project/spring-boot-dependencies/build.gradle#L163 -->
+		<!-- see https://github.com/JanusGraph/janusgraph/blob/6105d67f412def90ed6e704fa01cbf656602e6c9/pom.xml#L112 -->
+		<cassandra-driver.version>4.17.0</cassandra-driver.version>
+		<datastax.native-protocol.version>1.5.1</datastax.native-protocol.version>
+
 
 		<javax.servlet.version>4.0.1</javax.servlet.version>
 		<antlr.version>4.9.3</antlr.version>
@@ -632,6 +640,10 @@
 					<groupId>org.sonatype.sisu</groupId>
 					<artifactId>sisu-guava</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -669,6 +681,12 @@
 			<artifactId>testcontainers-keycloak</artifactId>
 			<version>${testcontainers.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
@@ -709,7 +727,24 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>25.0-jre</version>
-		</dependency>
+			</dependency>
+			<!-- cassandra driver -->
+			<dependency>
+					<groupId>com.datastax.oss</groupId>
+					<artifactId>java-driver-core</artifactId>
+					<version>${cassandra-driver.version}</version>
+			</dependency>
+			<dependency>
+					<groupId>com.datastax.oss</groupId>
+					<artifactId>java-driver-query-builder</artifactId>
+					<version>${cassandra-driver.version}</version>
+			</dependency>
+			<dependency>
+					<groupId>com.datastax.oss</groupId>
+					<artifactId>native-protocol</artifactId>
+					<version>${datastax.native-protocol.version}</version>
+			</dependency>
+			<!-- /cassandra driver -->
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -1040,7 +1075,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.0.0-M4</version>
+				<version>3.1.2</version>
 				<configuration>
 					<classesDirectory>${project.build.outputDirectory}</classesDirectory>
 				</configuration>
