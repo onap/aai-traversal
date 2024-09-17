@@ -91,7 +91,6 @@
 		<schema.uri.base.path>/aai</schema.uri.base.path>
 
 		<!-- versions -->
-		<spring.boot.version>2.4.13</spring.boot.version>
 		<janusgraph.version>0.6.4</janusgraph.version>
 		<gremlin.version>3.5.8</gremlin.version>
 
@@ -298,23 +297,12 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-hateoas</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.micrometer</groupId>
-			<artifactId>micrometer-core</artifactId>
-			<version>${micrometer.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
-			<version>${micrometer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-jersey2</artifactId>
-			<version>${micrometer.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.jms</groupId>
@@ -462,14 +450,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.freemarker</groupId>
-			<artifactId>freemarker</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
@@ -663,10 +643,6 @@
 		<dependency>
 			<groupId>org.apache.tinkerpop</groupId>
 			<artifactId>gremlin-groovy</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-utils</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
