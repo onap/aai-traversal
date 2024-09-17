@@ -299,7 +299,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
 
     @Test
     public void testDslQueryV2Aggregate() throws Exception {
-        String endpoint = "/aai/v17/dsl?format=aggregate";
+        String endpoint = "/aai/v29/dsl?format=aggregate";
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query", "pserver*('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
@@ -309,7 +309,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         ResponseEntity<String> responseEntity =
             restTemplate.exchange(baseUrl + endpoint, HttpMethod.PUT, httpEntity, String.class);
 
-        assertNotNull("Response from /aai/v17/dsl is not null", responseEntity);
+        assertNotNull("Response from /aai/v29/dsl is not null", responseEntity);
         assertEquals("Expected the response to be 200", HttpStatus.OK,
             responseEntity.getStatusCode());
     }
@@ -388,7 +388,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=simple&depth=0&nodesOnly=true&as-tree=true";
+        String endpoint = "/aai/v29/dsl?format=simple&depth=0&nodesOnly=true&as-tree=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -415,7 +415,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=simple&depth=0&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=simple&depth=0&nodesOnly=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -443,7 +443,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=resource&depth=0&nodesOnly=true&as-tree=true";
+        String endpoint = "/aai/v29/dsl?format=resource&depth=0&nodesOnly=true&as-tree=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -470,7 +470,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=resource&depth=0&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&depth=0&nodesOnly=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -498,7 +498,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
         String endpoint =
-            "/aai/v16/dsl?format=resource_and_url&depth=0&nodesOnly=true&as-tree=true";
+            "/aai/v29/dsl?format=resource_and_url&depth=0&nodesOnly=true&as-tree=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -525,7 +525,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=resource_and_url&depth=0&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource_and_url&depth=0&nodesOnly=true";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -552,7 +552,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver{'hostname'}('hostname','test-pserver-dsl') > complex");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=aggregate";
+        String endpoint = "/aai/v29/dsl?format=aggregate";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -565,7 +565,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject resultsValue = resultsArray.get(0).getAsJsonObject();
         assertNull(
-            resultsValue.get("/aai/v16/cloud-infrastructure/complexes/complex/test-complex-dsl")); // assert
+            resultsValue.get("/aai/v29/cloud-infrastructure/complexes/complex/test-complex-dsl")); // assert
                                                                                                    // complex
                                                                                                    // is
                                                                                                    // not
@@ -576,7 +576,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
                                                                                                    // not
                                                                                                    // selected
         JsonObject properties =
-            resultsValue.get("/aai/v16/cloud-infrastructure/pservers/pserver/test-pserver-dsl")
+            resultsValue.get("/aai/v29/cloud-infrastructure/pservers/pserver/test-pserver-dsl")
                 .getAsJsonObject().get("properties").getAsJsonObject();
         assertEquals(1, properties.size());
         assertThat(properties.get("hostname").toString(), is("\"test-pserver-dsl\"")); // assert
@@ -595,7 +595,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver{'hostname'}('hostname','test-pserver-dsl') > complex*");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=aggregate";
+        String endpoint = "/aai/v29/dsl?format=aggregate";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -608,14 +608,14 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonArray resultsValue = resultsArray.get(0).getAsJsonArray();
         assertNotNull(resultsValue.get(1).getAsJsonObject()
-            .get("/aai/v16/cloud-infrastructure/complexes/complex/test-complex-dsl")); // assert
+            .get("/aai/v29/cloud-infrastructure/complexes/complex/test-complex-dsl")); // assert
                                                                                        // complex is
                                                                                        // returned
                                                                                        // since it
                                                                                        // is
                                                                                        // selected
         JsonObject properties = resultsValue.get(0).getAsJsonObject()
-            .get("/aai/v16/cloud-infrastructure/pservers/pserver/test-pserver-dsl")
+            .get("/aai/v29/cloud-infrastructure/pservers/pserver/test-pserver-dsl")
             .getAsJsonObject().get("properties").getAsJsonObject();
         assertEquals(1, properties.size());
         assertThat(properties.get("hostname").toString(), is("\"test-pserver-dsl\"")); // verify
@@ -628,7 +628,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         assertNull(properties.get("in-maint")); // assert that in-maint is not returned in the
                                                 // properties list
         JsonObject complexProperties = resultsValue.get(1).getAsJsonObject()
-            .get("/aai/v16/cloud-infrastructure/complexes/complex/test-complex-dsl")
+            .get("/aai/v29/cloud-infrastructure/complexes/complex/test-complex-dsl")
             .getAsJsonObject().get("properties").getAsJsonObject();
         assertEquals(2, complexProperties.size()); // internal properties like source-of-truth,
                                                    // node-type and aai-uri are not returned.
@@ -640,7 +640,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query", "pserver*('hostname','test-pserver-dsl')");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=aggregate";
+        String endpoint = "/aai/v29/dsl?format=aggregate";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -652,7 +652,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         JsonObject results = JsonParser.parseString(responseString).getAsJsonObject();
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         JsonObject properties = resultsArray.get(0).getAsJsonObject()
-            .get("/aai/v16/cloud-infrastructure/pservers/pserver/test-pserver-dsl")
+            .get("/aai/v29/cloud-infrastructure/pservers/pserver/test-pserver-dsl")
             .getAsJsonObject().get("properties").getAsJsonObject();
         assertEquals(2, properties.size());
         assertThat(properties.get("hostname").toString(), is("\"test-pserver-dsl\"")); // verify
@@ -673,7 +673,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "pserver*('hostname','test-pserver-dsl')(> complex)(> cloud-region)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v18/dsl?format=aggregate";
+        String endpoint = "/aai/v29/dsl?format=aggregate";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -688,10 +688,10 @@ public class DslConsumerTest extends AbstractSpringRestTest {
                                               // test-pserver-dsl-03 since it does not have an edge
                                               // to cloud-region
         assertEquals(null, resultsArray.get(0).getAsJsonObject()
-            .get("/aai/v18/cloud-infrastructure/pservers/pserver/test-pserver-dsl-03")); // not
+            .get("/aai/v29/cloud-infrastructure/pservers/pserver/test-pserver-dsl-03")); // not
                                                                                          // returned
         assertNotNull(resultsArray.get(0).getAsJsonObject()
-            .get("/aai/v18/cloud-infrastructure/pservers/pserver/test-pserver-dsl"));
+            .get("/aai/v29/cloud-infrastructure/pservers/pserver/test-pserver-dsl"));
         headers.remove("X-DslApiVersion");
     }
 
@@ -700,7 +700,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         Map<String, String> dslQueryMap = new HashMap<>();
         dslQueryMap.put("dsl-query", "pserver*('hostname')!(> complex)!(> cloud-region)");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v18/dsl?format=aggregate";
+        String endpoint = "/aai/v29/dsl?format=aggregate";
 
         // Add header with V2 to use the {} feature as a part of dsl query
         headers.add("X-DslApiVersion", "V2");
@@ -713,10 +713,10 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         JsonArray resultsArray = results.get("results").getAsJsonArray();
         assertEquals(1, resultsArray.size()); // Returns only test-pserver-dsl-02
         assertEquals(null, resultsArray.get(0).getAsJsonObject()
-            .get("/aai/v18/cloud-infrastructure/pservers/pserver/test-pserver-dsl")); // not
+            .get("/aai/v29/cloud-infrastructure/pservers/pserver/test-pserver-dsl")); // not
                                                                                       // returned
         assertNotNull(resultsArray.get(0).getAsJsonObject()
-            .get("/aai/v18/cloud-infrastructure/pservers/pserver/test-pserver-dsl-02"));
+            .get("/aai/v29/cloud-infrastructure/pservers/pserver/test-pserver-dsl-02"));
         headers.remove("X-DslApiVersion");
     }
 
@@ -726,7 +726,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query", "pserver*('number-of-cpus','test')");
 
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=simple";
+        String endpoint = "/aai/v29/dsl?format=simple";
 
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
@@ -744,7 +744,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "[complex*('source-of-truth', 'JUNIT'), complex*('aai-uri', '/cloud-infrastructure/complexes/complex/test-complex-dsl')]");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=resource";
+        String endpoint = "/aai/v29/dsl?format=resource";
 
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
@@ -766,7 +766,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "[pserver*('hostname','test-pserver-dsl'), complex*('physical-location-id', 'test-complex-dsl')]");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=resource";
+        String endpoint = "/aai/v29/dsl?format=resource";
 
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
@@ -797,7 +797,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "[pserver*('hostname','test-pserver-dsl-02'), pserver*('hostname','test-pserver-dsl')>complex*, pnf('pnf-name','pnf-name-noResults')>lag-interface>l-interface] > complex*");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=resource";
+        String endpoint = "/aai/v29/dsl?format=resource";
 
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
@@ -835,7 +835,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
         dslQueryMap.put("dsl-query",
             "[pnf*('pnf-name','test-pnf-name-01'),pserver(>cloud-region*('cloud-owner','test-cloud-owner-01'))]");
         String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
-        String endpoint = "/aai/v16/dsl?format=resource";
+        String endpoint = "/aai/v29/dsl?format=resource";
 
         httpEntity = new HttpEntity<String>(payload, headers);
         ResponseEntity<String> responseEntity =
@@ -862,7 +862,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithBooleanPropertyAsString_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // With expected boolean value "false" as a boolean value (no quotes)
         dslQueryMap.put("dsl-query",
@@ -896,7 +896,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithWrongBooleanPropertyAsString_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // all string values not boolean related default to false
         dslQueryMap.put("dsl-query",
@@ -915,7 +915,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithBooleanPropertyAsInteger0_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // 0 is false, should return value
         dslQueryMap.put("dsl-query",
@@ -934,7 +934,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithBooleanPropertyAsInteger1_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // 0 is false, should return value
         dslQueryMap.put("dsl-query",
@@ -954,7 +954,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithBooleanPropertyAsTrue_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // 0 is false, should return value
         dslQueryMap.put("dsl-query",
@@ -974,7 +974,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithBooleanPropertyAsTrueString_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // 0 is false, should return value
         dslQueryMap.put("dsl-query",
@@ -994,7 +994,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithIntegerPropertyAsString_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // With expected boolean value "false" as a boolean value (no quotes)
         dslQueryMap.put("dsl-query",
@@ -1028,7 +1028,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithLongPropertyAsString_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // With expected boolean value "false" as a boolean value (no quotes)
         dslQueryMap.put("dsl-query",
@@ -1061,7 +1061,7 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     public void testDslQuery_IsAgnosticWithPrimitivePropertiesInList_ReturnSuccessfulResponse()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
-        String endpoint = "/aai/v19/dsl?format=resource&nodesOnly=true";
+        String endpoint = "/aai/v29/dsl?format=resource&nodesOnly=true";
 
         // With expected boolean value "false" as a boolean value (no quotes)
         dslQueryMap.put("dsl-query",

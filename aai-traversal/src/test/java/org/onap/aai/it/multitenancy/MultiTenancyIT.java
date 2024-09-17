@@ -102,7 +102,7 @@ public class MultiTenancyIT extends AbstractSpringRestTest {
     @Test
     public void testDslQueryWithDataOwner() throws Exception {
         baseUrl = "http://localhost:" + randomPort;
-        String endpoint = baseUrl + "/aai/v23/dsl?format=console";
+        String endpoint = baseUrl + "/aai/v29/dsl?format=console";
         List<Object> queryResults = null;
         ResponseEntity responseEntity = null;
 
