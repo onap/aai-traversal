@@ -32,12 +32,12 @@
 	<artifactId>aai-traversal</artifactId>
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>11</java.version>
 		<start-class>org.onap.aai.TraversalApp</start-class>
 
 		<maven.skip.tests>true</maven.skip.tests>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 
 		<jopt.simple.version>4.9</jopt.simple.version>
 
@@ -108,6 +108,7 @@
 		<antlr.version>4.9.3</antlr.version>
 		<keycloak.version>11.0.2</keycloak.version>
 		<activemq.version>5.16.7</activemq.version>
+		<io.swagger.version>1.6.14</io.swagger.version>
 
 		<micrometer.version>1.6.6</micrometer.version>
 		<mockito.core.version>3.4.0</mockito.core.version>
@@ -347,37 +348,8 @@
 		</dependency>
 		<dependency>
 			<groupId>io.swagger</groupId>
-			<artifactId>swagger-jersey-jaxrs</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.glassfish.jersey.media</groupId>
-					<artifactId>jersey-media-multipart</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jersey-core</artifactId>
-					<groupId>com.sun.jersey</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jersey-json</artifactId>
-					<groupId>com.sun.jersey</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jersey-server</artifactId>
-					<groupId>com.sun.jersey</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jersey-client</artifactId>
-					<groupId>com.sun.jersey</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsr311-api</artifactId>
-					<groupId>javax.ws.rs</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jersey-multipart</artifactId>
-					<groupId>com.sun.jersey.contribs</groupId>
-				</exclusion>
-			</exclusions>
+			<artifactId>swagger-jersey2-jaxrs</artifactId>
+			<version>${io.swagger.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -428,7 +400,7 @@
 			<groupId>org.janusgraph</groupId>
 			<artifactId>janusgraph-inmemory</artifactId>
 			<version>${janusgraph.version}</version>
-	</dependency>
+		</dependency>
 		<dependency>
 			<groupId>com.github.jnr</groupId>
 			<artifactId>jnr-ffi</artifactId>
@@ -501,14 +473,6 @@
                     <artifactId>aai-aaf-auth</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>com.sun.jersey</groupId>
-                    <artifactId>jersey-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.jackson</groupId>
-                    <artifactId>jackson-mapper-asl</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-http</artifactId>
                 </exclusion>
@@ -533,12 +497,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jms</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.jersey</groupId>
-					<artifactId>jersey-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.onap.aai.aai-common</groupId>
