@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -101,7 +100,7 @@ public class SearchGraphNamedQueryTest extends AAISetup {
         assert files != null;
         for (File file : files) {
             try {
-                Path path = Paths.get(widgetPath + AAIConstants.AAI_FILESEP + file.getName());
+                Path path = Path.of(widgetPath + AAIConstants.AAI_FILESEP + file.getName());
                 String widgetPayload = new String(Files.readAllBytes(path));
                 String modelInvariantId = getJsonValue(widgetPayload, "model-invariant-id");
                 String widgetUri =
@@ -126,7 +125,7 @@ public class SearchGraphNamedQueryTest extends AAISetup {
         assert files != null;
         for (File file : files) {
             try {
-                Path path = Paths.get(namedQueryPath + AAIConstants.AAI_FILESEP + file.getName());
+                Path path = Path.of(namedQueryPath + AAIConstants.AAI_FILESEP + file.getName());
                 String namedQueryPayload = new String(Files.readAllBytes(path));
                 String namedQueryUuid = getJsonValue(namedQueryPayload, "named-query-uuid");
                 String namedQueryUri =

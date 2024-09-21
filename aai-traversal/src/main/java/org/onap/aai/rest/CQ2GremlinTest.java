@@ -204,7 +204,7 @@ public class CQ2GremlinTest extends RESTAPI {
     protected void addStartNode(GraphTraversal<Vertex, Vertex> g, CustomQueryTestDTO content) {
         Optional<LinkedHashMap<String, String>> startNodeVertex = content.getVerticesDtos().stream()
             .filter(map -> map.containsKey("start-node")).findFirst();
-        if (!startNodeVertex.isPresent()) {
+        if (startNodeVertex.isEmpty()) {
             throw new IllegalArgumentException("start-node was not specified");
         }
         startNodeVertex.get().forEach((k, v) -> {

@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,7 +55,7 @@ public class LocalCQConfig extends CQConfig {
             String filepath =
                 storedQueriesLocation + AAIConstants.AAI_FILESEP + "stored-queries.json";
             logger.info("Using the Local stored queries");
-            Path path = Paths.get(filepath);
+            Path path = Path.of(filepath);
             String customQueryConfigJson = new String(Files.readAllBytes(path));
             queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
 
@@ -72,7 +71,7 @@ public class LocalCQConfig extends CQConfig {
             protected void onChange(File file) {
                 try {
                     String filepath = storedQueriesLocation;
-                    Path path = Paths.get(filepath);
+                    Path path = Path.of(filepath);
                     String customQueryConfigJson = new String(Files.readAllBytes(path));
                     queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
 

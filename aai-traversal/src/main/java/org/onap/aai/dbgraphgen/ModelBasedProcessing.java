@@ -269,7 +269,7 @@ public class ModelBasedProcessing {
                 try {
                     Optional<Vertex> result = dbMethHelper.searchVertexByIdentityMap(modTopNodeType,
                         startNodeFilterArrayOfHashes.get(i));
-                    if (!result.isPresent()) {
+                    if (result.isEmpty()) {
                         throw new AAIException("AAI_6114",
                             "No Node of type " + modTopNodeType + " found for properties");
                     }
@@ -710,7 +710,7 @@ public class ModelBasedProcessing {
 
             Optional<Vertex> result =
                 dbMethHelper.searchVertexByIdentityMap(topNodeTypeVal, startNodeFilterHash);
-            if (!result.isPresent()) {
+            if (result.isEmpty()) {
                 throw new AAIException("AAI_6114",
                     "No Node of type " + topNodeTypeVal + " found for properties");
             }
@@ -741,7 +741,7 @@ public class ModelBasedProcessing {
             }
             Optional<Vertex> result =
                 dbMethHelper.locateUniqueVertex(widgModNodeType, startNodeFilterHash);
-            if (!result.isPresent()) {
+            if (result.isEmpty()) {
                 throw new AAIException("AAI_6114",
                     "No Node of type " + topNType + " found for properties");
             }
@@ -794,7 +794,7 @@ public class ModelBasedProcessing {
         // Locate the starting node that we'll use to start looking for instance data
         Optional<Vertex> result =
             dbMethHelper.searchVertexByIdentityMap(topNType, startNodeFilterHash);
-        if (!result.isPresent()) {
+        if (result.isEmpty()) {
             throw new AAIException("AAI_6114",
                 "No Node of type " + topNType + " found for properties");
         }
@@ -2093,7 +2093,7 @@ public class ModelBasedProcessing {
             propHash.put(targetProp, valFromInstance);
 
             Optional<Vertex> result = dbMethHelper.locateUniqueVertex(targetNodeType, propHash);
-            if (!result.isPresent()) {
+            if (result.isEmpty()) {
                 // If it can't find the lookup node, don't fail, just log that it couldn't be found
                 // ---
                 logger.debug("WARNING - Could not find lookup node that corresponds to nodeType ["
