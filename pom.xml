@@ -30,13 +30,14 @@
     </parent>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
-    <version>1.14.7-SNAPSHOT</version>
+    <version>1.15.0-SNAPSHOT</version>
     <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>
         <module>aai-traversal</module>
     </modules>
     <properties>
+        <maven.compiler.release>11</maven.compiler.release>
         <!--
             Nexus Proxy Properties and Snapshot Locations
             Ideally this can be overwritten at runtime per internal environment specific values at runtime
