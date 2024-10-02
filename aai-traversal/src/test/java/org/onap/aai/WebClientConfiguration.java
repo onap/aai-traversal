@@ -22,10 +22,13 @@ package org.onap.aai;
 
 import java.time.Duration;
 import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -34,6 +37,7 @@ public class WebClientConfiguration {
 
   @Lazy
   @Bean
+  @Primary
   WebTestClient webTestClient(@LocalServerPort int port) {
     return WebTestClient.bindToServer()
       .baseUrl("http://localhost:" + port)
@@ -44,6 +48,18 @@ public class WebClientConfiguration {
         headers.set("X-FromAppId", "JUNIT");
         headers.set("X-TransactionId", "JUNIT");
         headers.setBasicAuth("AAI", "AAI");
+      })
+      .build();
+  }
+  
+  @Lazy
+  @Bean
+  WebTestClient mgmtClient(@Value("${local.management.port}") int port) {
+    return WebTestClient.bindToServer()
+      .baseUrl("http://localhost:" + port)
+      .responseTimeout(Duration.ofSeconds(300))
+      .defaultHeaders(headers -> {
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
       })
       .build();
   }

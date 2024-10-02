@@ -152,13 +152,10 @@ public class EchoResponseTest {
     }
 
     @Test
-    public void testEchoResultWhenValidHeadersButMediaTypeWrong() throws Exception {
-
-        when(httpHeaders.getAcceptableMediaTypes()).thenThrow(new IllegalStateException())
-        .thenReturn(outputMediaTypes);
-
-        Response response = echoResponse.echoResult(httpHeaders, null, null);
-
+    public void testCheckDbNowAction_Unknown() {
+    	when(aaiGraphCheckerMock.isAaiGraphDbAvailable()).thenReturn(null);
+        Response response = echoResponse.echoResult(httpHeaders, null, "myAction");
+        // Verify
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }

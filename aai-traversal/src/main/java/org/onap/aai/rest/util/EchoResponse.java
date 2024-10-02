@@ -54,6 +54,8 @@ public class EchoResponse extends RESTAPI {
 	public EchoResponse(AaiGraphChecker aaiGraphChecker) {
 		this.aaiGraphChecker = aaiGraphChecker;
 	}
+	
+	private static final String UP_RESPONSE="{\"status\":\"UP\",\"groups\":[\"liveness\",\"readiness\"]}";
 
 	/**
 	 * Simple health-check API that echos back the X-FromAppId and X-TransactionId
@@ -92,7 +94,7 @@ public class EchoResponse extends RESTAPI {
 				if (!aaiGraphChecker.isAaiGraphDbAvailable()) {
 					throw new AAIException("AAI_5105", "Error establishing a database connection");
 				}
-				return generateSuccessResponse(headers, templateVars);
+				return generateSuccessResponse();
 			} catch (AAIException aaiException) {
 				ErrorLogHelper.logException(aaiException);
 				return generateFailureResponse(headers, templateVars, aaiException);
@@ -102,30 +104,19 @@ public class EchoResponse extends RESTAPI {
 				return generateFailureResponse(headers, templateVars, aaiException);
 			}
 		}
-		return generateSuccessResponse(headers, templateVars);
+		return generateSuccessResponse();
 	}
 
-	private Response generateSuccessResponse(HttpHeaders headers, ArrayList<String> templateVariables) {
-		HashMap<AAIException, ArrayList<String>> exceptionList = new HashMap<>();
-		exceptionList.put(new AAIException("AAI_0002", "OK"), templateVariables);
-		try {
-			return Response.status(Status.OK)
-					.entity(
-							ErrorLogHelper.getRESTAPIInfoResponse(new ArrayList<>(headers.getAcceptableMediaTypes()), exceptionList))
-					.build();
-		} catch (Exception e) {
-			AAIException aaiException = new AAIException("AAI_4000", e);
-			ErrorLogHelper.logException(aaiException);
-			return generateFailureResponse(headers, templateVariables, aaiException);
-		}
-	}
+	private Response generateSuccessResponse() {
+    	return Response.status(Status.OK)
+    			.entity(UP_RESPONSE)
+    			.build();
+    }
 
-	private Response generateFailureResponse(HttpHeaders headers, ArrayList<String> templateVariables,
-			AAIException aaiException) {
-		return Response.status(aaiException.getErrorObject().getHTTPResponseCode())
-				.entity(
-						ErrorLogHelper.getRESTAPIErrorResponseWithLogging(
-								headers.getAcceptableMediaTypes(), aaiException, templateVariables))
-				.build();
-	}
+    private Response generateFailureResponse(HttpHeaders headers, ArrayList<String> templateVariables,
+    		AAIException aaiException) {
+    	return Response.status(aaiException.getErrorObject().getHTTPResponseCode()).entity(ErrorLogHelper
+    			.getRESTAPIErrorResponseWithLogging(headers.getAcceptableMediaTypes(), aaiException, templateVariables))
+    			.build();
+    }
 }
