@@ -91,8 +91,8 @@
 		<schema.uri.base.path>/aai</schema.uri.base.path>
 
 		<!-- versions -->
-		<janusgraph.version>0.6.4</janusgraph.version>
-		<gremlin.version>3.5.8</gremlin.version>
+		<janusgraph.version>1.0.0</janusgraph.version>
+		<gremlin.version>3.7.1</gremlin.version>
 
 		<spring-cloud.version>2020.0.6</spring-cloud.version>
 
@@ -379,6 +379,11 @@
 			<version>3.1.12</version>
 		</dependency>
 		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.1.4</version>
+		</dependency>
+		<dependency>
 			<groupId>org.janusgraph</groupId>
 			<artifactId>janusgraph-cql</artifactId>
 			<exclusions>
@@ -465,10 +470,6 @@
 			<artifactId>aai-core</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>org.onap.aai.aai-common</groupId>
-                    <artifactId>aai-aaf-auth</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-http</artifactId>
                 </exclusion>
@@ -497,12 +498,6 @@
 		<dependency>
 			<groupId>org.onap.aai.aai-common</groupId>
 			<artifactId>aai-rest</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.onap.aai.aai-common</groupId>
-					<artifactId>aai-aaf-auth</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<!-- Explicitly stating the security spring framework and exclude the bouncy
 			castle since that is somehow overwriting our p12 file decryption that's built
