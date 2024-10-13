@@ -36,7 +36,6 @@ import org.onap.aai.introspection.LoaderFactory;
 import org.onap.aai.introspection.MoxyLoader;
 import org.onap.aai.nodes.NodeIngestor;
 import org.onap.aai.rest.db.HttpEntry;
-import org.onap.aai.rest.dsl.DslQueryProcessor;
 import org.onap.aai.rest.dsl.V1DslQueryProcessor;
 import org.onap.aai.rest.dsl.V2DslQueryProcessor;
 import org.onap.aai.rest.dsl.v1.DslListener;
@@ -44,7 +43,6 @@ import org.onap.aai.rest.notification.NotificationService;
 import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.serialization.db.EdgeSerializer;
 import org.onap.aai.setup.AAIConfigTranslator;
-import org.onap.aai.setup.SchemaLocationsBean;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +57,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
         EdgeSerializer.class, NodeIngestor.class, SpringContextAware.class,
         IntrospectionConfig.class, RestBeanConfig.class, SearchConfiguration.class, XmlFormatTransformerConfiguration.class,
         GremlinServerSingleton.class, V1DslQueryProcessor.class, V2DslQueryProcessor.class, DslListener.class, org.onap.aai.rest.dsl.v2.DslListener.class,
-        LoaderFactory.class, NotificationService.class})
+        LoaderFactory.class, NotificationService.class, KafkaConfig.class})
 @TestPropertySource(
     properties = {"schema.uri.base.path = /aai",
         "schema.ingest.file = src/test/resources/application-test.properties"})

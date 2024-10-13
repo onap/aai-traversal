@@ -48,6 +48,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.config.ConfigConfiguration;
 import org.onap.aai.config.IntrospectionConfig;
+import org.onap.aai.config.KafkaConfig;
 import org.onap.aai.config.SearchConfiguration;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.edges.EdgeIngestor;
@@ -81,7 +82,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 @ContextConfiguration(
     classes = {ConfigConfiguration.class, AAIConfigTranslator.class, EdgeIngestor.class,
         EdgeSerializer.class, NodeIngestor.class, SpringContextAware.class,
-        SearchConfiguration.class, IntrospectionConfig.class, LoaderFactory.class, NotificationService.class})
+        SearchConfiguration.class, IntrospectionConfig.class, LoaderFactory.class, NotificationService.class, KafkaConfig.class})
 @TestPropertySource(
     properties = {"schema.uri.base.path = /aai",
         "schema.ingest.file = src/test/resources/application-test.properties"})
