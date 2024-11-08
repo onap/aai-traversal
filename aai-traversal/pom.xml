@@ -26,7 +26,7 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.15.1-SNAPSHOT</version>
+		<version>1.15.2-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
@@ -94,7 +94,7 @@
 		<janusgraph.version>1.0.0</janusgraph.version>
 		<gremlin.version>3.7.1</gremlin.version>
 
-		<spring-cloud.version>2020.0.6</spring-cloud.version>
+		<spring-cloud.version>2021.0.9</spring-cloud.version>
 
 		<!-- fix the driver version to match the one defined in janusgraph-cql
 				spring-boot (2.4) is otherwise downgrading it to 4.9.0 -->
@@ -321,25 +321,6 @@
 			<groupId>net.sf.jopt-simple</groupId>
 			<artifactId>jopt-simple</artifactId>
 			<version>${jopt.simple.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-core</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.ws.rs</groupId>
-					<artifactId>jsr311-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-jersey2-jaxrs</artifactId>
-			<version>${io.swagger.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
