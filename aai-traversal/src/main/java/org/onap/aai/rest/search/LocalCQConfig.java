@@ -19,8 +19,6 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

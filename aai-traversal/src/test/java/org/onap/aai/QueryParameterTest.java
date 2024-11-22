@@ -23,8 +23,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.util.*;
 
 import javax.ws.rs.core.Response;

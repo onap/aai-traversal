@@ -21,8 +21,6 @@ package org.onap.aai.rest.retired;
 
 import static org.junit.Assert.assertEquals;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.util.HashMap;
 import java.util.Map;
 

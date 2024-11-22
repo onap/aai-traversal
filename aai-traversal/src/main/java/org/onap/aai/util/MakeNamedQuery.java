@@ -19,8 +19,6 @@
  */
 package org.onap.aai.util;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.*;

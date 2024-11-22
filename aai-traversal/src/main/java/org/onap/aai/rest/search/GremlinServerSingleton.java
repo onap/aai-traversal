@@ -19,8 +19,6 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,8 +42,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class GremlinServerSingleton {
 
-    private static Logger logger = LoggerFactory.getLogger(GremlinServerSingleton.class);
-
     private boolean timerSet;
     private Timer timer;
 
@@ -66,7 +62,7 @@ public class GremlinServerSingleton {
 
     /**
      * Gets the query using CustomQueryConfig
-     * 
+     *
      * @param key
      * @return
      */

@@ -19,7 +19,6 @@
  */
 package org.onap.aai.rest.search;
 
-import com.att.eelf.configuration.EELFManager;
 import com.google.common.base.CaseFormat;
 
 import java.util.Map;

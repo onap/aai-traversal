@@ -24,8 +24,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.util.Collections;
 
 import org.junit.Test;

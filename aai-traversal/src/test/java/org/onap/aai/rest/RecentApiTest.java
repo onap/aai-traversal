@@ -21,8 +21,6 @@ package org.onap.aai.rest;
 
 import static org.junit.Assert.*;
 
-import com.att.eelf.configuration.EELFManager;
-
 import java.util.Collections;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
