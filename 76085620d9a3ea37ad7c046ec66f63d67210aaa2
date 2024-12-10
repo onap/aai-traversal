@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0dfb4456_1fd60b8b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2024-12-10T13:06:58Z",
+      "side": 1,
+      "message": "This is the first change after the 1.15.3 release. Could you bump the snapshot version to 1.15.4-SNAPSHOT?",
+      "revId": "76085620d9a3ea37ad7c046ec66f63d67210aaa2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
