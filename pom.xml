@@ -30,7 +30,7 @@
     </parent>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
-    <version>1.15.3-SNAPSHOT</version>
+    <version>1.15.4-SNAPSHOT</version>
     <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>
@@ -50,7 +50,7 @@
         <staging.path>/content/repositories/staging/</staging.path>
         <!-- GMaven plugin uses this property to figure out the name of the docker tag -->
         <aai.project.version>${project.version}</aai.project.version>
-        <aai.schema.service.version>1.12.6</aai.schema.service.version>
+        <aai.schema.service.version>1.12.7</aai.schema.service.version>
     </properties>
     <build>
         <pluginManagement>
