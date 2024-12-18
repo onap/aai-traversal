@@ -1,0 +1,4 @@
+distribution_type: maven
+log_dir: aai-traversal-maven-stage-master/1404/
+project: traversal
+version: 1.15.4
