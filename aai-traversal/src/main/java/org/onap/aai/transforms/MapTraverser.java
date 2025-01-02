@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import joptsimple.internal.Objects;
-
 public class MapTraverser {
 
     private Converter converter;
@@ -36,7 +34,8 @@ public class MapTraverser {
 
     public Map<String, Object> convertKeys(Map<String, Object> map) {
 
-        Objects.ensureNotNull(map);
+        if (map == null)
+            throw new NullPointerException();
 
         Map<String, Object> modifiedMap = new HashMap<>();
         convertKeys(map, modifiedMap);
