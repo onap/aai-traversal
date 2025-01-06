@@ -43,7 +43,6 @@ import org.onap.aai.PayloadUtil;
 import org.onap.aai.TraversalApp;
 import org.onap.aai.TraversalTestConfiguration;
 import org.onap.aai.WebClientConfiguration;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
 import org.slf4j.Logger;
@@ -56,7 +55,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -67,7 +65,6 @@ import org.springframework.web.client.RestTemplate;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @EnableAutoConfiguration(exclude={CassandraDataAutoConfiguration.class, CassandraAutoConfiguration.class}) // there is no running cassandra instance for the test
 @Import({TraversalTestConfiguration.class, WebClientConfiguration.class})
 public class QueryConsumerTest {

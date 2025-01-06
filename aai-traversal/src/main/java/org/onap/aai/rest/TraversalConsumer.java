@@ -34,8 +34,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.process.traversal.strategy.decoration.SubgraphStrategy;
-import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.db.props.AAIProperties;
 import org.onap.aai.exceptions.AAIException;
@@ -150,22 +148,6 @@ public abstract class TraversalConsumer extends RESTAPI {
         return traversalSource;
     }
 
-    protected Set<String> getRoles(Principal userPrincipal) {
-        KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) userPrincipal;
-        if (ObjectUtils.isEmpty(token)) {
-            return Collections.EMPTY_SET;
-        }
-
-        SimpleKeycloakAccount account = (SimpleKeycloakAccount) token.getDetails();
-        if (ObjectUtils.isEmpty(account)) {
-            return Collections.EMPTY_SET;
-        }
-
-        return account.getRoles().stream()
-            .map(role -> StringUtils.removeEnd(role, OwnerCheck.READ_ONLY_SUFFIX))
-            .collect(Collectors.toSet());
-    }
-
     protected void validateHistoryParams(Format format, MultivaluedMap<String, String> params)
         throws AAIException {
         getStartTime(format, params);
@@ -181,7 +163,7 @@ public abstract class TraversalConsumer extends RESTAPI {
      * truncation time
      * In the state api, we should return an error if the timestamp provided is prior to the
      * truncation time
-     * 
+     *
      * @param params
      * @return
      */

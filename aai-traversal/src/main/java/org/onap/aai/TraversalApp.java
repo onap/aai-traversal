@@ -26,7 +26,6 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.onap.aai.aailog.logs.AaiDebugLog;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
@@ -45,10 +44,14 @@ import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoCo
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
+@EnableWebSecurity
+@EnableConfigurationProperties
 @SpringBootApplication(
     exclude = {
         DataSourceAutoConfiguration.class,
@@ -132,7 +135,6 @@ public class TraversalApp {
             SpringApplication app = new SpringApplication(TraversalApp.class);
             app.setLogStartupInfo(false);
             app.setRegisterShutdownHook(true);
-            app.addInitializers(new PropertyPasswordConfiguration());
             env = app.run(args).getEnvironment();
         } catch (Exception ex) {
             AAIException aai = schemaServiceExceptionTranslator(ex);
