@@ -33,7 +33,6 @@ import java.util.logging.Logger;
 import javax.annotation.Priority;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.servlet.ServletProperties;
 import org.onap.aai.rest.*;
 import org.onap.aai.rest.search.ModelAndNamedQueryRestProvider;
 import org.onap.aai.rest.search.SearchProvider;
@@ -65,7 +64,7 @@ public class JerseyConfiguration {
     public ResourceConfig resourceConfig() {
         ResourceConfig resourceConfig = new ResourceConfig();
 
-        resourceConfig.property(ServletProperties.FILTER_FORWARD_ON_404, true);
+        resourceConfig.property("jersey.config.servlet.filter.forwardOn404", true);
         Set<Class<?>> classes = Sets.newHashSet(SearchProvider.class,
             ModelAndNamedQueryRestProvider.class, QueryConsumer.class, RecentAPIConsumer.class, EchoResponse.class, CQ2Gremlin.class, CQ2GremlinTest.class);
         Set<Class<?>> filterClasses =
@@ -80,7 +79,7 @@ public class JerseyConfiguration {
                 org.onap.aai.interceptors.pre.RequestHeaderManipulation.class,
                 org.onap.aai.interceptors.pre.RequestModification.class,
                 org.onap.aai.interceptors.post.InvalidResponseStatus.class,
-                
+
                 org.onap.aai.interceptors.post.ResponseTransactionLogging.class,
                 org.onap.aai.interceptors.post.ResponseHeaderManipulation.class
                 );

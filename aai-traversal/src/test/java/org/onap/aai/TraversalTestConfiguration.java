@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
 
@@ -67,25 +66,12 @@ public class TraversalTestConfiguration {
         RestTemplate restTemplate = null;
 
         if (env.acceptsProfiles(Profiles.of("one-way-ssl", "two-way-ssl"))) {
-            char[] trustStorePassword =
-                env.getProperty("server.ssl.trust-store-password").toCharArray();
-            char[] keyStorePassword =
-                env.getProperty("server.ssl.key-store-password").toCharArray();
+            SSLContext sslContext = SSLContextBuilder.create().build();
 
-            String keyStore = env.getProperty("server.ssl.key-store");
-            String trustStore = env.getProperty("server.ssl.trust-store");
-            SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
-
-            if (env.acceptsProfiles(Profiles.of("two-way-ssl"))) {
-                sslContextBuilder = sslContextBuilder
-                    .loadKeyMaterial(loadPfx(keyStore, keyStorePassword), keyStorePassword);
-            }
-
-            SSLContext sslContext = sslContextBuilder
-                .loadTrustMaterial(ResourceUtils.getFile(trustStore), trustStorePassword).build();
-
-            HttpClient client = HttpClients.custom().setSSLContext(sslContext)
-                .setSSLHostnameVerifier((s, sslSession) -> true).build();
+            HttpClient client = HttpClients.custom()
+                .setSSLContext(sslContext)
+                .setSSLHostnameVerifier((s, sslSession) -> true)
+                .build();
 
             restTemplate = builder
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(client)).build();
@@ -120,14 +106,5 @@ public class TraversalTestConfiguration {
         });
 
         return restTemplate;
-    }
-
-    private KeyStore loadPfx(String file, char[] password) throws Exception {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        File key = ResourceUtils.getFile(file);
-        try (InputStream in = new FileInputStream(key)) {
-            keyStore.load(in, password);
-        }
-        return keyStore;
     }
 }

@@ -30,7 +30,6 @@ import org.janusgraph.core.JanusGraphTransaction;
 import org.junit.*;
 import org.onap.aai.TraversalApp;
 import org.onap.aai.TraversalTestConfiguration;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.nodes.NodeIngestor;
@@ -57,7 +56,6 @@ import org.springframework.web.client.RestTemplate;
 @TestPropertySource(
     locations = "classpath:application-test.properties",
     properties = {"history.enabled=true", "history.truncate.window.days = " + Integer.MAX_VALUE})
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @EnableAutoConfiguration(exclude={CassandraDataAutoConfiguration.class, CassandraAutoConfiguration.class}) // there is no running cassandra instance for the test
 @Import(TraversalTestConfiguration.class)
 public abstract class AbstractSpringHistoryRestTest {

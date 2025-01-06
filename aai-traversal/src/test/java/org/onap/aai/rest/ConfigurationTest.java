@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.onap.aai.TraversalApp;
 import org.onap.aai.TraversalTestConfiguration;
 import org.onap.aai.config.SpringContextAware;
-import org.onap.aai.restclient.PropertyPasswordConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -46,15 +45,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
-import io.prometheus.client.exporter.common.TextFormat;
-
 /**
  * Test REST requests against configuration resource
  */
 @AutoConfigureMetrics
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(
-    initializers = PropertyPasswordConfiguration.class,
     classes = {SpringContextAware.class})
 @Import(TraversalTestConfiguration.class)
 @SpringBootTest(
