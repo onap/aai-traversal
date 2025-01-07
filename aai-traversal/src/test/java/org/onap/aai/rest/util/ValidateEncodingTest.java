@@ -22,6 +22,7 @@ package org.onap.aai.rest.util;
 import static org.junit.Assert.*;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -61,7 +62,6 @@ public class ValidateEncodingTest {
         ValidateEncoding validator = ValidateEncoding.getInstance();
 
         assertEquals(false, validator.validate(mockUriInfo));
-
     }
 
     @Test
@@ -91,8 +91,7 @@ public class ValidateEncodingTest {
     }
 
     @Test
-    public void testWhenQueryParameterHasPlusSignItShouldPass()
-        throws UnsupportedEncodingException {
+    public void testWhenQueryParameterHasPlusSignItShouldPass() throws UnsupportedEncodingException {
 
         MultivaluedHashMap<String, String> map = new MultivaluedHashMap<String, String>();
         map.putSingle("some-key", "test+one+two+three");
@@ -101,6 +100,44 @@ public class ValidateEncodingTest {
         ValidateEncoding validator = ValidateEncoding.getInstance();
 
         assertEquals(true, validator.validate(mockUriInfo));
+    }
+
+    // New test cases for validate(URI uri) method
+
+    @Test
+    public void badUriPath() throws UnsupportedEncodingException {
+        // Bad URI with unencoded illegal characters
+        String badPath = "/aai/v6/network/vces/vce/blahh::blach/others/other/jklfea{}";
+
+        // Mock UriInfo and avoid creating the URI directly to prevent IllegalArgumentException
+        UriInfo mockUriInfo = getMockUriInfo(badPath, new MultivaluedHashMap<String, String>());
+
+        // Use the ValidateEncoding class to check if this path is valid
+        ValidateEncoding validator = ValidateEncoding.getInstance();
+
+        // Assert that the path is invalid due to illegal characters
+        assertEquals("The path should be invalid due to illegal characters.", false, validator.validate(mockUriInfo));
+    }
+
+
+    @Test
+    public void goodUriPath() throws UnsupportedEncodingException {
+        // Valid URI path with correctly encoded characters
+        URI goodUri = URI.create("http://example.com/aai/v6/network/vces/vce/blahh%3A%3Ablach/others/other/jklfea%7B%7D");
+        ValidateEncoding validator = ValidateEncoding.getInstance();
+
+        // This should return true since the URI path is properly encoded
+        assertEquals(true, validator.validate(goodUri));
+    }
+
+    @Test
+    public void emptyUriPath() throws UnsupportedEncodingException {
+        // URI with an empty path
+        URI emptyUri = URI.create("http://example.com");
+        ValidateEncoding validator = ValidateEncoding.getInstance();
+
+        // This should return true, as an empty path is valid
+        assertEquals(true, validator.validate(emptyUri));
     }
 
     private UriInfo getMockUriInfo(String path, MultivaluedMap<String, String> map) {
