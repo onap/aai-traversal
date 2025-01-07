@@ -20,13 +20,12 @@
 package org.onap.aai.transforms;
 
 import com.bazaarvoice.jolt.JsonUtils;
+import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import org.junit.Test;
-import org.onap.aai.transforms.LowerCamelToLowerHyphenConverter;
-import org.onap.aai.transforms.MapTraverser;
 
 public class MapTraverserTest {
 
@@ -53,4 +52,70 @@ public class MapTraverserTest {
             JoltTestUtil.runArrayOrderObliviousDiffy("failed case " + testCase, output, actual);
         }
     }
+
+    @Test
+    public void testListWithNestedMaps() {
+        // Test case where list contains maps
+        Map<String, Object> input = Map.of(
+                "key1", List.of(Map.of("nestedKey", "value1"), Map.of("nestedKey", "value2")),
+                "key2", "value"
+        );
+
+        Map<String, Object> expectedOutput = Map.of(
+                "key1", List.of(Map.of("nested-key", "value1"), Map.of("nested-key", "value2")),
+                "key2", "value"
+        );
+
+        Map<String, Object> actual = traverser.convertKeys(input);
+        assert expectedOutput.equals(actual) : "Test failed for list with nested maps.";
+    }
+
+    @Test
+    public void testEmptyList() {
+        // Test case for an empty list
+        Map<String, Object> input = Map.of(
+                "key1", List.of(),
+                "key2", "value"
+        );
+
+        Map<String, Object> expectedOutput = Map.of(
+                "key1", List.of(),
+                "key2", "value"
+        );
+
+        Map<String, Object> actual = traverser.convertKeys(input);
+        assert expectedOutput.equals(actual) : "Test failed for empty list.";
+    }
+
+    @Test
+    public void testListWithPrimitives() {
+        // Test case for a list of primitive values
+        Map<String, Object> input = Map.of(
+                "key1", List.of("string1", "string2", "string3"),
+                "key2", "value"
+        );
+
+        Map<String, Object> expectedOutput = Map.of(
+                "key1", List.of("string1", "string2", "string3"),
+                "key2", "value"
+        );
+
+        Map<String, Object> actual = traverser.convertKeys(input);
+        assert expectedOutput.equals(actual) : "Test failed for list with primitive values.";
+    }
+    @Test
+    public void testNullListInMap() {
+        // Test case where the list is null inside the map
+        Map<String, Object> input = new HashMap<>();
+        input.put("key1", null);  // Null list in the map
+        input.put("key2", "value");
+
+        Map<String, Object> expectedOutput = new HashMap<>();
+        expectedOutput.put("key1", null);  // key1 should remain null
+        expectedOutput.put("key2", "value");
+
+        Map<String, Object> actual = traverser.convertKeys(input);
+        assert expectedOutput.equals(actual) : "Test failed for null list in map.";
+    }
+
 }
