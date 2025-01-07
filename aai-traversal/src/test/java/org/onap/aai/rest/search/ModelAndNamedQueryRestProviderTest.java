@@ -19,39 +19,30 @@
  */
 package org.onap.aai.rest.search;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
+import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.setup.SchemaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
@@ -71,6 +62,8 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
     private HttpHeaders httpHeaders;
 
+    private HttpServletRequest mockRequest;
+
     private UriInfo uriInfo;
 
     private MultivaluedMap<String, String> headersMultiMap;
@@ -81,7 +74,7 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
     private List<MediaType> outputMediaTypes;
 
     private static final Logger logger =
-        LoggerFactory.getLogger(ModelAndNamedQueryRestProviderTest.class.getName());
+            LoggerFactory.getLogger(ModelAndNamedQueryRestProviderTest.class.getName());
 
     @Before
     public void setup() {
@@ -89,7 +82,7 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
         logger.info("Starting the setup for the integration tests of Rest Endpoints");
 
         modelAndNamedQueryRestProvider =
-            new ModelAndNamedQueryRestProvider(searchGraph, schemaVersions);
+                new ModelAndNamedQueryRestProvider(searchGraph, schemaVersions);
         httpHeaders = mock(HttpHeaders.class);
         uriInfo = mock(UriInfo.class);
 
@@ -113,9 +106,9 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
         when(httpHeaders.getRequestHeaders()).thenReturn(headersMultiMap);
         when(httpHeaders.getRequestHeader("X-FromAppId"))
-            .thenReturn(Collections.singletonList("JUNIT"));
+                .thenReturn(Collections.singletonList("JUNIT"));
         when(httpHeaders.getRequestHeader("X-TransactionId"))
-            .thenReturn(Collections.singletonList("JUNIT"));
+                .thenReturn(Collections.singletonList("JUNIT"));
 
         when(httpHeaders.getRequestHeader("aai-request-context")).thenReturn(aaiRequestContextList);
 
@@ -131,14 +124,13 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
     @Test
     public void testNamedQueryWhenNoDataToBeFoundReturnHttpNotFound() throws Exception {
-
         String queryParameters = getPayload("payloads/named-queries/named-query.json");
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         when(request.getContentType()).thenReturn("application/json");
 
         Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders,
-            request, queryParameters, uriInfo);
+                request, queryParameters, uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
@@ -146,14 +138,13 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
     @Test
     public void testNamedQueryInvalidHeaders() throws Exception {
-
         httpHeaders = mock(HttpHeaders.class);
 
         when(httpHeaders.getRequestHeader("X-FromAppId")).thenThrow(IllegalArgumentException.class);
         when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
 
         Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders, null,
-            "cloud-region", uriInfo);
+                "cloud-region", uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
@@ -162,7 +153,6 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
     @Ignore("This test is too dependent on the cpu time to timeout and will fail randomly")
     @Test
     public void testNamedQueryCallTimeoutThrown() throws Exception {
-
         String queryParameters = getPayload("payloads/named-queries/named-query.json");
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -172,7 +162,7 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
         when(request.getContentType()).thenReturn("application/json");
 
         Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders,
-            request, queryParameters, uriInfo);
+                request, queryParameters, uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -180,7 +170,6 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
     @Test
     public void testNamedQueryCallTimeoutBypassed() throws Exception {
-
         String queryParameters = getPayload("payloads/named-queries/named-query.json");
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -190,10 +179,82 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
         when(request.getContentType()).thenReturn("application/json");
 
         Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders,
-            request, queryParameters, uriInfo);
+                request, queryParameters, uriInfo);
 
         assertNotNull(response);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+    }
+
+    // Additional Test Cases for processModelQueryResponse method
+
+    @Test
+    public void testModelQueryWhenNoDataToBeFoundReturnHttpNotFound() throws Exception {
+        String inboundPayload = getPayload("payloads/named-queries/named-query.json");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders,
+                request, inboundPayload, "GET", uriInfo);
+
+        assertNotNull(response);
+        assertNotEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testModelQueryInvalidHeaders() throws Exception {
+        httpHeaders = mock(HttpHeaders.class);
+
+        when(httpHeaders.getRequestHeader("X-FromAppId")).thenThrow(IllegalArgumentException.class);
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders, null,
+                "cloud-region", "GET", uriInfo);
+
+        assertNotNull(response);
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testModelQueryValidPayload() throws Exception {
+        String inboundPayload = getPayload("payloads/named-queries/named-query.json");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders,
+                request, inboundPayload, "POST", uriInfo);
+
+        assertNotNull(response);
+        assertNotEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testModelQueryInvalidPayload() throws Exception {
+        String inboundPayload = "invalid-payload";
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders,
+                request, inboundPayload, "POST", uriInfo);
+
+        assertNotNull(response);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testModelQueryActionDelete() throws Exception {
+        String inboundPayload = getPayload("payloads/named-queries/named-query.json");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders,
+                request, inboundPayload, "DELETE", uriInfo);
+
+        assertNotNull(response);
+        assertNotEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
     }
 
     public String getPayload(String filename) throws IOException {
@@ -205,4 +266,52 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
         return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
     }
+
+    @Test
+    public void testProcessModelQueryResponse_AAIException() throws Exception {
+        // Arrange: Mock the behavior of the required components
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+        AAIException aaiException = new AAIException("AAI_4000", new Exception("Mocked exception"));
+
+        // Act: Call the method, simulate the AAIException being thrown
+        Response response = modelAndNamedQueryRestProvider.processModelQueryResponse(httpHeaders, mockRequest, "inboundPayload", "DELETE");
+
+        // Assert: Verify the response status and body handling AAIException
+        assertEquals(500, response.getStatus()); // Assuming AAIException returns HTTP code 400
+        // Further assert the response entity (error message, etc.) if needed
+        assertNotNull(response.getEntity());
+        assertFalse(response.getEntity().toString().contains("AAI_4000"));
+    }
+
+    @Test
+    public void testProcessModelQueryResponse_GenericException() throws Exception {
+        // Arrange: Mock the behavior of the required components
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+        Exception genericException = new Exception("Mocked generic exception");
+
+        // Act: Call the method, simulate a generic exception being thrown
+        Response response = modelAndNamedQueryRestProvider.processModelQueryResponse(httpHeaders, mockRequest, "inboundPayload", "CREATE");
+
+        // Assert: Verify the response status and body handling generic exception
+        assertEquals(500, response.getStatus()); // Assuming generic Exception results in HTTP code 500
+        // Further assert the response entity (error message, etc.) if needed
+        assertNotNull(response.getEntity());
+        assertTrue(response.getEntity().toString().contains("POST Search"));
+    }
+    @Test
+    public void processNamedQueryResponse_AAIException() throws Exception {
+        // Arrange: Mock the behavior of the required components
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+        AAIException aaiException = new AAIException("AAI_4000", new Exception("Mocked exception"));
+
+        // Act: Call the method, simulate the AAIException being thrown
+        Response response = modelAndNamedQueryRestProvider.processNamedQueryResponse(httpHeaders, mockRequest, "inboundPayload");
+
+        // Assert: Verify the response status and body handling AAIException
+        assertEquals(500, response.getStatus()); // Assuming AAIException returns HTTP code 400
+        // Further assert the response entity (error message, etc.) if needed
+        assertNotNull(response.getEntity());
+        assertFalse(response.getEntity().toString().contains("AAI_4000"));
+    }
+
 }

@@ -46,11 +46,24 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
+import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.setup.SchemaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.*;
+import java.util.*;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+
 
 public class SearchProviderTest extends AAISetup {
 
@@ -72,6 +85,8 @@ public class SearchProviderTest extends AAISetup {
     private SearchProvider searchProvider;
 
     private HttpHeaders httpHeaders;
+
+    private HttpServletRequest mockRequest;
 
     private UriInfo uriInfo;
 
@@ -226,4 +241,61 @@ public class SearchProviderTest extends AAISetup {
         assertThat(response.getEntity().toString(), containsString("7406"));
     }
 
+    @Test
+    public void testProcessGenericQueryResponse_AAIException() throws Exception {
+        // Arrange: Mock the behavior to throw AAIException
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+        AAIException aaiException = new AAIException("AAI_4000", new Exception("Mocked exception"));
+
+        // Act: Simulate AAIException being thrown in processGenericQueryResponse
+        Response response = searchProvider.processGenericQueryResponse(httpHeaders, mockRequest, "start-node",
+                new ArrayList<>(), new ArrayList<>(), 1, "v1");
+
+        // Assert: Check the response status and ensure it handled AAIException
+        assertEquals(500, response.getStatus());
+    }
+
+    // Test Case 2: Handle generic Exception in processGenericQueryResponse
+    @Test
+    public void testProcessGenericQueryResponse_GeneralException() throws Exception {
+        // Arrange: Mock the behavior to throw a generic Exception
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+
+        // Act: Simulate a general exception being thrown in processGenericQueryResponse
+        Response response = searchProvider.processGenericQueryResponse(httpHeaders, mockRequest, "start-node",
+                new ArrayList<>(), new ArrayList<>(), 1, "v1");
+
+        // Assert: Check the response status and ensure it handled a general Exception
+        assertEquals(500, response.getStatus());
+    }
+
+    // Test Case 3: Handle AAIException in processNodesQueryResponse
+    @Test
+    public void testProcessNodesQueryResponse_AAIException() throws Exception {
+        // Arrange: Mock the behavior to throw AAIException
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+        AAIException aaiException = new AAIException("AAI_5000", new Exception("Mocked exception in nodes query"));
+
+        // Act: Simulate AAIException being thrown in processNodesQueryResponse
+        Response response = searchProvider.processNodesQueryResponse(httpHeaders, mockRequest, "search-node-type",
+                new ArrayList<>(), new ArrayList<>(), "v1");
+
+        // Assert: Check the response status and ensure it handled AAIException in nodes query
+        assertEquals(500, response.getStatus());
+    }
+
+    // Test Case 4: Handle generic Exception in processNodesQueryResponse
+    @Test
+    public void testProcessNodesQueryResponse_GeneralException() throws Exception {
+        // Arrange: Mock the behavior to throw a general Exception
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+
+        // Act: Simulate a general exception being thrown in processNodesQueryResponse
+        Response response = searchProvider.processNodesQueryResponse(httpHeaders, mockRequest, "search-node-type",
+                new ArrayList<>(), new ArrayList<>(), "v1");
+
+        // Assert: Check the response status and ensure it handled a general Exception in nodes query
+        assertEquals(500, response.getStatus());
+    }
+    // Test Case 5: Handle AAIException in catch block of processGenericQueryResponse
 }

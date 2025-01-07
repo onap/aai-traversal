@@ -19,27 +19,6 @@
  */
 package org.onap.aai.dbgraphmap;
 
-import static org.mockito.ArgumentMatchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.persistence.dynamic.DynamicEntity;
 import org.janusgraph.graphdb.types.system.EmptyVertex;
@@ -62,6 +41,15 @@ import org.onap.aai.serialization.queryformats.utils.UrlBuilder;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.util.GenericQueryBuilder;
 import org.onap.aai.util.NodesQueryBuilder;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.*;
+import java.net.URI;
+import java.util.*;
+import java.util.stream.Stream;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SearchGraphTest extends AAISetup {
 
@@ -173,7 +161,9 @@ public class SearchGraphTest extends AAISetup {
             new GenericQueryBuilder().setHeaders(httpHeaders).setStartNodeType("service-instance")
                 .setStartNodeKeyParams(keys).setIncludeNodeTypes(includeStrings).setDepth(1)
                 .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
-        System.out.println(response);
+        Assert.assertEquals(200,response.getStatus());
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
     }
 
     @Test(expected = AAIException.class)
@@ -225,6 +215,13 @@ public class SearchGraphTest extends AAISetup {
                 .setStartNodeType("").setStartNodeKeyParams(keys).setIncludeNodeTypes(null)
                 .setDepth(1).setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
         System.out.println(response);
+
+        String responseJson = response.toString();
+
+        // Assertions
+        Assert.assertNotNull(responseJson);
+        Assert.assertTrue(responseJson.contains("result-data"));
+        Assert.assertTrue(responseJson.contains("cloud-region"));
     }
 
     @Test
@@ -244,6 +241,13 @@ public class SearchGraphTest extends AAISetup {
 
         Introspector response = searchGraph.createSearchResults(loader, urlBuilder, keys);
         System.out.println(response);
+
+        String responseJson = response.toString();
+
+        Assert.assertNotNull(responseJson);
+        Assert.assertTrue(responseJson.contains("result-data"));
+        Assert.assertTrue(responseJson.contains("cloud-region"));
+
     }
 
     @Test(expected = AAIException.class)
@@ -289,6 +293,10 @@ public class SearchGraphTest extends AAISetup {
                 .setEdgeFilterParams(edgeFilter).setFilterParams(filter).setDbEngine(dbEngine)
                 .setLoader(loader).setUrlBuilder(urlBuilder));
         Assert.assertNotNull(response);
+        Assert.assertEquals(200,response.getStatus());
+        Assert.assertNotNull(response);
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
     }
 
     @Test
@@ -303,6 +311,23 @@ public class SearchGraphTest extends AAISetup {
                 .setEdgeFilterParams(edgeFilter).setFilterParams(filter).setDbEngine(dbEngine)
                 .setLoader(loader).setUrlBuilder(urlBuilder));
         Assert.assertNotNull(response);
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
+    }
+
+    @Test
+    public void runNodesQueryTargetNodeTypeNullTest() throws AAIException {
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        List<String> filter = new ArrayList<String>();
+        filter.add("model:EQUALS:DOES-NOT-EXIST:AAI");
+        List<String> edgeFilter = new ArrayList<String>();
+        edgeFilter.add("model:EXISTS:DOES-NOT-EXIST:AAI");
+
+        assertThrows(AAIException.class,
+                () -> searchGraph.runNodesQuery(
+                        new NodesQueryBuilder().setHeaders(httpHeaders).setTargetNodeType(null)
+                                .setEdgeFilterParams(edgeFilter).setFilterParams(filter).setDbEngine(dbEngine)
+                                .setLoader(loader).setUrlBuilder(urlBuilder)));
     }
 
     @Test
@@ -311,9 +336,12 @@ public class SearchGraphTest extends AAISetup {
         List<String> filter = new ArrayList<String>();
         filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST");
         List<String> edgeFilter = new ArrayList<>();
-        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
-            .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
-            .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Response response = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
+                .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Assert.assertNotNull(response);
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
     }
 
     @Test
@@ -322,9 +350,29 @@ public class SearchGraphTest extends AAISetup {
         List<String> filter = new ArrayList<>();
         filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter = new ArrayList<>();
-        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
-            .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
-            .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Response response = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
+                .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Assert.assertNotNull(response);
+        Assert.assertEquals(200,response.getStatus());
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
+
+    }
+
+    @Test
+    public void runNodesQueryTestNoFilterParam() throws AAIException {
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        List<String> filter = new ArrayList<>();
+        //filter.add("model:DOES-NOT-EQUAL:DOES-NOT-EXIST:AAI");
+        List<String> edgeFilter = new ArrayList<>();
+        Response response = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
+                .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Assert.assertNotNull(response);
+        Assert.assertEquals(200,response.getStatus());
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
     }
 
     @Test
@@ -333,9 +381,13 @@ public class SearchGraphTest extends AAISetup {
         List<String> filter = new ArrayList<>();
         filter.add("model:EXISTS:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter = new ArrayList<>();
-        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
-            .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
-            .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Response response = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
+                .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Assert.assertNotNull(response);
+        Assert.assertEquals(200,response.getStatus());
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
     }
 
     @Test(expected = AAIException.class)
@@ -344,8 +396,12 @@ public class SearchGraphTest extends AAISetup {
         List<String> filter = new ArrayList<>();
         filter.add("model:DOES_NOT_EXIST:DOES-NOT-EXIST:AAI");
         List<String> edgeFilter = new ArrayList<>();
-        searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
-            .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
-            .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Response response = searchGraph.runNodesQuery(new NodesQueryBuilder().setHeaders(httpHeaders)
+                .setTargetNodeType("model-ver").setEdgeFilterParams(edgeFilter).setFilterParams(filter)
+                .setDbEngine(dbEngine).setLoader(loader).setUrlBuilder(urlBuilder));
+        Assert.assertNotNull(response);
+        Assert.assertEquals(200,response.getStatus());
+        Object entity = response.getEntity();
+        Assert.assertNotNull(entity);
     }
 }
