@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "43b7d0b2_c45001bd",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/config/PropertyPasswordConfigurationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T12:44:53Z",
+      "side": 1,
+      "message": "For all the tests that are newly added with this change, we would need the copyright for 2025 now",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
