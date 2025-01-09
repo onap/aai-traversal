@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cf2b1b92_daacb19f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:43:44Z",
+      "side": 1,
+      "message": "With respect to the size of this CR and it\u0027s quality I would say that we should split this up into multiple ones.\nOn a general note, I would appreciate it rather that we are adding fewer tests here (that you wrote yourself!) and that are asserting useful things instead of 5000 lines of Chatgpt.",
+      "revId": "8841fd14e6db6f43fe34dd8a02c044a19a5adb2e",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
