@@ -16,6 +16,159 @@
       "message": "For all the tests that are newly added with this change, we would need the copyright for 2025 now",
       "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "213e408f_c0c4925c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/dbgraphmap/SearchGraphTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "It\u0027s good that we are now asserting that a response is returned. We should also assert the response body though. Otherwise, this may as well be returning an error response for all we know",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e456f19d_20ebf32e",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/InvalidResponseStatusTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "This test is the same test as `testFilter_ResponseStatus405_ShouldChangeTo400` and it\u0027s not in fact asserting that an xml content-type is set.",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ddbf9330_8599dd6c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/InvalidResponseStatusTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "This test is not asserting that the entity is in json format",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "922ef80b_3575789d",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/ResponseHeaderManipulationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "You are asserting here that `String !\u003d List\u003cString\u003e` and the `responseHeaderManipulation` is not involved here. This test doesn\u0027t make sense from my perspective. Would should only have positive assertions here of this kind.",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "37c1836c_6231096a",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/ResponseHeaderManipulationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd61aef9_6e615c71",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/ResponseHeaderManipulationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6bbb3c4c_f6be385c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/ResponseHeaderManipulationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "Why are you asserting that mockResponseHeaders.get(\"Content-Type\")) does not have some value, when your are already asserting that mockResponseHeaders does not contain a `Content-Type` in the line before?",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6ee6f5dd_ac09bf93",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/ResponseHeaderManipulationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "24c75729_7f4de9b9",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/post/ResponseHeaderManipulationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:19:27Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
