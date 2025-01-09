@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1fd226a4_8d57a7b8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:20:30Z",
+      "side": 1,
+      "message": "General question: Do I have to review through 5000 lines of chatgpt?",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "43b7d0b2_c45001bd",
