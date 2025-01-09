@@ -186,6 +186,91 @@
       "message": "Same here",
       "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3f11377e_47029840",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/pre/HeaderValidationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:41:10Z",
+      "side": 1,
+      "message": "@ExtendWith is not needed here. @SpringBootTest already includes that",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d35883de_d28c36f1",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/pre/HeaderValidationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:41:10Z",
+      "side": 1,
+      "message": "This is a strange notation, please just use `@TestConfiguration` instead of `@Configuration` on your static inner `TestConfig` class here",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b3b00e6a_07a8e966",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/pre/HeaderValidationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:41:10Z",
+      "side": 1,
+      "message": "This line is declared is twice. Also you don\u0027t need to initialize this explicitly when you are actually dependency injecting it here using `@InjectMocks`",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7232dfb0_22b816e8",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/pre/HeaderValidationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:41:10Z",
+      "side": 1,
+      "message": "This line cannot do anything because there exists no `FROM_APP_ID` header. Chatgpt likely translated the reference to `AAIHeaderProperties.FROM_APP_ID` in the `HeaderValidation.getPartnerName()` method to `FROM_APP_ID` while the header is actually named `X-FromAppId`.",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8917c104_b6ba107c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/interceptors/pre/HeaderValidationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-01-09T13:41:10Z",
+      "side": 1,
+      "message": "The assertion doesn\u0027t fit to your comment. You are only asserting right now, that your mocking isn\u0027t working because `when(requestContext.getHeaderString(\"X-ONAP-PartnerName\")).thenReturn(\"\");` isn\u0027t working and is actually returning `null` instead of `\"\"`.\nWould this line work and the FROM_APP_ID one, then the assertion should be `assertEquals(\"testAppId\", partnerName)`",
+      "revId": "695aaf83599a87eddfefbe30392400e0d5ae4143",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
