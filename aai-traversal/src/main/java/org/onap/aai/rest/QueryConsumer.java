@@ -21,6 +21,7 @@ package org.onap.aai.rest;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -124,7 +125,7 @@ public class QueryConsumer extends TraversalConsumer {
         @Context HttpHeaders headers,
         @Context HttpServletRequest req,
         @Context UriInfo info) {
-        Set<String> roles = this.getRoles(req.getUserPrincipal());
+        Set<String> roles = Collections.emptySet();
 
         return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
             TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,

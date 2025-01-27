@@ -22,6 +22,7 @@ package org.onap.aai.rest;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -125,7 +126,7 @@ public class DslConsumer extends TraversalConsumer {
                                                @RequestParam(defaultValue = "-1") int resultSize,
                                                @RequestHeader HttpHeaders headers,
                                                HttpServletRequest request) throws FileNotFoundException, AAIException {
-        Set<String> roles = this.getRoles(request.getUserPrincipal());
+        Set<String> roles = Collections.emptySet();
 
         return processExecuteQuery(dslQuery, request, versionParam, format, subgraph,
                 validate, headers, new Pageable(resultIndex, resultSize), roles);

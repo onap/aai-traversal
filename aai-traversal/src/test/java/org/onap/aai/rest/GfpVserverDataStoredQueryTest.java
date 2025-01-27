@@ -54,15 +54,16 @@ import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
 import org.onap.aai.HttpTestUtil;
 import org.onap.aai.PayloadUtil;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.transforms.XmlFormatTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 public class GfpVserverDataStoredQueryTest extends AAISetup {
 
     private static final Logger logger =

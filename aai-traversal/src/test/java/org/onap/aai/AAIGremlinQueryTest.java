@@ -39,7 +39,6 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.onap.aai.config.PropertyPasswordConfiguration;
 import org.onap.aai.dbmap.AAIGraph;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.serialization.queryformats.Format;
@@ -51,7 +50,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -82,7 +81,6 @@ import com.jayway.jsonpath.JsonPath;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = TraversalApp.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@ContextConfiguration(initializers = PropertyPasswordConfiguration.class)
 @EnableAutoConfiguration(exclude={CassandraDataAutoConfiguration.class, CassandraAutoConfiguration.class}) // there is no running cassandra instance for the test
 @Import(TraversalTestConfiguration.class)
 public class AAIGremlinQueryTest {
@@ -191,6 +189,7 @@ public class AAIGremlinQueryTest {
         headers.add("Real-Time", "true");
         headers.add("X-FromAppId", "JUNIT");
         headers.add("X-TransactionId", "JUNIT");
+        headers.add("Authorization", "Basic QUFJOkFBSQ==");
         Map<String, String> gremlinQueryMap = new HashMap<>();
         gremlinQueryMap.put("gremlin-query", "g.V().has('hostname', 'test-pserver').count()");
 
