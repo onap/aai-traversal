@@ -20,9 +20,7 @@
 package org.onap.aai.util;
 
 import java.util.List;
-
 import javax.ws.rs.core.HttpHeaders;
-
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.utils.UrlBuilder;

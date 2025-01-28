@@ -27,9 +27,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-
 import javax.annotation.PostConstruct;
-
 import org.eclipse.jetty.util.security.Password;
 import org.onap.aai.TraversalProfiles;
 import org.onap.aai.util.AAIConstants;

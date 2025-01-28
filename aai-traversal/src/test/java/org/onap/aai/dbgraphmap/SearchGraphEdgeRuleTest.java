@@ -20,15 +20,12 @@
 package org.onap.aai.dbgraphmap;
 
 import static org.junit.Assert.assertEquals;
-
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.onap.aai.AAISetup;
 import org.onap.aai.edges.exceptions.EdgeRuleNotFoundException;
 import org.onap.aai.exceptions.AAIException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class SearchGraphEdgeRuleTest extends AAISetup {
     @Rule

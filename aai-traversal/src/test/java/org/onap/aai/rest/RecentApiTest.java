@@ -21,8 +21,6 @@ package org.onap.aai.rest;
 
 import static org.junit.Assert.*;
 
-import java.util.Collections;
-
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.janusgraph.core.JanusGraphTransaction;
 import org.junit.Test;

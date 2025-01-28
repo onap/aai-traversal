@@ -23,7 +23,6 @@ import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.jersey2.server.JerseyTags;
 import io.micrometer.jersey2.server.JerseyTagsProvider;
-
 import org.glassfish.jersey.server.ContainerResponse;
 import org.glassfish.jersey.server.monitoring.RequestEvent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

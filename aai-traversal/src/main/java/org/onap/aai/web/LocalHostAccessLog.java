@@ -20,9 +20,7 @@
 package org.onap.aai.web;
 
 import ch.qos.logback.access.jetty.RequestLogImpl;
-
 import java.util.Arrays;
-
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;

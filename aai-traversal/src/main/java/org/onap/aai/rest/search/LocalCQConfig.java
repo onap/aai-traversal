@@ -31,7 +31,6 @@ import javax.annotation.PostConstruct;
 
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.logging.ErrorLogHelper;
-import org.onap.aai.logging.LogFormatTools;
 import org.onap.aai.util.AAIConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

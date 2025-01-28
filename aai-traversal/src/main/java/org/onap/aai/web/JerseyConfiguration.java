@@ -21,17 +21,13 @@ package org.onap.aai.web;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.util.Comparator.comparingInt;
-
 import com.google.common.collect.Sets;
-
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import javax.annotation.Priority;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletProperties;
 import org.onap.aai.rest.*;

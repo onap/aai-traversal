@@ -20,8 +20,6 @@
 package org.onap.aai.rest.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

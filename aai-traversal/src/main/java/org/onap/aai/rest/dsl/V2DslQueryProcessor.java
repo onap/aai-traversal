@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.onap.aai.config.SpringContextAware;
@@ -39,7 +38,6 @@ import org.onap.aai.dsl.v2.AAIDslParser;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.rest.dsl.v2.DslListener;
 import org.onap.aai.rest.dsl.validation.DslValidator;
-import org.onap.aai.rest.enums.QueryVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
