@@ -27,7 +27,6 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.onap.aai.edges.EdgeIngestor;
-import org.onap.aai.introspection.Loader;
 
 public class DslQueryBuilderTest {
     DslQueryBuilder dslQueryBuilder;

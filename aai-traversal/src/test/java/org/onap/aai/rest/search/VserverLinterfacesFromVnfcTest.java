@@ -19,8 +19,6 @@
  */
 package org.onap.aai.rest.search;
 
-import static org.junit.Assert.*;
-
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;

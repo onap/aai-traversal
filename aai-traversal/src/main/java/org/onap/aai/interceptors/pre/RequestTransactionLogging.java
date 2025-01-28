@@ -20,12 +20,7 @@
 package org.onap.aai.interceptors.pre;
 
 import com.google.gson.JsonObject;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;

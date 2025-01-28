@@ -27,9 +27,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.onap.aai.config.SpringContextAware;
@@ -38,7 +36,6 @@ import org.onap.aai.dsl.v1.AAIDslParser;
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.rest.dsl.v1.DslListener;
 import org.onap.aai.rest.dsl.validation.DslValidator;
-import org.onap.aai.rest.enums.QueryVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;

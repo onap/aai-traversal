@@ -21,11 +21,6 @@
 package org.onap.aai.rest.dsl;
 
 import static org.junit.Assert.*;
-
-import java.util.Deque;
-import java.util.List;
-
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

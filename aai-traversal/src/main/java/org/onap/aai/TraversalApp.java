@@ -20,10 +20,8 @@
 package org.onap.aai;
 
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.onap.aai.aailog.logs.AaiDebugLog;
 import org.onap.aai.config.SpringContextAware;

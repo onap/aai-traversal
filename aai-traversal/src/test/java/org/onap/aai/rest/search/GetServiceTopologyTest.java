@@ -22,7 +22,6 @@ package org.onap.aai.rest.search;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;

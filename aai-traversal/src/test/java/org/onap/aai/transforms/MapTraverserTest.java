@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.junit.Test;
-import org.onap.aai.transforms.LowerCamelToLowerHyphenConverter;
-import org.onap.aai.transforms.MapTraverser;
 
 public class MapTraverserTest {
 

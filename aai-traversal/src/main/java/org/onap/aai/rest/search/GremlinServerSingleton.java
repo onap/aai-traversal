@@ -18,27 +18,7 @@
  * ============LICENSE_END=========================================================
  */
 package org.onap.aai.rest.search;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Date;
-import java.util.Properties;
 import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.tinkerpop.gremlin.driver.Cluster;
-import org.onap.aai.logging.LogFormatTools;
-import org.onap.aai.util.AAIConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 public class GremlinServerSingleton {
 

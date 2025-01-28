@@ -23,9 +23,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.Map.Entry;
-
 import org.apache.commons.io.FileUtils;
-import org.onap.aai.config.SpringContextAware;
 import org.onap.aai.introspection.Introspector;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.LoaderFactory;

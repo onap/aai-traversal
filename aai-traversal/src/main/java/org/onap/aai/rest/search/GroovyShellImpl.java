@@ -20,14 +20,10 @@
 package org.onap.aai.rest.search;
 
 import java.util.Map;
-
-import javax.ws.rs.core.MultivaluedHashMap;
-
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
 import org.onap.aai.restcore.search.GremlinGroovyShell;
-import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.util.AAIConstants;
 
 public class GroovyShellImpl extends GenericQueryProcessor {
