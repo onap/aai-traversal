@@ -1,0 +1,9 @@
+Verified+1: ONAP Bypass GHA <releng+onap.bypass.gha@linuxfoundation.org>
+Verified+1: ONAP Required GHA <releng+onap.required.gha@linuxfoundation.org>
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Fiete Ostkamp <fiete.ostkamp@telekom.de>
+Submitted-by: Fiete Ostkamp <fiete.ostkamp@telekom.de>
+Submitted-at: Tue, 28 Jan 2025 16:41:22 +0000
+Reviewed-on: https://gerrit.onap.org/r/c/aai/traversal/+/140072
+Project: aai/traversal
+Branch: refs/heads/master
