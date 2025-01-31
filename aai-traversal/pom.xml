@@ -103,7 +103,7 @@
 
 
 		<javax.servlet.version>4.0.1</javax.servlet.version>
-		<antlr.version>4.9.3</antlr.version>
+		<antlr.version>4.13.2</antlr.version>
 		<io.swagger.version>1.6.14</io.swagger.version>
 
 		<micrometer.version>1.6.6</micrometer.version>
@@ -490,6 +490,7 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
+			<version>${antlr.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
