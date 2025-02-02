@@ -20,6 +20,8 @@
 
 package org.onap.aai.config;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,11 +39,11 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(requests -> requests
-                .antMatchers("/util/echo", "/actuator/**")
+                .requestMatchers("/util/echo", "/actuator/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated())
-            .httpBasic();
+            .httpBasic(withDefaults());
 
         return httpSecurity.build();
     }

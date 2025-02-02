@@ -25,18 +25,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.Priority;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.PreMatching;
+import jakarta.ws.rs.core.Response;
 
 import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.interceptors.AAIContainerFilter;
 import org.onap.aai.logging.ErrorLogHelper;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @PreMatching
 @Priority(AAIRequestFilterPriority.VERSION)
@@ -48,7 +47,6 @@ public class VersionInterceptor extends AAIContainerFilter implements ContainerR
 
     private final SchemaVersions schemaVersions;
 
-    @Autowired
     public VersionInterceptor(SchemaVersions schemaVersions) {
         this.schemaVersions = schemaVersions;
         allowedVersions = schemaVersions.getVersions().stream().map(SchemaVersion::toString)

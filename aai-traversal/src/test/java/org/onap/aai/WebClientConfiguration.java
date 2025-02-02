@@ -25,7 +25,7 @@ import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
@@ -51,7 +51,7 @@ public class WebClientConfiguration {
       })
       .build();
   }
-  
+
   @Lazy
   @Bean
   WebTestClient mgmtClient(@Value("${local.management.port}") int port) {

@@ -26,18 +26,18 @@
 	<parent>
 		<groupId>org.onap.aai.traversal</groupId>
 		<artifactId>traversal</artifactId>
-		<version>1.15.5-SNAPSHOT</version>
+		<version>1.16.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.onap.aai.traversal</groupId>
 	<artifactId>aai-traversal</artifactId>
 
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<start-class>org.onap.aai.TraversalApp</start-class>
 
 		<maven.skip.tests>true</maven.skip.tests>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 
 		<!-- End of the jacoco plugin properties -->
 
@@ -92,7 +92,7 @@
 		<!-- <janusgraph.version>1.0.0</janusgraph.version>
 		<gremlin.version>3.7.1</gremlin.version> -->
 
-		<spring-cloud.version>2021.0.9</spring-cloud.version>
+		<spring-cloud.version>2022.0.5</spring-cloud.version>
 
 		<!-- fix the driver version to match the one defined in janusgraph-cql
 				spring-boot (2.6) is otherwise downgrading it to 4.13.0 -->
@@ -101,8 +101,6 @@
 		<cassandra-driver.version>4.17.0</cassandra-driver.version>
 		<datastax.native-protocol.version>1.5.1</datastax.native-protocol.version>
 
-
-		<javax.servlet.version>4.0.1</javax.servlet.version>
 		<antlr.version>4.9.3</antlr.version>
 		<io.swagger.version>1.6.14</io.swagger.version>
 
@@ -303,9 +301,8 @@
 			<version>1.8.13</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>2.1</version>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
@@ -343,8 +340,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.1.4</version>
+			<artifactId>jakarta.json</artifactId>
+			<version>2.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.janusgraph</groupId>
@@ -363,7 +360,6 @@
 		<dependency>
 			<groupId>org.janusgraph</groupId>
 			<artifactId>janusgraph-inmemory</artifactId>
-			<version>${janusgraph.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -377,8 +373,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.fasterxml.jackson.jaxrs</groupId>
-			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+			<artifactId>jackson-jakarta-rs-json-provider</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -443,12 +439,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jersey</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 				<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -465,16 +455,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jetty</artifactId>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+            <version>1.0.12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-sleuth</artifactId>
-		</dependency>
-		<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+				<groupId>io.zipkin.reporter2</groupId>
+				<artifactId>zipkin-reporter-brave</artifactId>
 		</dependency>
 		<dependency>
       <groupId>org.springframework.boot</groupId>
@@ -488,13 +475,17 @@
 			</exclusions>
     </dependency>
 		<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+				<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-maven-plugin</artifactId>
-			<version>${antlr.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.sonatype.sisu</groupId>
@@ -537,7 +528,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.34</version>
+			<version>1.18.36</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -560,11 +551,6 @@
 					<groupId>com.datastax.oss</groupId>
 					<artifactId>java-driver-query-builder</artifactId>
 					<version>${cassandra-driver.version}</version>
-			</dependency>
-			<dependency>
-					<groupId>com.datastax.oss</groupId>
-					<artifactId>native-protocol</artifactId>
-					<version>${datastax.native-protocol.version}</version>
 			</dependency>
 			<!-- /cassandra driver -->
 		</dependencies>
@@ -653,7 +639,6 @@
 				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>3.0</version>
 					<configuration>
 						<header>LICENSE.TXT</header>
 						<includes>
@@ -880,7 +865,6 @@
 			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<version>3.0</version>
 				<configuration>
 					<header>LICENSE.TXT</header>
 					<includes>
@@ -895,7 +879,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.1.2</version>
 				<configuration>
 					<classesDirectory>${project.build.outputDirectory}</classesDirectory>
 				</configuration>
