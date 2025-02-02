@@ -19,7 +19,8 @@
  */
 package org.onap.aai.rest.search;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 

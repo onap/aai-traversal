@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onap.aai.service.RetiredService;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -109,4 +109,3 @@ class RetiredInterceptorTest {
         assertEquals(null, extractedVersion);
     }
 }
-
