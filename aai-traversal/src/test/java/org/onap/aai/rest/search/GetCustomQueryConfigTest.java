@@ -19,7 +19,7 @@
  */
 package org.onap.aai.rest.search;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
 

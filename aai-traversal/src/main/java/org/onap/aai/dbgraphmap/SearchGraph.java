@@ -27,10 +27,10 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -159,7 +159,7 @@ public class SearchGraph {
             }
             List<Vertex> results = queryBuilder.toList();
             if (results.isEmpty()) {
-                String errorMessage = String.format("No Node of type %s ",
+                String errorMessage = "No Node of type %s ".formatted(
                     genericQueryBuilder.getStartNodeType(), " found for properties: %s",
                     genericQueryBuilder.getStartNodeKeyParams().toString());
                 throw new AAIException("AAI_6114", errorMessage);

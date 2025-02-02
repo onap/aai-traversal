@@ -22,7 +22,7 @@ package org.onap.aai.rest.search;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.onap.aai.restclient.RestClient;
 import org.slf4j.Logger;

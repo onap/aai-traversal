@@ -24,9 +24,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.UriInfo;
 
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -53,9 +53,9 @@ public class AAIExtensionMap {
     // -----------------------------------------------------------------------
     // postExtErrorCallback | java.lang.reflect.Method (RW)
     // -----------------------------------------------------------------------
-    // servletRequest | javax.servlet.http.HttpServletRequest (RO)
+    // servletRequest | jakarta.servlet.http.HttpServletRequest (RO)
     // -----------------------------------------------------------------------
-    // headers | javax.ws.rs.core.HttpHeaders (RO)
+    // headers | jakarta.ws.rs.core.HttpHeaders (RO)
     // -----------------------------------------------------------------------
     // objFromRequestType | String (ex. ?org.onap.aai.domain.yang.Vce?) (RO)
     // -----------------------------------------------------------------------

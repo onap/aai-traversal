@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 # curl is used in the putTool script
 # (PUT's can't be done using the busybox wget)
 RUN apk --no-cache add curl

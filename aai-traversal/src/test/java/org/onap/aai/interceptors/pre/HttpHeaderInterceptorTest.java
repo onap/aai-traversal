@@ -21,7 +21,7 @@ package org.onap.aai.interceptors.pre;
 
 import org.junit.jupiter.api.Test;
 import org.onap.aai.interceptors.AAIHeaderProperties;
-import javax.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import static org.mockito.Mockito.*;
 
 class HttpHeaderInterceptorTest {
