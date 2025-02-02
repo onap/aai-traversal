@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -40,6 +40,7 @@ import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.Format;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class TraversalConsumer extends RESTAPI {
 
@@ -52,6 +53,7 @@ public abstract class TraversalConsumer extends RESTAPI {
     private Long endTime = null;
     private Long furthestInThePast = null;
 
+    @Autowired
     public TraversalConsumer() {
         this.historyTruncateWindow = Integer.parseInt(SpringContextAware.getApplicationContext()
             .getEnvironment().getProperty("history.truncate.window.days", "365"));

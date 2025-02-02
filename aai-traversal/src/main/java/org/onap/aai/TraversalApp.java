@@ -20,8 +20,8 @@
 package org.onap.aai;
 
 import java.util.Map;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.onap.aai.aailog.logs.AaiDebugLog;
 import org.onap.aai.config.SpringContextAware;
@@ -45,6 +45,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -68,6 +69,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
     basePackages = {"org.onap.aai.config", "org.onap.aai.web", "org.onap.aai.setup",
         "org.onap.aai.tasks", "org.onap.aai.service", "org.onap.aai.rest", "org.onap.aai.aaf",
         "org.onap.aai.aailog", "org.onap.aai.introspection", "org.onap.aai.rest.notification"})
+@Configuration
 public class TraversalApp {
 
     private static final Logger logger = LoggerFactory.getLogger(TraversalApp.class.getName());
