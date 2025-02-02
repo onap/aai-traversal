@@ -22,8 +22,8 @@ package org.onap.aai.rest.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 
 import org.springframework.web.util.UriUtils;
 

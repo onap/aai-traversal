@@ -30,9 +30,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.javatuples.Pair;
@@ -62,7 +62,6 @@ import org.onap.aai.util.AAIConfig;
 import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -102,7 +101,6 @@ public class DslConsumer extends TraversalConsumer {
     private QueryVersion dslApiVersion = DEFAULT_VERSION;
     Map<QueryVersion, DslQueryProcessor> dslQueryProcessors;
 
-    @Autowired
     public DslConsumer(@Qualifier("requestScopedTraversalUriHttpEntry") HttpEntry requestScopedTraversalUriHttpEntry,
             SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
             XmlFormatTransformer xmlFormatTransformer,

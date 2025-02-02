@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.janusgraph.core.SchemaViolationException;
 import org.junit.Before;
@@ -75,7 +75,7 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<String> response = springExceptionHandler.handleJsonException(exception, webRequest);
         AAIErrorResponse responseEntity = objectMapper.readValue(response.getBody(), AAIErrorResponse.class);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        
+
         assertEquals("SVC3102",responseEntity.getRequestError().getServiceException().getMessageId());
         assertEquals("Error parsing input performing %1 on %2 (msg=%3) (ec=%4)",responseEntity.getRequestError().getServiceException().getText());
         assertEquals("PUT",responseEntity.getRequestError().getServiceException().getVariables().get(0));
@@ -90,7 +90,7 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<String> response = springExceptionHandler.handleSchemaViolationException(exception, webRequest);
         AAIErrorResponse responseEntity = objectMapper.readValue(response.getBody(), AAIErrorResponse.class);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        
+
         assertEquals("SVC3002",responseEntity.getRequestError().getServiceException().getMessageId());
         assertEquals("Error writing output performing %1 on %2 (msg=%3) (ec=%4)",responseEntity.getRequestError().getServiceException().getText());
         assertEquals("PUT",responseEntity.getRequestError().getServiceException().getVariables().get(0));
