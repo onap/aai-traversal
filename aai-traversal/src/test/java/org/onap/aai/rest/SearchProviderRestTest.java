@@ -87,6 +87,7 @@ public class SearchProviderRestTest extends AbstractSpringRestTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Real-Time", "true");
         headers.add("X-TransactionId", "JUNIT");
+        headers.setBasicAuth("AAI","AAI");
 
         httpEntity = new HttpEntity(headers);
         String endpoint = "/aai/latest/search/generic-query";

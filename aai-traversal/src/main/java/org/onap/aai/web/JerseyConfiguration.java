@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Priority;
+import jakarta.annotation.Priority;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.onap.aai.rest.*;
 import org.onap.aai.rest.search.ModelAndNamedQueryRestProvider;

@@ -52,7 +52,7 @@ public class Edge {
 
     @Override
     public String toString() {
-        return String.format("labels: %s, direction: %s ",
+        return "labels: %s, direction: %s ".formatted(
             labels.stream().map(EdgeLabel::getLabel).collect(Collectors.joining(",")),
             this.getDirection().name());
     }

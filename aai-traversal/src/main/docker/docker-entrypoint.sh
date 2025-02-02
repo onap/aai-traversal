@@ -43,7 +43,7 @@ JAVA_CMD="exec java";
 JVM_OPTS="${PRE_JVM_ARGS}";
 JVM_OPTS="${JVM_OPTS} -XX:HeapDumpPath=/opt/app/aai-traversal/logs/ajsc-jetty/heap-dump";
 JVM_OPTS="${JVM_OPTS} -XX:MaxMetaspaceSize=${MAX_METASPACE_SIZE}";
-JVM_OPTS="${JVM_OPTS} -XX:MaxRAMPercentage=${MAX_RAM_PERCENTAGE:-60}";
+JVM_OPTS="${JVM_OPTS} -XX:MaxRAMPercentage=${MAX_RAM_PERCENTAGE:-70}";
 
 JVM_OPTS="${JVM_OPTS} -server";
 JVM_OPTS="${JVM_OPTS} -XX:NewSize=512m";
@@ -51,9 +51,6 @@ JVM_OPTS="${JVM_OPTS} -XX:MaxNewSize=512m";
 JVM_OPTS="${JVM_OPTS} -XX:SurvivorRatio=8";
 JVM_OPTS="${JVM_OPTS} -XX:+DisableExplicitGC";
 JVM_OPTS="${JVM_OPTS} -XX:+UseG1GC";
-JVM_OPTS="${JVM_OPTS} -XX:+CMSParallelRemarkEnabled";
-JVM_OPTS="${JVM_OPTS} -XX:+CMSClassUnloadingEnabled";
-JVM_OPTS="${JVM_OPTS} -XX:-UseBiasedLocking";
 JVM_OPTS="${JVM_OPTS} -XX:ParallelGCThreads=4";
 JVM_OPTS="${JVM_OPTS} -XX:LargePageSizeInBytes=128m";
 JVM_OPTS="${JVM_OPTS} -Dsun.net.inetaddr.ttl=180";
