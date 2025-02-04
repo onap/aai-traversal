@@ -68,7 +68,6 @@ public class JerseyConfiguration {
                 org.onap.aai.interceptors.pre.RequestTransactionLogging.class,
                 org.onap.aai.interceptors.pre.HeaderValidation.class,
                 org.onap.aai.interceptors.pre.HttpHeaderInterceptor.class,
-                org.onap.aai.interceptors.pre.OneWaySslAuthorization.class,
                 org.onap.aai.interceptors.pre.VersionLatestInterceptor.class,
                 org.onap.aai.interceptors.pre.RetiredInterceptor.class,
                 org.onap.aai.interceptors.pre.VersionInterceptor.class,
