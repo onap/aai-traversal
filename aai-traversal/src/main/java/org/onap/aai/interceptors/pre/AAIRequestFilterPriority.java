@@ -41,5 +41,7 @@ public final class AAIRequestFilterPriority {
     public static final int HEADER_MANIPULATION = 6000;
 
     public static final int REQUEST_MODIFICATION = 7000;
+    
+    public static final int UTFValidator = 8000;
 
 }
