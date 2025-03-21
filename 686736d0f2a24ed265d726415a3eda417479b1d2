@@ -18,6 +18,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "190c5eaa_4b042d84",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T21:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f8e43e5c_e6ba09d9",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c05fd62a_cccc3828",
@@ -31,6 +49,24 @@
       "writtenOn": "2025-03-21T12:16:53Z",
       "side": 1,
       "message": "I don\u0027t think this test is adding much value here. Can you remove it?",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "365743bf_69f95f13",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T21:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c05fd62a_cccc3828",
       "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -52,6 +88,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "48d051d7_2e2684fb",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T21:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9857618d_e3763c59",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "382e92b3_a9ad9939",
@@ -65,6 +119,24 @@
       "writtenOn": "2025-03-21T12:16:53Z",
       "side": 1,
       "message": "Can you shed some light on this\n```java\n@Ignore\n@EnabledIfSystemProperty(...)\n```\npattern here?\nCan that ever not be `@Ignore`d, when we are setting the `aai.dsl.max.nodecount` to `100` in the `loadProperties` method that is called in `BeforeEach`?",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f69786c_eb9deaf3",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T21:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "382e92b3_a9ad9939",
       "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -86,6 +158,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7f7dc7e2_25bf2058",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T21:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "154b0dc1_adb1aa3a",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7d85a1a7_c884db95",
@@ -103,6 +193,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1b6b6a33_73afe7b0",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T21:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7d85a1a7_c884db95",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2a6823cc_5f2abcfe",
@@ -116,6 +224,24 @@
       "writtenOn": "2025-03-21T12:16:53Z",
       "side": 1,
       "message": "We are asserting `true` here, but the test is called `...ValidationFailed`. This does not make sense, does it?",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f708fd4_4a91eb74",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T21:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a6823cc_5f2abcfe",
       "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
