@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f8e43e5c_e6ba09d9",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T12:03:38Z",
+      "side": 1,
+      "message": "I think we should also have another test case here that tests the `.loop(\"all\", edges)` case, since that is the other value the `validateLoop` param may have",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
