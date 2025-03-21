@@ -16,6 +16,108 @@
       "message": "I think we should also have another test case here that tests the `.loop(\"all\", edges)` case, since that is the other value the `validateLoop` param may have",
       "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c05fd62a_cccc3828",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T12:16:53Z",
+      "side": 1,
+      "message": "I don\u0027t think this test is adding much value here. Can you remove it?",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9857618d_e3763c59",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T12:16:53Z",
+      "side": 1,
+      "message": "`input` cannot be null here, therefore the if block can be removed",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "382e92b3_a9ad9939",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T12:16:53Z",
+      "side": 1,
+      "message": "Can you shed some light on this\n```java\n@Ignore\n@EnabledIfSystemProperty(...)\n```\npattern here?\nCan that ever not be `@Ignore`d, when we are setting the `aai.dsl.max.nodecount` to `100` in the `loadProperties` method that is called in `BeforeEach`?",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "154b0dc1_adb1aa3a",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T12:16:53Z",
+      "side": 1,
+      "message": "Fetching the node count from the property would only make sense to me, when the class that you are testing is also doing that.\nLooking at the `DslValidatorRule` I don\u0027t really find that.\nAm I missing something here, or could we also just define it as `int maxNodeCount \u003d 10;` and go from there?",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7d85a1a7_c884db95",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T12:16:53Z",
+      "side": 1,
+      "message": "Similar to the other property test, I would suggest to remove this test case",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2a6823cc_5f2abcfe",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/dsl/validation/DslQueryValidatorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-21T12:16:53Z",
+      "side": 1,
+      "message": "We are asserting `true` here, but the test is called `...ValidationFailed`. This does not make sense, does it?",
+      "revId": "686736d0f2a24ed265d726415a3eda417479b1d2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
