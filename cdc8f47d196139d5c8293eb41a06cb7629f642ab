@@ -118,6 +118,40 @@
       "message": "PLease replace this with an `assertEquals` here that asserts the response entity",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5db2faa3_d32dc7be",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:08:53Z",
+      "side": 1,
+      "message": "This variable is not used. Can you remove it?",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ebde9055_4ad49ab3",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:08:53Z",
+      "side": 1,
+      "message": "Please replace this with an `assertEquals` here that asserts the response entity",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
