@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d12ece27_f607a42f",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/GenericQueryProcessorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T07:20:23Z",
+      "side": 1,
+      "message": "This test only deals with the \u0027if query shorter than dsl query end, return query\u0027 bit:\n```java\nString end \u003d \".cap(\u0027x\u0027).unfold().dedup()\";\nif (query.length() \u003c\u003d end.length()) {\n    return query;\n}\n```\nCan you add another test that tests `String dslQuery \u003d \"some dsl query.cap(\u0027x\u0027).unfold().dedup()\";`?\nI think the test method name should be adjusted then too, to something like `testAsTreeParameterWithDslQueryShorterThanQueryEnd` and `testAsTreeParameterWithDslQueryLongerThanQueryEnd` maybe",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
