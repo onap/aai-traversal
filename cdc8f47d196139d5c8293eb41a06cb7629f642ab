@@ -152,6 +152,91 @@
       "message": "Please replace this with an `assertEquals` here that asserts the response entity",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0f8dc7a7_9e534c03",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:41:01Z",
+      "side": 1,
+      "message": "The `@BeforeEach` block here is not needed. You are using `@ExtendWith(MockitoExtension.class)` to initialize the mocks, which is an alternative to `MockitoAnnotations.openMocks(this)`",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e9ba050d_d60b3fe1",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:41:01Z",
+      "side": 1,
+      "message": "This test doesn\u0027t make sense to me at all. You are invoking `schemaServiceCQConfig.retrieveCustomQueries();` which will throw a `NullPointerException`. So `fail(...)` is never reached, right now. Then you are catching it and asserting `NotEquals` with some random message.\n\nIf you want to explicitly assert the `NullPointer` (even though I don\u0027t know how that relates to the `_EmptyResponse` in the test method), then do something like:\n```java\nNullPointerException exception \u003d assertThrows(NullPointerException.class, () -\u003e {\n    schemaServiceCQConfig.retrieveCustomQueries();\n});\n\nString expectedMessage \u003d \"...\";\nString actualMessage \u003d exception.getMessage();\n\nassertEquals(expectedMessage, actualMessage);\n```",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "090a42d1_c00038e5",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:41:01Z",
+      "side": 1,
+      "message": "This test case is exactly the same as the one before",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "38253733_65d2ca16",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:41:01Z",
+      "side": 1,
+      "message": "Since we are on Java 17, we can use [text blocks](https://www.baeldung.com/java-text-blocks) here, which would be a bit nicer to read",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "68e97495_672be1c3",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:41:01Z",
+      "side": 1,
+      "message": "Please remove this mock here. It is not involved in the logic you are testing here",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
