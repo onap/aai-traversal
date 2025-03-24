@@ -237,6 +237,23 @@
       "message": "Please remove this mock here. It is not involved in the logic you are testing here",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b9169f06_27854cf6",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T09:01:54Z",
+      "side": 1,
+      "message": "Please add assertions for `result` to make sure it is\n- successful\n- it has a certain value",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
