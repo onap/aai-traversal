@@ -254,6 +254,108 @@
       "message": "Please add assertions for `result` to make sure it is\n- successful\n- it has a certain value",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c351a09d_8c16a57c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T09:24:39Z",
+      "side": 1,
+      "message": "This variable is not used, please remove it",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a4b278ec_82361128",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T09:24:39Z",
+      "side": 1,
+      "message": "The same comment as with the other test that is asserting `500` for missing headers.\nPlease assert the response body here too. Also your test method naming indicates that you want to test the aai exception catching.\nYour method body asserts based on the RuntimeException, which is the other catch-all in the code",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0d1a7ffb_0d49b17c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T09:24:39Z",
+      "side": 1,
+      "message": "Please assert the response body here",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "06ee8c3e_4832f995",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T09:24:39Z",
+      "side": 1,
+      "message": "The `aaiException` field is not used here, please remove it",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9d5b88ae_6a0ffeea",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T09:24:39Z",
+      "side": 1,
+      "message": "Please assert the response body here",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "510a3484_e87f0f60",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T09:24:39Z",
+      "side": 1,
+      "message": "Please assert the response body here",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
