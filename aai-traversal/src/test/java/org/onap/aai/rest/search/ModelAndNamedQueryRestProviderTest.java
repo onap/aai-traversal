@@ -19,30 +19,8 @@
  */
 package org.onap.aai.rest.search;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-
+import jakarta.ws.rs.core.*;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -52,6 +30,15 @@ import org.onap.aai.AAISetup;
 import org.onap.aai.setup.SchemaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
@@ -70,6 +57,8 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
     private ModelAndNamedQueryRestProvider modelAndNamedQueryRestProvider;
 
     private HttpHeaders httpHeaders;
+
+    private HttpServletRequest mockRequest;
 
     private UriInfo uriInfo;
 
@@ -144,20 +133,6 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
 
-    @Test
-    public void testNamedQueryInvalidHeaders() throws Exception {
-
-        httpHeaders = mock(HttpHeaders.class);
-
-        when(httpHeaders.getRequestHeader("X-FromAppId")).thenThrow(IllegalArgumentException.class);
-        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
-
-        Response response = modelAndNamedQueryRestProvider.getNamedQueryResponse(httpHeaders, null,
-            "cloud-region", uriInfo);
-
-        assertNotNull(response);
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-    }
 
     @Ignore("This test is too dependent on the cpu time to timeout and will fail randomly")
     @Test
@@ -196,6 +171,81 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
 
+    // Additional Test Cases for processModelQueryResponse method
+
+    @Test
+    public void testModelQueryWhenNoDataToBeFoundReturnHttpBadRequest() throws Exception {
+        String inboundPayload = getPayload("payloads/named-queries/named-query.json");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders,
+                request, inboundPayload, "GET", uriInfo);
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+        String expectedResponseEntity = """
+            {"requestError":{"serviceException":{"messageId":"SVC3000","text":"Invalid input performing %1 on %2 (msg=%3) (ec=%4)","variables":["POST Search","getModelQueryResponse","Required Field not passed.:Could not determine the top-node nodeType for this request. modelInfo: []","ERR.5.4.6118"]}}}""";
+
+        // Assert for the response body matches the expected error message
+        assertEquals(expectedResponseEntity, response.getEntity());
+    }
+
+
+    @Test
+    public void testModelQueryInvalidHeaders() throws Exception {
+        httpHeaders = mock(HttpHeaders.class);
+
+        when(httpHeaders.getRequestHeader("X-FromAppId")).thenThrow(IllegalArgumentException.class);
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(outputMediaTypes);
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders, null,
+                "cloud-region", "GET", uriInfo);
+
+        assertNotNull(response);
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testModelQueryInvalidPayload() throws Exception {
+        String inboundPayload = "invalid-payload";
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders,
+                request, inboundPayload, "POST", uriInfo);
+
+        assertNotNull(response);
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        String expectedResponseEntity = """
+            {"requestError":{"serviceException":{"messageId":"SVC3000","text":"Invalid input performing %1 on %2 (msg=%3) (ec=%4)","variables":["POST Search","getModelQueryResponse","Invalid input performing %1 on %2:Could not unmarshall: null","ERR.5.2.3000"]}}}""";
+
+        // Assert that the response entity matches the expected error response
+        assertEquals(expectedResponseEntity, response.getEntity());
+    }
+
+    @Test
+    public void testModelQueryActionDelete() throws Exception {
+        String inboundPayload = getPayload("payloads/named-queries/named-query.json");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getContentType()).thenReturn("application/json");
+
+        Response response = modelAndNamedQueryRestProvider.getModelQueryResponse(httpHeaders,
+                request, inboundPayload, "DELETE", uriInfo);
+
+
+        assertNotNull(response);
+        String expectedResponseEntity = """
+            {"requestError":{"serviceException":{"messageId":"SVC3000","text":"Invalid input performing %1 on %2 (msg=%3) (ec=%4)","variables":["POST Search","getModelQueryResponse","Required Field not passed.:Could not determine the top-node nodeType for this request. modelInfo: []","ERR.5.4.6118"]}}}""";
+
+        // Assert that the response entity matches the expected error response
+        assertEquals(expectedResponseEntity, response.getEntity());
+    }
+
     public String getPayload(String filename) throws IOException {
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
@@ -205,4 +255,47 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
         return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
     }
+
+    @Test
+    public void testProcessModelQueryResponse_AAIException() throws Exception {
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+        Response response = modelAndNamedQueryRestProvider.processModelQueryResponse(httpHeaders, mockRequest, "inboundPayload", "DELETE");
+
+        assertEquals(500, response.getStatus());
+        System.out.println(response.getEntity());
+
+
+        assertNotNull(response.getEntity());
+        String expectedResponseEntity = """
+                {"requestError":{"serviceException":{"messageId":"SVC3000","text":"Invalid input performing %1 on %2 (msg=%3) (ec=%4)","variables":["POST Search","getModelQueryResponse","Invalid Accept header","4.0.4014"]}}}""";
+
+        // Assert that the response entity matches the expected error response
+        assertEquals(expectedResponseEntity, response.getEntity());
+    }
+
+    @Test
+    public void testProcessModelQueryResponse_GenericException() throws Exception {
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+
+        Response response = modelAndNamedQueryRestProvider.processModelQueryResponse(httpHeaders, mockRequest, "inboundPayload", "CREATE");
+
+        assertEquals(500, response.getStatus());
+        assertNotNull(response.getEntity());
+        assertTrue(response.getEntity().toString().contains("POST Search"));
+    }
+    @Test
+    public void processNamedQueryResponse_AAIException() throws Exception {
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+        Response response = modelAndNamedQueryRestProvider.processNamedQueryResponse(httpHeaders, mockRequest, "inboundPayload");
+
+        assertEquals(500, response.getStatus());
+        assertNotNull(response.getEntity());
+        String expectedResponseEntity = """
+                {"requestError":{"serviceException":{"messageId":"SVC3000","text":"Invalid input performing %1 on %2 (msg=%3) (ec=%4)","variables":["POST Search","getNamedQueryResponse","Invalid Accept header","4.0.4014"]}}}""";
+
+        assertEquals(expectedResponseEntity, response.getEntity());
+    }
+
+
+
 }

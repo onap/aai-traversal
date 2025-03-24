@@ -26,26 +26,25 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onap.aai.AAISetup;
+import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.Loader;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.setup.SchemaVersion;
@@ -72,6 +71,8 @@ public class SearchProviderTest extends AAISetup {
     private SearchProvider searchProvider;
 
     private HttpHeaders httpHeaders;
+
+    private HttpServletRequest mockRequest;
 
     private UriInfo uriInfo;
 
@@ -226,4 +227,32 @@ public class SearchProviderTest extends AAISetup {
         assertThat(response.getEntity().toString(), containsString("7406"));
     }
 
+
+    @Test
+    public void testProcessGenericQueryResponse_GeneralException() throws Exception {
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+
+        Response response = searchProvider.processGenericQueryResponse(httpHeaders, mockRequest, "start-node",
+                new ArrayList<>(), new ArrayList<>(), 1, "v1");
+
+        assertEquals(500, response.getStatus());
+        String expectedResponseEntity = """
+            {"requestError":{"serviceException":{"messageId":"SVC3000","text":"Invalid input performing %1 on %2 (msg=%3) (ec=%4)","variables":["GET Search","getGenericQueryResponse","Invalid Accept header","4.0.4014"]}}}""";
+
+        assertEquals(expectedResponseEntity, response.getEntity());
+    }
+
+    @Test
+    public void testProcessNodesQueryResponse_GeneralException() throws Exception {
+        when(httpHeaders.getAcceptableMediaTypes()).thenReturn(new ArrayList<>());
+
+        Response response = searchProvider.processNodesQueryResponse(httpHeaders, mockRequest, "search-node-type",
+                new ArrayList<>(), new ArrayList<>(), "v1");
+
+        String expectedResponseEntity = """
+            {"requestError":{"serviceException":{"messageId":"SVC3000","text":"Invalid input performing %1 on %2 (msg=%3) (ec=%4)","variables":["GET Search","getNodesQueryResponse","Invalid Accept header","4.0.4014"]}}}""";
+
+        assertEquals(500, response.getStatus());
+        assertEquals(expectedResponseEntity, response.getEntity());
+    }
 }
