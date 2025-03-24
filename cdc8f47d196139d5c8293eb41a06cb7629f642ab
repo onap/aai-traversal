@@ -16,6 +16,23 @@
       "message": "This test only deals with the \u0027if query shorter than dsl query end, return query\u0027 bit:\n```java\nString end \u003d \".cap(\u0027x\u0027).unfold().dedup()\";\nif (query.length() \u003c\u003d end.length()) {\n    return query;\n}\n```\nCan you add another test that tests `String dslQuery \u003d \"some dsl query.cap(\u0027x\u0027).unfold().dedup()\";`?\nI think the test method name should be adjusted then too, to something like `testAsTreeParameterWithDslQueryShorterThanQueryEnd` and `testAsTreeParameterWithDslQueryLongerThanQueryEnd` maybe",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a0d0946e_e31a9fe7",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T07:43:25Z",
+      "side": 1,
+      "message": "Please don\u0027t assert what you are NOT expecting. That doesn\u0027t make any sense at all.\nRather assert here that you are expecting a `Response.Status.BAD_REQUEST.getStatusCode()` here and also the specific response body:\n```java\nassertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());\nString expectedResponseEntity \u003d \"\"\"\n        {\"requestError\":{\"serviceException\":{\"messageId\":\"SVC3000\",\"text\":\"Invalid input performing %1 on %2 (msg\u003d%3) (ec\u003d%4)\",\"variables\":[\"POST Search\",\"getModelQueryResponse\",\"Required Field not passed.:Could not determine the top-node nodeType for this request. modelInfo: []\",\"ERR.5.4.6118\"]}}}\"\"\";\nassertEquals(expectedResponseEntity,response.getEntity());\n```",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
