@@ -33,6 +33,91 @@
       "message": "Please don\u0027t assert what you are NOT expecting. That doesn\u0027t make any sense at all.\nRather assert here that you are expecting a `Response.Status.BAD_REQUEST.getStatusCode()` here and also the specific response body:\n```java\nassertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());\nString expectedResponseEntity \u003d \"\"\"\n        {\"requestError\":{\"serviceException\":{\"messageId\":\"SVC3000\",\"text\":\"Invalid input performing %1 on %2 (msg\u003d%3) (ec\u003d%4)\",\"variables\":[\"POST Search\",\"getModelQueryResponse\",\"Required Field not passed.:Could not determine the top-node nodeType for this request. modelInfo: []\",\"ERR.5.4.6118\"]}}}\"\"\";\nassertEquals(expectedResponseEntity,response.getEntity());\n```",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "50c21795_22a71495",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:07:32Z",
+      "side": 1,
+      "message": "Please assert the response entity here.\nAlso your method is called ``...InvalidHeaders`, while what you are testing here is rather that `RuntimeExceptions` are caught and mapped to error responses.\n\nI would suggest that you either rename the test message to something like `testModelQueryRuntimeExceptionsAreCaught`, or if it is specifically about testing that the `xFromAppId` header may not be `null`, then adjust this testcase to `when(httpHeaders.getRequestHeader(\"X-FromAppId\")).thenReturn(null)` and assert the `AAIException` that is caught and mapped to some error response",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e1fdb3dc_beb77bbe",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:07:32Z",
+      "side": 1,
+      "message": "The assertion doesn\u0027t match the test name. I would suggest to change this to `assertEquals(...)` (instead of `assertNotEquals(...)`) and resolve the exception that would make it fail:\n```json\n{\n  \"requestError\": {\n    \"serviceException\": {\n      \"messageId\": \"SVC3000\",\n      \"text\": \"Invalid input performing %1 on %2 (msg\u003d%3) (ec\u003d%4)\",\n      \"variables\": [\n        \"POST Search\",\n        \"getModelQueryResponse\",\n        \"Required Field not passed.:Could not determine the top-node nodeType for this request. modelInfo: []\",\n        \"ERR.5.4.6118\"\n      ]\n    }\n  }\n}\n\n```",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8e08eab7_f1b42655",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:07:32Z",
+      "side": 1,
+      "message": "Please also assert the response entity",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "580d68bd_cd9f0945",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:07:32Z",
+      "side": 1,
+      "message": "This variable is not used. Can you remove it?",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cdbbbb68_b969c0c0",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-24T08:07:32Z",
+      "side": 1,
+      "message": "PLease replace this with an `assertEquals` here that asserts the response entity",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
