@@ -473,6 +473,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ef797095_20d92110",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T12:22:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68e97495_672be1c3",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b9169f06_27854cf6",
