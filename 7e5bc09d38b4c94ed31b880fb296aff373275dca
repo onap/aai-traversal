@@ -16,6 +16,24 @@
       "message": "Please remove this leftover",
       "revId": "7e5bc09d38b4c94ed31b880fb296aff373275dca",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a9a283a_38fd9da5",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T07:50:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3cb31f1_64891e93",
+      "revId": "7e5bc09d38b4c94ed31b880fb296aff373275dca",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
