@@ -88,6 +88,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "15ad25dd_169b839a",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "50c21795_22a71495",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e1fdb3dc_beb77bbe",
@@ -101,6 +119,24 @@
       "writtenOn": "2025-03-24T08:07:32Z",
       "side": 1,
       "message": "The assertion doesn\u0027t match the test name. I would suggest to change this to `assertEquals(...)` (instead of `assertNotEquals(...)`) and resolve the exception that would make it fail:\n```json\n{\n  \"requestError\": {\n    \"serviceException\": {\n      \"messageId\": \"SVC3000\",\n      \"text\": \"Invalid input performing %1 on %2 (msg\u003d%3) (ec\u003d%4)\",\n      \"variables\": [\n        \"POST Search\",\n        \"getModelQueryResponse\",\n        \"Required Field not passed.:Could not determine the top-node nodeType for this request. modelInfo: []\",\n        \"ERR.5.4.6118\"\n      ]\n    }\n  }\n}\n\n```",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ed018f38_c1941990",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/ModelAndNamedQueryRestProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e1fdb3dc_beb77bbe",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -332,6 +368,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ad80834_fa576715",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9ba050d_d60b3fe1",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "090a42d1_c00038e5",
@@ -349,6 +403,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "66dad29c_80bcbe34",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "090a42d1_c00038e5",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "38253733_65d2ca16",
@@ -362,6 +434,24 @@
       "writtenOn": "2025-03-24T08:41:01Z",
       "side": 1,
       "message": "Since we are on Java 17, we can use [text blocks](https://www.baeldung.com/java-text-blocks) here, which would be a bit nicer to read",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0eb386a_1596174e",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "38253733_65d2ca16",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -400,6 +490,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "70983dcb_60252ad7",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SchemaServiceCQConfigTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9169f06_27854cf6",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c351a09d_8c16a57c",
@@ -413,6 +521,24 @@
       "writtenOn": "2025-03-24T09:24:39Z",
       "side": 1,
       "message": "This variable is not used, please remove it",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b75e2ba6_dcea953e",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c351a09d_8c16a57c",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -434,6 +560,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ae43f61_491b33c9",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4b278ec_82361128",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0d1a7ffb_0d49b17c",
@@ -447,6 +591,24 @@
       "writtenOn": "2025-03-24T09:24:39Z",
       "side": 1,
       "message": "Please assert the response body here",
+      "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "df6b361a_9fcd01bc",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/search/SearchProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-25T10:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d1a7ffb_0d49b17c",
       "revId": "cdc8f47d196139d5c8293eb41a06cb7629f642ab",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
