@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "55f40548_065c74be",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TestCQ2Gremlin.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-26T09:04:04Z",
+      "side": 1,
+      "message": "Please use `import static org.junit.jupiter.api.Assertions.*;` here to consistently use Junit 5 classes for new tests",
+      "revId": "d7d52b366255181301d256558481f62f796c8850",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7f53635b_6e1419f5",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TestCQ2Gremlin.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-26T09:04:04Z",
+      "side": 1,
+      "message": "Please rename this class to `CQ2GremlinTest` to have a similar naming to all other test classes",
+      "revId": "d7d52b366255181301d256558481f62f796c8850",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
