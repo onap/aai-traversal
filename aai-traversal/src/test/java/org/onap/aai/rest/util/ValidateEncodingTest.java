@@ -19,16 +19,15 @@
  */
 package org.onap.aai.rest.util;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.UnsupportedEncodingException;
-
+import java.net.URI;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriInfo;
-
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ValidateEncodingTest {
 
@@ -101,6 +100,34 @@ public class ValidateEncodingTest {
         ValidateEncoding validator = ValidateEncoding.getInstance();
 
         assertEquals(true, validator.validate(mockUriInfo));
+    }
+
+    @Test
+    public void badUriPath() throws UnsupportedEncodingException {
+        String badPath = "/aai/v6/network/vces/vce/blahh::blach/others/other/jklfea{}";
+
+        UriInfo mockUriInfo = getMockUriInfo(badPath, new MultivaluedHashMap<String, String>());
+
+        ValidateEncoding validator = ValidateEncoding.getInstance();
+
+        assertFalse(validator.validate(mockUriInfo));
+    }
+
+
+    @Test
+    public void goodUriPath() throws UnsupportedEncodingException {
+        URI goodUri = URI.create("http://example.com/aai/v6/network/vces/vce/blahh%3A%3Ablach/others/other/jklfea%7B%7D");
+        ValidateEncoding validator = ValidateEncoding.getInstance();
+
+        assertEquals(true, validator.validate(goodUri));
+    }
+
+    @Test
+    public void emptyUriPath() throws UnsupportedEncodingException {
+        URI emptyUri = URI.create("http://example.com");
+        ValidateEncoding validator = ValidateEncoding.getInstance();
+
+        assertTrue(validator.validate(emptyUri));
     }
 
     private UriInfo getMockUriInfo(String path, MultivaluedMap<String, String> map) {
