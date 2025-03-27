@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "12eb7176_c082f228",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-27T07:50:20Z",
+      "side": 1,
+      "message": "This field is not used and can be removed",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "10fae8b2_db73f1bc",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-27T07:50:20Z",
+      "side": 1,
+      "message": "Please use Junit 5\u0027s `@BeforeEach` here",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2e2e1bc2_cae2ad51",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-27T07:50:20Z",
+      "side": 1,
+      "message": "`anyObject()` is deprecated. You should be able to replace it with `any()`",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
