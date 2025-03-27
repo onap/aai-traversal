@@ -50,6 +50,57 @@
       "message": "`anyObject()` is deprecated. You should be able to replace it with `any()`",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5f618dde_96080d7c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-27T08:29:57Z",
+      "side": 1,
+      "message": "This is not used here, since at this point, the class level `endTime` field that is checked in the method is not null:\n```java\nif (endTime !\u003d null) {\n    return endTime;\n}\n\nString endTs \u003d params.getFirst(\"endTs\");\n```\nTherefore it does not reach `params.getFirst(\"endTs\")` and the stub is not used.\nLikely you can fix this be re-instantiating the object under test, that you don\u0027t have that state here",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ee777b48_39ebbbc0",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-27T08:29:57Z",
+      "side": 1,
+      "message": "Is an assertion missing here for the value of `endTime`?",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6603dee9_7f189a8e",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-27T08:29:57Z",
+      "side": 1,
+      "message": "For some reason, this stub is not working and `queryParameters.getFirst(\"endTs\")` is instead returning `\"now\"`",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
