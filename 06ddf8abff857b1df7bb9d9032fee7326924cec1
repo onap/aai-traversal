@@ -203,6 +203,57 @@
       "message": "Leftover",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "67fdf0af_f4d1e27f",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/util/PaginationUtilTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-30T19:10:41Z",
+      "side": 1,
+      "message": "Please remove this test. This asserts a null behaviour that is not explicitly wanted",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "20bb02bc_6f46d106",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/util/ValidateEncodingTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-30T19:10:41Z",
+      "side": 1,
+      "message": "You can use `assertFalse` here",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6f4963d1_c9be6bb2",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/util/ValidateEncodingTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-30T19:10:41Z",
+      "side": 1,
+      "message": "You can use `assertTrue` here",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
