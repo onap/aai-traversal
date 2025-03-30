@@ -135,6 +135,40 @@
       "message": "I don\u0027t think the `NullPointerException` that you are asserting here is really an intended property of the implementation of this method.\nAs such, I would suggest to remove this test, since it is not clear if this behaviour is desirable",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "82dfcbc1_0e144f18",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-30T17:22:24Z",
+      "side": 1,
+      "message": "Please add an assertion if you want to test this. Also, this test case looks quite unfinished.\nSo either remove it, or clean it up please",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ac5f1d0c_786e1829",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-03-30T17:22:24Z",
+      "side": 1,
+      "message": "Leftover",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
