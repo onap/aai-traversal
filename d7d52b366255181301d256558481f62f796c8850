@@ -18,6 +18,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7188e4c4_327cda14",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TestCQ2Gremlin.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55f40548_065c74be",
+      "revId": "d7d52b366255181301d256558481f62f796c8850",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7f53635b_6e1419f5",

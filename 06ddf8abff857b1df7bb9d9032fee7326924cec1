@@ -35,6 +35,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cd2233e6_0c0ccfb4",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "10fae8b2_db73f1bc",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2e2e1bc2_cae2ad51",
@@ -48,6 +66,24 @@
       "writtenOn": "2025-03-27T07:50:20Z",
       "side": 1,
       "message": "`anyObject()` is deprecated. You should be able to replace it with `any()`",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "62686151_94246960",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2e2e1bc2_cae2ad51",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -69,6 +105,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "dd5a0b6c_35d410fc",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5f618dde_96080d7c",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ee777b48_39ebbbc0",
@@ -82,6 +136,24 @@
       "writtenOn": "2025-03-27T08:29:57Z",
       "side": 1,
       "message": "Is an assertion missing here for the value of `endTime`?",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "072cda92_fd5242ae",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ee777b48_39ebbbc0",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -103,6 +175,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "659d1d4b_509a325f",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6603dee9_7f189a8e",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "35844213_a80e8d86",
@@ -116,6 +206,24 @@
       "writtenOn": "2025-03-30T16:29:01Z",
       "side": 1,
       "message": "What is this test supposed to test?\nYou have implemented `getSubgraphStrategy` yourself in this test class and your implementation does not contain any validation logic for the values of `startTs` and `endTs`",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d73c844_dc5e9288",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "35844213_a80e8d86",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -137,6 +245,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a362fde_e91a66b3",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1cd65d41_aaf07908",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "88a8a0c5_875ee5c5",
@@ -150,6 +276,24 @@
       "writtenOn": "2025-03-30T18:53:57Z",
       "side": 1,
       "message": "Same comment as for the other `testGetSubgraphStrategyWithEqualStartAndEndTimestamps()` test",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5dde363a_d1016bac",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88a8a0c5_875ee5c5",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -171,6 +315,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d48140b7_fae8c0a5",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "799fe89d_305cd223",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "82dfcbc1_0e144f18",
@@ -184,6 +346,24 @@
       "writtenOn": "2025-03-30T17:22:24Z",
       "side": 1,
       "message": "Please add an assertion if you want to test this. Also, this test case looks quite unfinished.\nSo either remove it, or clean it up please",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "63f9fc99_65abc883",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82dfcbc1_0e144f18",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -205,6 +385,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "22f3ccf6_a1be83cc",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ac5f1d0c_786e1829",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "67fdf0af_f4d1e27f",
@@ -218,6 +416,24 @@
       "writtenOn": "2025-03-30T19:10:41Z",
       "side": 1,
       "message": "Please remove this test. This asserts a null behaviour that is not explicitly wanted",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cd0e5cb0_71a88e18",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/util/PaginationUtilTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "67fdf0af_f4d1e27f",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -239,6 +455,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ad45e50_8986b526",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/util/ValidateEncodingTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "20bb02bc_6f46d106",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6f4963d1_c9be6bb2",
@@ -252,6 +486,24 @@
       "writtenOn": "2025-03-30T19:10:41Z",
       "side": 1,
       "message": "You can use `assertTrue` here",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "53dfd2a2_d7bf18a4",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/util/ValidateEncodingTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6f4963d1_c9be6bb2",
       "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
