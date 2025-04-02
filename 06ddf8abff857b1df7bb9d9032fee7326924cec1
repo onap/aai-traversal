@@ -18,6 +18,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2ae5c6a3_eb4d4604",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TraversalConsumerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T05:37:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12eb7176_c082f228",
+      "revId": "06ddf8abff857b1df7bb9d9032fee7326924cec1",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "10fae8b2_db73f1bc",
