@@ -51,6 +51,24 @@
       "message": "Please rename this class to `CQ2GremlinTest` to have a similar naming to all other test classes",
       "revId": "d7d52b366255181301d256558481f62f796c8850",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fefaf603_4d880062",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/rest/TestCQ2Gremlin.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-02T06:09:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7f53635b_6e1419f5",
+      "revId": "d7d52b366255181301d256558481f62f796c8850",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
