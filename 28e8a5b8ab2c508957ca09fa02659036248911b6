@@ -105,6 +105,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "5d312220_a7b0ebd6",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-03T14:49:32Z",
+      "side": 1,
+      "message": "Please remove this at it is not used anywhere",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "e9998783_6ea216ef",
         "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
         "patchSetId": 1
@@ -116,6 +133,23 @@
       "writtenOn": "2025-04-03T14:48:41Z",
       "side": 1,
       "message": "`openMocks` is not needed here. `@SpringBootTest` is already doing that",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7a4499a0_294f9a24",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-03T14:49:32Z",
+      "side": 1,
+      "message": "Please remove this",
       "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
