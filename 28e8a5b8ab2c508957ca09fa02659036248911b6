@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fca6092b_a377abe9",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/transforms/LowerCamelToLowerHyphenConverterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-03T14:11:58Z",
+      "side": 1,
+      "message": "Please use the Junit 5 import here",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3212cdb4_ce9ccddc",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/transforms/LowerCamelToLowerHyphenConverterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-03T14:11:58Z",
+      "side": 1,
+      "message": "This test is named `inputWithHyphens`, but it\u0027s not testing that (I would expect an input of `my-Variable-Name-Test` for instance)",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
