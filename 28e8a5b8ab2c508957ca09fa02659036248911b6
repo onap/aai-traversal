@@ -18,6 +18,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "066dcdaa_1e78bd81",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fb8e398_0e2f68f3",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "70327b08_997ef089",
@@ -31,6 +49,24 @@
       "writtenOn": "2025-04-03T14:48:41Z",
       "side": 1,
       "message": "Please remove the `webEnvironment` configuration here. You are not actually defining any test case that would require a full web environment",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "71e19e69_4816ba07",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70327b08_997ef089",
       "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -52,6 +88,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9c5b40bb_16b16121",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "65f513df_81840015",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ed9135c7_dc9f4392",
@@ -65,6 +119,24 @@
       "writtenOn": "2025-04-03T14:48:41Z",
       "side": 1,
       "message": "Please remove this variable declaration here. You are not using it",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d9c1312b_94788461",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed9135c7_dc9f4392",
       "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -86,6 +158,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f74ef40a_1a18c67d",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e365512_c50a997a",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f1c82748_f5f99631",
@@ -99,6 +189,24 @@
       "writtenOn": "2025-04-03T14:48:41Z",
       "side": 1,
       "message": "Please remove this field declaration here. You are not using it anywhere",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9114f1e0_cb4a6601",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f1c82748_f5f99631",
       "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -120,6 +228,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "82261af4_6a22b617",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5d312220_a7b0ebd6",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e9998783_6ea216ef",
@@ -133,6 +259,24 @@
       "writtenOn": "2025-04-03T14:48:41Z",
       "side": 1,
       "message": "`openMocks` is not needed here. `@SpringBootTest` is already doing that",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5389150f_b0e4aa9b",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9998783_6ea216ef",
       "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
@@ -154,6 +298,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "23e2946f_05b8b0f6",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a4499a0_294f9a24",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "fca6092b_a377abe9",
@@ -171,6 +333,24 @@
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e657c547_4a1c8a1c",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/transforms/LowerCamelToLowerHyphenConverterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fca6092b_a377abe9",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3212cdb4_ce9ccddc",
@@ -184,6 +364,24 @@
       "writtenOn": "2025-04-03T14:11:58Z",
       "side": 1,
       "message": "This test is named `inputWithHyphens`, but it\u0027s not testing that (I would expect an input of `my-Variable-Name-Test` for instance)",
+      "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b5357350_041563a9",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/transforms/LowerCamelToLowerHyphenConverterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-04T12:01:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3212cdb4_ce9ccddc",
       "revId": "28e8a5b8ab2c508957ca09fa02659036248911b6",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
