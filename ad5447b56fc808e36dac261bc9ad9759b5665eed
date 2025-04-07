@@ -16,6 +16,24 @@
       "message": "Can you please elaborate on your reasoning for\n- declaring a `Profile` class in this test class\n- declaring a `SpecificExpectedException` exception in this test class\n- declaring a `processProfile` helper method for these classes\n\nI am a bit pissed of to be honest here, because I can only imagine that it is not you who came up with this, but ChatGPT hallucinating here.\nIf I should assess this wrongly and there should indeed be any value in testing classes that are declared in the test class, please enlighten me.",
       "revId": "ad5447b56fc808e36dac261bc9ad9759b5665eed",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e40f69c2_93c36611",
+        "filename": "aai-traversal/src/test/java/org/onap/aai/TraversalAppTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-04-07T21:00:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dbc14ea2_2f14c48c",
+      "revId": "ad5447b56fc808e36dac261bc9ad9759b5665eed",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
