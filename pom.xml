@@ -26,11 +26,11 @@
     <parent>
         <groupId>org.onap.aai.aai-common</groupId>
         <artifactId>aai-parent</artifactId>
-        <version>1.16.0</version>
+        <version>1.16.1-SNAPSHOT</version>
     </parent>
     <groupId>org.onap.aai.traversal</groupId>
     <artifactId>traversal</artifactId>
-    <version>1.16.0-SNAPSHOT</version>
+    <version>1.16.1-SNAPSHOT</version>
     <name>aai-traversal</name>
     <packaging>pom</packaging>
     <modules>
@@ -42,7 +42,7 @@
             Nexus Proxy Properties and Snapshot Locations
             Ideally this can be overwritten at runtime per internal environment specific values at runtime
         -->
-        <aai.common.version>1.16.0</aai.common.version>
+        <aai.common.version>1.16.1-SNAPSHOT</aai.common.version>
         <nexusproxy>https://nexus.onap.org</nexusproxy>
         <site.path>/content/sites/site/org/onap/aai/traversal/${project.artifactId}/${project.version}</site.path>
         <release.path>/content/repositories/releases/</release.path>
