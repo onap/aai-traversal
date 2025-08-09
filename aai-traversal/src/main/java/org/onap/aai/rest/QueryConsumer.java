@@ -82,9 +82,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Timed
 @Path("{version: v[1-9][0-9]*|latest}/query")
+@Tag(name = "Query Consumer", description = "Executes predefined or custom queries on the A&AI graph.")
 public class QueryConsumer extends TraversalConsumer {
 
     private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
@@ -109,8 +115,17 @@ public class QueryConsumer extends TraversalConsumer {
     }
 
     @PUT
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary = "Execute A&AI Query", description = "Runs a query using start URIs, a query name, or a Gremlin string.", responses = {
+            @ApiResponse(responseCode = "200", description = "Query executed successfully", content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class)),
+                    @Content(mediaType = MediaType.APPLICATION_XML, schema = @Schema(implementation = String.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "404", description = "Query target not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response executeQuery(
         String content,
         @PathParam("version") String versionParam,

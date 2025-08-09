@@ -37,11 +37,18 @@ import org.onap.aai.restcore.RESTAPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * The Class EchoResponse.
  */
 @Path("/util")
 @Component
+@Tag(name = "Utility", description = "Provides utility endpoints such as health checks and connectivity verification.")
 public class EchoResponse extends RESTAPI {
 
 	protected static String authPolicyFunctionName = "util";
@@ -68,6 +75,15 @@ public class EchoResponse extends RESTAPI {
 	@GET
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	@Path("/echo")
+	@Operation(summary = "Health check and echo", description = "Echoes `X-FromAppId` and `X-TransactionId` headers. If `action` is provided, also checks database connectivity.", parameters = {
+			@Parameter(name = "action", in = ParameterIn.QUERY, description = "Check DB connectivity if present"),
+			@Parameter(name = "X-FromAppId", in = ParameterIn.HEADER, required = true),
+			@Parameter(name = "X-TransactionId", in = ParameterIn.HEADER, required = true)
+	}, responses = {
+			@ApiResponse(responseCode = "200", description = "Healthy"),
+			@ApiResponse(responseCode = "503", description = "DB check failed"),
+			@ApiResponse(responseCode = "500", description = "Internal error")
+	})
 	public Response echoResult(@Context HttpHeaders headers, @Context HttpServletRequest req,
 			@QueryParam("action") String myAction) {
 
