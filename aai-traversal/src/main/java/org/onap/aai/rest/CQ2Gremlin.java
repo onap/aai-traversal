@@ -48,7 +48,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @Path("/cq2gremlin")
+@Tag(name = "Custom Queries", description = "Endpoints for converting custom queries into Gremlin traversals.")
 public class CQ2Gremlin extends RESTAPI {
 
     private HttpEntry traversalUriHttpEntry;
@@ -66,8 +70,10 @@ public class CQ2Gremlin extends RESTAPI {
     }
 
     @PUT
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(tags = { "Custom Queries" }, 
+        summary = "Convert custom query to Gremlin traversal", description = "Converts a custom query definition into a Gremlin traversal string.", operationId = "convertCustomQueryToGremlin")
     public Response getC2Qgremlin(@RequestBody Map<String, CustomQueryConfigDTO> content,
         @Context HttpHeaders headers, @Context UriInfo info) {
         if (content.size() == 0) {

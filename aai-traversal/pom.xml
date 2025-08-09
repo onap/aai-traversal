@@ -107,6 +107,9 @@
 
 		<!-- Integration tests will be skipped by default. Could be enabled here or by -DskipITs=false-->
 		<skipITs>true</skipITs>
+
+		<!-- Swagger version for open api json creation -->
+		<swagger.version>2.2.35</swagger.version>
 	</properties>
 	<profiles>
 		<!-- Docker profile to be used for building docker image and pushing to
@@ -495,6 +498,11 @@
 			<version>1.18.36</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-jaxrs2-jakarta</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -846,6 +854,30 @@
 				<configuration>
 					<classesDirectory>${project.build.outputDirectory}</classesDirectory>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<version>${swagger.version}</version>
+				<executions>
+					<execution>
+						<id>generate-openapi</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>resolve</goal>
+						</goals>
+						<configuration>
+							<attachSwaggerArtifact>false</attachSwaggerArtifact>
+							<outputPath>${project.build.directory}/generated-swagger-docs</outputPath>
+							<outputFileName>openapi</outputFileName>
+							<outputFormat>JSON</outputFormat>
+							<resourcePackages>
+								<resourcePackage>org.onap.aai</resourcePackage>
+							</resourcePackages>
+							<prettyPrint>true</prettyPrint>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
