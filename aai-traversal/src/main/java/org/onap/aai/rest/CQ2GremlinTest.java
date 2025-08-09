@@ -66,7 +66,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @Path("/cq2gremlintest")
+@Tag(name = "Custom Query Testing", description = "Endpoints for validating custom queries by executing them against a test graph.")
 public class CQ2GremlinTest extends RESTAPI {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CQ2GremlinTest.class);
@@ -90,8 +94,10 @@ public class CQ2GremlinTest extends RESTAPI {
     }
 
     @PUT
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(tags = {
+            "Custom Query Testing" }, summary = "Test custom query to Gremlin traversal", description = "Executes a custom query against an in-memory graph and validates the results.", operationId = "testCustomQueryToGremlin")
     public Response getC2Qgremlin(@RequestBody CustomQueryTestDTO content,
         @Context HttpHeaders headers, @Context UriInfo info) throws AAIException {
         if (content == null) {

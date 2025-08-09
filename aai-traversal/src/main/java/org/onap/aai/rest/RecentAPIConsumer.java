@@ -63,9 +63,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Path("/recents/{version: v[1-9][0-9]*|latest}")
 @Timed
+@Tag(name = "Recent Data Queries", description = "Retrieve recently updated nodes within a specified time range.")
 public class RecentAPIConsumer extends RESTAPI {
 
     private static final String AAI_3021 = "AAI_3021";
@@ -90,8 +95,8 @@ public class RecentAPIConsumer extends RESTAPI {
 
     @Autowired
     public RecentAPIConsumer(HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
-        GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
-        @Value("${schema.uri.base.path}") String basePath) {
+            GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
+            @Value("${schema.uri.base.path}") String basePath) {
         this.traversalUriHttpEntry = traversalUriHttpEntry;
         this.schemaVersions = schemaVersions;
         this.gremlinServerSingleton = gremlinServerSingleton;
@@ -101,11 +106,22 @@ public class RecentAPIConsumer extends RESTAPI {
 
     @GET
     @Path("/{nodeType: .+}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Operation(summary = "Get recent data for a given node type", description = "Fetches nodes updated within the given hours or date-time for the specified node type and schema version.", parameters = {
+            @Parameter(name = "version", description = "Schema version or 'latest'", required = true),
+            @Parameter(name = "nodeType", description = "Type of the node to query", required = true),
+            @Parameter(name = "hours", description = "Time range in hours", required = false),
+            @Parameter(name = "date-time", description = "Epoch milliseconds for start time", required = false)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "Successful retrieval of recent data"),
+            @ApiResponse(responseCode = "400", description = "Invalid input parameters"),
+            @ApiResponse(responseCode = "404", description = "Node type not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getRecentData(@PathParam("version") String versionParam,
-        @PathParam("nodeType") String nodeType, @Context HttpHeaders headers,
-        @Context HttpServletRequest req, @Context UriInfo info) {
+            @PathParam("nodeType") String nodeType, @Context HttpHeaders headers,
+            @Context HttpServletRequest req, @Context UriInfo info) {
 
         return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
             TraversalConstants.AAI_TRAVERSAL_TIMEOUT_APP,

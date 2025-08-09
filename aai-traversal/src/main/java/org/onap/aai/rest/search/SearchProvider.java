@@ -64,6 +64,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Implements the search subdomain in the REST API. All API calls must include X-FromAppId and
@@ -71,6 +74,7 @@ import io.micrometer.core.annotation.Timed;
  */
 @Path("/{version: v[1-9][0-9]*|latest}/search")
 @Timed
+@Tag(name = "Search", description = "Provides APIs to execute graph search queries including generic and node-specific searches")
 public class SearchProvider extends RESTAPI {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchProvider.class);
@@ -109,8 +113,13 @@ public class SearchProvider extends RESTAPI {
      */
     /* ---------------- Start Generic Query --------------------- */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path(GENERIC_QUERY)
+    @Operation(summary = "Execute Generic Graph Query", description = "Runs a generic search in the graph database starting from a given node type, with optional filters and depth constraints.", responses = {
+            @ApiResponse(responseCode = "200", description = "Successful execution of the generic query"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getGenericQueryResponse(@Context HttpHeaders headers,
         @Context HttpServletRequest req, @QueryParam("start-node-type") final String startNodeType,
         @QueryParam("key") final List<String> startNodeKeyParams,
@@ -208,8 +217,13 @@ public class SearchProvider extends RESTAPI {
      */
     /* ---------------- Start Nodes Query --------------------- */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path(NODES_QUERY)
+    @Operation(summary = "Execute Nodes Graph Query", description = "Runs a node-specific search in the graph database with optional edge and property filters.", responses = {
+            @ApiResponse(responseCode = "200", description = "Successful execution of the nodes query"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getNodesQueryResponse(@Context HttpHeaders headers,
         @Context HttpServletRequest req,
         @QueryParam("search-node-type") final String searchNodeType,

@@ -50,6 +50,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+
 @EnableWebSecurity
 @EnableConfigurationProperties
 @SpringBootApplication(
@@ -70,6 +73,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
         "org.onap.aai.tasks", "org.onap.aai.service", "org.onap.aai.rest", "org.onap.aai.aaf",
         "org.onap.aai.aailog", "org.onap.aai.introspection", "org.onap.aai.rest.notification"})
 @Configuration
+@OpenAPIDefinition(info = @Info(title = "AAI Traversal APIs", description = "Provides APIs for graph-based traversal of AAI entities and their relationships.", version = "1.0.0"))
 public class TraversalApp {
 
     private static final Logger logger = LoggerFactory.getLogger(TraversalApp.class.getName());

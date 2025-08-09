@@ -50,12 +50,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * Implements the search subdomain in the REST API. All API calls must include
  * X-FromAppId and X-TransactionId in the header.
  *
  */
 @Path("/search")
+@Tag(name = "Model and Named Queries", description = "Execute pre-defined named queries or model-based operations on the AAI graph.")
 public class ModelAndNamedQueryRestProvider extends RESTAPI {
 
     private static final Logger LOGGER =
@@ -85,8 +92,15 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
      */
     /* ---------------- Start Named Query --------------------- */
     @POST
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path(NAMED_QUERY)
+    @Operation(summary = "Execute a named query", description = "Runs a pre-defined query by name and returns the matching graph data.", parameters = {
+            @Parameter(name = "queryParameters", description = "Named query request parameters in JSON or XML format", in = ParameterIn.DEFAULT, required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "Successful execution of the named query"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getNamedQueryResponse(@Context HttpHeaders headers,
         @Context HttpServletRequest req, String queryParameters, @Context UriInfo info) {
         return runner(TraversalConstants.AAI_TRAVERSAL_TIMEOUT_ENABLED,
@@ -170,8 +184,16 @@ public class ModelAndNamedQueryRestProvider extends RESTAPI {
      */
     /* ---------------- Start Named Query --------------------- */
     @POST
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Path(MODEL_QUERY)
+    @Operation(summary = "Execute a model query", description = "Runs a query or operation based on a model definition. Supports optional delete action.", parameters = {
+            @Parameter(name = "action", description = "Action to perform. Use DELETE to remove matching data.", required = false),
+            @Parameter(name = "inboundPayload", description = "Model query request payload in JSON or XML format", in = ParameterIn.DEFAULT, required = true)
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "Successful execution of the model query"),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload or parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getModelQueryResponse(@Context HttpHeaders headers,
         @Context HttpServletRequest req, String inboundPayload, @QueryParam("action") String action,
         @Context UriInfo info) {
