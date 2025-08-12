@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f35fc17_3d50e18a",
+        "filename": "aai-traversal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 7849
+      },
+      "writtenOn": "2025-08-12T06:56:28Z",
+      "side": 1,
+      "message": "Can you check if the versions of the plugin and the `swagger-jaxrs2-jakarta` dep that you declare above are always the same? If so, please introduce a placeholder (i.e `${swagger.version}`",
+      "revId": "ce3e07b2895f6b8ce912e51a0c7fd74e99165a41",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    }
+  ]
+}
