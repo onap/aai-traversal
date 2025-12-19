@@ -16,6 +16,24 @@
       "message": "Better use `3.1.1`. For another service I initially used `3.1.4`, but [had to downgrade](https://gerrit.onap.org/r/c/so/adapters/so-cnf-adapter/+/142759) due to the maven version used in the pipeline",
       "revId": "22a8934ec5429449a2ddf348db13ceb103c67619",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0a20c77_a5433e8c",
+        "filename": "pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 8519
+      },
+      "writtenOn": "2025-12-19T07:37:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08d4ca8d_f7e8d2a6",
+      "revId": "22a8934ec5429449a2ddf348db13ceb103c67619",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a"
     }
   ]
 }
