@@ -75,6 +75,7 @@ import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.gson.JsonElement;
@@ -104,7 +105,7 @@ public class QueryConsumer extends TraversalConsumer {
     private final XmlFormatTransformer xmlFormatTransformer;
 
     @Autowired
-    public QueryConsumer(HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
+    public QueryConsumer(@Qualifier("requestScopedTraversalUriHttpEntry") HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
         GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
         @Value("${schema.uri.base.path}") String basePath) {
         this.traversalUriHttpEntry = traversalUriHttpEntry;

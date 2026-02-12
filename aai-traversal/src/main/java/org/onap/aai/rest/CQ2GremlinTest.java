@@ -62,6 +62,7 @@ import org.onap.aai.setup.SchemaVersions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -87,7 +88,7 @@ public class CQ2GremlinTest extends RESTAPI {
     protected GraphTraversalSource gts;
 
     @Autowired
-    public CQ2GremlinTest(HttpEntry traversalUriHttpEntry,
+    public CQ2GremlinTest(@Qualifier("requestScopedTraversalUriHttpEntry") HttpEntry traversalUriHttpEntry,
         @Value("${schema.uri.base.path}") String basePath) {
         this.traversalUriHttpEntry = traversalUriHttpEntry;
 

@@ -60,6 +60,7 @@ import org.onap.aai.util.TraversalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import io.micrometer.core.annotation.Timed;
@@ -94,7 +95,7 @@ public class RecentAPIConsumer extends RESTAPI {
     private XmlFormatTransformer xmlFormatTransformer;
 
     @Autowired
-    public RecentAPIConsumer(HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
+    public RecentAPIConsumer(@Qualifier("requestScopedTraversalUriHttpEntry") HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
             GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
             @Value("${schema.uri.base.path}") String basePath) {
         this.traversalUriHttpEntry = traversalUriHttpEntry;
