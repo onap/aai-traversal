@@ -71,7 +71,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 @ComponentScan(
     basePackages = {"org.onap.aai.config", "org.onap.aai.web", "org.onap.aai.setup",
         "org.onap.aai.tasks", "org.onap.aai.service", "org.onap.aai.rest", "org.onap.aai.aaf",
-        "org.onap.aai.aailog", "org.onap.aai.introspection", "org.onap.aai.rest.notification"})
+        "org.onap.aai.aailog", "org.onap.aai.introspection", "org.onap.aai.rest.notification",
+        "org.onap.aai.util.delta"})
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "AAI Traversal APIs", description = "Provides APIs for graph-based traversal of AAI entities and their relationships.", version = "1.0.0"))
 public class TraversalApp {

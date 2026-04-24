@@ -44,6 +44,7 @@ import org.onap.aai.serialization.db.EdgeSerializer;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.setup.SchemaVersions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,7 +65,7 @@ public class CQ2Gremlin extends RESTAPI {
     protected EdgeSerializer rules;
 
     @Autowired
-    public CQ2Gremlin(HttpEntry traversalUriHttpEntry,
+    public CQ2Gremlin(@Qualifier("traversalUriHttpEntry") HttpEntry traversalUriHttpEntry,
         @Value("${schema.uri.base.path}") String basePath) {
         this.traversalUriHttpEntry = traversalUriHttpEntry;
     }
@@ -72,7 +73,7 @@ public class CQ2Gremlin extends RESTAPI {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(tags = { "Custom Queries" }, 
+    @Operation(tags = { "Custom Queries" },
         summary = "Convert custom query to Gremlin traversal", description = "Converts a custom query definition into a Gremlin traversal string.", operationId = "convertCustomQueryToGremlin")
     public Response getC2Qgremlin(@RequestBody Map<String, CustomQueryConfigDTO> content,
         @Context HttpHeaders headers, @Context UriInfo info) {

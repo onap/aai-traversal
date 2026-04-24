@@ -37,7 +37,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
@@ -48,7 +48,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Test REST requests against configuration resource
  */
-@AutoConfigureMetrics
+@AutoConfigureObservability
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(
     classes = {SpringContextAware.class})

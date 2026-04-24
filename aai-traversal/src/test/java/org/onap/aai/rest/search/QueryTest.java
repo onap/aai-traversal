@@ -61,6 +61,7 @@ import org.onap.aai.introspection.ModelType;
 import org.onap.aai.nodes.NodeIngestor;
 import org.onap.aai.query.builder.GremlinTraversal;
 import org.onap.aai.rest.notification.NotificationService;
+import org.onap.aai.rest.notification.DeltaEventsService;
 import org.onap.aai.restcore.search.GremlinGroovyShell;
 import org.onap.aai.restcore.search.GroovyQueryBuilder;
 import org.onap.aai.serialization.db.EdgeSerializer;
@@ -70,6 +71,7 @@ import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.setup.AAIConfigTranslator;
 import org.onap.aai.setup.SchemaConfigVersions;
 import org.onap.aai.setup.SchemaVersion;
+import org.onap.aai.util.delta.DeltaEventsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +84,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 @ContextConfiguration(
     classes = {ConfigConfiguration.class, AAIConfigTranslator.class, EdgeIngestor.class,
         EdgeSerializer.class, NodeIngestor.class, SpringContextAware.class,
-        SearchConfiguration.class, IntrospectionConfig.class, LoaderFactory.class, NotificationService.class, KafkaConfig.class})
+        SearchConfiguration.class, IntrospectionConfig.class, LoaderFactory.class, NotificationService.class, DeltaEventsService.class, KafkaConfig.class, DeltaEventsConfig.class})
 @TestPropertySource(
     properties = {"schema.uri.base.path = /aai",
         "schema.ingest.file = src/test/resources/application-test.properties"})
