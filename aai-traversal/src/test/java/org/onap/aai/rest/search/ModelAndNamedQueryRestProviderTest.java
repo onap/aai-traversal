@@ -36,7 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -113,7 +113,7 @@ public class ModelAndNamedQueryRestProviderTest extends AAISetup {
 
         // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very
         // unreasonable
-        Mockito.doReturn(null).when(queryParameters).remove(anyObject());
+        Mockito.doReturn(null).when(queryParameters).remove(any());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
     }

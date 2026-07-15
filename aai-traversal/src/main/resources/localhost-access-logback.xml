@@ -60,7 +60,7 @@
 	<if condition='property("livenessAccessLogEnabled").contains("false")'>
 		<then>
 			<filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-				<evaluator class="ch.qos.logback.access.net.URLEvaluator">
+				<evaluator class="ch.qos.logback.access.common.net.URLEvaluator">
 					<URL>/aai/util/echo</URL>
 				</evaluator>
 				<OnMismatch>NEUTRAL</OnMismatch>

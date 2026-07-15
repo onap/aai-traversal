@@ -19,7 +19,7 @@
  */
 package org.onap.aai.rest.search;
 
-import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -121,7 +121,7 @@ public class GroovyShellImplTest extends AAISetup {
 
         // TODO - Check if this is valid since RemoveDME2QueryParameters seems to be very
         // unreasonable
-        Mockito.doReturn(null).when(queryParameters).remove(anyObject());
+        Mockito.doReturn(null).when(queryParameters).remove(any());
 
         when(httpHeaders.getMediaType()).thenReturn(APPLICATION_JSON);
         loader = loaderFactory.createLoaderForVersion(introspectorFactoryType, version);

@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMapOf;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -258,7 +258,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
         // when(mockProcessor.getNodeUsingUniqueId(any(String.class),any(String.class),any(String.class),any(String.class),any(String.class))).thenReturn(vertex);
         when(mockProcessor.runDeleteByModel(any(String.class), any(String.class), any(String.class),
-            any(String.class), anyMapOf(String.class, Object.class), any(String.class),
+            any(String.class), anyMap(), any(String.class),
             any(String.class))).thenReturn(resultMock);
         Map<String, String> result = processor.runDeleteByModel("test", "test", "test", "test",
             startNodeFilterHash, "test", "test");

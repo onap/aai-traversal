@@ -92,8 +92,6 @@
 		<!-- <janusgraph.version>1.0.0</janusgraph.version>
 		<gremlin.version>3.7.1</gremlin.version> -->
 
-		<spring-cloud.version>2022.0.5</spring-cloud.version>
-
 		<!-- fix the driver version to match the one defined in janusgraph-cql
 				spring-boot (2.6) is otherwise downgrading it to 4.13.0 -->
 		<!-- see https://github.com/spring-projects/spring-boot/blob/f8c9fee3b0c8ff9ef48cf12fb4a9f8a51630a485/spring-boot-project/spring-boot-dependencies/build.gradle#L170 -->
@@ -102,8 +100,6 @@
 		<datastax.native-protocol.version>1.5.1</datastax.native-protocol.version>
 
 		<antlr.version>4.13.2</antlr.version>
-
-		<mockito.core.version>3.4.0</mockito.core.version>
 
 		<!-- Integration tests will be skipped by default. Could be enabled here or by -DskipITs=false-->
 		<skipITs>true</skipITs>
@@ -328,8 +324,8 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-access</artifactId>
+			<groupId>ch.qos.logback.access</groupId>
+			<artifactId>logback-access-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
@@ -427,7 +423,6 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-tracing-bridge-brave</artifactId>
-      <version>1.0.12</version>
 		</dependency>
 		<dependency>
 			<groupId>io.zipkin.reporter2</groupId>
@@ -506,13 +501,6 @@
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 			<!-- cassandra driver -->
 			<dependency>
 					<groupId>com.datastax.oss</groupId>
