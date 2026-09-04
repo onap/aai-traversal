@@ -19,6 +19,9 @@
  */
 package org.onap.aai.dbgraphgen;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -58,6 +61,7 @@ public class ModelBasedProcessingTest extends AAISetup {
     private static final String FROM_APP_ID = "JUNIT";
     private static final String API_VERSION = "1.0";
     private static final String AAI_NODE_TYPE = "aai-node-type";
+    private static final int TIMED_QUERY_INVOCATIONS = 5;
 
     private static final String MODEL_VESION_NODE_VALUE = "model-ver";
     private static final String MODEL_VERSION_ID_KEY = "model-version-id";
@@ -969,6 +973,87 @@ public class ModelBasedProcessingTest extends AAISetup {
         Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
         modelBasedProcessor.genTopoMap4ModelVer(TRANSACTION_ID, FROM_APP_ID, modelVerV,
             MODEL_VERSION_ID_VALUE);
+    }
+
+    @Test
+    public void testPruneResultSet_SubResultSetWithoutVertex() throws AAIException {
+        Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
+        Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(source);
+
+        // collectInstanceData() returns a vertex-less resultSet when a named-query property
+        // constraint says stop, and the caller adds that to the parent's sub-results
+        ResultSet rs = getResultSet();
+        List<ResultSet> subResultSet = new ArrayList<>();
+        subResultSet.add(new ResultSet());
+        rs.setSubResultSet(subResultSet);
+
+        ResultSet prunedResSet = modelBasedProcessor.pruneResultSet(rs, "generic-vnf",
+            new HashMap<>());
+
+        assertNotNull("the result set we did not prune at should have been kept",
+            prunedResSet.getVert());
+        assertTrue("a vertex-less sub-resultSet cannot satisfy a secondary filter",
+            prunedResSet.getSubResultSet().isEmpty());
+    }
+
+    @Test
+    public void testQueryByModel_ShutsDownTheTimeLimiterExecutor() throws Exception {
+        Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
+        Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(source);
+
+        int threadsBefore = livePoolThreadCount();
+        for (int i = 0; i < TIMED_QUERY_INVOCATIONS; i++) {
+            try {
+                modelBasedProcessor.queryByModel(TRANSACTION_ID, FROM_APP_ID,
+                    MODEL_VERSION_ID_VALUE, null, null, AAI_NODE_TYPE, new ArrayList<>(),
+                    API_VERSION);
+            } catch (AAIException expected) {
+                // this fixture cannot answer the query - we are only checking the executor
+            }
+        }
+
+        assertNoPoolThreadsLeaked("queryByModel", threadsBefore);
+    }
+
+    @Test
+    public void testQueryByNamedQuery_ShutsDownTheTimeLimiterExecutor() throws Exception {
+        Mockito.when(dbEngine.asAdmin()).thenReturn(admin);
+        Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(source);
+
+        int threadsBefore = livePoolThreadCount();
+        for (int i = 0; i < TIMED_QUERY_INVOCATIONS; i++) {
+            try {
+                modelBasedProcessor.queryByNamedQuery(TRANSACTION_ID, FROM_APP_ID,
+                    "named-query-uuid-1", new ArrayList<>(), API_VERSION);
+            } catch (AAIException expected) {
+                // this fixture cannot answer the query - we are only checking the executor
+            }
+        }
+
+        assertNoPoolThreadsLeaked("queryByNamedQuery", threadsBefore);
+    }
+
+    private void assertNoPoolThreadsLeaked(String methodName, int threadsBefore)
+        throws InterruptedException {
+        // a shut down executor does not terminate its worker thread synchronously
+        long deadline = System.currentTimeMillis() + 10000L;
+        while (livePoolThreadCount() > threadsBefore && System.currentTimeMillis() < deadline) {
+            Thread.sleep(100L);
+        }
+
+        int leaked = livePoolThreadCount() - threadsBefore;
+        assertTrue(methodName + "() left " + leaked + " executor thread(s) behind after "
+            + TIMED_QUERY_INVOCATIONS + " invocations", leaked <= 0);
+    }
+
+    private static int livePoolThreadCount() {
+        int count = 0;
+        for (Thread thread : Thread.getAllStackTraces().keySet()) {
+            if (thread.isAlive() && thread.getName().startsWith("pool-")) {
+                count++;
+            }
+        }
+        return count;
     }
 
 }

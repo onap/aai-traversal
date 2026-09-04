@@ -343,7 +343,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
 
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void pruneResultSetTest() throws AAIException {
         ResultSet rs = new ResultSet();
         Vertex v = new BaseVertexLabel(AAIProperties.NODE_TYPE);
@@ -356,6 +356,7 @@ public class ModelBasedProcessingInvalidDataTest extends AAISetup {
         map.put("test", new Object());
         ResultSet resultSet = processor.pruneResultSet(rs, "testr", map);
         assertNotNull(resultSet);
+        assertTrue(resultSet.getSubResultSet().isEmpty());
 
     }
 

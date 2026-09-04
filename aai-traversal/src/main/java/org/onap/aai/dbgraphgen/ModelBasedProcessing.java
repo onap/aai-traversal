@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.UncheckedTimeoutException;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -384,9 +385,9 @@ public class ModelBasedProcessing {
         }
 
         List<ResultSet> resultList = new ArrayList<>();
-        TimeLimiter limiter = SimpleTimeLimiter.create(Executors.newCachedThreadPool());
+        ExecutorService queryExecutor = Executors.newSingleThreadExecutor();
         try {
-
+            TimeLimiter limiter = SimpleTimeLimiter.create(queryExecutor);
             resultList = limiter.callWithTimeout(new AaiCallable<List<ResultSet>>() {
                 public List<ResultSet> process() throws AAIException {
                     return queryByModel_Timed(transId_f, fromAppId_f, modelVersionId_f,
@@ -410,6 +411,8 @@ public class ModelBasedProcessing {
         } catch (Exception e) {
             throw new AAIException("AAI_6128",
                 "Unexpected exception in queryByModel(): " + e.getMessage());
+        } finally {
+            queryExecutor.shutdownNow();
         }
 
         return resultList;
@@ -1047,8 +1050,9 @@ public class ModelBasedProcessing {
         }
 
         List<ResultSet> resultList = new ArrayList<>();
-        TimeLimiter limiter = SimpleTimeLimiter.create(Executors.newCachedThreadPool());
+        ExecutorService queryExecutor = Executors.newSingleThreadExecutor();
         try {
+            TimeLimiter limiter = SimpleTimeLimiter.create(queryExecutor);
             resultList = limiter.callWithTimeout(new AaiCallable<List<ResultSet>>() {
                 public List<ResultSet> process() throws AAIException {
                     return queryByNamedQuery_Timed(transId_f, fromAppId_f, namedQueryUuid_f,
@@ -1072,6 +1076,8 @@ public class ModelBasedProcessing {
         } catch (Exception e) {
             throw new AAIException("AAI_6128",
                 "Unexpected exception in queryByNamedQuery(): " + e.getMessage());
+        } finally {
+            queryExecutor.shutdownNow();
         }
 
         return resultList;
@@ -1289,6 +1295,12 @@ public class ModelBasedProcessing {
 
         // Given a ResultSet and some secondary filter info, do pruning as needed
         ResultSet pResSet = new ResultSet();
+
+        if (resSetVal.getVert() == null) {
+            // collectInstanceData() gives back a vertex-less resultSet when a named-query
+            // property constraint says stop - there is nothing that could satisfy the filter.
+            return pResSet;
+        }
 
         // For this ResultSet, we will see if we are on a node of the type that is our cutPoint;
         // then only keep it if we peek "below" and see a match for our filter.
