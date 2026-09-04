@@ -149,6 +149,37 @@ class LocalCQConfigTest {
     }
 
     @Test
+    void testStoredQueriesAreReloadedWhenTheFileChanges() throws Exception {
+        Files.writeString(storedQueriesFilePath, storedQueriesJson("initial-query"));
+
+        localCQConfig.init();
+
+        assertNotNull(localCQConfig.getCustomQueryConfig().getStoredQuery("initial-query"));
+
+        Files.writeString(storedQueriesFilePath, storedQueriesJson("reloaded-query"));
+        // the watcher only reacts to a timestamp that moved on by more than half a second
+        assertTrue(storedQueriesFilePath.toFile()
+            .setLastModified(System.currentTimeMillis() + 2000L));
+
+        storedQueriesWatcher().run();
+
+        assertNotNull(localCQConfig.getCustomQueryConfig().getStoredQuery("reloaded-query"),
+            "the stored queries should have been reloaded from stored-queries.json");
+    }
+
+    private static String storedQueriesJson(String queryName) {
+        return "{\"stored-queries\":[{\"" + queryName + "\":{\"stored-query\":"
+            + "\"builder.getVerticesByProperty('aai-node-type','pserver')\"}}]}";
+    }
+
+    private TimerTask storedQueriesWatcher() throws NoSuchFieldException, IllegalAccessException {
+        Field storedQueriesWatcherField =
+            LocalCQConfig.class.getDeclaredField("storedQueriesWatcher");
+        storedQueriesWatcherField.setAccessible(true);
+        return (TimerTask) storedQueriesWatcherField.get(localCQConfig);
+    }
+
+    @Test
     void testOnChange() throws Exception {
         LocalCQConfig.FileWatcher fileWatcher = spy(localCQConfig.new FileWatcher(new File(storedQueriesFilePath.toString())) {
             @Override
