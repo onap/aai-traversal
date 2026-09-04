@@ -22,7 +22,6 @@ package org.onap.aai.rest.search;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -44,49 +43,41 @@ public class LocalCQConfig extends CQConfig {
 
     private boolean timerSet;
     private Timer timer;
+    private TimerTask storedQueriesWatcher;
 
     @PostConstruct
     public void init() {
 
-        try {
-            String filepath =
-                storedQueriesLocation + AAIConstants.AAI_FILESEP + "stored-queries.json";
-            logger.info("Using the Local stored queries");
-            Path path = Path.of(filepath);
-            String customQueryConfigJson = new String(Files.readAllBytes(path));
-            queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
+        File storedQueriesFile =
+            new File(storedQueriesLocation + AAIConstants.AAI_FILESEP + "stored-queries.json");
+        logger.info("Using the Local stored queries");
+        loadStoredQueries(storedQueriesFile);
 
-        } catch (IOException e) {
-            AAIException aaiException = new AAIException("AAI_4002", e);
-            ErrorLogHelper.logException(aaiException);
-            // logger.error("Error occurred during the processing of query json file: " +
-            // LogFormatTools.getStackTop(e));
-        }
-
-        TimerTask task = new FileWatcher(new File(storedQueriesLocation)) {
+        storedQueriesWatcher = new FileWatcher(storedQueriesFile) {
             @Override
             protected void onChange(File file) {
-                try {
-                    String filepath = storedQueriesLocation;
-                    Path path = Path.of(filepath);
-                    String customQueryConfigJson = new String(Files.readAllBytes(path));
-                    queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
-
-                } catch (IOException e) {
-                    AAIException aaiException = new AAIException("AAI_4002", e);
-                    ErrorLogHelper.logException(aaiException);
-                    // logger.error("Error occurred during the processing of query json file: " +
-                    // LogFormatTools.getStackTop(e));
-                }
+                loadStoredQueries(file);
             }
         };
 
         if (!timerSet) {
             timerSet = true;
             timer = new Timer();
-            timer.schedule(task, new Date(), 10000);
+            timer.schedule(storedQueriesWatcher, new Date(), 10000);
         }
 
+    }
+
+    private void loadStoredQueries(File storedQueriesFile) {
+        try {
+            String customQueryConfigJson =
+                new String(Files.readAllBytes(storedQueriesFile.toPath()));
+            queryConfig = new GetCustomQueryConfig(customQueryConfigJson);
+
+        } catch (IOException e) {
+            AAIException aaiException = new AAIException("AAI_4002", e);
+            ErrorLogHelper.logException(aaiException);
+        }
     }
 
     abstract class FileWatcher extends TimerTask {
