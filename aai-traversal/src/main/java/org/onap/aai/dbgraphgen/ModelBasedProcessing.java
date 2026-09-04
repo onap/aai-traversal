@@ -3326,9 +3326,11 @@ public class ModelBasedProcessing {
             throw new AAIException("AAI_6115", emsg);
         }
 
+        // getProperties() returns the OXM property names, so the persona properties have to be
+        // looked up without the db-alias suffix that they are stored under.
         Collection<String> props4ThisNT = introspector.getProperties();
-        return props4ThisNT.contains(addDBAliasedSuffix("model-invariant-id"))
-            && props4ThisNT.contains(addDBAliasedSuffix("model-version-id"));
+        return props4ThisNT.contains("model-invariant-id")
+            && props4ThisNT.contains("model-version-id");
 
     }// nodeTypeSupportsPersona()
 
