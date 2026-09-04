@@ -19,6 +19,7 @@
  */
 package org.onap.aai.dbgraphgen;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -973,6 +974,14 @@ public class ModelBasedProcessingTest extends AAISetup {
         Mockito.when(admin.getReadOnlyTraversalSource()).thenReturn(gts);
         modelBasedProcessor.genTopoMap4ModelVer(TRANSACTION_ID, FROM_APP_ID, modelVerV,
             MODEL_VERSION_ID_VALUE);
+    }
+
+    @Test
+    public void testNodeTypeSupportsPersona() throws AAIException {
+        assertTrue("generic-vnf declares model-invariant-id and model-version-id",
+            modelBasedProcessor.nodeTypeSupportsPersona("generic-vnf"));
+        assertFalse("pserver declares neither of the persona properties",
+            modelBasedProcessor.nodeTypeSupportsPersona("pserver"));
     }
 
     @Test
