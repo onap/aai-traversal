@@ -51,9 +51,11 @@ public class SecurityConfig {
     @Bean
     InMemoryUserDetailsManager userDetailsService(AuthProperties userProperties) {
         UserDetails[] users = userProperties.getUsers().stream()
-            .map(user -> User.withDefaultPasswordEncoder()
-                .username(user.getUsername())
-                .password(user.getPassword())
+            // {noop} rather than a hash: aai.basic-auth.users[].password is already cleartext
+            // configuration, so hashing it here would cost a bcrypt verification per request
+            // without protecting anything.
+            .map(user -> User.withUsername(user.getUsername())
+                .password("{noop}" + user.getPassword())
                 .roles("someRole")
                 .build())
             .toArray(UserDetails[]::new);
