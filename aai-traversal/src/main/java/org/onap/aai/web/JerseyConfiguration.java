@@ -79,7 +79,8 @@ public class JerseyConfiguration {
                 org.onap.aai.interceptors.post.InvalidResponseStatus.class,
 
                 org.onap.aai.interceptors.post.ResponseTransactionLogging.class,
-                org.onap.aai.interceptors.post.ResponseHeaderManipulation.class
+                org.onap.aai.interceptors.post.ResponseHeaderManipulation.class,
+                ObservationPathPatternFilter.class
                 );
         resourceConfig.registerClasses(classes);
         logger.debug("REGISTERED CLASSES " + classes.toString());
