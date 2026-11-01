@@ -22,6 +22,7 @@ package org.onap.aai.interceptors.pre;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -35,10 +36,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriInfo;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -187,6 +191,27 @@ public class RequestTransactionLoggingTest {
         assertTrue(requestJson.contains("ID"));
         assertTrue(requestJson.contains("Http-Method"));
         assertTrue(requestJson.contains("Headers"));
+    }
+
+    @Test
+    void testFilter_shouldMaskAuthorizationInLoggedRequest() throws IOException {
+        MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+        headers.add("Authorization", "Basic dXNlcjpzZWNyZXQ=");
+        headers.add("X-FromAppId", "test-app");
+        headers.add("Accept", "application/json");
+        headers.add("Content-Type", "application/json");
+        when(mockRequestContext.getHeaders()).thenReturn(headers);
+        when(mockRequestContext.getHeaderString("Accept")).thenReturn("application/json");
+        when(mockRequestContext.getHeaderString("Content-Type")).thenReturn("application/json");
+        when(mockRequestContext.getEntityStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
+
+        requestTransactionLogging.filter(mockRequestContext);
+
+        ArgumentCaptor<String> loggedRequest = ArgumentCaptor.forClass(String.class);
+        verify(mockRequestContext).setProperty(eq(AAIHeaderProperties.AAI_REQUEST), loggedRequest.capture());
+        assertFalse(loggedRequest.getValue().contains("dXNlcjpzZWNyZXQ="));
+        assertTrue(loggedRequest.getValue().contains("Authorization=[***]"));
+        assertTrue(loggedRequest.getValue().contains("X-FromAppId=[test-app]"));
     }
 
     // Custom configuration for this test class to isolate the beans
