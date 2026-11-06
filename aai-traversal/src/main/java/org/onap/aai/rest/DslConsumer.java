@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,7 +95,6 @@ public class DslConsumer extends TraversalConsumer {
     private final DslListener v1DslListener;
     private final org.onap.aai.rest.dsl.v2.DslListener v2DslListener;
 
-    private QueryVersion dslApiVersion = DEFAULT_VERSION;
     Map<QueryVersion, DslQueryProcessor> dslQueryProcessors;
 
     @Autowired
@@ -136,18 +134,10 @@ public class DslConsumer extends TraversalConsumer {
         final String dslOverride = headers.getFirst("X-DslOverride");
         final MultivaluedMap<String,String> queryParams = toMultivaluedMap(request.getParameterMap());
 
-        Optional<String> dslApiVersionHeader =
-            Optional.ofNullable(headers.getFirst("X-DslApiVersion"));
-        if (dslApiVersionHeader.isPresent()) {
-            try {
-                dslApiVersion = QueryVersion.valueOf(dslApiVersionHeader.get());
-            } catch (IllegalArgumentException e) {
-                LOGGER.debug("Defaulting DSL Api Version to  " + DEFAULT_VERSION);
-            }
-        }
+        final QueryVersion dslApiVersion = getDslApiVersion(headers);
 
         Pair<List<Object>,Map<String,List<String>>> executionResult = executeQuery(dslQuery, request, queryFormat, subgraph, validate, queryParams, pageable,
-                roles, version, sourceOfTruth, dslOverride);
+                roles, version, sourceOfTruth, dslOverride, dslApiVersion);
         List<Object> vertices = executionResult.getValue0();
 
         String result = serializeResponse(request, queryFormat, headers, version, sourceOfTruth, queryParams, executionResult.getValue1(), vertices);
@@ -203,7 +193,8 @@ public class DslConsumer extends TraversalConsumer {
 
     private Pair<List<Object>,Map<String,List<String>>> executeQuery(String content, HttpServletRequest req, String queryFormat, String subgraph,
             String validate, MultivaluedMap<String, String> queryParameters, Pageable pageable, Set<String> roles,
-            final SchemaVersion version, final String sourceOfTruth, final String dslOverride)
+            final SchemaVersion version, final String sourceOfTruth, final String dslOverride,
+            final QueryVersion dslApiVersion)
             throws AAIException, FileNotFoundException {
         final String serverBase =
             req.getRequestURL().toString().replaceAll("/(v[0-9]+|latest)/.*", "/");
@@ -266,6 +257,18 @@ public class DslConsumer extends TraversalConsumer {
         }
 
         return Pair.with(vertices, dslResult.selectedProperties());
+    }
+
+    private QueryVersion getDslApiVersion(HttpHeaders headers) {
+        String dslApiVersionHeader = headers.getFirst("X-DslApiVersion");
+        if (dslApiVersionHeader != null) {
+            try {
+                return QueryVersion.valueOf(dslApiVersionHeader);
+            } catch (IllegalArgumentException e) {
+                LOGGER.debug("Defaulting DSL Api Version to  " + DEFAULT_VERSION);
+            }
+        }
+        return DEFAULT_VERSION;
     }
 
     private List<Object> dedupObjectInAggregateFormatResultStreams(List<Object> vertTemp) {
