@@ -180,7 +180,7 @@ public class RecentAPIConsumer extends RESTAPI {
                 new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
             FormatFactory ff = new FormatFactory(traversalUriHttpEntry.getLoader(), serializer,
                 schemaVersions, this.basePath, serverBase);
-            Format format = Format.pathed_resourceversion;
+            Format format = Format.pathed;
 
             Formatter formater = ff.get(format, info.getQueryParameters());
 

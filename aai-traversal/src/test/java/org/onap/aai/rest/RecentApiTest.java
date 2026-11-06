@@ -21,6 +21,8 @@ package org.onap.aai.rest;
 
 import static org.junit.Assert.*;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.janusgraph.core.JanusGraphTransaction;
 import org.junit.Test;
@@ -45,6 +47,17 @@ public class RecentApiTest extends AbstractSpringRestTest {
                 .property("source-of-truth", "JUNIT")
                 .property("aai-uri", "/cloud-infrastructure/pservers/pserver/test-pserver-recents")
                 .next();
+            long now = System.currentTimeMillis();
+            g.addV().property("aai-node-type", "pserver")
+                .property("hostname", "test-pserver-recent").property("in-maint", false)
+                .property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/cloud-infrastructure/pservers/pserver/test-pserver-recent")
+                .property("aai-created-ts", now - TimeUnit.MINUTES.toMillis(30)).next();
+            g.addV().property("aai-node-type", "pserver")
+                .property("hostname", "test-pserver-older").property("in-maint", false)
+                .property("source-of-truth", "JUNIT")
+                .property("aai-uri", "/cloud-infrastructure/pservers/pserver/test-pserver-older")
+                .property("aai-created-ts", now - TimeUnit.HOURS.toMillis(5)).next();
         } catch (Exception ex) {
             success = false;
         } finally {
@@ -175,5 +188,35 @@ public class RecentApiTest extends AbstractSpringRestTest {
         assertNotNull("Response from /aai/recents/v14/pserver is null", responseEntity);
         assertEquals("Expected the response to be 400", HttpStatus.BAD_REQUEST,
             responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void thatHoursOnlyReturnsNodesCreatedWithinThatWindow() {
+        String body = getRecents("hours", "1");
+
+        assertTrue(body, body.contains("/pservers/pserver/test-pserver-recent\""));
+        assertFalse(body, body.contains("test-pserver-older"));
+        assertFalse(body, body.contains("test-pserver-recents"));
+    }
+
+    @Test
+    public void thatDateTimeReturnsNodesCreatedSinceThatTime() {
+        long sixHoursAgo = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(6);
+
+        String body = getRecents("date-time", Long.toString(sixHoursAgo));
+
+        assertTrue(body, body.contains("/pservers/pserver/test-pserver-recent\""));
+        assertTrue(body, body.contains("test-pserver-older"));
+        assertFalse(body, body.contains("test-pserver-recents"));
+    }
+
+    private String getRecents(String parameter, String value) {
+        httpEntity = new HttpEntity(headers);
+        String uri = UriComponentsBuilder.fromUriString(baseUrl + "/aai/recents/v14/pserver")
+            .queryParam(parameter, value).toUriString();
+        ResponseEntity<String> responseEntity =
+            restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        return responseEntity.getBody();
     }
 }
