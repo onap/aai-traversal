@@ -55,7 +55,8 @@ import org.onap.aai.parsers.query.QueryParser;
 import org.onap.aai.query.builder.Pageable;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.search.CustomQueryConfig;
-import org.onap.aai.rest.search.GenericQueryProcessor;
+import org.onap.aai.rest.search.CustomQueryProcessor;
+import org.onap.aai.rest.search.GremlinQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
 import org.onap.aai.rest.util.PaginationUtil;
 import org.onap.aai.restcore.HttpMethod;
@@ -218,7 +219,7 @@ public class QueryConsumer extends TraversalConsumer {
                 return (createMessageInvalidQuerySection(queryURI, headers));
             }
 
-            GenericQueryProcessor processor;
+            List<Object> vertTemp;
 
             if (isHistory(format)) {
                 validateHistoryParams(format, info.getQueryParameters());
@@ -238,19 +239,14 @@ public class QueryConsumer extends TraversalConsumer {
                     vertexSet.addAll(vertices);
                 }
 
-                processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                    .startFrom(vertexSet).queryFrom(queryURIObj)
-                    .traversalSource(isHistory(format), traversalSource).create();
+                vertTemp = new CustomQueryProcessor(dbEngine, traversalSource,
+                    getGremlinQueryStyle(format))
+                    .execute(customQueryConfig, queryURIObj, vertexSet, subGraphStyle);
             } else if (!queryURI.equals("")) {
-                processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                    .queryFrom(queryURIObj)
-                    .traversalSource(isHistory(format), traversalSource).create();
+                throw new AAIException("AAI_6148");
             } else {
-                processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                    .queryFrom(gremlin, "gremlin")
-                    .traversalSource(isHistory(format), traversalSource).create();
+                vertTemp = new GremlinQueryProcessor(traversalSource).execute(gremlin, subGraphStyle);
             }
-            List<Object> vertTemp = processor.execute(subGraphStyle);
             int fromIndex = pageable.getPage() * pageable.getPageSize();
             List<Object> vertices = PaginationUtil.hasValidPaginationParams(pageable)
                 ? vertTemp.subList(fromIndex, fromIndex + pageable.getPageSize())

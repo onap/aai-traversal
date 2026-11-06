@@ -45,8 +45,8 @@ import org.onap.aai.rest.dsl.V1DslQueryProcessor;
 import org.onap.aai.rest.dsl.V2DslQueryProcessor;
 import org.onap.aai.rest.dsl.v1.DslListener;
 import org.onap.aai.rest.enums.QueryVersion;
-import org.onap.aai.rest.search.GenericQueryProcessor;
-import org.onap.aai.rest.search.GremlinServerSingleton;
+import org.onap.aai.rest.search.DslTraversalProcessor;
+import org.onap.aai.rest.search.DslTraversalProcessor.DslResult;
 import org.onap.aai.rest.util.PaginationUtil;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
@@ -92,7 +92,6 @@ public class DslConsumer extends TraversalConsumer {
     private final HttpEntry httpEntry;
     private final SchemaVersions schemaVersions;
     private final String basePath;
-    private final GremlinServerSingleton gremlinServerSingleton;
     private final XmlFormatTransformer xmlFormatTransformer;
     private final DslListener v1DslListener;
     private final org.onap.aai.rest.dsl.v2.DslListener v2DslListener;
@@ -102,12 +101,10 @@ public class DslConsumer extends TraversalConsumer {
 
     @Autowired
     public DslConsumer(@Qualifier("requestScopedTraversalUriHttpEntry") HttpEntry requestScopedTraversalUriHttpEntry,
-            SchemaVersions schemaVersions, GremlinServerSingleton gremlinServerSingleton,
-            XmlFormatTransformer xmlFormatTransformer,
+            SchemaVersions schemaVersions, XmlFormatTransformer xmlFormatTransformer,
             @Value("${schema.uri.base.path}") String basePath, DslListener v1DslListener, org.onap.aai.rest.dsl.v2.DslListener v2DslListener) {
         this.httpEntry = requestScopedTraversalUriHttpEntry;
         this.schemaVersions = schemaVersions;
-        this.gremlinServerSingleton = gremlinServerSingleton;
         this.xmlFormatTransformer = xmlFormatTransformer;
         this.basePath = basePath;
         this.v1DslListener = v1DslListener;
@@ -246,14 +243,12 @@ public class DslConsumer extends TraversalConsumer {
         GraphTraversalSource traversalSource =
             getTraversalSource(dbEngine, format, queryParameters, roles);
 
-        GenericQueryProcessor processor =
-            new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                .queryFrom(dsl, "dsl").queryProcessor(dslQueryProcessor).version(dslApiVersion)
-                .uriParams(queryParameters)
-                .traversalSource(isHistory(format), traversalSource).create();
-
         SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
-        List<Object> vertTemp = processor.execute(subGraphStyle);
+        boolean asTree = "true".equalsIgnoreCase(queryParameters.getFirst("as-tree"));
+        DslResult dslResult =
+            new DslTraversalProcessor(dbEngine, traversalSource, getGremlinQueryStyle(format))
+                .execute(dslQueryProcessor, dslApiVersion, dsl, asTree, subGraphStyle);
+        List<Object> vertTemp = dslResult.results();
 
         List<Object> vertices;
         if (isAggregate(format)) {
@@ -270,7 +265,7 @@ public class DslConsumer extends TraversalConsumer {
                 : vertTemp;
         }
 
-        return Pair.with(vertices, processor.getPropertiesMap());
+        return Pair.with(vertices, dslResult.selectedProperties());
     }
 
     private List<Object> dedupObjectInAggregateFormatResultStreams(List<Object> vertTemp) {

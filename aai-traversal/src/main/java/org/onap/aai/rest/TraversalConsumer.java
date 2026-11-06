@@ -229,4 +229,11 @@ public abstract class TraversalConsumer extends RESTAPI {
         return traversalUriHttpEntry.getQueryStyle();
     }
 
+    protected QueryStyle getGremlinQueryStyle(Format format) {
+        if (isHistory(format)) {
+            return QueryStyle.HISTORY_GREMLIN_TRAVERSAL;
+        }
+        return QueryStyle.GREMLIN_TRAVERSAL;
+    }
+
 }

@@ -41,8 +41,7 @@ import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.introspection.ModelType;
 import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
 import org.onap.aai.rest.db.HttpEntry;
-import org.onap.aai.rest.search.GenericQueryProcessor;
-import org.onap.aai.rest.search.GremlinServerSingleton;
+import org.onap.aai.rest.search.RecentNodesProcessor;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.db.DBSerializer;
@@ -50,7 +49,6 @@ import org.onap.aai.serialization.engines.TransactionalGraphEngine;
 import org.onap.aai.serialization.queryformats.Format;
 import org.onap.aai.serialization.queryformats.FormatFactory;
 import org.onap.aai.serialization.queryformats.Formatter;
-import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import org.onap.aai.setup.SchemaVersion;
 import org.onap.aai.setup.SchemaVersions;
 import org.onap.aai.transforms.XmlFormatTransformer;
@@ -88,17 +86,14 @@ public class RecentAPIConsumer extends RESTAPI {
 
     private String basePath;
 
-    private GremlinServerSingleton gremlinServerSingleton;
-
     private XmlFormatTransformer xmlFormatTransformer;
 
     @Autowired
     public RecentAPIConsumer(@Qualifier("traversalUriHttpEntry") HttpEntry traversalUriHttpEntry, SchemaVersions schemaVersions,
-            GremlinServerSingleton gremlinServerSingleton, XmlFormatTransformer xmlFormatTransformer,
+            XmlFormatTransformer xmlFormatTransformer,
             @Value("${schema.uri.base.path}") String basePath) {
         this.traversalUriHttpEntry = traversalUriHttpEntry;
         this.schemaVersions = schemaVersions;
-        this.gremlinServerSingleton = gremlinServerSingleton;
         this.xmlFormatTransformer = xmlFormatTransformer;
         this.basePath = basePath;
     }
@@ -158,14 +153,9 @@ public class RecentAPIConsumer extends RESTAPI {
             this.checkNodeType(nodeType);
             this.checkQueryParams(info.getQueryParameters());
 
-            GenericQueryProcessor processor = null;
-
-            processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                .queryFrom(nodeType, "nodeQuery").uriParams(info.getQueryParameters()).create();
-
             String result = "";
-            SubGraphStyle subGraphStyle = null;
-            List<Object> vertices = processor.execute(subGraphStyle);
+            List<Object> vertices = new RecentNodesProcessor(dbEngine).execute(nodeType,
+                getStartTime(info.getQueryParameters()));
 
             DBSerializer serializer =
                 new DBSerializer(version, dbEngine, introspectorFactoryType, sourceOfTruth);
@@ -220,6 +210,17 @@ public class RecentAPIConsumer extends RESTAPI {
             throw new AAIException("AAI_6115",
                 "Unrecognized nodeType [" + nodeType + "] passed to recents query.");
         }
+    }
+
+    private long getStartTime(MultivaluedMap<String, String> params) {
+        if (params.containsKey("hours")) {
+            return System.currentTimeMillis()
+                - TimeUnit.HOURS.toMillis(Long.parseLong(params.getFirst("hours")));
+        }
+        if (params.containsKey("date-time")) {
+            return Long.parseLong(params.getFirst("date-time"));
+        }
+        return 0L;
     }
 
     public void checkQueryParams(MultivaluedMap<String, String> params) throws AAIException {
