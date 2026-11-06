@@ -277,6 +277,17 @@ public class QueryConsumerTest {
         assertThat(responseEntity.getBody(), containsString("6148"));
     }
 
+    @Test
+    public void thatRawGremlinCannotRunGroovy() throws Exception {
+        String payload = "{\"gremlin\": \"'id'.execute().text\"}";
+        httpEntity = new HttpEntity(payload, headers);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+            baseUrl + "/aai/v14/query?format=count", HttpMethod.PUT, httpEntity, String.class);
+
+        assertThat(responseEntity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+        assertThat(responseEntity.getBody(), containsString("3000"));
+    }
+
     private String addCloudRegion(String id) throws Exception {
         Map<String, String> cloudRegionMap = new HashMap<>();
         cloudRegionMap.put("cloud-owner", "test-owner-id" + id);

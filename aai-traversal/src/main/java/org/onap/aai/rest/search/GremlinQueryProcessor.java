@@ -20,16 +20,31 @@
  */
 package org.onap.aai.rest.search;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.apache.tinkerpop.gremlin.language.grammar.GremlinAntlrToJava;
+import org.apache.tinkerpop.gremlin.language.grammar.GremlinErrorListener;
+import org.apache.tinkerpop.gremlin.language.grammar.GremlinLexer;
+import org.apache.tinkerpop.gremlin.language.grammar.GremlinParser;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.strategy.verification.ReadOnlyStrategy;
+import org.apache.tinkerpop.gremlin.process.traversal.strategy.verification.VerificationException;
+import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
+import org.onap.aai.exceptions.AAIException;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
+import org.onap.aai.util.AAIConstants;
 
 /**
  * Runs the raw Gremlin of a {@code /query} request.
+ * <p>
+ * The Gremlin is parsed with TinkerPop's Gremlin grammar instead of being run as Groovy,
+ * so it can only contain traversal steps. It must be a single traversal spawned from a
+ * plain {@code g} with {@code V()} or {@code E()}, which keeps callers from replacing the
+ * strategies of the given traversal source, and it runs read-only.
  */
 public final class GremlinQueryProcessor {
 
@@ -39,9 +54,60 @@ public final class GremlinQueryProcessor {
         this.traversalSource = traversalSource;
     }
 
-    public List<Object> execute(String gremlin, SubGraphStyle subGraphStyle) {
-        GraphTraversal<?, ?> g =
-            GroovyTraversalRunner.run(gremlin, new HashMap<>(), traversalSource, Optional.empty());
-        return SubGraphs.collect(subGraphStyle, g);
+    public List<Object> execute(String gremlin, SubGraphStyle subGraphStyle) throws AAIException {
+        AaiDBTraversalMetricLog metricLog =
+            new AaiDBTraversalMetricLog(AAIConstants.AAI_TRAVERSAL_MS);
+        metricLog.pre(Optional.empty());
+        GraphTraversal<?, ?> g;
+        try {
+            g = toTraversal(gremlin);
+        } finally {
+            metricLog.post();
+        }
+
+        try {
+            return SubGraphs.collect(subGraphStyle, g);
+        } catch (VerificationException e) {
+            throw new AAIException("AAI_3000", e);
+        }
+    }
+
+    private GraphTraversal<?, ?> toTraversal(String gremlin) throws AAIException {
+        try {
+            GremlinParser.QueryContext query = parseSingleTraversal(gremlin);
+            return (GraphTraversal<?, ?>) new GremlinAntlrToJava(
+                traversalSource.withStrategies(ReadOnlyStrategy.instance())).visitQuery(query);
+        } catch (RuntimeException e) {
+            throw new AAIException("AAI_3000", e);
+        }
+    }
+
+    private static GremlinParser.QueryContext parseSingleTraversal(String gremlin)
+        throws AAIException {
+        GremlinLexer lexer = new GremlinLexer(CharStreams.fromString(gremlin));
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(new GremlinErrorListener());
+        GremlinParser parser = new GremlinParser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.addErrorListener(new GremlinErrorListener());
+
+        List<GremlinParser.QueryContext> queries = parser.queryList().query();
+        if (queries.size() != 1) {
+            throw new AAIException("AAI_3000", "Expected a single traversal");
+        }
+        GremlinParser.QueryContext query = queries.get(0);
+        GremlinParser.RootTraversalContext root = query.rootTraversal();
+        if (root == null || query.getChildCount() != 1) {
+            throw new AAIException("AAI_3000", "Expected a traversal without a terminal step");
+        }
+        if (root.traversalSource().getChildCount() != 1) {
+            throw new AAIException("AAI_3000", "Expected the traversal to start from g");
+        }
+        GremlinParser.TraversalSourceSpawnMethodContext spawn = root.traversalSourceSpawnMethod();
+        if (spawn.traversalSourceSpawnMethod_V() == null
+            && spawn.traversalSourceSpawnMethod_E() == null) {
+            throw new AAIException("AAI_3000", "Expected the traversal to start with V() or E()");
+        }
+        return query;
     }
 }

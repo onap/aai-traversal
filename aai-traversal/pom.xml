@@ -517,6 +517,12 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
+				<!-- generated with ANTLR 4.9, which the 4.13 runtime cannot load;
+					src/main/resources/antlr4 regenerates it from the same Gremlin.g4 -->
+				<exclusion>
+					<groupId>org.apache.tinkerpop</groupId>
+					<artifactId>gremlin-language</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -718,6 +724,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/*WebSecurityConfig.*</exclude>
+						<exclude>org/apache/tinkerpop/gremlin/language/grammar/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
