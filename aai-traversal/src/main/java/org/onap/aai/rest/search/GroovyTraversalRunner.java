@@ -3,6 +3,7 @@
  * org.onap.aai
  * ================================================================================
  * Copyright © 2017-2018 AT&T Intellectual Property. All rights reserved.
+ * Modifications Copyright (C) 2026 Deutsche Telekom AG.
  * ================================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +20,22 @@
  */
 package org.onap.aai.rest.search;
 
+import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.onap.aai.aailog.logs.AaiDBTraversalMetricLog;
 import org.onap.aai.restcore.search.GremlinGroovyShell;
 import org.onap.aai.util.AAIConstants;
 
-public class GroovyShellImpl extends GenericQueryProcessor {
+final class GroovyTraversalRunner {
 
-    protected GroovyShellImpl(Builder builder) {
-        super(builder);
-    }
+    private GroovyTraversalRunner() {}
 
-    @Override
-    protected GraphTraversal<?, ?> runQuery(String query, Map<String, Object> params,
-        GraphTraversalSource traversalSource) {
+    static GraphTraversal<?, ?> run(String query, Map<String, Object> params,
+        GraphTraversalSource traversalSource, Optional<URI> uri) {
 
         AaiDBTraversalMetricLog metricLog =
             new AaiDBTraversalMetricLog(AAIConstants.AAI_TRAVERSAL_MS);
@@ -47,5 +48,4 @@ public class GroovyShellImpl extends GenericQueryProcessor {
         metricLog.post();
         return graphTraversal;
     }
-
 }
