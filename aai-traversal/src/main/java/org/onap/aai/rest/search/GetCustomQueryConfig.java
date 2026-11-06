@@ -33,7 +33,6 @@ import com.google.gson.reflect.TypeToken;
 public class GetCustomQueryConfig {
 
     private JsonArray storedQueries = null;
-    private CustomQueryConfig customQueryConfig;
 
     private static final String QUERY_CONFIG = "query";
     private static final String REQUIRED_CONFIG = "required-properties";
@@ -75,7 +74,8 @@ public class GetCustomQueryConfig {
         return toStringList(null);
     }
 
-    private void getStoredQueryBlock(JsonObject configObject, String config) {
+    private void getStoredQueryBlock(CustomQueryConfig customQueryConfig, JsonObject configObject,
+        String config) {
         if (!configObject.has(config)) {
             customQueryConfig.setQueryRequiredProperties(new ArrayList<>());
             customQueryConfig.setQueryOptionalProperties(new ArrayList<>());
@@ -103,7 +103,7 @@ public class GetCustomQueryConfig {
 
     public CustomQueryConfig getStoredQuery(String queryName) {
 
-        customQueryConfig = null;
+        CustomQueryConfig customQueryConfig = null;
         JsonObject configObject;
         JsonElement query;
         JsonElement queryConfig;
@@ -115,7 +115,7 @@ public class GetCustomQueryConfig {
                 if (query != null) {
                     customQueryConfig = new CustomQueryConfig();
                     configObject = query.getAsJsonObject();
-                    getStoredQueryBlock(configObject, QUERY_CONFIG);
+                    getStoredQueryBlock(customQueryConfig, configObject, QUERY_CONFIG);
                     if (configObject.has(STORED_QUERY_CONFIG)) {
                         queryConfig = configObject.get(STORED_QUERY_CONFIG);
                         customQueryConfig.setQuery(queryConfig.getAsString());
