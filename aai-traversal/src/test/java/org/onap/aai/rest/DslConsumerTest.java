@@ -409,6 +409,26 @@ public class DslConsumerTest extends AbstractSpringRestTest {
     }
 
     @Test
+    public void thatDslApiVersionHeaderOnlyAppliesToItsOwnRequest() throws Exception {
+        Map<String, String> dslQueryMap = new HashMap<>();
+        dslQueryMap.put("dsl-query",
+            "pserver{'hostname', 'ptnii-equip-name', 'in-maint'}('hostname','test-pserver-dsl')");
+        String payload = PayloadUtil.getTemplatePayload("dsl-query.json", dslQueryMap);
+        String endpoint = baseUrl + "/aai/v29/dsl?format=simple&depth=0&nodesOnly=true";
+
+        headers.add("X-DslApiVersion", "V2");
+        ResponseEntity<String> v2Response = restTemplate.exchange(endpoint, HttpMethod.PUT,
+            new HttpEntity<String>(payload, headers), String.class);
+        headers.remove("X-DslApiVersion");
+        ResponseEntity<String> defaultResponse = restTemplate.exchange(endpoint, HttpMethod.PUT,
+            new HttpEntity<String>(payload, headers), String.class);
+
+        assertEquals(HttpStatus.OK, v2Response.getStatusCode());
+        assertEquals("V1 does not support property selection with {}",
+            HttpStatus.BAD_REQUEST, defaultResponse.getStatusCode());
+    }
+
+    @Test
     public void testDslQueryProcessingV2_WithSimpleFormat_WithoutAsTreeQueryParameter()
         throws Exception {
         Map<String, String> dslQueryMap = new HashMap<>();
