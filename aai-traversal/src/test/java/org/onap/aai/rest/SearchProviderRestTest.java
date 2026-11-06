@@ -42,7 +42,7 @@ public class SearchProviderRestTest extends AbstractSpringRestTest {
 
         httpEntity = new HttpEntity(headers);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl + endpoint)
             .queryParam("key", "cloud-region.cloud-owner:test-aic")
             .queryParam("include", "cloud-region");
 
@@ -64,7 +64,7 @@ public class SearchProviderRestTest extends AbstractSpringRestTest {
 
         httpEntity = new HttpEntity(headers);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl + endpoint)
             .queryParam("key", "cloud-region.cloud-owner:test-aic")
             .queryParam("include", "cloud-region");
 
@@ -92,7 +92,7 @@ public class SearchProviderRestTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity(headers);
         String endpoint = "/aai/latest/search/generic-query";
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl + endpoint)
             .queryParam("key", "cloud-region.cloud-owner:test-aic")
             .queryParam("include", "cloud-region").queryParam("start-node-type", "cloud-region");
 

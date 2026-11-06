@@ -20,6 +20,7 @@
 package org.onap.aai;
 
 import java.io.IOException;
+import java.net.URI;
 
 import javax.net.ssl.SSLContext;
 
@@ -32,21 +33,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 @TestConfiguration
-@EnableAutoConfiguration(exclude={CassandraDataAutoConfiguration.class, CassandraAutoConfiguration.class}) // there is no running cassandra instance for the test
+@EnableAutoConfiguration
 public class TraversalTestConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(TraversalTestConfiguration.class);
@@ -82,6 +84,11 @@ public class TraversalTestConfiguration {
             restTemplate = builder.build();
         }
 
+        restTemplate.setMessageConverters(restTemplate.getMessageConverters().stream()
+            .map(converter -> converter instanceof JacksonJsonHttpMessageConverter
+                ? new MappingJackson2HttpMessageConverter() : converter)
+            .toList());
+
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override
             public boolean hasError(ClientHttpResponse clientHttpResponse) throws IOException {
@@ -94,7 +101,7 @@ public class TraversalTestConfiguration {
                         return true;
                     }
 
-                    if (clientHttpResponse.getRawStatusCode() % 100 == 5) {
+                    if (clientHttpResponse.getStatusCode().value() % 100 == 5) {
                         logger.debug("Call returned a error " + clientHttpResponse.getStatusText());
                         return true;
                     }
@@ -104,7 +111,7 @@ public class TraversalTestConfiguration {
             }
 
             @Override
-            public void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
+            public void handleError(URI url, HttpMethod method, ClientHttpResponse clientHttpResponse) throws IOException {
             }
         });
 

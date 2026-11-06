@@ -50,7 +50,7 @@ public class RetiredConsumerSpringTest extends AbstractSpringRestTest {
             responseEntity =
                 restTemplate.exchange(baseUrl + url, HttpMethod.GET, httpEntity, String.class);
             LOGGER.debug("For url {} expected status {} actual status {} and body {}", url, status,
-                responseEntity.getStatusCodeValue(), responseEntity.getBody());
+                responseEntity.getStatusCode().value(), responseEntity.getBody());
             assertEquals(status, responseEntity.getStatusCode());
         });
     }

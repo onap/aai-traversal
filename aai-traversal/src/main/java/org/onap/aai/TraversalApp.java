@@ -37,32 +37,22 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.micrometer.tracing.brave.autoconfigure.BraveAutoConfiguration;
+import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 
-@EnableWebSecurity
 @EnableConfigurationProperties
 @SpringBootApplication(
     exclude = {
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class,
-        CassandraDataAutoConfiguration.class,
-        CassandraAutoConfiguration.class,
-        ErrorMvcAutoConfiguration.class
+        ErrorMvcAutoConfiguration.class,
+        BraveAutoConfiguration.class
     })
 // Component Scan provides a way to look for spring beans
 // It only searches beans in the following packages
@@ -107,10 +97,6 @@ public class TraversalApp {
         contextMap = MDC.getCopyOfContextMap();
 
         logger.debug("AAI Server initialization started...");
-
-        // Setting this property to allow for encoded slash (/) in the path parameter
-        // This is only needed for tomcat keeping this as temporary
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
 
         logger.debug("Starting AAIGraph connections and the NodeInjestor");
 

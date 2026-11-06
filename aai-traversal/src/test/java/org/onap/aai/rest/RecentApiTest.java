@@ -63,7 +63,7 @@ public class RecentApiTest extends AbstractSpringRestTest {
         String endpoint = "/aai/recents/v14/pserver";
         httpEntity = new HttpEntity(headers);
         UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint).queryParam("hours", "190");
+            UriComponentsBuilder.fromUriString(baseUrl + endpoint).queryParam("hours", "190");
         ResponseEntity responseEntity =
             restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
         LOGGER.debug("Response for GET request with uri {} : {}", builder.toUriString(),
@@ -100,7 +100,7 @@ public class RecentApiTest extends AbstractSpringRestTest {
     public void testRecentsHoursWrongNumber() {
         String endpoint = "/aai/recents/v14/pserver";
         httpEntity = new HttpEntity(headers);
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl + endpoint)
             .queryParam("hours", "1900000000000000000000000000000000000000000000000");
         ResponseEntity responseEntity =
             restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
@@ -116,7 +116,7 @@ public class RecentApiTest extends AbstractSpringRestTest {
     public void testRecentsStartTimeWrongNumber() {
         String endpoint = "/aai/recents/v14/pserver";
         httpEntity = new HttpEntity(headers);
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl + endpoint)
             .queryParam("date-time", "190000000000000000000000000000000000000000000");
         ResponseEntity responseEntity =
             restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
@@ -133,7 +133,7 @@ public class RecentApiTest extends AbstractSpringRestTest {
         String endpoint = "/aai/recents/v14/xserver";
         httpEntity = new HttpEntity(headers);
         UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint).queryParam("hours", "190");
+            UriComponentsBuilder.fromUriString(baseUrl + endpoint).queryParam("hours", "190");
         ResponseEntity responseEntity =
             restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
 
@@ -149,7 +149,7 @@ public class RecentApiTest extends AbstractSpringRestTest {
         String endpoint = "/aai/recents/v14/pserver";
         httpEntity = new HttpEntity(headers);
         UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint).queryParam("hours", "200");
+            UriComponentsBuilder.fromUriString(baseUrl + endpoint).queryParam("hours", "200");
 
         ResponseEntity responseEntity =
             restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);
@@ -166,7 +166,7 @@ public class RecentApiTest extends AbstractSpringRestTest {
         String endpoint = "/aai/recents/v14/pserver";
         httpEntity = new HttpEntity(headers);
         UriComponentsBuilder builder =
-            UriComponentsBuilder.fromHttpUrl(baseUrl + endpoint).queryParam("date-time", "200");
+            UriComponentsBuilder.fromUriString(baseUrl + endpoint).queryParam("date-time", "200");
 
         ResponseEntity responseEntity =
             restTemplate.exchange(builder.toUriString(), HttpMethod.GET, httpEntity, String.class);

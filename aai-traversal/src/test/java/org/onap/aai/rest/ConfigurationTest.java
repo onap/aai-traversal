@@ -21,9 +21,11 @@ package org.onap.aai.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.Base64;
 import java.util.Collections;
 
@@ -35,10 +37,11 @@ import org.onap.aai.config.SpringContextAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.tomcat.TomcatWebServer;
+import org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,7 +51,8 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Test REST requests against configuration resource
  */
-@AutoConfigureObservability
+@AutoConfigureMetrics
+@AutoConfigureTracing
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ContextConfiguration(
     classes = {SpringContextAware.class})
@@ -56,7 +60,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = {SpringContextAware.class, TraversalApp.class})
-@EnableAutoConfiguration(exclude={CassandraDataAutoConfiguration.class, CassandraAutoConfiguration.class}) // there is no running cassandra instance for the test
+@EnableAutoConfiguration
 public class ConfigurationTest extends AbstractSpringRestTest {
     @Autowired
     RestTemplate restTemplate;
@@ -67,6 +71,9 @@ public class ConfigurationTest extends AbstractSpringRestTest {
     private HttpEntity<String> httpEntity;
     private String actuatorurl;
     private HttpHeaders headers;
+
+    @Autowired
+    private ServletWebServerApplicationContext applicationContext;
 
     @Before
     public void setup() throws UnsupportedEncodingException {
@@ -84,6 +91,29 @@ public class ConfigurationTest extends AbstractSpringRestTest {
         httpEntity = new HttpEntity<String>(headers);
         baseUrl = "http://localhost:" + randomPort;
         actuatorurl = "http://localhost:" + mgtPort;
+    }
+
+    @Test
+    public void testManagementEndpointsWithoutCredentials() {
+        ResponseEntity<String> health = restTemplate.getForEntity(actuatorurl + "/actuator/health", String.class);
+        assertEquals(HttpStatus.OK, health.getStatusCode());
+        assertTrue(health.getBody().contains("UP"));
+        HttpHeaders anonymousHeaders = new HttpHeaders();
+        anonymousHeaders.setAccept(Collections.singletonList(MediaType.TEXT_PLAIN));
+        ResponseEntity<String> metrics = restTemplate.exchange(actuatorurl + "/actuator/prometheus",
+            HttpMethod.GET, new HttpEntity<>(anonymousHeaders), String.class);
+        assertEquals(HttpStatus.OK, metrics.getStatusCode());
+        assertTrue(metrics.getBody().contains("group_id"));
+    }
+
+    @Test
+    public void testEncodedSolidusUsesRealConnectorPolicyWithoutObsoleteProperty() {
+        TomcatWebServer server = (TomcatWebServer) applicationContext.getWebServer();
+        assertEquals("reject", server.getTomcat().getConnector().getEncodedSolidusHandling());
+        ResponseEntity<String> rejected = restTemplate.exchange(
+            URI.create(baseUrl + "/aai/v32/query%2Fnot-a-route"), HttpMethod.GET, httpEntity, String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, rejected.getStatusCode());
+        assertNull(System.getProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH"));
     }
 
     @Test
