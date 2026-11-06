@@ -43,7 +43,6 @@ import org.onap.aai.introspection.exceptions.AAIUnknownObjectException;
 import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
-import org.onap.aai.rest.search.QueryProcessorType;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.RESTAPI;
 import org.onap.aai.serialization.db.DBSerializer;
@@ -79,7 +78,6 @@ public class RecentAPIConsumer extends RESTAPI {
     /** The introspector factory type. */
     private ModelType introspectorFactoryType = ModelType.MOXY;
 
-    private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
     /** The query style. */
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecentAPIConsumer.class);
@@ -141,15 +139,9 @@ public class RecentAPIConsumer extends RESTAPI {
         @Context UriInfo info, @Context HttpHeaders headers) {
 
         String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-        String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
-        QueryProcessorType processorType = this.processorType;
         Response response;
         TransactionalGraphEngine dbEngine = null;
         try {
-
-            if (queryProcessor != null) {
-                processorType = QueryProcessorType.valueOf(queryProcessor);
-            }
 
             SchemaVersion version = new SchemaVersion(versionParam);
             this.checkVersion(version);
@@ -169,8 +161,7 @@ public class RecentAPIConsumer extends RESTAPI {
             GenericQueryProcessor processor = null;
 
             processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                .queryFrom(nodeType, "nodeQuery").uriParams(info.getQueryParameters())
-                .processWith(processorType).create();
+                .queryFrom(nodeType, "nodeQuery").uriParams(info.getQueryParameters()).create();
 
             String result = "";
             SubGraphStyle subGraphStyle = null;

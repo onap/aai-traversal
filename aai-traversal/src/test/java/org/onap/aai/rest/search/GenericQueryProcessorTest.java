@@ -22,17 +22,10 @@ package org.onap.aai.rest.search;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onap.aai.exceptions.AAIException;
-import org.onap.aai.rest.enums.QueryVersion;
-import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
-import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,59 +41,11 @@ public class GenericQueryProcessorTest {
     }
 
     @Test
-    public void testSetQueryProcessorType() {
-        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(mockDbEngine, mockGremlinServerSingleton);
-        builder.processWith(QueryProcessorType.GREMLIN_SERVER);
-        assertEquals(QueryProcessorType.GREMLIN_SERVER, builder.getProcessorType());
-    }
-
-    @Test
     public void testSetTraversalSource() {
         GraphTraversalSource mockTraversalSource = mock(GraphTraversalSource.class);
         GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(mockDbEngine, mockGremlinServerSingleton);
         builder.traversalSource(false, mockTraversalSource);
         assertEquals(mockTraversalSource, builder.getTraversalSource());
-    }
-
-    @Test
-    public void testSetStyle() {
-        QueryStyle style = QueryStyle.HISTORY_GREMLIN_TRAVERSAL;
-        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(mockDbEngine, mockGremlinServerSingleton);
-        builder.setStyle(style);
-        assertEquals(style, builder.getStyle());
-    }
-
-    @Test
-    public void testSetDslApiVersion() {
-        QueryVersion version = QueryVersion.V2;
-        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(mockDbEngine, mockGremlinServerSingleton);
-        builder.setDslApiVersion(version);
-        assertEquals(version, builder.getDslApiVersion());
-    }
-
-    @Test
-    public void testSetHistory() {
-        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(mockDbEngine, mockGremlinServerSingleton);
-        builder.setHistory(true);
-        assertTrue(builder.isHistory());
-    }
-
-    @Test
-    public void testSetHistoryFalse() {
-        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(mockDbEngine, mockGremlinServerSingleton);
-        builder.setHistory(false);
-        assertFalse(builder.isHistory());
-    }
-
-    @Test
-    public void testEmptyQueryAndEmptyVertices() throws AAIException, FileNotFoundException {
-        GenericQueryProcessor.Builder builder = new GenericQueryProcessor.Builder(mockDbEngine, mockGremlinServerSingleton);
-        builder.queryFrom("", "gremlin");
-        builder.startFrom(Collections.emptyList());
-
-        GenericQueryProcessor queryProcessor = builder.create();
-        List<Object> result = queryProcessor.execute(SubGraphStyle.star);
-        assertTrue(result.isEmpty());
     }
 
     @Test

@@ -57,7 +57,6 @@ import org.onap.aai.rest.db.HttpEntry;
 import org.onap.aai.rest.search.CustomQueryConfig;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
-import org.onap.aai.rest.search.QueryProcessorType;
 import org.onap.aai.rest.util.PaginationUtil;
 import org.onap.aai.restcore.HttpMethod;
 import org.onap.aai.restcore.util.URITools;
@@ -93,8 +92,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path("{version: v[1-9][0-9]*|latest}/query")
 @Tag(name = "Query Consumer", description = "Executes predefined or custom queries on the A&AI graph.")
 public class QueryConsumer extends TraversalConsumer {
-
-    private QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumer.class);
 
@@ -155,17 +152,12 @@ public class QueryConsumer extends TraversalConsumer {
         String queryFormat, String subgraph, HttpHeaders headers, UriInfo info, Pageable pageable, Set<String> roles) {
 
         String sourceOfTruth = headers.getRequestHeaders().getFirst("X-FromAppId");
-        String queryProcessor = headers.getRequestHeaders().getFirst("QueryProcessor");
-        QueryProcessorType processorType = this.processorType;
         Response response;
         TransactionalGraphEngine dbEngine = null;
 
         try {
             this.checkQueryParams(info.getQueryParameters());
             Format format = Format.getFormat(queryFormat);
-            if (queryProcessor != null) {
-                processorType = QueryProcessorType.valueOf(queryProcessor);
-            }
             SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);
 
             JsonObject input = JsonParser.parseString(content).getAsJsonObject();
@@ -247,16 +239,15 @@ public class QueryConsumer extends TraversalConsumer {
                 }
 
                 processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                    .startFrom(vertexSet).queryFrom(queryURIObj).format(format)
-                    .processWith(processorType).traversalSource(isHistory(format), traversalSource)
-                    .create();
+                    .startFrom(vertexSet).queryFrom(queryURIObj)
+                    .traversalSource(isHistory(format), traversalSource).create();
             } else if (!queryURI.equals("")) {
                 processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                    .queryFrom(queryURIObj).processWith(processorType)
+                    .queryFrom(queryURIObj)
                     .traversalSource(isHistory(format), traversalSource).create();
             } else {
                 processor = new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
-                    .queryFrom(gremlin, "gremlin").processWith(processorType)
+                    .queryFrom(gremlin, "gremlin")
                     .traversalSource(isHistory(format), traversalSource).create();
             }
             List<Object> vertTemp = processor.execute(subGraphStyle);

@@ -47,7 +47,6 @@ import org.onap.aai.rest.dsl.v1.DslListener;
 import org.onap.aai.rest.enums.QueryVersion;
 import org.onap.aai.rest.search.GenericQueryProcessor;
 import org.onap.aai.rest.search.GremlinServerSingleton;
-import org.onap.aai.rest.search.QueryProcessorType;
 import org.onap.aai.rest.util.PaginationUtil;
 import org.onap.aai.serialization.db.DBSerializer;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
@@ -88,7 +87,6 @@ import io.micrometer.core.annotation.Timed;
 public class DslConsumer extends TraversalConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DslConsumer.class);
-    private static final QueryProcessorType processorType = QueryProcessorType.LOCAL_GROOVY;
     private static final QueryVersion DEFAULT_VERSION = QueryVersion.V1;
 
     private final HttpEntry httpEntry;
@@ -251,7 +249,7 @@ public class DslConsumer extends TraversalConsumer {
         GenericQueryProcessor processor =
             new GenericQueryProcessor.Builder(dbEngine, gremlinServerSingleton)
                 .queryFrom(dsl, "dsl").queryProcessor(dslQueryProcessor).version(dslApiVersion)
-                .processWith(processorType).format(format).uriParams(queryParameters)
+                .uriParams(queryParameters)
                 .traversalSource(isHistory(format), traversalSource).create();
 
         SubGraphStyle subGraphStyle = SubGraphStyle.valueOf(subgraph);

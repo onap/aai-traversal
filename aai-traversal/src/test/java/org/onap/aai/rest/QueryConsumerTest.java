@@ -243,6 +243,66 @@ public class QueryConsumerTest {
         assertThat(responseEntity.getBody().toString(), containsString("3022"));
     }
 
+    @Test
+    public void thatStoredQueryRunsWithoutItsOptionalParameter() throws Exception {
+        String cloudRegionUri = addCloudRegion("3333");
+
+        ResponseEntity<String> responseEntity = executeStoredQuery(cloudRegionUri,
+            "related-to?startingNodeType=cloud-region&relatedToNodeType=tenant");
+
+        assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
+        assertThat(responseEntity.getBody(),
+            containsString(cloudRegionUri + "/tenants/tenant/test-tenant-id3333"));
+    }
+
+    @Test
+    public void thatAsTreeIsRejectedForStoredQueries() throws Exception {
+        String cloudRegionUri = addCloudRegion("4444");
+
+        ResponseEntity<String> responseEntity = executeStoredQuery(cloudRegionUri,
+            "related-to?startingNodeType=cloud-region&relatedToNodeType=tenant&as-tree=true");
+
+        assertThat(responseEntity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+        assertThat(responseEntity.getBody(), containsString("3022"));
+    }
+
+    @Test
+    public void thatStoredQueryWithoutStartReturnsNotFound() throws Exception {
+        String payload = "{\"query\": \"query/cloud-region-sites?owner=test-owner-id5555\"}";
+        httpEntity = new HttpEntity(payload, headers);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+            baseUrl + "/aai/v14/query?format=pathed", HttpMethod.PUT, httpEntity, String.class);
+
+        assertThat(responseEntity.getStatusCode(), is(HttpStatus.NOT_FOUND));
+        assertThat(responseEntity.getBody(), containsString("6148"));
+    }
+
+    private String addCloudRegion(String id) throws Exception {
+        Map<String, String> cloudRegionMap = new HashMap<>();
+        cloudRegionMap.put("cloud-owner", "test-owner-id" + id);
+        cloudRegionMap.put("cloud-region-id", "test-region-id" + id);
+        cloudRegionMap.put("tenant-id", "test-tenant-id" + id);
+        cloudRegionMap.put("tenant-name", "test-tenant-name-id" + id);
+        cloudRegionMap.put("vserver-id", "some-vserver-id-id" + id);
+        cloudRegionMap.put("vserver-name", "test-vserver-name-id" + id);
+        cloudRegionMap.put("pserver-uri", pserverUri);
+        String uri = "/aai/v14/cloud-infrastructure/cloud-regions/cloud-region/test-owner-id" + id
+            + "/test-region-id" + id;
+        addCloudRegion(cloudRegionMap, uri);
+        return uri;
+    }
+
+    private ResponseEntity<String> executeStoredQuery(String start, String query)
+        throws Exception {
+        Map<String, String> customQueryMap = new HashMap<>();
+        customQueryMap.put("start", start.replaceFirst("^/aai/v14/", ""));
+        customQueryMap.put("query", query);
+        String payload = PayloadUtil.getTemplatePayload("custom-query.json", customQueryMap);
+        httpEntity = new HttpEntity(payload, headers);
+        return restTemplate.exchange(baseUrl + "/aai/v14/query?format=pathed", HttpMethod.PUT,
+            httpEntity, String.class);
+    }
+
     @After
     public void tearDown() {
 

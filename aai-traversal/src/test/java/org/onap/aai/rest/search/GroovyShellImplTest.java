@@ -131,8 +131,6 @@ public class GroovyShellImplTest extends AAISetup {
         builder.queryFrom(URI.create("te"));
         builder.queryFrom("te", "gremlin");
         builder.create();
-        builder.processWith(QueryProcessorType.GREMLIN_SERVER);
-        builder.processWith(QueryProcessorType.LOCAL_GROOVY);
 
         groovyShellImpl = new GroovyShellImpl(builder);
     }

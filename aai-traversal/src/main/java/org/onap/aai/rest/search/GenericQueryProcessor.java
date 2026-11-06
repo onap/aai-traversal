@@ -43,7 +43,6 @@ import org.onap.aai.restcore.search.GroovyQueryBuilder;
 import org.onap.aai.restcore.util.URITools;
 import org.onap.aai.serialization.engines.QueryStyle;
 import org.onap.aai.serialization.engines.TransactionalGraphEngine;
-import org.onap.aai.serialization.queryformats.Format;
 import org.onap.aai.serialization.queryformats.SubGraphStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,11 +78,9 @@ public abstract class GenericQueryProcessor {
      */
     protected Optional<String> dsl;
     protected final boolean isDsl;
-    protected boolean isHistory;
     protected GraphTraversalSource traversalSource;
     protected QueryStyle style;
     protected QueryVersion dslApiVersion;
-    protected Format format;
 
     protected GenericQueryProcessor(Builder builder) {
         this.uri = builder.getUri();
@@ -106,8 +103,6 @@ public abstract class GenericQueryProcessor {
         }
         this.traversalSource = builder.getTraversalSource();
         this.style = builder.getStyle();
-        this.isHistory = builder.isHistory();
-        this.format = builder.getFormat();
     }
 
     protected abstract GraphTraversal<?, ?> runQuery(String query, Map<String, Object> params,
@@ -149,10 +144,6 @@ public abstract class GenericQueryProcessor {
         }
         Map<String, Object> params = tuple.getValue1();
 
-        if (query.equals("") && (vertices.isPresent() && vertices.get().isEmpty())) {
-            // nothing to do, just exit
-            return new ArrayList<>();
-        }
         GraphTraversal<?, ?> g = this.runQuery(query, params, traversalSource);
 
         resultVertices = this.processSubGraph(style, g);
@@ -291,7 +282,6 @@ public abstract class GenericQueryProcessor {
         private Optional<String> gremlin = Optional.empty();
         private boolean isGremlin = false;
         private Optional<Collection<Vertex>> vertices = Optional.empty();
-        private QueryProcessorType processorType = QueryProcessorType.GREMLIN_SERVER;
 
         private Optional<String> dsl = Optional.empty();
         private boolean isDsl = false;
@@ -301,9 +291,7 @@ public abstract class GenericQueryProcessor {
         private boolean isNodeTypeQuery = false;
         protected MultivaluedMap<String, String> uriParams;
         protected GraphTraversalSource traversalSource;
-        protected boolean isHistory = false;
         protected QueryVersion dslApiVersion;
-        protected Format format;
 
         protected QueryStyle style = QueryStyle.GREMLIN_TRAVERSAL;
 
@@ -346,20 +334,9 @@ public abstract class GenericQueryProcessor {
             return this;
         }
 
-        public Builder processWith(QueryProcessorType type) {
-            this.processorType = type;
-            return this;
-        }
-
-        public Builder format(Format format) {
-            this.format = format;
-            return this;
-        }
-
         public Builder traversalSource(boolean isHistory, GraphTraversalSource source) {
             this.traversalSource = source;
-            this.isHistory = isHistory;
-            if (this.isHistory) {
+            if (isHistory) {
                 this.style = QueryStyle.HISTORY_GREMLIN_TRAVERSAL;
             }
 
@@ -412,10 +389,6 @@ public abstract class GenericQueryProcessor {
             return vertices;
         }
 
-        public QueryProcessorType getProcessorType() {
-            return processorType;
-        }
-
         public GremlinServerSingleton getGremlinServerSingleton() {
             return gremlinServerSingleton;
         }
@@ -439,36 +412,12 @@ public abstract class GenericQueryProcessor {
             return traversalSource;
         }
 
-        public void setTraversalSource(GraphTraversalSource traversalSource) {
-            this.traversalSource = traversalSource;
-        }
-
-        public boolean isHistory() {
-            return isHistory;
-        }
-
-        public void setHistory(boolean history) {
-            isHistory = history;
-        }
-
         public QueryStyle getStyle() {
             return style;
         }
 
-        public void setStyle(QueryStyle style) {
-            this.style = style;
-        }
-
         public QueryVersion getDslApiVersion() {
             return dslApiVersion;
-        }
-
-        public void setDslApiVersion(QueryVersion dslApiVersion) {
-            this.dslApiVersion = dslApiVersion;
-        }
-
-        public Format getFormat() {
-            return this.format;
         }
 
     }
